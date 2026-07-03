@@ -13,6 +13,8 @@
  * The redirect URI for desktop apps is the special loopback value below.
  */
 
-export const GDRIVE_CLIENT_ID = (import.meta as any).env.MAIN_VITE_GDRIVE_CLIENT_ID || '';
-export const GDRIVE_CLIENT_SECRET = (import.meta as any).env.MAIN_VITE_GDRIVE_CLIENT_SECRET || '';
+// @ts-ignore
+export const GDRIVE_CLIENT_ID = import.meta.env.MAIN_VITE_GDRIVE_CLIENT_ID || process.env.MAIN_VITE_GDRIVE_CLIENT_ID || '';
+// @ts-ignore
+export const GDRIVE_CLIENT_SECRET = import.meta.env.MAIN_VITE_GDRIVE_CLIENT_SECRET || process.env.MAIN_VITE_GDRIVE_CLIENT_SECRET || '';
 export const GDRIVE_REDIRECT_URI = 'http://localhost';
