@@ -11,10 +11,8 @@
     "postinstall": "electron-builder install-app-deps",
     "package": "electron-builder",
     "package:mac": "electron-vite build && electron-builder --mac",
-    "package:win": "electron-vite build && electron-builder --win",
-    "package:win7": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27 -c.publish.channel=win7 -c.nsis.artifactName='Molecule-Setup-\\${version}-Win7.\\${ext}'",
-    "release:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27 -c.publish.channel=win7 -c.nsis.artifactName='Molecule-Setup-\\${version}-Win7.\\${ext}' --publish always",
-    "release:win7plus": "electron-vite build && electron-builder --win --publish always",
+    "package:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27",
+    "release:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27 --publish always",
     "rebuild": "electron-rebuild -f -w better-sqlite3,@grandchef/node-printer"
   },
   "dependencies": {
