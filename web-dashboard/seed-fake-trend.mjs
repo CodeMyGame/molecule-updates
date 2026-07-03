@@ -18,16 +18,34 @@ import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import readline from 'node:readline';
+import fs from 'node:fs';
+import path from 'node:path';
 
-// Same PUBLIC config as the dashboard / POS.
+// Load local .env from root directory if present
+function loadEnv() {
+  const envPath = path.resolve('../.env');
+  if (fs.existsSync(envPath)) {
+    const content = fs.readFileSync(envPath, 'utf8');
+    for (const line of content.split('\n')) {
+      const parts = line.trim().split('=');
+      if (parts.length >= 2 && !line.startsWith('#')) {
+        const key = parts[0].trim();
+        const value = parts.slice(1).join('=').trim();
+        process.env[key] = value;
+      }
+    }
+  }
+}
+loadEnv();
+
 const firebaseConfig = {
-  apiKey: 'AIzaSyDEsgbZY1q50Y4NTmkbYrFmeB3_3-7v2Lw',
-  authDomain: 'molecule-e2e95.firebaseapp.com',
-  projectId: 'molecule-e2e95',
-  storageBucket: 'molecule-e2e95.firebasestorage.app',
-  messagingSenderId: '297835941121',
-  appId: '1:297835941121:web:da4ca719e39fde27ad9f00',
-  measurementId: 'G-XVD2WKKNEK',
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
 };
 
 const CLEAR = process.argv.includes('--clear');
