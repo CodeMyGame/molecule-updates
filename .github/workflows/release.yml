@@ -1,0 +1,69 @@
+name: CI/CD Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version Bump Type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - none
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Configure Git Credentials
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.bump_type != 'none'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump Version
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.bump_type != 'none'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Bump package.json version and create a commit + tag
+          npm version ${{ github.event.inputs.bump_type }} -m "chore(release): bump version to %s"
+          
+          # Push the commit and the tag back to GitHub
+          git push origin main
+          git push origin --tags
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build & Publish Windows 7+ Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run release:win7plus
+
+      - name: Build & Publish Windows 7 Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run release:win
