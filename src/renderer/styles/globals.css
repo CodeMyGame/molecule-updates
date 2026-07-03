@@ -1,0 +1,393 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Dark mode: globally remap light colors to dark equivalents.
+ * This avoids adding dark: variants to every component.
+ */
+.dark {
+  color-scheme: dark;
+
+  /* Remap white/gray backgrounds */
+  --tw-bg-white: #1a1a2e;
+}
+
+/* Override bg-white in dark mode */
+.dark .bg-white { background-color: #1f2937 !important; }
+.dark .bg-gray-50 { background-color: #1a1f2e !important; }
+.dark .bg-gray-100 { background-color: #111827 !important; }
+.dark .bg-gray-200 { background-color: #1f2937 !important; }
+
+/* Text colors */
+.dark .text-gray-900 { color: #f3f4f6 !important; }
+.dark .text-gray-800 { color: #e5e7eb !important; }
+.dark .text-gray-700 { color: #d1d5db !important; }
+.dark .text-gray-600 { color: #9ca3af !important; }
+.dark .text-gray-500 { color: #9ca3af !important; }
+.dark .text-gray-400 { color: #6b7280 !important; }
+
+/* Borders */
+.dark .border-gray-200 { border-color: #374151 !important; }
+.dark .border-gray-100 { border-color: #1f2937 !important; }
+.dark .border-gray-300 { border-color: #4b5563 !important; }
+
+/* Hover states */
+.dark .hover\:bg-gray-50:hover { background-color: #1f2937 !important; }
+.dark .hover\:bg-gray-100:hover { background-color: #283040 !important; }
+.dark .hover\:bg-gray-200:hover { background-color: #374151 !important; }
+
+/* Focus rings */
+.dark .focus\:ring-blue-300:focus { --tw-ring-color: rgba(59, 130, 246, 0.4) !important; }
+.dark .focus\:border-blue-400:focus { border-color: #3b82f6 !important; }
+
+/* Input/form elements */
+.dark input, .dark select, .dark textarea {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #4b5563 !important;
+}
+.dark input::placeholder, .dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Shadows in dark mode */
+.dark .shadow-sm { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; }
+.dark .shadow-md { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important; }
+.dark .shadow-xl { box-shadow: 0 20px 25px rgba(0, 0, 0, 0.5) !important; }
+
+/* Dividers */
+.dark .divide-gray-100 > :not(:last-child) { border-color: #1f2937 !important; }
+.dark .divide-gray-200 > :not(:last-child) { border-color: #374151 !important; }
+
+/* Specific component overrides */
+.dark .bg-blue-50 { background-color: rgba(59, 130, 246, 0.15) !important; }
+.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.1) !important; }
+.dark .bg-green-50 { background-color: rgba(16, 185, 129, 0.1) !important; }
+.dark .bg-yellow-50 { background-color: rgba(245, 158, 11, 0.1) !important; }
+.dark .bg-orange-50 { background-color: rgba(249, 115, 22, 0.1) !important; }
+
+/* Status badges */
+.dark .bg-green-100 { background-color: rgba(16, 185, 129, 0.2) !important; }
+.dark .bg-red-100 { background-color: rgba(239, 68, 68, 0.2) !important; }
+.dark .bg-blue-100 { background-color: rgba(59, 130, 246, 0.2) !important; }
+.dark .bg-yellow-100 { background-color: rgba(245, 158, 11, 0.2) !important; }
+.dark .bg-purple-100 { background-color: rgba(139, 92, 246, 0.2) !important; }
+
+.dark .text-green-700 { color: #34d399 !important; }
+.dark .text-red-700 { color: #f87171 !important; }
+.dark .text-blue-700 { color: #60a5fa !important; }
+.dark .text-yellow-700 { color: #fbbf24 !important; }
+
+/* System font stack with Inter preference */
+@layer base {
+  @font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: local('Inter'), local('Inter-Regular');
+  }
+
+  html {
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100 overflow-hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Prevent text selection on POS touch targets */
+  button, a, [role="button"] {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom scrollbar styles */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+
+  /* Thin scrollbar for Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db #f3f4f6;
+  }
+
+  .dark * {
+    scrollbar-color: #4b5563 #1f2937;
+  }
+}
+
+/* POS-specific utility classes */
+@layer components {
+  /* Touch-friendly tap targets (minimum 44x44px per WCAG) */
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center;
+  }
+
+  .tap-target-lg {
+    @apply min-h-[56px] min-w-[56px] flex items-center justify-center;
+  }
+
+  /* POS sidebar */
+  .pos-sidebar {
+    @apply bg-gray-900 text-gray-100 flex flex-col h-screen;
+  }
+
+  /* POS header */
+  .pos-header {
+    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-1 flex items-center justify-between shadow-sm;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .pos-header::before,
+  .pos-header::after {
+    content: '';
+    position: absolute;
+    top: -100%;
+    bottom: -100%;
+    width: 40%;
+    z-index: -2;
+    pointer-events: none;
+    border-radius: 9999px;
+    filter: blur(30px);
+    opacity: 0.6;
+  }
+  .pos-header::before {
+    left: -40%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.7) 0%, rgba(139, 92, 246, 0.55) 40%, transparent 70%);
+    animation: pos-header-run 6s linear infinite;
+  }
+  .pos-header::after {
+    left: -40%;
+    background: radial-gradient(circle, rgba(52, 211, 153, 0.65) 0%, rgba(236, 72, 153, 0.55) 40%, rgba(251, 146, 60, 0.55) 70%, transparent 80%);
+    animation: pos-header-run 9s linear infinite;
+    animation-delay: -3s;
+  }
+
+  .pos-header-float-text {
+    display: inline-flex;
+    gap: 0;
+    line-height: 1;
+  }
+  .pos-header-float-char {
+    display: inline-block;
+    white-space: pre;
+    background: linear-gradient(90deg, #1e3a8a, #6d28d9, #be185d, #ea580c, #047857, #1e3a8a);
+    background-size: 600% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: pos-header-char-wave 2.6s ease-in-out infinite,
+               pos-header-name-hue 8s linear infinite;
+    will-change: transform, filter;
+    transform-origin: center bottom;
+  }
+
+  .pos-header-pattern {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.45;
+    mix-blend-mode: overlay;
+    background-repeat: repeat;
+    animation: pos-header-pattern-cycle 24s steps(1) infinite,
+               pos-header-pattern-scroll 8s linear infinite;
+  }
+  .pos-header > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Card component */
+  .pos-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4;
+  }
+
+  /* POS number pad button */
+  .numpad-btn {
+    @apply h-14 w-14 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500
+      text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center justify-center
+      transition-colors duration-100 select-none;
+  }
+
+  .numpad-btn-primary {
+    @apply h-14 w-14 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+      text-xl font-semibold text-white flex items-center justify-center
+      transition-colors duration-100 select-none;
+  }
+
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400;
+  }
+
+  .badge-neutral {
+    @apply bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300;
+  }
+
+  /* POS menu item grid card */
+  .menu-item-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 cursor-pointer
+      hover:shadow-md hover:border-blue-300 active:bg-blue-50 dark:active:bg-blue-900/30
+      transition-all duration-150 select-none;
+  }
+
+  /* Order item row */
+  .order-item-row {
+    @apply flex items-center justify-between py-2 px-3 border-b border-gray-100 dark:border-gray-700
+      last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800;
+  }
+
+  /* Table cell for POS table map */
+  .table-cell {
+    @apply rounded-lg border-2 flex flex-col items-center justify-center
+      cursor-pointer transition-all duration-200 select-none p-3;
+  }
+
+  .table-cell-available {
+    @apply border-green-300 bg-green-50 hover:bg-green-100 text-green-800 dark:border-green-700 dark:bg-green-900/20 dark:hover:bg-green-900/40 dark:text-green-400;
+  }
+
+  .table-cell-occupied {
+    @apply border-red-300 bg-red-50 hover:bg-red-100 text-red-800 dark:border-red-700 dark:bg-red-900/20 dark:hover:bg-red-900/40 dark:text-red-400;
+  }
+
+  .table-cell-reserved {
+    @apply border-yellow-300 bg-yellow-50 hover:bg-yellow-100 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/20 dark:hover:bg-yellow-900/40 dark:text-yellow-400;
+  }
+}
+
+/* Animations */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 200ms ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 250ms ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 250ms ease-out;
+  }
+
+  /* Long-occupied table alert: pulsing red ring to draw the admin's eye. */
+  .animate-long-hour {
+    animation: longHourPulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes longHourPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+    50%      { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-long-hour { animation: none; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes pos-header-run {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(350vw); }
+  }
+
+  @keyframes pos-header-char-wave {
+    0%, 60%, 100% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 0 transparent);
+    }
+    30% {
+      transform: scale(1.25);
+      filter: drop-shadow(0 2px 6px rgba(190, 24, 93, 0.45));
+    }
+  }
+
+  @keyframes pos-header-name-hue {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  @keyframes pos-header-pattern-scroll {
+    0%   { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
+
+  @keyframes pos-header-pattern-cycle {
+    /* dots */
+    0%, 24% {
+      background-image: radial-gradient(rgba(255,255,255,0.9) 1.5px, transparent 2px);
+      background-size: 16px 16px;
+    }
+    /* diagonal stripes */
+    25%, 49% {
+      background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.6) 0 2px, transparent 2px 12px);
+      background-size: auto;
+    }
+    /* grid */
+    50%, 74% {
+      background-image: linear-gradient(rgba(255,255,255,0.55) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.55) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    /* triangles */
+    75%, 99% {
+      background-image: conic-gradient(from 45deg at 50% 50%, rgba(255,255,255,0.7) 0 25%, transparent 0 50%, rgba(255,255,255,0.4) 0 75%, transparent 0);
+      background-size: 24px 24px;
+    }
+  }
+}

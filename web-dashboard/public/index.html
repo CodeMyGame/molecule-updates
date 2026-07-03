@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#4f46e5" />
+  <title>Molecule — Owner Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { -webkit-font-smoothing: antialiased; }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+    .live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .fade-up { animation: fade-up .35s ease both; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="h-full bg-slate-50 font-sans text-slate-800">
+
+  <!-- ───────────────── LOGIN ───────────────── -->
+  <div id="loginView" class="min-h-full hidden items-center justify-center px-4 py-10">
+    <div class="w-full max-w-sm">
+      <div class="flex flex-col items-center mb-8">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 mb-4">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="1.6"/><circle cx="19" cy="6" r="1.6"/><circle cx="5" cy="18" r="1.6"/><circle cx="19" cy="18" r="1.6"/><path d="M10 11 6.5 7M14 11l3.5-4M10 13l-3.5 4M14 13l3.5 4"/></svg>
+        </div>
+        <h1 class="text-xl font-bold text-slate-900">Molecule</h1>
+        <p class="text-sm text-slate-500">Owner Dashboard</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-6">
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1.5">Email</label>
+            <input id="email" type="email" autocomplete="username" required
+              class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+              placeholder="owner@example.com" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1.5">Password</label>
+            <input id="password" type="password" autocomplete="current-password" required
+              class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
+              placeholder="••••••••" />
+          </div>
+          <button id="loginBtn" type="submit"
+            class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed">
+            Sign in
+          </button>
+          <p id="loginError" class="text-xs text-rose-600 text-center hidden"></p>
+        </form>
+      </div>
+      <p class="text-center text-[11px] text-slate-400 mt-5 leading-relaxed">
+        Use the same email &amp; password you set in your POS<br/>under Settings → Cloud Dashboard.
+      </p>
+    </div>
+  </div>
+
+  <!-- ───────────────── DASHBOARD ───────────────── -->
+  <div id="dashView" class="hidden min-h-full">
+    <!-- Top bar -->
+    <header class="sticky top-0 z-20 bg-white/85 backdrop-blur border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 id="restName" class="text-base sm:text-lg font-bold text-slate-900 truncate">Dashboard</h1>
+            <span id="dayBadge" class="hidden text-[10px] font-semibold px-2 py-0.5 rounded-full"></span>
+          </div>
+          <p id="syncInfo" class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+            <span class="live-dot inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span id="syncText">Connecting…</span>
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="refreshBtn" title="Refresh" class="text-slate-400 hover:text-indigo-600 border border-slate-200 hover:border-indigo-300 rounded-lg p-1.5 transition">
+            <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          <button id="signOutBtn" class="text-xs font-medium text-slate-500 hover:text-slate-800 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1.5 transition">
+            Sign out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
+
+      <!-- Empty / waiting state -->
+      <div id="emptyState" class="hidden bg-white rounded-2xl border border-slate-200/70 p-10 text-center">
+        <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center mb-4">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <p class="text-sm font-medium text-slate-700">Waiting for your POS to sync…</p>
+        <p class="text-xs text-slate-400 mt-1">Open the POS and make sure Cloud Dashboard is connected. Data appears here within a few minutes.</p>
+      </div>
+
+      <div id="content" class="hidden space-y-6">
+
+        <!-- Revenue (tabbed by period) -->
+        <section class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+          <div class="flex items-center justify-between gap-3 mb-3">
+            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Revenue</p>
+            <div id="periodTabs" class="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-medium text-slate-500">
+              <button data-period="today" class="px-2.5 sm:px-3 py-1 rounded-md transition">Today</button>
+              <button data-period="week" class="px-2.5 sm:px-3 py-1 rounded-md transition">Week</button>
+              <button data-period="month" class="px-2.5 sm:px-3 py-1 rounded-md transition">Month</button>
+              <button data-period="year" class="px-2.5 sm:px-3 py-1 rounded-md transition">Year</button>
+            </div>
+          </div>
+          <p id="periodRevenue" class="text-3xl sm:text-4xl font-extrabold text-slate-900">—</p>
+          <p id="periodSub" class="text-xs text-slate-400 mt-1"></p>
+        </section>
+
+        <!-- KPI cards (today) -->
+        <section class="grid grid-cols-3 gap-3 sm:gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-3 sm:p-5">
+            <p id="kpiOrdersLabel" class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400 leading-tight">Orders today</p>
+            <p id="kpiOrders" class="text-xl sm:text-3xl font-extrabold text-slate-900 mt-1.5 truncate">—</p>
+            <p id="kpiCovers" class="text-[10px] sm:text-[11px] text-slate-400 mt-1 truncate"></p>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-3 sm:p-5">
+            <p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400 leading-tight">Avg order</p>
+            <p id="kpiAov" class="text-xl sm:text-3xl font-extrabold text-slate-900 mt-1.5 truncate">—</p>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-3 sm:p-5">
+            <p id="kpiTaxLabel" class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400 leading-tight">Tax today</p>
+            <p id="kpiTax" class="text-xl sm:text-3xl font-extrabold text-slate-900 mt-1.5 truncate">—</p>
+          </div>
+        </section>
+
+        <!-- Active orders (live) -->
+        <section class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+              Active orders
+              <span id="activeCount" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600"></span>
+            </h2>
+            <span id="activeValue" class="text-xs font-medium text-slate-400"></span>
+          </div>
+          <div id="activeOrders" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </section>
+
+        <!-- Cash + loss prevention -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <!-- Cash reconciliation -->
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5 lg:col-span-1">
+            <h2 class="text-sm font-bold text-slate-900 mb-4">Cash drawer</h2>
+            <dl class="space-y-2.5 text-sm">
+              <div class="flex justify-between"><dt class="text-slate-500">Opening</dt><dd id="cashOpening" class="font-medium text-slate-800">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">Cash sales</dt><dd id="cashSales" class="font-medium text-slate-800">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">Expected</dt><dd id="cashExpected" class="font-medium text-slate-800">—</dd></div>
+              <div class="flex justify-between"><dt class="text-slate-500">Counted (closing)</dt><dd id="cashClosing" class="font-medium text-slate-800">—</dd></div>
+            </dl>
+            <div id="cashDiffWrap" class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-sm font-medium text-slate-600">Difference</span>
+              <span id="cashDiff" class="text-sm font-bold px-2.5 py-1 rounded-lg">—</span>
+            </div>
+          </div>
+
+          <!-- Loss prevention -->
+          <div class="grid grid-cols-2 gap-4 lg:col-span-2 lg:grid-cols-2">
+            <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+                </span>
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Discounts</p>
+              </div>
+              <p id="lpDiscount" class="text-xl sm:text-2xl font-extrabold text-slate-900">—</p>
+              <p id="lpDiscountCount" class="text-[11px] text-slate-400 mt-1"></p>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg>
+                </span>
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Cancelled</p>
+              </div>
+              <p id="lpCancelled" class="text-xl sm:text-2xl font-extrabold text-slate-900">—</p>
+              <p id="lpCancelledVal" class="text-[11px] text-slate-400 mt-1"></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Payments + Orders by type -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+            <h2 class="text-sm font-bold text-slate-900 mb-4">Payment methods</h2>
+            <div id="payments" class="space-y-3"></div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+            <h2 class="text-sm font-bold text-slate-900 mb-4">Orders by type</h2>
+            <div id="ordersByType" class="space-y-3"></div>
+          </div>
+        </section>
+
+        <!-- 7-day trend -->
+        <section class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+          <h2 class="text-sm font-bold text-slate-900 mb-4">Last 7 days</h2>
+          <div id="trend" class="flex items-end justify-between gap-2 h-32"></div>
+        </section>
+
+        <!-- Top items + Low stock -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+            <h2 id="topItemsLabel" class="text-sm font-bold text-slate-900 mb-4">Top items today</h2>
+            <div id="topItems" class="space-y-2.5"></div>
+          </div>
+          <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-5">
+            <h2 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+              Low stock
+              <span id="lowStockCount" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-100 text-rose-600"></span>
+            </h2>
+            <div id="lowStock" class="space-y-2.5"></div>
+          </div>
+        </section>
+
+      </div>
+
+      <footer class="text-center text-[11px] text-slate-400 pt-2 pb-6">
+        <span id="appVersion"></span> · Live data from your POS
+      </footer>
+    </main>
+  </div>
+
+  <!-- ───────────────── APP ───────────────── -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+    import {
+      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+      browserLocalPersistence, setPersistence,
+    } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+    import {
+      getFirestore, doc, onSnapshot, collection, query, orderBy, limit,
+    } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+
+    // Same PUBLIC config as the POS — security is enforced by Firestore rules.
+    const firebaseConfig = {
+      apiKey: 'AIzaSyDEsgbZY1q50Y4NTmkbYrFmeB3_3-7v2Lw',
+      authDomain: 'molecule-e2e95.firebaseapp.com',
+      projectId: 'molecule-e2e95',
+      storageBucket: 'molecule-e2e95.firebasestorage.app',
+      messagingSenderId: '297835941121',
+      appId: '1:297835941121:web:da4ca719e39fde27ad9f00',
+      measurementId: 'G-XVD2WKKNEK',
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ── Formatting helpers ──
+    const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ', PKR: '₨', LKR: 'Rs', NPR: 'रू', BDT: '৳' };
+    let currencySymbol = '₹';
+    function setCurrency(c) {
+      if (!c) return;
+      currencySymbol = CURRENCY_SYMBOLS[String(c).toUpperCase()] || (String(c).length <= 2 ? c : currencySymbol);
+    }
+    // Amounts arrive in minor units (paise). Divide by 100 for display.
+    function money(minor) {
+      const v = (Number(minor) || 0) / 100;
+      return currencySymbol + v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function num(n) { return (Number(n) || 0).toLocaleString(); }
+    function prettyLabel(s) {
+      return String(s || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+    function timeAgo(date) {
+      if (!date) return '';
+      const secs = Math.round((Date.now() - date.getTime()) / 1000);
+      if (secs < 60) return 'just now';
+      if (secs < 3600) return Math.floor(secs / 60) + ' min ago';
+      if (secs < 86400) return Math.floor(secs / 3600) + ' hr ago';
+      return date.toLocaleDateString();
+    }
+    const $ = (id) => document.getElementById(id);
+
+    // ── View switching ──
+    function showLogin() {
+      $('loginView').classList.remove('hidden'); $('loginView').classList.add('flex');
+      $('dashView').classList.add('hidden');
+    }
+    function showDash() {
+      $('loginView').classList.add('hidden'); $('loginView').classList.remove('flex');
+      $('dashView').classList.remove('hidden');
+    }
+
+    // ── Auth ──
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+
+    $('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = $('loginBtn'); const err = $('loginError');
+      err.classList.add('hidden');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        await signInWithEmailAndPassword(auth, $('email').value.trim(), $('password').value);
+      } catch (ex) {
+        const map = {
+          'auth/invalid-credential': 'Incorrect email or password.',
+          'auth/wrong-password': 'Incorrect email or password.',
+          'auth/user-not-found': 'No account found for this email.',
+          'auth/invalid-email': 'Please enter a valid email.',
+          'auth/too-many-requests': 'Too many attempts. Try again later.',
+          'auth/network-request-failed': 'Network error. Check your connection.',
+        };
+        err.textContent = map[ex.code] || 'Sign-in failed. Please try again.';
+        err.classList.remove('hidden');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Sign in';
+      }
+    });
+
+    $('signOutBtn').addEventListener('click', () => signOut(auth));
+
+    $('refreshBtn').addEventListener('click', () => {
+      const icon = $('refreshIcon');
+      icon.style.transition = 'transform 0.6s ease';
+      icon.style.transform = 'rotate(360deg)';
+      setTimeout(() => { icon.style.transition = ''; icon.style.transform = ''; }, 650);
+      window.location.reload();
+    });
+
+    let unsubs = [];
+    function clearSubs() { unsubs.forEach((u) => { try { u(); } catch {} }); unsubs = []; }
+
+    onAuthStateChanged(auth, (user) => {
+      clearSubs();
+      if (!user) { showLogin(); return; }
+      showDash();
+      subscribe(user.uid);
+    });
+
+    // ── Live data ──
+    let hasLive = false;
+    function subscribe(uid) {
+      const base = `restaurants/${uid}`;
+
+      // meta/status
+      unsubs.push(onSnapshot(doc(db, `${base}/meta/status`), (snap) => {
+        const m = snap.data() || {};
+        setCurrency(m.currency);
+        $('restName').textContent = m.restaurantName || 'Dashboard';
+        $('appVersion').textContent = m.appVersion ? ('v' + m.appVersion) : '';
+        const badge = $('dayBadge');
+        badge.classList.remove('hidden');
+        if (m.dayOpen) { badge.textContent = 'OPEN'; badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700'; }
+        else { badge.textContent = 'CLOSED'; badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500'; }
+        renderActiveOrders(m.activeOrders || [], m.activeOrderValue || 0);
+      }, () => {}));
+
+      // live/today
+      unsubs.push(onSnapshot(doc(db, `${base}/live/today`), (snap) => {
+        if (!snap.exists()) { renderEmpty(); return; }
+        renderLive(snap.data());
+        const ts = snap.data().updatedAt;
+        const d = ts && ts.toDate ? ts.toDate() : null;
+        $('syncText').textContent = d ? ('Updated ' + timeAgo(d)) : 'Live';
+      }, (ex) => { $('syncText').textContent = 'Connection error'; console.error(ex); }));
+
+      // daily (last 7) for trend
+      const q = query(collection(db, `${base}/daily`), orderBy('__name__', 'desc'), limit(7));
+      unsubs.push(onSnapshot(q, (qs) => {
+        const rows = [];
+        qs.forEach((d) => rows.push({ date: d.id, ...d.data() }));
+        renderTrend(rows.reverse());
+      }, () => {}));
+    }
+
+    function renderEmpty() {
+      hasLive = false;
+      $('emptyState').classList.remove('hidden');
+      $('content').classList.add('hidden');
+      $('syncText').textContent = 'Live';
+    }
+
+    function renderLive(d) {
+      if (!hasLive) {
+        $('emptyState').classList.add('hidden');
+        $('content').classList.remove('hidden');
+        $('content').classList.add('fade-up');
+        hasLive = true;
+      }
+
+      // Revenue + all period-scoped cards (KPIs, tax, loss prevention,
+      // payments, order types, top items) are rendered by renderPeriod so they
+      // update together when the owner changes the period tab.
+      currentData = d;
+      renderPeriod();
+
+      // Cash (today only — a per-day drawer reconciliation)
+      const c = d.cash || {};
+      $('cashOpening').textContent = money(c.opening);
+      $('cashSales').textContent = money(c.sales);
+      $('cashExpected').textContent = money(c.expected);
+      $('cashClosing').textContent = c.closing ? money(c.closing) : '—';
+      const diff = Number(c.difference) || 0;
+      const diffEl = $('cashDiff');
+      if (!c.closing) {
+        diffEl.textContent = 'Day open'; diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500';
+      } else if (diff === 0) {
+        diffEl.textContent = 'Balanced'; diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700';
+      } else {
+        diffEl.textContent = (diff > 0 ? '+' : '') + money(diff);
+        diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700';
+      }
+
+      // Low stock (today / "right now")
+      const ls = $('lowStock');
+      const low = d.lowStock || [];
+      const lsCount = $('lowStockCount');
+      if (low.length) { lsCount.textContent = low.length; lsCount.classList.remove('hidden'); }
+      else { lsCount.classList.add('hidden'); }
+      ls.innerHTML = low.length ? low.map((s) => `
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-700 truncate">${escapeHtml(s.name)}</span>
+          <span class="text-xs font-semibold text-rose-600">${num(s.currentStock)} / ${num(s.minStock)} ${escapeHtml(s.unit || '')}</span>
+        </div>`).join('') : `<div class="flex items-center gap-2 text-sm text-emerald-600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> All stocked up</div>`;
+    }
+
+    const BAR_COLORS = { indigo: 'bg-indigo-500', emerald: 'bg-emerald-500' };
+    function renderBars(elId, rows, color) {
+      const el = $(elId);
+      if (!rows.length) { el.innerHTML = emptyRow('No data yet'); return; }
+      const max = Math.max(...rows.map((r) => r.value), 1);
+      el.innerHTML = rows.map((r) => `
+        <div>
+          <div class="flex items-center justify-between text-sm mb-1">
+            <span class="text-slate-600">${escapeHtml(r.label)} <span class="text-slate-400 text-xs">· ${r.sub}</span></span>
+            <span class="font-semibold text-slate-800">${money(r.value)}</span>
+          </div>
+          <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-full ${BAR_COLORS[color]} rounded-full transition-all duration-500" style="width:${Math.max(4, (r.value / max) * 100)}%"></div>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderTrend(rows) {
+      const el = $('trend');
+      if (!rows.length) { el.innerHTML = `<div class="w-full text-center text-sm text-slate-400 self-center">No history yet</div>`; return; }
+      const max = Math.max(...rows.map((r) => Number(r.revenue) || 0), 1);
+      el.innerHTML = rows.map((r) => {
+        const v = Number(r.revenue) || 0;
+        const h = Math.max(6, (v / max) * 100);
+        const day = new Date(r.date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short' });
+        return `
+          <div class="flex-1 flex flex-col items-center justify-end gap-1.5 h-full group">
+            <span class="text-[10px] font-medium text-slate-400 opacity-0 group-hover:opacity-100 transition">${money(v)}</span>
+            <div class="w-full max-w-[34px] rounded-t-lg bg-gradient-to-t from-indigo-500 to-indigo-400 transition-all duration-500" style="height:${h}%"></div>
+            <span class="text-[10px] text-slate-400">${day}</span>
+          </div>`;
+      }).join('');
+    }
+
+    // created_at is stored UTC as "YYYY-MM-DD HH:MM:SS" — mark it as UTC to parse correctly.
+    function openFor(raw) {
+      if (!raw) return '';
+      const d = new Date(String(raw).replace(' ', 'T') + 'Z');
+      if (isNaN(d.getTime())) return '';
+      const mins = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
+      if (mins < 1) return 'just now';
+      if (mins < 60) return 'open ' + mins + 'm';
+      return 'open ' + Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+    }
+
+    // ── Revenue period tabs ──
+    let currentData = null;
+    let selectedPeriod = 'today';
+    const PERIOD_LABEL = { today: 'today', week: 'this week', month: 'this month', year: 'this year' };
+
+    function renderPeriod() {
+      const d = currentData;
+      const tabs = document.querySelectorAll('#periodTabs button');
+      tabs.forEach((b) => {
+        const active = b.dataset.period === selectedPeriod;
+        b.className = 'px-2.5 sm:px-3 py-1 rounded-md transition ' +
+          (active ? 'bg-white text-slate-900 shadow-sm font-semibold' : 'text-slate-500');
+      });
+      if (!d) return;
+
+      // Prefer the selected period's full metric block. Fall back to the
+      // top-level fields (today) if an older POS hasn't sent `periods` yet —
+      // in that case only "today" has real data for the non-revenue cards.
+      const p = (d.periods && d.periods[selectedPeriod]) || d;
+      const suffix = PERIOD_LABEL[selectedPeriod];
+
+      // Revenue headline
+      $('periodRevenue').textContent = money(p.revenue);
+      $('periodSub').textContent = num(p.orders) + ' order(s) ' + PERIOD_LABEL[selectedPeriod];
+
+      // KPI cards
+      $('kpiOrdersLabel').textContent = 'Orders ' + suffix;
+      $('kpiOrders').textContent = num(p.orders);
+      $('kpiCovers').textContent = (Number(p.covers) || 0) + ' covers';
+      $('kpiAov').textContent = money(p.averageOrderValue);
+      $('kpiTaxLabel').textContent = 'Tax ' + suffix;
+      $('kpiTax').textContent = money(p.taxTotal);
+
+      // Loss prevention
+      $('lpDiscount').textContent = money(p.discountTotal);
+      $('lpDiscountCount').textContent = num(p.discountedOrders) + ' discounted order(s)';
+      const can = p.cancelledOrders || {};
+      $('lpCancelled').textContent = num(can.count);
+      $('lpCancelledVal').textContent = money(can.value) + ' value';
+
+      // Payments
+      renderBars('payments', (p.payments || []).map((x) => ({
+        label: prettyLabel(x.mode), value: Number(x.total) || 0, sub: num(x.count) + ' txn',
+      })), 'indigo');
+
+      // Orders by type
+      renderBars('ordersByType', (p.ordersByType || []).map((o) => ({
+        label: prettyLabel(o.type), value: Number(o.revenue) || 0, sub: num(o.count) + ' order(s)',
+      })), 'emerald');
+
+      // Top items
+      $('topItemsLabel').textContent = 'Top items ' + suffix;
+      const ti = $('topItems');
+      const items = p.topItems || [];
+      ti.innerHTML = items.length ? items.map((it, i) => `
+        <div class="flex items-center gap-3">
+          <span class="w-5 h-5 rounded-md bg-slate-100 text-slate-500 text-[11px] font-bold flex items-center justify-center flex-shrink-0">${i + 1}</span>
+          <span class="flex-1 text-sm text-slate-700 truncate">${escapeHtml(it.name)}</span>
+          <span class="text-xs text-slate-400">×${num(it.quantity)}</span>
+          <span class="text-sm font-semibold text-slate-800 w-20 text-right">${money(it.revenue)}</span>
+        </div>`).join('') : emptyRow('No sales ' + suffix);
+    }
+
+    document.querySelectorAll('#periodTabs button').forEach((b) => {
+      b.addEventListener('click', () => { selectedPeriod = b.dataset.period; renderPeriod(); });
+    });
+    renderPeriod(); // style the default tab before data arrives
+
+    let lastActive = [], lastActiveValue = 0;
+    function renderActiveOrders(list, totalValue) {
+      lastActive = list; lastActiveValue = totalValue;
+      const el = $('activeOrders'), countEl = $('activeCount'), valEl = $('activeValue');
+      if (list.length) { countEl.textContent = list.length; countEl.classList.remove('hidden'); valEl.textContent = money(totalValue) + ' open'; }
+      else { countEl.classList.add('hidden'); valEl.textContent = ''; }
+      if (!list.length) { el.innerHTML = `<p class="text-sm text-slate-400 col-span-full">No open orders right now.</p>`; return; }
+      el.innerHTML = list.map((o) => {
+        const title = o.table ? escapeHtml(o.table) : prettyLabel(o.type);
+        return `
+          <div class="rounded-xl border ${o.onHold ? 'border-amber-200 bg-amber-50/50' : 'border-slate-200 bg-slate-50/60'} p-3.5">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-sm font-semibold text-slate-800 truncate">${title}</span>
+              ${o.onHold ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 flex-shrink-0">HOLD</span>' : ''}
+            </div>
+            <p class="text-xs text-slate-500">${escapeHtml(prettyLabel(o.type))} · ${num(o.itemCount)} item(s)</p>
+            <div class="flex items-center justify-between mt-2">
+              <span class="text-sm font-bold text-slate-900">${money(o.total)}</span>
+              <span class="text-[11px] text-slate-400">${openFor(o.openedAt)}${o.orderNumber ? ' · #' + escapeHtml(String(o.orderNumber)) : ''}</span>
+            </div>
+          </div>`;
+      }).join('');
+    }
+    // Keep the "open Xm" durations ticking even between syncs.
+    setInterval(() => { if (lastActive.length) renderActiveOrders(lastActive, lastActiveValue); }, 60000);
+
+    function emptyRow(text) { return `<p class="text-sm text-slate-400">${text}</p>`; }
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+  </script>
+</body>
+</html>
