@@ -3,6 +3,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { join, dirname } from 'path';
 import fs from 'fs';
+import os from 'os';
 import { is } from '@electron-toolkit/utils';
 import { getDb, closeDb, getDbPath } from './db/connection';
 import { runMigrations } from './db/migrations/runner';
@@ -176,6 +177,14 @@ async function runVacuumIfDue(): Promise<void> {
 }
 
 function setupAutoUpdater(): void {
+  // Set update channel based on Windows version to support Windows 7 (Electron 22) separately
+  const isWindows7 = os.platform() === 'win32' && os.release().startsWith('6.1');
+  if (isWindows7) {
+    autoUpdater.channel = 'win7';
+  } else {
+    autoUpdater.channel = 'latest';
+  }
+
   ipcMain.handle('updater:get-version', () => {
     return app.getVersion();
   });
