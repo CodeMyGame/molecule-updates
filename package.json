@@ -1,6 +1,6 @@
 {
   "name": "molecule",
-  "version": "1.2.4",
+  "version": "1.1.1",
   "description": "Restaurant POS System",
   "author": "Molecule <contact@moleculepos.com>",
   "main": "out/main/index.js",
