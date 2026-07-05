@@ -1,4 +1,4 @@
-name: CI/CD Release Pipeline
+name: Molecule App Build & Release
 
 on:
   push:
