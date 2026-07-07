@@ -1,5 +1,4 @@
-import { createHmac, timingSafeEqual, randomUUID } from 'crypto';
-import { execSync } from 'child_process';
+import { createHmac, timingSafeEqual } from 'crypto';
 import * as https from 'https';
 import * as settingsRepo from '../db/repositories/settings.repo';
 import { base32Encode, base32Decode } from './base32';
@@ -21,26 +20,6 @@ const SETTINGS_MAX_DAY_KEY = 'license_max_day';
 const GRACE_DAYS = TEST_MODE ? 1 : 7; // 1 minute grace in test mode
 const WARN_DAYS = TEST_MODE ? 2 : 30; // 2 minutes warning in test mode
 
-// ─── Machine ID / Hardware Fingerprint ─────────────────────────────────────────
-function getMachineId(): string {
-  try {
-    if (process.platform === 'win32') {
-      const out = execSync('reg query HKLM\\SOFTWARE\\Microsoft\\Cryptography /v MachineGuid').toString();
-      const match = /MachineGuid\s+REG_SZ\s+(\S+)/i.exec(out);
-      if (match) return match[1].trim();
-    }
-  } catch (err) {
-    // Ignore and fall back to local database-backed UUID
-  }
-  const SETTINGS_MACHINE_UUID = 'machine_uuid';
-  let localId = settingsRepo.get(SETTINGS_MACHINE_UUID);
-  if (!localId) {
-    localId = randomUUID();
-    settingsRepo.set(SETTINGS_MACHINE_UUID, localId, 'license');
-  }
-  return localId;
-}
-
 // ─── Dynamic Firebase Initialization ──────────────────────────────────────────
 let firebaseLoaded = false;
 let initializeApp: typeof import('firebase/app')['initializeApp'];
@@ -49,7 +28,6 @@ let doc: typeof import('firebase/firestore')['doc'];
 let getDoc: typeof import('firebase/firestore')['getDoc'];
 let setDoc: typeof import('firebase/firestore')['setDoc'];
 let updateDoc: typeof import('firebase/firestore')['updateDoc'];
-let arrayUnion: typeof import('firebase/firestore')['arrayUnion'];
 
 function loadFirebase(): void {
   if (firebaseLoaded) return;
@@ -61,7 +39,6 @@ function loadFirebase(): void {
   getDoc = fsMod.getDoc;
   setDoc = fsMod.setDoc;
   updateDoc = fsMod.updateDoc;
-  arrayUnion = fsMod.arrayUnion;
   firebaseLoaded = true;
 }
 
@@ -78,8 +55,8 @@ function ensureInit(): void {
   firestore = initializeFirestore(fbApp, { experimentalForceLongPolling: true });
 }
 
-// ─── Central License Verification & Device Registration ────────────────────────
-async function syncLicenseWithServer(key: string, machineId: string): Promise<void> {
+// ─── Central License Verification ──────────────────────────────────────────────
+async function syncLicenseWithServer(key: string): Promise<void> {
   try {
     ensureInit();
     const docRef = doc(firestore, 'licenses', key);
@@ -87,15 +64,14 @@ async function syncLicenseWithServer(key: string, machineId: string): Promise<vo
 
     if (!snap.exists()) {
       // Lazy migration: if key is valid offline but doesn't exist on server,
-      // silently register the current device on Firestore to create the document.
+      // silently register it as used in Firestore to create the document.
       const parsed = parseAndValidateKey(key);
       if (parsed.valid) {
         const expiryDateStr = new Date(parsed.expiryDayNum * TIME_UNIT_MS).toISOString().split('T')[0];
         await setDoc(docRef, {
           tier: parsed.tier,
           expiryDate: expiryDateStr,
-          maxDevices: 1,
-          activatedDevices: [machineId],
+          isUsed: true,
           updatedAt: new Date().toISOString()
         });
       }
@@ -103,27 +79,18 @@ async function syncLicenseWithServer(key: string, machineId: string): Promise<vo
     }
 
     const data = snap.data();
-    const activatedDevices = data.activatedDevices || [];
-    const maxDevices = data.maxDevices || 1;
-
-    if (activatedDevices.includes(machineId)) {
-      return;
+    if (data.isUsed) {
+      throw new Error('This license key has already been used for activation.');
     }
 
-    if (activatedDevices.length >= maxDevices) {
-      // Exceeded limit: wipe local activation settings
-      clearLicense();
-      throw new Error('This license key is already in use on another computer.');
-    }
-
-    // Register this device on the server
+    // Mark key as used on the server
     await updateDoc(docRef, {
-      activatedDevices: arrayUnion(machineId),
+      isUsed: true,
       updatedAt: new Date().toISOString()
     });
   } catch (err: any) {
     console.error('[License] Server sync failed:', err?.message || err);
-    if (err?.message?.includes('already in use')) {
+    if (err?.message?.includes('already been used')) {
       throw err;
     }
   }
@@ -278,10 +245,6 @@ export async function getLicenseStatus(): Promise<LicenseStatus> {
     return { state: 'expired_hard', tier: parsed.tier, expiryDate, daysRemaining: 0 };
   }
 
-  // Trigger silent server sync check in background
-  const machineId = getMachineId();
-  syncLicenseWithServer(storedKey, machineId).catch(() => {});
-
   if (daysRemaining < 0) {
     // In grace period — report remaining grace days (0 to GRACE_DAYS)
     return {
@@ -312,10 +275,9 @@ export async function activateLicense(key: string): Promise<LicenseStatus> {
 
   // Store the normalized key (uppercase, no dashes)
   const normalized = key.toUpperCase().replace(/[^A-Z2-7]/g, '');
-  const machineId = getMachineId();
 
-  // Validate & bind key to current machine on server
-  await syncLicenseWithServer(normalized, machineId);
+  // Validate & mark key as used on server
+  await syncLicenseWithServer(normalized);
 
   settingsRepo.set(SETTINGS_LICENSE_KEY, normalized, 'license');
 
