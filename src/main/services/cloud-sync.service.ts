@@ -19,9 +19,11 @@
 import { app, safeStorage } from 'electron';
 import path from 'path';
 import fs from 'fs';
+import zlib from 'zlib';
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth, User } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
+import type { FirebaseStorage } from 'firebase/storage';
 
 // Firebase is loaded lazily (see loadFirebase) rather than via top-level
 // imports. This keeps the `require('firebase/*')` calls out of the bundle's
@@ -39,6 +41,9 @@ let initializeFirestore: typeof import('firebase/firestore')['initializeFirestor
 let doc: typeof import('firebase/firestore')['doc'];
 let setDoc: typeof import('firebase/firestore')['setDoc'];
 let serverTimestamp: typeof import('firebase/firestore')['serverTimestamp'];
+let getStorage: typeof import('firebase/storage')['getStorage'];
+let ref: typeof import('firebase/storage')['ref'];
+let uploadBytes: typeof import('firebase/storage')['uploadBytes'];
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 let firebaseLoaded = false;
@@ -50,6 +55,8 @@ function loadFirebase(): void {
   const authMod = require('firebase/auth');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const fsMod = require('firebase/firestore');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const storageMod = require('firebase/storage');
   initializeApp = appMod.initializeApp;
   deleteApp = appMod.deleteApp;
   getAuth = authMod.getAuth;
@@ -60,6 +67,9 @@ function loadFirebase(): void {
   doc = fsMod.doc;
   setDoc = fsMod.setDoc;
   serverTimestamp = fsMod.serverTimestamp;
+  getStorage = storageMod.getStorage;
+  ref = storageMod.ref;
+  uploadBytes = storageMod.uploadBytes;
   firebaseLoaded = true;
 }
 import { FIREBASE_CONFIG, isFirebaseConfigured } from './firebase-config';
@@ -76,6 +86,7 @@ const DEBOUNCE_MS = 15_000; // coalesce event-driven pushes (payment, day open/c
 let fbApp: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let firestore: Firestore | null = null;
+let storage: FirebaseStorage | null = null;
 let currentUser: User | null = null;
 
 let autoTimer: NodeJS.Timeout | null = null;
@@ -124,13 +135,14 @@ function ensureInit(): void {
   auth = getAuth(fbApp);
   // Long-polling is the robust transport under Node/Electron main (no WebChannel).
   firestore = initializeFirestore(fbApp, { experimentalForceLongPolling: true });
+  storage = getStorage(fbApp);
 }
 
 async function teardown(): Promise<void> {
   stopAutoSync();
   if (auth) { try { await fbSignOut(auth); } catch { /* ignore */ } }
   if (fbApp) { try { await deleteApp(fbApp); } catch { /* ignore */ } }
-  fbApp = null; auth = null; firestore = null; currentUser = null;
+  fbApp = null; auth = null; firestore = null; storage = null; currentUser = null;
 }
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
@@ -302,6 +314,51 @@ export function getStatus(): CloudStatus {
   };
 }
 
+/** Backs up the SQLite database to Firebase Storage, compressed using Gzip. */
+export async function pushDatabaseBackup(): Promise<void> {
+  if (!currentUser || !storage) return;
+
+  try {
+    const lastFbBackup = settingsRepo.get('last_firebase_backup');
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    if (lastFbBackup === today) {
+      // Already backed up to Firebase today!
+      return;
+    }
+
+    const backupDir = path.join(app.getPath('userData'), 'backups');
+    const backupPath = path.join(backupDir, 'auto-backup-latest.db');
+
+    // Make sure backup file exists (if not, backup now)
+    if (!fs.existsSync(backupPath)) {
+      if (!fs.existsSync(backupDir)) {
+        fs.mkdirSync(backupDir, { recursive: true });
+      }
+      // Load dynamically to avoid circular import issues
+      const { getDb } = require('../db/connection');
+      const db = getDb();
+      await db.backup(backupPath);
+    }
+
+    logger.info('[Cloud Backup] Compressing database file...');
+    const fileBuffer = fs.readFileSync(backupPath);
+    const compressed = zlib.gzipSync(fileBuffer);
+
+    const uid = currentUser.uid;
+    const storageRef = ref(storage, `backups/${uid}/molecule-backup-latest.db.gz`);
+
+    logger.info(`[Cloud Backup] Uploading compressed backup to Firebase Storage for user ${uid}...`);
+    await uploadBytes(storageRef, compressed, {
+      contentType: 'application/gzip'
+    });
+
+    settingsRepo.set('last_firebase_backup', today, 'general');
+    logger.info('[Cloud Backup] Database backup successfully uploaded to Firebase Storage.');
+  } catch (err: any) {
+    logger.error('[Cloud Backup] Firebase storage backup upload failed:', err);
+  }
+}
+
 /**
  * Connect with the owner's email/password. Signs in if the account exists,
  * otherwise creates it (first-time setup). Persists credentials and starts sync.
@@ -333,6 +390,8 @@ export async function connect(
   startAutoSync();
   // Fire an immediate push so the dashboard lights up right away.
   pushNow().catch((e) => logger.error('Cloud: initial push failed', e));
+  // Fire database backup (non-blocking)
+  pushDatabaseBackup().catch((e) => logger.error('Cloud: database backup failed', e));
   return getStatus();
 }
 
@@ -408,6 +467,8 @@ export async function restoreSession(): Promise<void> {
   try {
     await connect(creds.email, creds.password);
     logger.info('Cloud: session restored, auto-sync started');
+    // Fire database backup (non-blocking)
+    pushDatabaseBackup().catch((e) => logger.error('Cloud: database backup failed', e));
   } catch (err) {
     logger.error('Cloud: failed to restore session (will stay offline)', err);
   }
