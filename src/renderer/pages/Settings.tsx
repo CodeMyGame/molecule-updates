@@ -409,8 +409,8 @@ const Settings: React.FC = () => {
       setUpdateState('ready');
     });
     const unsub4 = window.electronAPI.updater.onError((msg) => {
-      setUpdateError(msg);
-      setUpdateState('error');
+      // Treat checking failures as "no update available" silently
+      setUpdateState('no-update');
     });
     const unsub5 = window.electronAPI.updater.onUpdateNotAvailable((info) => {
       setUpdateState('no-update');
@@ -435,9 +435,7 @@ const Settings: React.FC = () => {
         toast(t('settings.devModeNoUpdate', 'Updates are disabled in development mode.'));
       }
     } catch (err: any) {
-      setUpdateError(err.message || 'Check failed');
-      setUpdateState('error');
-      toast.error(t('settings.updateCheckFailed', 'Update check failed'));
+      setUpdateState('no-update');
     }
   };
 

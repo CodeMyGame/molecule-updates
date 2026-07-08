@@ -27,8 +27,7 @@ export default function UpdateNotification(): JSX.Element | null {
       setState('ready');
     });
     const unsub4 = window.electronAPI.updater.onError((msg) => {
-      setErrorMsg(msg);
-      setState('error');
+      // Suppress update checking error popups completely
     });
 
     return () => { unsub1(); unsub2(); unsub3(); unsub4(); };
