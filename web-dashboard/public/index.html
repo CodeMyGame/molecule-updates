@@ -459,12 +459,14 @@
       }, (ex) => { $('syncText').textContent = 'Connection error'; console.error(ex); }));
 
       // daily (last 7) for trend
-      const q = query(collection(db, `${base}/daily`), orderBy(documentId(), 'desc'), limit(7));
+      const q = query(collection(db, `${base}/daily`), orderBy('date', 'desc'), limit(7));
       unsubs.push(onSnapshot(q, (qs) => {
         const rows = [];
         qs.forEach((d) => rows.push({ date: d.id, ...d.data() }));
         renderTrend(rows.reverse());
-      }, () => {}));
+      }, (err) => {
+        console.error("Trend Query Error:", err);
+      }));
     }
 
     function renderEmpty() {
@@ -643,8 +645,8 @@
         
         const q = query(
           dailyRef,
-          where(documentId(), '>=', startDateStr),
-          where(documentId(), '<=', endDateStr)
+          where('date', '>=', startDateStr),
+          where('date', '<=', endDateStr)
         );
         
         const querySnapshot = await getDocs(q);
