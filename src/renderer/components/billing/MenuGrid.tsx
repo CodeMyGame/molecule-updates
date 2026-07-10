@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Search, Leaf, CircleDot, Loader2, TrendingUp, Star, Plus, Settings, Pencil, Trash2, Pin } from 'lucide-react';
 import type { MenuCategory, MenuItem, Variation, Addon, AddonGroup } from '../../hooks/useMenu';
@@ -74,6 +74,9 @@ const MenuGrid: React.FC<MenuGridProps> = ({
   const [addingNewGroup, setAddingNewGroup] = useState(false);
   const [newGroupForm, setNewGroupForm] = useState({ name: '', minSelect: '0', maxSelect: '1', isRequired: false });
   const [savingGroup, setSavingGroup] = useState(false);
+
+  const clickedItemsRef = useRef(new Set<number>());
+  const confirmLockRef = useRef(false);
 
   // Edit state
   const [editVariationId, setEditVariationId] = useState<number | null>(null);
@@ -427,6 +430,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
         setEditingVariation(false);
         setEditingAddonGroupId(null);
         setAddingNewGroup(false);
+        confirmLockRef.current = false;
         setVariationModal({ item, variations: variations ?? [], addonGroups: addons ?? [], mode: 'customize' });
       } catch {
         // ignore
@@ -439,6 +443,8 @@ const MenuGrid: React.FC<MenuGridProps> = ({
 
   const handleItemClick = useCallback(
     async (item: MenuItem) => {
+      if (clickedItemsRef.current.has(item.id)) return;
+      clickedItemsRef.current.add(item.id);
       setLoadingItem(item.id);
       try {
         // Always fetch — the has_variations/has_addons flags on `item` come from a snapshot
@@ -456,6 +462,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
           setEditingVariation(false);
           setEditingAddonGroupId(null);
           setAddingNewGroup(false);
+          confirmLockRef.current = false;
           setVariationModal({ item, variations, addonGroups: addons, mode: 'order' });
         } else {
           onAddToCart(item);
@@ -465,13 +472,15 @@ const MenuGrid: React.FC<MenuGridProps> = ({
         onAddToCart(item);
       } finally {
         setLoadingItem(null);
+        clickedItemsRef.current.delete(item.id);
       }
     },
     [getVariations, getAddons, onAddToCart]
   );
 
   const handleConfirmVariation = useCallback(() => {
-    if (!variationModal) return;
+    if (!variationModal || confirmLockRef.current) return;
+    confirmLockRef.current = true;
     const { item } = variationModal;
     // Resolve addon prices based on the selected variation
     const resolvedAddons = selectedAddons.map((addon) => {
