@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Minus,
   Plus,
@@ -65,6 +65,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const [noteText, setNoteText] = useState('');
   const [comboSuggestions, setComboSuggestions] = useState<any[]>([]);
   const [dismissedCombos, setDismissedCombos] = useState<Set<number>>(new Set());
+  const lastClickTimeRef = useRef<number>(0);
 
   // Fetch combos and suggest matching ones based on cart items
   useEffect(() => {
@@ -263,6 +264,10 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     <div className="flex items-center border border-gray-200 rounded">
                       <button
                         onClick={() => {
+                          const now = Date.now();
+                          if (now - lastClickTimeRef.current < 150) return;
+                          lastClickTimeRef.current = now;
+
                           // Decrement: peel from the most recent underlying row.
                           // If that row's qty would drop below its synced (already-KOT'd) qty,
                           // block — same protection as before, just per-row.
@@ -290,6 +295,10 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       </span>
                       <button
                         onClick={() => {
+                          const now = Date.now();
+                          if (now - lastClickTimeRef.current < 150) return;
+                          lastClickTimeRef.current = now;
+
                           // Increment: add to the most recent underlying row.
                           const targetIdx = lastIndex;
                           updateQuantity(targetIdx, cart[targetIdx].quantity + 1);
