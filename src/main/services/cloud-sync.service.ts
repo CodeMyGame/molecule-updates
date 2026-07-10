@@ -359,6 +359,7 @@ export async function pushNow(): Promise<void> {
     await Promise.all([
       setDoc(doc(firestore, `${base}/live/today`), payload),
       setDoc(doc(firestore, `${base}/meta/status`), meta, { merge: true }),
+      setDoc(doc(firestore, `${base}/daily/${today}`), payload, { merge: true }),
     ]);
 
     const now = new Date().toISOString();
