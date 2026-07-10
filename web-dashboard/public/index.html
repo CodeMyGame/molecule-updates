@@ -254,7 +254,7 @@
         <!-- 7-day trend -->
         <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
           <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Last 7 days</h2>
-          <div id="trend" class="flex items-end justify-between gap-2 h-32"></div>
+          <div id="trend" class="h-48 w-full"></div>
         </section>
 
         <!-- Top items + Low stock -->
@@ -539,21 +539,101 @@
 
     function renderTrend(rows) {
       const el = $('trend');
-      if (!rows.length) { el.innerHTML = `<div class="w-full text-center text-sm text-slate-400 dark:text-slate-500 self-center">No history yet</div>`; return; }
-      const max = Math.max(...rows.map((r) => Number(r.revenue) || 0), 1);
-      el.innerHTML = rows.map((r) => {
+      if (!rows.length) {
+        el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500">No history yet</div>`;
+        return;
+      }
+
+      const width = 600;
+      const height = 200;
+      const paddingLeft = 55;
+      const paddingRight = 15;
+      const paddingTop = 20;
+      const paddingBottom = 25;
+
+      const plotWidth = width - paddingLeft - paddingRight;
+      const plotHeight = height - paddingTop - paddingBottom;
+
+      const revenues = rows.map((r) => Number(r.revenue) || 0);
+      const max = Math.max(...revenues, 1);
+
+      // Format short currency label (e.g. ₹5.2K)
+      function shortMoney(valPaise) {
+        const val = valPaise / 100;
+        if (val >= 100000) return currencySymbol + (val / 100000).toFixed(1) + 'L';
+        if (val >= 1000) return currencySymbol + (val / 1000).toFixed(1) + 'K';
+        return currencySymbol + val.toFixed(0);
+      }
+
+      // Generate points
+      const points = rows.map((r, i) => {
         const v = Number(r.revenue) || 0;
-        const h = Math.max(6, (v / max) * 100);
+        const x = paddingLeft + (i / (rows.length - 1 || 1)) * plotWidth;
+        const y = paddingTop + plotHeight - (v / max) * plotHeight;
         const parts = r.date.split('-');
         const d = new Date(parts[0], parts[1] - 1, parts[2]);
         const day = d.toLocaleDateString(undefined, { weekday: 'short' });
-        return `
-          <div class="flex-1 flex flex-col items-center justify-end gap-1.5 h-full group">
-            <span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition">${money(v)}</span>
-            <div class="w-full max-w-[34px] rounded-t-lg bg-gradient-to-t from-indigo-500 to-indigo-400 dark:from-indigo-600 dark:to-indigo-500 transition-all duration-500" style="height:${h}%"></div>
-            <span class="text-[10px] text-slate-400 dark:text-slate-500">${day}</span>
-          </div>`;
-      }).join('');
+        return { x, y, value: v, label: day };
+      });
+
+      // Path for the line
+      const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+      // Path for the filled gradient area
+      const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
+
+      // Y-axis gridlines & labels
+      const yTicks = 4;
+      let yElements = '';
+      for (let i = 0; i < yTicks; i++) {
+        const ratio = i / (yTicks - 1);
+        const y = paddingTop + plotHeight - ratio * plotHeight;
+        const val = ratio * max;
+        yElements += `
+          <!-- Grid line -->
+          <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/65" stroke-dasharray="3,3" stroke-width="1" />
+          <!-- Y Label -->
+          <text x="${paddingLeft - 8}" y="${y + 3}" text-anchor="end" font-size="9" font-weight="500" class="fill-slate-400 dark:fill-slate-500 font-sans">${shortMoney(val)}</text>
+        `;
+      }
+
+      // X-axis elements
+      let xElements = '';
+      points.forEach((p) => {
+        xElements += `
+          <!-- X Label -->
+          <text x="${p.x}" y="${height - 5}" text-anchor="middle" font-size="10" font-weight="500" class="fill-slate-400 dark:fill-slate-500 font-sans">${p.label}</text>
+          <!-- Point dot shadow/halo -->
+          <circle cx="${p.x}" cy="${p.y}" r="6" fill="#6366f1" opacity="0.1" />
+          <!-- Point dot -->
+          <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#ffffff" stroke="#6366f1" stroke-width="2.5" />
+          <!-- Point value popup -->
+          <text x="${p.x}" y="${p.y - 8}" text-anchor="middle" font-size="9" font-weight="600" class="fill-slate-700 dark:fill-slate-350 font-sans">${shortMoney(p.value)}</text>
+        `;
+      });
+
+      el.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible select-none">
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.22"/>
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0.01"/>
+            </linearGradient>
+          </defs>
+          
+          <!-- Grid & Y-Axis labels -->
+          ${yElements}
+          
+          <!-- Gradient fill area under the line -->
+          <path d="${areaPath}" fill="url(#chartGrad)" />
+          
+          <!-- Trend line -->
+          <path d="${linePath}" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+          
+          <!-- X labels & interactive dots -->
+          ${xElements}
+        </svg>
+      `;
     }
 
     // created_at is stored UTC as "YYYY-MM-DD HH:MM:SS" — mark it as UTC to parse correctly.
