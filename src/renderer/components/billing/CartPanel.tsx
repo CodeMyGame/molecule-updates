@@ -265,7 +265,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       <button
                         onClick={() => {
                           const now = Date.now();
-                          if (now - lastClickTimeRef.current < 150) return;
+                          if (now - lastClickTimeRef.current < 100) return;
                           lastClickTimeRef.current = now;
 
                           // Decrement: peel from the most recent underlying row.
@@ -296,7 +296,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       <button
                         onClick={() => {
                           const now = Date.now();
-                          if (now - lastClickTimeRef.current < 150) return;
+                          if (now - lastClickTimeRef.current < 100) return;
                           lastClickTimeRef.current = now;
 
                           // Increment: add to the most recent underlying row.

@@ -472,7 +472,9 @@ const MenuGrid: React.FC<MenuGridProps> = ({
         onAddToCart(item);
       } finally {
         setLoadingItem(null);
-        clickedItemsRef.current.delete(item.id);
+        setTimeout(() => {
+          clickedItemsRef.current.delete(item.id);
+        }, 300);
       }
     },
     [getVariations, getAddons, onAddToCart]
