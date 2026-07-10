@@ -258,8 +258,13 @@
 
       </div>
 
-      <footer class="text-center text-[11px] text-slate-400 dark:text-slate-500 pt-2 pb-6">
-        <span id="appVersion"></span> · Live data from your POS
+      <footer class="text-center text-[11px] text-slate-400 dark:text-slate-500 pt-2 pb-6 space-y-1.5">
+        <div>
+          <span id="appVersion"></span> · Live data from your POS
+        </div>
+        <div id="licenseInfo" class="hidden text-slate-400 dark:text-slate-500 font-medium">
+          License Expiry: <span id="licenseExpiry"></span>
+        </div>
       </footer>
     </main>
   </div>
@@ -379,7 +384,6 @@
     function subscribe(uid) {
       const base = `restaurants/${uid}`;
 
-      // meta/status
       unsubs.push(onSnapshot(doc(db, `${base}/meta/status`), (snap) => {
         const m = snap.data() || {};
         setCurrency(m.currency);
@@ -390,6 +394,40 @@
         if (m.dayOpen) { badge.textContent = 'OPEN'; badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'; }
         else { badge.textContent = 'CLOSED'; badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'; }
         renderActiveOrders(m.activeOrders || [], m.activeOrderValue || 0);
+
+        // Render License Info
+        const licWrap = $('licenseInfo');
+        const licExp = $('licenseExpiry');
+        if (m.licenseExpiryDate) {
+          licWrap.classList.remove('hidden');
+          
+          let dateText = m.licenseExpiryDate;
+          try {
+            const d = new Date(m.licenseExpiryDate);
+            if (!isNaN(d.getTime())) {
+              dateText = d.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              });
+            }
+          } catch {}
+          
+          let statusText = '';
+          let colorClass = 'text-slate-600 dark:text-slate-350';
+          
+          if (m.licenseState === 'expired_hard' || m.licenseState === 'expired_grace') {
+            statusText = ' (Expired)';
+            colorClass = 'text-rose-600 dark:text-rose-400 font-semibold';
+          } else if (m.licenseState === 'expiring_soon') {
+            statusText = ' (Expiring soon)';
+            colorClass = 'text-amber-600 dark:text-amber-450 font-semibold';
+          }
+          
+          licExp.innerHTML = `<span class="${colorClass}">${dateText}${statusText}</span>`;
+        } else {
+          licWrap.classList.add('hidden');
+        }
       }, () => {}));
 
       // live/today

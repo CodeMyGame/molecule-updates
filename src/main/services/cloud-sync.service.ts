@@ -68,6 +68,7 @@ import * as reportsService from './reports.service';
 import * as inventoryRepo from '../db/repositories/inventory.repo';
 import * as settingsRepo from '../db/repositories/settings.repo';
 import { logger } from '../utils/logger';
+import * as licenseService from '../license/license.service';
 
 const CRED_FILE = 'cloud-credentials.bin';
 const AUTO_SYNC_MS = 15 * 60_000; // push at most every 15 minutes on the timer
@@ -241,12 +242,13 @@ export function buildSnapshot(date = localDateStr()): Record<string, unknown> {
   };
 }
 
-function buildMeta(): Record<string, unknown> {
+async function buildMeta(): Promise<Record<string, unknown>> {
   const db = getDb();
   const session = db.prepare(
     'SELECT opened_by, opened_at FROM day_sessions WHERE closed_at IS NULL ORDER BY id DESC LIMIT 1',
   ).get() as { opened_by: number; opened_at: string } | undefined;
   const restaurant = settingsRepo.getRestaurant();
+  const licenseStatus = await licenseService.getLicenseStatus();
 
   // Live "what's open right now" — active + held orders, summary only (no items).
   const activeRows = db.prepare(`
@@ -278,6 +280,8 @@ function buildMeta(): Record<string, unknown> {
     activeOrders,
     activeOrderCount: activeOrders.length,
     activeOrderValue: activeOrders.reduce((s, o) => s + (Number(o.total) || 0), 0),
+    licenseExpiryDate: licenseStatus.expiryDate ?? null,
+    licenseState: licenseStatus.state ?? null,
     updatedAt: serverTimestamp(),
   };
 }
@@ -350,10 +354,11 @@ export async function pushNow(): Promise<void> {
     const snapshot = buildSnapshot(today);
     const payload = { ...snapshot, updatedAt: serverTimestamp() };
 
+    const meta = await buildMeta();
     const base = `restaurants/${uid}`;
     await Promise.all([
       setDoc(doc(firestore, `${base}/live/today`), payload),
-      setDoc(doc(firestore, `${base}/meta/status`), buildMeta(), { merge: true }),
+      setDoc(doc(firestore, `${base}/meta/status`), meta, { merge: true }),
     ]);
 
     const now = new Date().toISOString();
