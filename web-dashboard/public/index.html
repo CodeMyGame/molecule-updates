@@ -146,7 +146,23 @@
               <button data-period="week" class="px-2.5 sm:px-3 py-1 rounded-md transition">Week</button>
               <button data-period="month" class="px-2.5 sm:px-3 py-1 rounded-md transition">Month</button>
               <button data-period="year" class="px-2.5 sm:px-3 py-1 rounded-md transition">Year</button>
+              <button data-period="custom" class="px-2.5 sm:px-3 py-1 rounded-md transition">Custom</button>
             </div>
+          </div>
+          <!-- Custom Date Range Selector -->
+          <div id="customDateRange" class="hidden flex flex-wrap items-center gap-3 mb-4 p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-800/80">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">From</span>
+              <input id="customStart" type="date" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-805 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">To</span>
+              <input id="customEnd" type="date" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-805 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none" />
+            </div>
+            <button id="applyCustomDates" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm">
+              Apply
+            </button>
+            <span id="customRangeError" class="text-xs text-rose-600 hidden font-semibold"></span>
           </div>
           <p id="periodRevenue" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">—</p>
           <p id="periodSub" class="text-xs text-slate-400 dark:text-slate-500 mt-1"></p>
@@ -277,7 +293,7 @@
       browserLocalPersistence, setPersistence,
     } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
     import {
-      getFirestore, doc, onSnapshot, collection, query, orderBy, limit,
+      getFirestore, doc, onSnapshot, collection, query, orderBy, limit, getDocs, where,
     } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
     // Same PUBLIC config as the POS — security is enforced by Firestore rules.
@@ -294,6 +310,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    let currentUid = null;
 
     // ── Formatting helpers ──
     const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ', PKR: '₨', LKR: 'Rs', NPR: 'रू', BDT: '৳' };
@@ -374,7 +391,8 @@
       clearSubs();
       const loader = $('initialLoader');
       if (loader) loader.classList.add('hidden');
-      if (!user) { showLogin(); return; }
+      if (!user) { currentUid = null; showLogin(); return; }
+      currentUid = user.uid;
       showDash();
       subscribe(user.uid);
     });
@@ -557,6 +575,7 @@
         b.className = 'px-2.5 sm:px-3 py-1 rounded-md transition ' +
           (active ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-semibold' : 'text-slate-500 dark:text-slate-455');
       });
+      if (selectedPeriod === 'custom') return;
       if (!d) return;
 
       // Prefer the selected period's full metric block. Fall back to the
@@ -607,10 +626,274 @@
         </div>`).join('') : emptyRow('No sales ' + suffix);
     }
 
+    async function fetchAndAggregateCustomRange(uid, startDateStr, endDateStr) {
+      const errEl = $('customRangeError');
+      errEl.classList.add('hidden');
+      
+      const applyBtn = $('applyCustomDates');
+      applyBtn.disabled = true;
+      applyBtn.textContent = 'Loading…';
+      
+      try {
+        const base = `restaurants/${uid}`;
+        const dailyRef = collection(db, `${base}/daily`);
+        
+        const q = query(
+          dailyRef,
+          where('__name__', '>=', startDateStr),
+          where('__name__', '<=', endDateStr)
+        );
+        
+        const querySnapshot = await getDocs(q);
+        
+        let revenue = 0;
+        let orders = 0;
+        let covers = 0;
+        let taxTotal = 0;
+        let discountTotal = 0;
+        let discountedOrders = 0;
+        let cancelledCount = 0;
+        let cancelledValue = 0;
+        
+        const paymentsMap = new Map();
+        const ordersByTypeMap = new Map();
+        const topItemsMap = new Map();
+        
+        const todayStr = currentData ? currentData.date : null;
+        let includesToday = false;
+        if (todayStr && todayStr >= startDateStr && todayStr <= endDateStr) {
+          includesToday = true;
+        }
+
+        querySnapshot.forEach((docSnap) => {
+          if (docSnap.id === todayStr && includesToday) return;
+
+          const data = docSnap.data();
+          
+          revenue += Number(data.revenue) || 0;
+          orders += Number(data.orders) || 0;
+          covers += Number(data.covers) || 0;
+          taxTotal += Number(data.taxTotal) || 0;
+          discountTotal += Number(data.discountTotal) || 0;
+          discountedOrders += Number(data.discountedOrders) || 0;
+          
+          if (data.cancelledOrders) {
+            cancelledCount += Number(data.cancelledOrders.count) || 0;
+            cancelledValue += Number(data.cancelledOrders.value) || 0;
+          }
+          
+          if (Array.isArray(data.payments)) {
+            data.payments.forEach((p) => {
+              const prev = paymentsMap.get(p.mode) || { total: 0, count: 0 };
+              paymentsMap.set(p.mode, {
+                total: prev.total + (Number(p.total) || 0),
+                count: prev.count + (Number(p.count) || 0)
+              });
+            });
+          }
+          
+          if (Array.isArray(data.ordersByType)) {
+            data.ordersByType.forEach((o) => {
+              const prev = ordersByTypeMap.get(o.type) || { revenue: 0, count: 0 };
+              ordersByTypeMap.set(o.type, {
+                revenue: prev.revenue + (Number(o.revenue) || 0),
+                count: prev.count + (Number(o.count) || 0)
+              });
+            });
+          }
+          
+          if (Array.isArray(data.topItems)) {
+            data.topItems.forEach((it) => {
+              const prev = topItemsMap.get(it.name) || { quantity: 0, revenue: 0 };
+              topItemsMap.set(it.name, {
+                quantity: prev.quantity + (Number(it.quantity) || 0),
+                revenue: prev.revenue + (Number(it.revenue) || 0)
+              });
+            });
+          }
+        });
+
+        if (includesToday && currentData) {
+          revenue += Number(currentData.revenue) || 0;
+          orders += Number(currentData.orders) || 0;
+          covers += Number(currentData.covers) || 0;
+          taxTotal += Number(currentData.taxTotal) || 0;
+          discountTotal += Number(currentData.discountTotal) || 0;
+          discountedOrders += Number(currentData.discountedOrders) || 0;
+          
+          if (currentData.cancelledOrders) {
+            cancelledCount += Number(currentData.cancelledOrders.count) || 0;
+            cancelledValue += Number(currentData.cancelledOrders.value) || 0;
+          }
+          
+          if (Array.isArray(currentData.payments)) {
+            currentData.payments.forEach((p) => {
+              const prev = paymentsMap.get(p.mode) || { total: 0, count: 0 };
+              paymentsMap.set(p.mode, {
+                total: prev.total + (Number(p.total) || 0),
+                count: prev.count + (Number(p.count) || 0)
+              });
+            });
+          }
+          
+          if (Array.isArray(currentData.ordersByType)) {
+            currentData.ordersByType.forEach((o) => {
+              const prev = ordersByTypeMap.get(o.type) || { revenue: 0, count: 0 };
+              ordersByTypeMap.set(o.type, {
+                revenue: prev.revenue + (Number(o.revenue) || 0),
+                count: prev.count + (Number(o.count) || 0)
+              });
+            });
+          }
+          
+          if (Array.isArray(currentData.topItems)) {
+            currentData.topItems.forEach((it) => {
+              const prev = topItemsMap.get(it.name) || { quantity: 0, revenue: 0 };
+              topItemsMap.set(it.name, {
+                quantity: prev.quantity + (Number(it.quantity) || 0),
+                revenue: prev.revenue + (Number(it.revenue) || 0)
+              });
+            });
+          }
+        }
+
+        const payments = Array.from(paymentsMap.entries()).map(([mode, val]) => ({
+          mode,
+          total: val.total,
+          count: val.count
+        }));
+        
+        const ordersByType = Array.from(ordersByTypeMap.entries()).map(([type, val]) => ({
+          type,
+          revenue: val.revenue,
+          count: val.count
+        }));
+        
+        const topItems = Array.from(topItemsMap.entries())
+          .map(([name, val]) => ({
+            name,
+            quantity: val.quantity,
+            revenue: val.revenue
+          }))
+          .sort((a, b) => b.revenue - a.revenue)
+          .slice(0, 5);
+
+        const customMetrics = {
+          revenue,
+          orders,
+          covers,
+          taxTotal,
+          discountTotal,
+          discountedOrders,
+          cancelledOrders: { count: cancelledCount, value: cancelledValue },
+          averageOrderValue: orders > 0 ? Math.round(revenue / orders) : 0,
+          payments,
+          ordersByType,
+          topItems
+        };
+        
+        renderCustomPeriod(customMetrics, startDateStr, endDateStr);
+        
+      } catch (ex) {
+        console.error('Failed to load range:', ex);
+        errEl.textContent = 'Failed to load range.';
+        errEl.classList.remove('hidden');
+      } finally {
+        applyBtn.disabled = false;
+        applyBtn.textContent = 'Apply';
+      }
+    }
+
+    function renderCustomPeriod(p, start, end) {
+      let startLabel = start;
+      let endLabel = end;
+      try {
+        const d1 = new Date(start);
+        const d2 = new Date(end);
+        if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
+          const opt = { month: 'short', day: 'numeric', year: 'numeric' };
+          startLabel = d1.toLocaleDateString(undefined, opt);
+          endLabel = d2.toLocaleDateString(undefined, opt);
+        }
+      } catch {}
+
+      $('periodRevenue').textContent = money(p.revenue);
+      $('periodSub').textContent = num(p.orders) + ' order(s) from ' + startLabel + ' to ' + endLabel;
+
+      $('kpiOrdersLabel').textContent = 'Orders (custom)';
+      $('kpiOrders').textContent = num(p.orders);
+      $('kpiCovers').textContent = (Number(p.covers) || 0) + ' covers';
+      $('kpiAov').textContent = money(p.averageOrderValue);
+      $('kpiTaxLabel').textContent = 'Tax (custom)';
+      $('kpiTax').textContent = money(p.taxTotal);
+
+      $('lpDiscount').textContent = money(p.discountTotal);
+      $('lpDiscountCount').textContent = num(p.discountedOrders) + ' discounted order(s)';
+      const can = p.cancelledOrders || {};
+      $('lpCancelled').textContent = num(can.count);
+      $('lpCancelledVal').textContent = money(can.value) + ' value';
+
+      renderBars('payments', (p.payments || []).map((x) => ({
+        label: prettyLabel(x.mode), value: Number(x.total) || 0, sub: num(x.count) + ' txn',
+      })), 'indigo');
+
+      renderBars('ordersByType', (p.ordersByType || []).map((o) => ({
+        label: prettyLabel(o.type), value: Number(o.revenue) || 0, sub: num(o.count) + ' order(s)',
+      })), 'emerald');
+
+      $('topItemsLabel').textContent = 'Top items (custom)';
+      const ti = $('topItems');
+      const items = p.topItems || [];
+      ti.innerHTML = items.length ? items.map((it, i) => `
+        <div class="flex items-center gap-3">
+          <span class="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 text-[11px] font-bold flex items-center justify-center flex-shrink-0">${i + 1}</span>
+          <span class="flex-1 text-sm text-slate-700 dark:text-slate-300 truncate">${escapeHtml(it.name)}</span>
+          <span class="text-xs text-slate-400 dark:text-slate-500">×${num(it.quantity)}</span>
+          <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 w-20 text-right">${money(it.revenue)}</span>
+        </div>`).join('') : emptyRow('No sales in range');
+    }
+
     document.querySelectorAll('#periodTabs button').forEach((b) => {
-      b.addEventListener('click', () => { selectedPeriod = b.dataset.period; renderPeriod(); });
+      b.addEventListener('click', () => {
+        selectedPeriod = b.dataset.period;
+        if (selectedPeriod === 'custom') {
+          $('customDateRange').classList.remove('hidden');
+          if (!$('customStart').value || !$('customEnd').value) {
+            const today = new Date();
+            const lastWeek = new Date();
+            lastWeek.setDate(today.getDate() - 7);
+            $('customEnd').value = today.toISOString().split('T')[0];
+            $('customStart').value = lastWeek.toISOString().split('T')[0];
+          }
+          document.querySelectorAll('#periodTabs button').forEach((btn) => {
+            const active = btn.dataset.period === 'custom';
+            btn.className = 'px-2.5 sm:px-3 py-1 rounded-md transition ' +
+              (active ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-semibold' : 'text-slate-500 dark:text-slate-455');
+          });
+          if (currentUid) {
+            fetchAndAggregateCustomRange(currentUid, $('customStart').value, $('customEnd').value);
+          }
+        } else {
+          $('customDateRange').classList.add('hidden');
+          renderPeriod();
+        }
+      });
     });
     renderPeriod(); // style the default tab before data arrives
+
+    $('applyCustomDates').addEventListener('click', () => {
+      const start = $('customStart').value;
+      const end = $('customEnd').value;
+      if (currentUid && start && end) {
+        if (start > end) {
+          const errEl = $('customRangeError');
+          errEl.textContent = 'Start date cannot be after end date.';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        fetchAndAggregateCustomRange(currentUid, start, end);
+      }
+    });
 
     let lastActive = [], lastActiveValue = 0;
     function renderActiveOrders(list, totalValue) {
