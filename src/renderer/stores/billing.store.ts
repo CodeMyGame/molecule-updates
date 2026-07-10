@@ -64,6 +64,7 @@ interface BillingState {
   addTempItemToCart: (name: string, priceInPaise: number, taxRate: number) => void;
   removeFromCart: (index: number) => void;
   updateQuantity: (index: number, quantity: number) => void;
+  incrementQuantity: (index: number, delta: number) => void;
   updateItemNotes: (index: number, notes: string) => void;
   setOrderType: (type: OrderType) => void;
   setTable: (tableId: number | null) => void;
@@ -174,6 +175,22 @@ export const useBillingStore = create<BillingState>((set, get) => ({
           : item
       ),
     }));
+  },
+
+  incrementQuantity: (index: number, delta: number) => {
+    set((state) => {
+      const item = state.cart[index];
+      if (!item) return state;
+      const newQty = item.quantity + delta;
+      if (newQty < 1) return state;
+      return {
+        cart: state.cart.map((c, i) =>
+          i === index
+            ? { ...c, quantity: newQty, total: c.unitPrice * newQty }
+            : c
+        ),
+      };
+    });
   },
 
   updateItemNotes: (index: number, notes: string) => {

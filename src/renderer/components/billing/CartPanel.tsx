@@ -48,6 +48,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const syncedItemCount = useBillingStore((s) => s.syncedItemCount);
   const syncedQuantities = useBillingStore((s) => s.syncedQuantities);
   const updateQuantity = useBillingStore((s) => s.updateQuantity);
+  const incrementQuantity = useBillingStore((s) => s.incrementQuantity);
   const removeFromCart = useBillingStore((s) => s.removeFromCart);
   const updateItemNotes = useBillingStore((s) => s.updateItemNotes);
   const getSubtotal = useBillingStore((s) => s.getSubtotal);
@@ -278,7 +279,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                             }
                             return;
                           }
-                          updateQuantity(targetIdx, newQty);
+                          incrementQuantity(targetIdx, -1);
                         }}
                         className="p-0.5 text-gray-500 hover:text-red-600 hover:bg-red-50
                           rounded-l transition-colors"
@@ -292,7 +293,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                         onClick={() => {
                           // Increment: add to the most recent underlying row.
                           const targetIdx = lastIndex;
-                          updateQuantity(targetIdx, cart[targetIdx].quantity + 1);
+                          incrementQuantity(targetIdx, 1);
                         }}
                         className="p-0.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50
                           rounded-r transition-colors"
