@@ -366,10 +366,47 @@ export async function pushNow(): Promise<void> {
     lastSyncAt = now;
     lastError = null;
     settingsRepo.set('last_cloud_sync', now, 'general');
+
+    if (settingsRepo.get('history_synced_to_cloud') !== 'true') {
+      settingsRepo.set('history_synced_to_cloud', 'true', 'general');
+      syncHistory().catch((e) => logger.error('Cloud: history sync failed', e));
+    }
   } catch (err: any) {
     lastError = err?.message ?? 'Sync failed';
     logger.error('Cloud: push failed', err);
     throw err;
+  }
+}
+
+async function syncHistory(): Promise<void> {
+  if (!currentUser || !firestore) return;
+  const uid = currentUser.uid;
+  try {
+    const db = getDb();
+    const rows = db.prepare(`
+      SELECT DISTINCT date(created_at) AS order_date FROM orders ORDER BY order_date ASC
+    `).all() as { order_date: string }[];
+
+    if (!rows.length) return;
+
+    logger.info(`Cloud: Starting historical sync of daily snapshots for ${rows.length} days...`);
+
+    for (const row of rows) {
+      const dateStr = row.order_date;
+      if (!dateStr) continue;
+
+      try {
+        const snapshot = buildSnapshot(dateStr);
+        const payload = { ...snapshot, updatedAt: new Date().toISOString() };
+        await setDoc(doc(firestore, `restaurants/${uid}/daily/${dateStr}`), payload, { merge: true });
+      } catch (err: any) {
+        logger.error(`Cloud: Failed to sync history for date ${dateStr}`, err);
+      }
+    }
+
+    logger.info('Cloud: Historical daily snapshot sync completed successfully.');
+  } catch (err: any) {
+    logger.error('Cloud: Historical sync failed', err);
   }
 }
 
