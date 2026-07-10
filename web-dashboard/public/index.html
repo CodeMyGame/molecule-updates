@@ -294,6 +294,7 @@
     } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
     import {
       getFirestore, doc, onSnapshot, collection, query, orderBy, limit, getDocs, where,
+      documentId,
     } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
     // Same PUBLIC config as the POS — security is enforced by Firestore rules.
@@ -458,7 +459,7 @@
       }, (ex) => { $('syncText').textContent = 'Connection error'; console.error(ex); }));
 
       // daily (last 7) for trend
-      const q = query(collection(db, `${base}/daily`), orderBy('__name__', 'desc'), limit(7));
+      const q = query(collection(db, `${base}/daily`), orderBy(documentId(), 'desc'), limit(7));
       unsubs.push(onSnapshot(q, (qs) => {
         const rows = [];
         qs.forEach((d) => rows.push({ date: d.id, ...d.data() }));
@@ -541,7 +542,9 @@
       el.innerHTML = rows.map((r) => {
         const v = Number(r.revenue) || 0;
         const h = Math.max(6, (v / max) * 100);
-        const day = new Date(r.date + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short' });
+        const parts = r.date.split('-');
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        const day = d.toLocaleDateString(undefined, { weekday: 'short' });
         return `
           <div class="flex-1 flex flex-col items-center justify-end gap-1.5 h-full group">
             <span class="text-[10px] font-medium text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition">${money(v)}</span>
@@ -640,8 +643,8 @@
         
         const q = query(
           dailyRef,
-          where('__name__', '>=', startDateStr),
-          where('__name__', '<=', endDateStr)
+          where(documentId(), '>=', startDateStr),
+          where(documentId(), '<=', endDateStr)
         );
         
         const querySnapshot = await getDocs(q);
