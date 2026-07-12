@@ -178,6 +178,14 @@ function periodMetrics(startDate: string, endDate: string): Record<string, unkno
        WHERE created_at >= ? AND created_at <= ? AND status != 'cancelled' AND discount_amount > 0`,
   ).get(`${startDate} 00:00:00`, `${endDate} 23:59:59`) as { n: number };
 
+  // Hourly sales breakdown for the period
+  const hourlyRows = db.prepare(
+    `SELECT CAST(strftime('%H', created_at) AS INTEGER) AS hour, COUNT(*) AS count, COALESCE(SUM(grand_total), 0) AS revenue
+     FROM orders
+     WHERE created_at >= ? AND created_at <= ? AND status != 'cancelled'
+     GROUP BY hour`
+  ).all(`${startDate} 00:00:00`, `${endDate} 23:59:59`) as { hour: number; count: number; revenue: number }[];
+
   return {
     revenue: summary.totalRevenue,
     orders: summary.totalOrders,
@@ -190,6 +198,7 @@ function periodMetrics(startDate: string, endDate: string): Record<string, unkno
     ordersByType: summary.ordersByType,   // [{ type, count, revenue }]
     topItems: summary.topItems,           // [{ name, quantity, revenue }]
     cancelledOrders: { count: cancelled.n, value: cancelled.value },
+    hourlySales: hourlyRows,              // [{ hour, count, revenue }]
   };
 }
 

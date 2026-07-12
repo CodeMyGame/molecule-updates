@@ -251,17 +251,31 @@
           </div>
         </section>
 
-        <!-- 7-day trend -->
+        <!-- Business Analytics Card -->
         <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-          <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Last 7 days</h2>
-          <div id="trend" class="h-48 w-full"></div>
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-5 border-b border-slate-100 dark:border-slate-800/60 pb-3">
+            <h2 id="analyticsTitle" class="text-sm font-bold text-slate-900 dark:text-white">Business Analytics</h2>
+            
+            <!-- Chart Tabs Selector -->
+            <div class="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl text-[11px] font-bold">
+              <button data-chart="weekly" class="chart-tab px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-900 shadow-sm text-slate-800 dark:text-slate-100">Weekly WoW</button>
+              <button data-chart="moving" class="chart-tab px-3 py-1.5 rounded-lg transition text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">Moving Average</button>
+              <button data-chart="trajectory" class="chart-tab px-3 py-1.5 rounded-lg transition text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">MTD Trajectory</button>
+              <button data-chart="weekday" class="chart-tab px-3 py-1.5 rounded-lg transition text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">Weekday Averages</button>
+            </div>
+          </div>
+          <div id="trend" class="h-56 w-full"></div>
         </section>
 
-        <!-- Top items + Low stock -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Top items + Busy hours + Low stock -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
             <h2 id="topItemsLabel" class="text-sm font-bold text-slate-900 dark:text-white mb-4">Top items today</h2>
             <div id="topItems" class="space-y-2.5"></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5 flex flex-col">
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Busy hours peak times</h2>
+            <div id="busyHours" class="h-44 w-full mt-auto"></div>
           </div>
           <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
             <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
@@ -312,6 +326,8 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     let currentUid = null;
+    let historicalRows = [];
+    let currentChartView = 'weekly';
 
     // ── Formatting helpers ──
     const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', EUR: '€', GBP: '£', AED: 'د.إ', PKR: '₨', LKR: 'Rs', NPR: 'रू', BDT: '৳' };
@@ -458,12 +474,13 @@
         $('syncText').textContent = d ? ('Updated ' + timeAgo(d)) : 'Live';
       }, (ex) => { $('syncText').textContent = 'Connection error'; console.error(ex); }));
 
-      // daily (last 7) for trend
-      const q = query(collection(db, `${base}/daily`), orderBy('date', 'desc'), limit(7));
+      // daily (last 60) for trend/benchmarks
+      const q = query(collection(db, `${base}/daily`), orderBy('date', 'desc'), limit(60));
       unsubs.push(onSnapshot(q, (qs) => {
         const rows = [];
         qs.forEach((d) => rows.push({ date: d.id, ...d.data() }));
-        renderTrend(rows.reverse());
+        historicalRows = rows;
+        renderAnalytics();
       }, (err) => {
         console.error("Trend Query Error:", err);
       }));
@@ -537,27 +554,53 @@
         </div>`).join('');
     }
 
-    function renderTrend(rows) {
+    function renderAnalytics() {
+      renderSelectedChart();
+      renderBusyHours();
+    }
+
+    function renderSelectedChart() {
       const el = $('trend');
-      if (!rows.length) {
-        el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500">No history yet</div>`;
+      if (!historicalRows || historicalRows.length === 0) {
+        el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 font-sans">No history yet</div>`;
+        return;
+      }
+      
+      if (currentChartView === 'weekly') {
+        renderWeeklyWoW();
+      } else if (currentChartView === 'moving') {
+        renderMovingAverage();
+      } else if (currentChartView === 'trajectory') {
+        renderMTDTrajectory();
+      } else if (currentChartView === 'weekday') {
+        renderWeekdayAverages();
+      }
+    }
+
+    function renderWeeklyWoW() {
+      const el = $('trend');
+      const current = historicalRows.slice(0, 7).reverse();
+      const previous = historicalRows.slice(7, 14).reverse();
+      
+      if (!current.length) {
+        el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 font-sans">No history yet</div>`;
         return;
       }
 
       const width = 600;
-      const height = 200;
-      const paddingLeft = 65;
-      const paddingRight = 15;
-      const paddingTop = 25;
+      const height = 220;
+      const paddingLeft = 60;
+      const paddingRight = 20;
+      const paddingTop = 30;
       const paddingBottom = 30;
 
       const plotWidth = width - paddingLeft - paddingRight;
       const plotHeight = height - paddingTop - paddingBottom;
 
-      const revenues = rows.map((r) => Number(r.revenue) || 0);
-      const max = Math.max(...revenues, 1);
+      const currentVals = current.map(r => Number(r.revenue) || 0);
+      const prevVals = previous.map(r => Number(r.revenue) || 0);
+      const max = Math.max(...currentVals, ...prevVals, 1);
 
-      // Format short currency label (e.g. ₹5.2K)
       function shortMoney(valPaise) {
         const val = valPaise / 100;
         if (val >= 100000) return currencySymbol + (val / 100000).toFixed(1) + 'L';
@@ -565,10 +608,9 @@
         return currencySymbol + val.toFixed(0);
       }
 
-      // Generate points
-      const points = rows.map((r, i) => {
+      const currentPoints = current.map((r, i) => {
         const v = Number(r.revenue) || 0;
-        const x = paddingLeft + (i / (rows.length - 1 || 1)) * plotWidth;
+        const x = paddingLeft + (i / 6) * plotWidth;
         const y = paddingTop + plotHeight - (v / max) * plotHeight;
         const parts = r.date.split('-');
         const d = new Date(parts[0], parts[1] - 1, parts[2]);
@@ -576,13 +618,21 @@
         return { x, y, value: v, label: day };
       });
 
-      // Path for the line
-      const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      const prevPoints = previous.map((r, i) => {
+        const v = Number(r.revenue) || 0;
+        const x = paddingLeft + (i / 6) * plotWidth;
+        const y = paddingTop + plotHeight - (v / max) * plotHeight;
+        return { x, y, value: v };
+      });
 
-      // Path for the filled gradient area
-      const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
+      const linePathCurrent = currentPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      const linePathPrev = prevPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      
+      let areaPath = '';
+      if (currentPoints.length > 0) {
+        areaPath = `${linePathCurrent} L ${currentPoints[currentPoints.length - 1].x} ${height - paddingBottom} L ${currentPoints[0].x} ${height - paddingBottom} Z`;
+      }
 
-      // Y-axis gridlines & labels
       const yTicks = 4;
       let yElements = '';
       for (let i = 0; i < yTicks; i++) {
@@ -590,25 +640,25 @@
         const y = paddingTop + plotHeight - ratio * plotHeight;
         const val = ratio * max;
         yElements += `
-          <!-- Grid line -->
-          <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/65" stroke-dasharray="3,3" stroke-width="1" />
-          <!-- Y Label -->
-          <text x="${paddingLeft - 10}" y="${y + 3.5}" text-anchor="end" font-size="11" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${shortMoney(val)}</text>
+          <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/60" stroke-dasharray="3,3" stroke-width="1" />
+          <text x="${paddingLeft - 10}" y="${y + 3.5}" text-anchor="end" font-size="10" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${shortMoney(val)}</text>
         `;
       }
 
-      // X-axis elements
       let xElements = '';
-      points.forEach((p) => {
+      currentPoints.forEach((p) => {
         xElements += `
-          <!-- X Label -->
-          <text x="${p.x}" y="${height - 7}" text-anchor="middle" font-size="12" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${p.label}</text>
-          <!-- Point dot shadow/halo -->
+          <text x="${p.x}" y="${height - 8}" text-anchor="middle" font-size="11" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${p.label}</text>
           <circle cx="${p.x}" cy="${p.y}" r="6" fill="#6366f1" opacity="0.1" />
-          <!-- Point dot -->
-          <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#ffffff" stroke="#6366f1" stroke-width="2.5" />
-          <!-- Point value popup -->
-          <text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="11" font-weight="700" class="fill-slate-700 dark:fill-slate-350 font-sans">${shortMoney(p.value)}</text>
+          <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#ffffff" stroke="#6366f1" stroke-width="2" />
+          <text x="${p.x}" y="${p.y - 10}" text-anchor="middle" font-size="10" font-weight="700" class="fill-slate-700 dark:fill-slate-300 font-sans">${shortMoney(p.value)}</text>
+        `;
+      });
+
+      let prevDotElements = '';
+      prevPoints.forEach((p) => {
+        prevDotElements += `
+          <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" />
         `;
       });
 
@@ -616,22 +666,448 @@
         <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible select-none">
           <defs>
             <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.22"/>
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.18"/>
               <stop offset="100%" stop-color="#6366f1" stop-opacity="0.01"/>
             </linearGradient>
           </defs>
           
-          <!-- Grid & Y-Axis labels -->
           ${yElements}
-          
-          <!-- Gradient fill area under the line -->
-          <path d="${areaPath}" fill="url(#chartGrad)" />
-          
-          <!-- Trend line -->
-          <path d="${linePath}" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-          
-          <!-- X labels & interactive dots -->
+          ${areaPath ? `<path d="${areaPath}" fill="url(#chartGrad)" />` : ''}
+          ${linePathPrev ? `<path d="${linePathPrev}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4,4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7" />` : ''}
+          <path d="${linePathCurrent}" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
           ${xElements}
+          ${prevDotElements}
+          
+          <g transform="translate(65, 15)" font-size="10" font-weight="600" class="font-sans">
+            <line x1="0" y1="0" x2="15" y2="0" stroke="#6366f1" stroke-width="2.5" />
+            <circle cx="7.5" cy="0" r="2" fill="#6366f1" />
+            <text x="22" y="3" class="fill-slate-600 dark:fill-slate-350">This week</text>
+            
+            <line x1="85" y1="0" x2="100" y2="0" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3,3" opacity="0.8" />
+            <circle cx="92.5" cy="0" r="2" fill="#94a3b8" />
+            <text x="107" y="3" class="fill-slate-400 dark:fill-slate-500">Last week</text>
+          </g>
+        </svg>
+      `;
+    }
+
+    function renderMovingAverage() {
+      const el = $('trend');
+      const displayCount = Math.min(historicalRows.length, 15);
+      
+      if (displayCount === 0) {
+        el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 font-sans">No history yet</div>`;
+        return;
+      }
+
+      const width = 600;
+      const height = 220;
+      const paddingLeft = 60;
+      const paddingRight = 20;
+      const paddingTop = 30;
+      const paddingBottom = 30;
+
+      const plotWidth = width - paddingLeft - paddingRight;
+      const plotHeight = height - paddingTop - paddingBottom;
+
+      const plotData = [];
+      for (let i = 0; i < displayCount; i++) {
+        const rIdx = displayCount - 1 - i;
+        const r = historicalRows[rIdx];
+        const val = Number(r.revenue) || 0;
+        
+        let sum = 0;
+        let count = 0;
+        for (let j = 0; j < 7; j++) {
+          const past = historicalRows[rIdx + j];
+          if (past) {
+            sum += Number(past.revenue) || 0;
+            count++;
+          }
+        }
+        const movingAvg = count > 0 ? sum / count : val;
+        
+        const parts = r.date.split('-');
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        const dayLabel = d.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' });
+        plotData.push({ label: dayLabel, value: val, movingAvg });
+      }
+
+      const max = Math.max(...plotData.map(d => Math.max(d.value, d.movingAvg)), 1);
+
+      function shortMoney(valPaise) {
+        const val = valPaise / 100;
+        if (val >= 100000) return currencySymbol + (val / 100000).toFixed(1) + 'L';
+        if (val >= 1000) return currencySymbol + (val / 1000).toFixed(1) + 'K';
+        return currencySymbol + val.toFixed(0);
+      }
+
+      const yTicks = 4;
+      let yElements = '';
+      for (let i = 0; i < yTicks; i++) {
+        const ratio = i / (yTicks - 1);
+        const y = paddingTop + plotHeight - ratio * plotHeight;
+        const val = ratio * max;
+        yElements += `
+          <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/60" stroke-dasharray="3,3" stroke-width="1" />
+          <text x="${paddingLeft - 10}" y="${y + 3.5}" text-anchor="end" font-size="10" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${shortMoney(val)}</text>
+        `;
+      }
+
+      const barW = Math.max(6, Math.min(20, plotWidth / (displayCount * 1.8)));
+      let barElements = '';
+      let linePoints = [];
+      let xLabels = '';
+
+      plotData.forEach((p, i) => {
+        const x = paddingLeft + (i / (displayCount - 1 || 1)) * plotWidth;
+        const barH = (p.value / max) * plotHeight;
+        const barX = x - barW / 2;
+        const barY = paddingTop + plotHeight - barH;
+        
+        const lineY = paddingTop + plotHeight - (p.movingAvg / max) * plotHeight;
+        linePoints.push({ x, y: lineY });
+
+        barElements += `
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="2" class="fill-indigo-100 dark:fill-indigo-950/45 hover:fill-indigo-200 dark:hover:fill-indigo-900/60 transition-colors" />
+        `;
+
+        if (displayCount <= 8 || i % 2 === 0 || i === displayCount - 1) {
+          xLabels += `
+            <text x="${x}" y="${height - 8}" text-anchor="middle" font-size="10" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${p.label}</text>
+          `;
+        }
+      });
+
+      const linePath = linePoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+      el.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible select-none">
+          ${yElements}
+          ${barElements}
+          <path d="${linePath}" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          ${linePoints.map(p => `
+            <circle cx="${p.x}" cy="${p.y}" r="2" fill="#ffffff" stroke="#6366f1" stroke-width="1.5" />
+          `).join('')}
+          ${xLabels}
+          
+          <g transform="translate(65, 15)" font-size="10" font-weight="600" class="font-sans">
+            <rect x="0" y="-5" width="12" height="10" rx="1.5" class="fill-indigo-200 dark:fill-indigo-900/50" />
+            <text x="18" y="3" class="fill-slate-600 dark:fill-slate-350">Daily sales</text>
+            
+            <line x1="90" y1="0" x2="105" y2="0" stroke="#6366f1" stroke-width="2.5" />
+            <circle cx="97.5" cy="0" r="1.5" fill="#6366f1" />
+            <text x="112" y="3" class="fill-slate-600 dark:fill-slate-350">7-Day Moving Avg</text>
+          </g>
+        </svg>
+      `;
+    }
+
+    function renderMTDTrajectory() {
+      const el = $('trend');
+      if (!historicalRows.length) {
+        el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 font-sans">No history yet</div>`;
+        return;
+      }
+
+      const currentMonthStr = historicalRows[0].date.slice(0, 7);
+      let previousMonthStr = '';
+      for (const r of historicalRows) {
+        const m = r.date.slice(0, 7);
+        if (m !== currentMonthStr) {
+          previousMonthStr = m;
+          break;
+        }
+      }
+
+      const currentDays = historicalRows.filter(r => r.date.slice(0, 7) === currentMonthStr).reverse();
+      const prevDays = previousMonthStr ? historicalRows.filter(r => r.date.slice(0, 7) === previousMonthStr).reverse() : [];
+
+      let currentAccum = 0;
+      const currentCurve = currentDays.map((r) => {
+        currentAccum += Number(r.revenue) || 0;
+        return { day: parseInt(r.date.slice(8, 10)), value: currentAccum };
+      });
+
+      let prevAccum = 0;
+      const prevCurve = prevDays.map((r) => {
+        prevAccum += Number(r.revenue) || 0;
+        return { day: parseInt(r.date.slice(8, 10)), value: prevAccum };
+      });
+
+      const maxDays = Math.max(31, ...currentCurve.map(c => c.day), ...prevCurve.map(c => c.day));
+      const maxVal = Math.max(currentAccum, prevAccum, 1);
+
+      const width = 600;
+      const height = 220;
+      const paddingLeft = 65;
+      const paddingRight = 20;
+      const paddingTop = 30;
+      const paddingBottom = 30;
+
+      const plotWidth = width - paddingLeft - paddingRight;
+      const plotHeight = height - paddingTop - paddingBottom;
+
+      function shortMoney(valPaise) {
+        const val = valPaise / 100;
+        if (val >= 100000) return currencySymbol + (val / 100000).toFixed(1) + 'L';
+        if (val >= 1000) return currencySymbol + (val / 1000).toFixed(1) + 'K';
+        return currencySymbol + val.toFixed(0);
+      }
+
+      const currentPoints = currentCurve.map(pt => ({
+        x: paddingLeft + ((pt.day - 1) / (maxDays - 1)) * plotWidth,
+        y: paddingTop + plotHeight - (pt.value / maxVal) * plotHeight,
+        value: pt.value,
+        day: pt.day
+      }));
+
+      const prevPoints = prevCurve.map(pt => ({
+        x: paddingLeft + ((pt.day - 1) / (maxDays - 1)) * plotWidth,
+        y: paddingTop + plotHeight - (pt.value / maxVal) * plotHeight,
+        value: pt.value,
+        day: pt.day
+      }));
+
+      const pathCurrent = currentPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+      const pathPrev = prevPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+
+      const yTicks = 4;
+      let yElements = '';
+      for (let i = 0; i < yTicks; i++) {
+        const ratio = i / (yTicks - 1);
+        const y = paddingTop + plotHeight - ratio * plotHeight;
+        const val = ratio * maxVal;
+        yElements += `
+          <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/60" stroke-dasharray="3,3" stroke-width="1" />
+          <text x="${paddingLeft - 10}" y="${y + 3.5}" text-anchor="end" font-size="10" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${shortMoney(val)}</text>
+        `;
+      }
+
+      let xElements = '';
+      [1, 10, 20, 30].forEach((day) => {
+        const x = paddingLeft + ((day - 1) / (maxDays - 1)) * plotWidth;
+        xElements += `
+          <line x1="${x}" y1="${paddingTop}" x2="${x}" y2="${paddingTop + plotHeight}" stroke="currentColor" class="text-slate-50/20 dark:text-slate-900/10" stroke-width="1" />
+          <text x="${x}" y="${height - 8}" text-anchor="middle" font-size="10" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">Day ${day}</text>
+        `;
+      });
+
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const cMonthNum = parseInt(currentMonthStr.slice(5, 7)) - 1;
+      const cMonthLabel = months[cMonthNum] || currentMonthStr;
+      
+      const pMonthNum = previousMonthStr ? parseInt(previousMonthStr.slice(5, 7)) - 1 : -1;
+      const pMonthLabel = pMonthNum >= 0 ? months[pMonthNum] : 'Last Month';
+
+      el.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible select-none">
+          ${yElements}
+          ${xElements}
+          ${pathPrev ? `<path d="${pathPrev}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3,3" opacity="0.75" />` : ''}
+          <path d="${pathCurrent}" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          ${currentPoints.length > 0 ? `
+            <circle cx="${currentPoints[currentPoints.length - 1].x}" cy="${currentPoints[currentPoints.length - 1].y}" r="4" fill="#6366f1" />
+            <text x="${currentPoints[currentPoints.length - 1].x}" y="${currentPoints[currentPoints.length - 1].y - 10}" text-anchor="end" font-size="10" font-weight="700" class="fill-slate-700 dark:fill-slate-300 font-sans">${shortMoney(currentAccum)}</text>
+          ` : ''}
+          ${prevPoints.length > 0 ? `
+            <circle cx="${prevPoints[prevPoints.length - 1].x}" cy="${prevPoints[prevPoints.length - 1].y}" r="3" fill="#94a3b8" />
+            <text x="${prevPoints[prevPoints.length - 1].x}" y="${prevPoints[prevPoints.length - 1].y + 14}" text-anchor="end" font-size="10" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${shortMoney(prevAccum)}</text>
+          ` : ''}
+          
+          <g transform="translate(65, 15)" font-size="10" font-weight="600" class="font-sans">
+            <line x1="0" y1="0" x2="15" y2="0" stroke="#6366f1" stroke-width="2.5" />
+            <text x="22" y="3" class="fill-slate-600 dark:fill-slate-350">MTD (${cMonthLabel})</text>
+            
+            <line x1="100" y1="0" x2="115" y2="0" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3,3" opacity="0.8" />
+            <text x="122" y="3" class="fill-slate-400 dark:fill-slate-500">${pMonthLabel}</text>
+          </g>
+        </svg>
+      `;
+    }
+
+    function renderWeekdayAverages() {
+      const el = $('trend');
+      if (!historicalRows.length) {
+        el.innerHTML = `<div class="w-full h-full flex items-center justify-center text-sm text-slate-400 dark:text-slate-500 font-sans">No history yet</div>`;
+        return;
+      }
+
+      const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      
+      const weekdaySum = Array(7).fill(0);
+      const weekdayCount = Array(7).fill(0);
+      historicalRows.forEach((r) => {
+        const parts = r.date.split('-');
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        const dayIdx = d.getDay();
+        weekdaySum[dayIdx] += Number(r.revenue) || 0;
+        weekdayCount[dayIdx]++;
+      });
+      const weekdayAvg = weekdaySum.map((sum, i) => weekdayCount[i] > 0 ? sum / weekdayCount[i] : 0);
+
+      const currentWeekVals = Array(7).fill(0);
+      historicalRows.slice(0, 7).forEach((r) => {
+        const parts = r.date.split('-');
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        const dayIdx = d.getDay();
+        currentWeekVals[dayIdx] = Number(r.revenue) || 0;
+      });
+
+      const max = Math.max(...weekdayAvg, ...currentWeekVals, 1);
+
+      const width = 600;
+      const height = 220;
+      const paddingLeft = 60;
+      const paddingRight = 20;
+      const paddingTop = 30;
+      const paddingBottom = 30;
+
+      const plotWidth = width - paddingLeft - paddingRight;
+      const plotHeight = height - paddingTop - paddingBottom;
+
+      function shortMoney(valPaise) {
+        const val = valPaise / 100;
+        if (val >= 100000) return currencySymbol + (val / 100000).toFixed(1) + 'L';
+        if (val >= 1000) return currencySymbol + (val / 1000).toFixed(1) + 'K';
+        return currencySymbol + val.toFixed(0);
+      }
+
+      const yTicks = 4;
+      let yElements = '';
+      for (let i = 0; i < yTicks; i++) {
+        const ratio = i / (yTicks - 1);
+        const y = paddingTop + plotHeight - ratio * plotHeight;
+        const val = ratio * max;
+        yElements += `
+          <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/60" stroke-dasharray="3,3" stroke-width="1" />
+          <text x="${paddingLeft - 10}" y="${y + 3.5}" text-anchor="end" font-size="10" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${shortMoney(val)}</text>
+        `;
+      }
+
+      let barElements = '';
+      let xLabels = '';
+      const groupWidth = plotWidth / 7;
+      const innerBarW = Math.min(14, groupWidth * 0.3);
+
+      daysOfWeek.forEach((day, i) => {
+        const centerX = paddingLeft + i * groupWidth + groupWidth / 2;
+        
+        const avgH = (weekdayAvg[i] / max) * plotHeight;
+        const avgX = centerX - innerBarW - 1.5;
+        const avgY = paddingTop + plotHeight - avgH;
+
+        const curH = (currentWeekVals[i] / max) * plotHeight;
+        const curX = centerX + 1.5;
+        const curY = paddingTop + plotHeight - curH;
+
+        barElements += `
+          <rect x="${avgX}" y="${avgY}" width="${innerBarW}" height="${avgH}" rx="1.5" class="fill-slate-200 dark:fill-slate-800 hover:fill-slate-300 dark:hover:fill-slate-700 transition-colors" />
+          <rect x="${curX}" y="${curY}" width="${innerBarW}" height="${curH}" rx="1.5" class="fill-indigo-500 dark:fill-indigo-650 hover:fill-indigo-400 transition-colors" />
+        `;
+
+        xLabels += `
+          <text x="${centerX}" y="${height - 8}" text-anchor="middle" font-size="11" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${day}</text>
+        `;
+      });
+
+      el.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible select-none">
+          ${yElements}
+          ${barElements}
+          ${xLabels}
+          
+          <g transform="translate(65, 15)" font-size="10" font-weight="600" class="font-sans">
+            <rect x="0" y="-5" width="12" height="10" rx="1.5" class="fill-slate-200 dark:fill-slate-800" />
+            <text x="18" y="3" class="fill-slate-500 dark:fill-slate-400">Historical Avg</text>
+            
+            <rect x="110" y="-5" width="12" height="10" rx="1.5" class="fill-indigo-500" />
+            <text x="128" y="3" class="fill-slate-600 dark:fill-slate-350">This week's actual</text>
+          </g>
+        </svg>
+      `;
+    }
+
+    function renderBusyHours() {
+      const el = $('busyHours');
+      if (!el) return;
+
+      let source = [];
+      if (selectedPeriod === 'custom') {
+        source = (window.customMetrics && window.customMetrics.hourlySales) || [];
+      } else if (currentData) {
+        if (selectedPeriod === 'today') {
+          source = currentData.hourlySales || [];
+        } else if (currentData.periods && currentData.periods[selectedPeriod]) {
+          source = currentData.periods[selectedPeriod].hourlySales || [];
+        }
+      }
+
+      const counts = Array(24).fill(0);
+      source.forEach((r) => {
+        const h = Number(r.hour);
+        if (h >= 0 && h < 24) counts[h] = Number(r.count) || 0;
+      });
+
+      const startH = 10;
+      const endH = 23;
+      const hCount = endH - startH + 1;
+      
+      const maxCount = Math.max(...counts.slice(startH, endH + 1), 1);
+
+      const width = 300;
+      const height = 140;
+      const paddingLeft = 15;
+      const paddingRight = 15;
+      const paddingTop = 15;
+      const paddingBottom = 20;
+
+      const plotWidth = width - paddingLeft - paddingRight;
+      const plotHeight = height - paddingTop - paddingBottom;
+
+      const barW = Math.max(4, plotWidth / (hCount * 1.6));
+      let bars = '';
+      let labels = '';
+
+      for (let h = startH; h <= endH; h++) {
+        const i = h - startH;
+        const x = paddingLeft + (i / (hCount - 1 || 1)) * plotWidth;
+        const val = counts[h];
+        const barH = Math.max(3, (val / maxCount) * plotHeight);
+        const barX = x - barW / 2;
+        const barY = paddingTop + plotHeight - barH;
+
+        let fillClass = 'fill-slate-100 dark:fill-slate-800';
+        if (val > 0) {
+          const ratio = val / maxCount;
+          if (ratio > 0.7) fillClass = 'fill-indigo-600 dark:fill-indigo-500';
+          else if (ratio > 0.35) fillClass = 'fill-indigo-400 dark:fill-indigo-400/80';
+          else fillClass = 'fill-indigo-200 dark:fill-indigo-950/70';
+        }
+
+        bars += `
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="1.5" class="${fillClass} transition-all duration-300" />
+        `;
+
+        let labelText = '';
+        if (h === 12) labelText = '12 PM';
+        else if (h === 16) labelText = '4 PM';
+        else if (h === 20) labelText = '8 PM';
+        else if (h === startH) labelText = '10 AM';
+        else if (h === endH) labelText = '11 PM';
+
+        if (labelText) {
+          labels += `
+            <text x="${x}" y="${height - 4}" text-anchor="middle" font-size="9" font-weight="600" class="fill-slate-400 dark:fill-slate-500 font-sans">${labelText}</text>
+          `;
+        }
+      }
+
+      el.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible select-none">
+          <line x1="${paddingLeft}" y1="${paddingTop + plotHeight}" x2="${width - paddingRight}" y2="${paddingTop + plotHeight}" stroke="currentColor" class="text-slate-100 dark:text-slate-850" stroke-width="1.5" />
+          ${bars}
+          ${labels}
         </svg>
       `;
     }
@@ -709,6 +1185,8 @@
           <span class="text-xs text-slate-400 dark:text-slate-500">×${num(it.quantity)}</span>
           <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 w-20 text-right">${money(it.revenue)}</span>
         </div>`).join('') : emptyRow('No sales ' + suffix);
+
+      renderBusyHours();
     }
 
     async function fetchAndAggregateCustomRange(uid, startDateStr, endDateStr) {
@@ -798,6 +1276,21 @@
           }
         });
 
+        const hourlyMap = new Map();
+        querySnapshot.forEach((docSnap) => {
+          if (docSnap.id === todayStr && includesToday) return;
+          const data = docSnap.data();
+          if (Array.isArray(data.hourlySales)) {
+            data.hourlySales.forEach((h) => {
+              const prev = hourlyMap.get(h.hour) || { count: 0, revenue: 0 };
+              hourlyMap.set(h.hour, {
+                count: prev.count + (Number(h.count) || 0),
+                revenue: prev.revenue + (Number(h.revenue) || 0)
+              });
+            });
+          }
+        });
+
         if (includesToday && currentData) {
           revenue += Number(currentData.revenue) || 0;
           orders += Number(currentData.orders) || 0;
@@ -840,6 +1333,16 @@
               });
             });
           }
+
+          if (Array.isArray(currentData.hourlySales)) {
+            currentData.hourlySales.forEach((h) => {
+              const prev = hourlyMap.get(h.hour) || { count: 0, revenue: 0 };
+              hourlyMap.set(h.hour, {
+                count: prev.count + (Number(h.count) || 0),
+                revenue: prev.revenue + (Number(h.revenue) || 0)
+              });
+            });
+          }
         }
 
         const payments = Array.from(paymentsMap.entries()).map(([mode, val]) => ({
@@ -863,6 +1366,12 @@
           .sort((a, b) => b.revenue - a.revenue)
           .slice(0, 5);
 
+        const hourlySales = Array.from(hourlyMap.entries()).map(([hour, val]) => ({
+          hour,
+          count: val.count,
+          revenue: val.revenue
+        }));
+
         const customMetrics = {
           revenue,
           orders,
@@ -874,9 +1383,11 @@
           averageOrderValue: orders > 0 ? Math.round(revenue / orders) : 0,
           payments,
           ordersByType,
-          topItems
+          topItems,
+          hourlySales
         };
         
+        window.customMetrics = customMetrics;
         renderCustomPeriod(customMetrics, startDateStr, endDateStr);
         
       } catch (ex) {
@@ -936,6 +1447,8 @@
           <span class="text-xs text-slate-400 dark:text-slate-500">×${num(it.quantity)}</span>
           <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 w-20 text-right">${money(it.revenue)}</span>
         </div>`).join('') : emptyRow('No sales in range');
+
+      renderBusyHours();
     }
 
     document.querySelectorAll('#periodTabs button').forEach((b) => {
@@ -965,6 +1478,18 @@
       });
     });
     renderPeriod(); // style the default tab before data arrives
+
+    document.querySelectorAll('.chart-tab').forEach((b) => {
+      b.addEventListener('click', () => {
+        currentChartView = b.dataset.chart;
+        document.querySelectorAll('.chart-tab').forEach((btn) => {
+          const active = btn.dataset.chart === currentChartView;
+          btn.className = 'chart-tab px-3 py-1.5 rounded-lg transition ' +
+            (active ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-800 dark:text-slate-100 font-semibold' : 'text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300');
+        });
+        renderSelectedChart();
+      });
+    });
 
     $('applyCustomDates').addEventListener('click', () => {
       const start = $('customStart').value;
