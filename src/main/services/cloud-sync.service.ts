@@ -464,3 +464,7 @@ export async function restoreSession(): Promise<void> {
     logger.error('Cloud: failed to restore session (will stay offline)', err);
   }
 }
+
+export function getUid(): string | null {
+  return currentUser?.uid ?? null;
+}

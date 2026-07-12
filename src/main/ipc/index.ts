@@ -19,7 +19,6 @@ import {
   DAY_SESSION,
   BACKUP,
   WHATSAPP,
-  GDRIVE,
   CLOUD,
   FAVORITES,
   KITCHEN_NETWORK,
@@ -48,7 +47,6 @@ import * as reportsService from '../services/reports.service';
 import * as kotPrintService from '../services/kot-print.service';
 import { createPrinter, sendRawToPrinter, VIRTUAL_PRINTER_NAME } from '../services/escpos-print.service';
 import * as whatsappService from '../services/whatsapp.service';
-import * as gdriveService from '../services/gdrive.service';
 import * as cloudSync from '../services/cloud-sync.service';
 import * as kitchenServer from '../services/kitchen-server.service';
 import { logger } from '../utils/logger';
@@ -1355,75 +1353,5 @@ export function registerAllHandlers(): void {
     }
   });
 
-  // ---- Google Drive ----
 
-  ipcMain.handle(GDRIVE.signIn, async (): Promise<IpcResult<{ email: string }>> => {
-    try {
-      const result = await gdriveService.signIn();
-      return { success: true, data: result };
-    } catch (err: any) {
-      logger.error('GDrive signIn failed:', err);
-      return { success: false, error: err.message || 'Google sign-in failed' };
-    }
-  });
-
-  ipcMain.handle(GDRIVE.signOut, (): IpcResult<void> => {
-    gdriveService.signOut();
-    return { success: true, data: undefined };
-  });
-
-  ipcMain.handle(GDRIVE.getAccount, (): IpcResult<{ email: string; connected: boolean }> => {
-    return { success: true, data: gdriveService.getAccount() };
-  });
-
-  ipcMain.handle(GDRIVE.uploadBackup, async (): Promise<IpcResult<{ fileId: string }>> => {
-    try {
-      const backupDir = path.join(app.getPath('userData'), 'backups');
-      if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
-
-      const dateStr = new Date().toISOString().slice(0, 10);
-      const backupPath = path.join(backupDir, `molecule-backup-${dateStr}.db`);
-
-      const db = getDb();
-      await db.backup(backupPath);
-
-      const result = await gdriveService.uploadBackup(backupPath);
-
-      settingsRepo.set('last_gdrive_backup', new Date().toISOString(), 'general');
-      return { success: true, data: result };
-    } catch (err: any) {
-      logger.error('GDrive upload failed:', err);
-      return { success: false, error: err.message || 'Google Drive upload failed' };
-    }
-  });
-
-  ipcMain.handle(GDRIVE.listBackups, async (): Promise<IpcResult<any[]>> => {
-    try {
-      const list = await gdriveService.listBackups();
-      return { success: true, data: list };
-    } catch (err: any) {
-      logger.error('GDrive list failed:', err);
-      return { success: false, error: err.message || 'Failed to list Google Drive backups' };
-    }
-  });
-
-  ipcMain.handle(GDRIVE.restoreBackup, async (_event, fileId: string): Promise<IpcResult<void>> => {
-    try {
-      const tmpPath = path.join(app.getPath('temp'), `molecule-gdrive-restore-${Date.now()}.db`);
-      await gdriveService.downloadBackup(fileId, tmpPath);
-
-      const dbPath = getDbPath();
-      closeDb();
-      fs.copyFileSync(tmpPath, dbPath);
-
-      try { fs.unlinkSync(tmpPath); } catch { /* ignore */ }
-
-      app.relaunch();
-      app.exit(0);
-      return { success: true, data: undefined };
-    } catch (err: any) {
-      logger.error('GDrive restore failed:', err);
-      return { success: false, error: err.message || 'Google Drive restore failed' };
-    }
-  });
 }

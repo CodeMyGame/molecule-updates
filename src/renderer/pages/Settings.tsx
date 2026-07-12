@@ -149,7 +149,7 @@ const SETTING_KEYS = [
   'kot_layout',
   'auto_backup',
   'last_backup',
-  'last_gdrive_backup',
+  'last_supabase_backup',
   'whatsapp_enabled',
   'chatmitra_api_key',
   'coins_enabled',
@@ -1652,87 +1652,7 @@ const Settings: React.FC = () => {
     }
   };
 
-  // ── Google Drive state ──
-  const [gdriveAccount, setGdriveAccount] = useState<{ email: string; connected: boolean }>({ email: '', connected: false });
-  const [gdriveLoading, setGdriveLoading] = useState(false);
-  const [gdriveUploading, setGdriveUploading] = useState(false);
-  const [gdriveBackups, setGdriveBackups] = useState<{ id: string; name: string; createdTime: string; size: string }[]>([]);
-  const [showGdriveRestore, setShowGdriveRestore] = useState(false);
-  const [gdriveRestoring, setGdriveRestoring] = useState(false);
-  const [gdriveMsg, setGdriveMsg] = useState('');
-  const [gdriveMsgIsError, setGdriveMsgIsError] = useState(false);
 
-  useEffect(() => {
-    if (activeSection !== 'backup') return;
-    ipc<{ email: string; connected: boolean }>(window.electronAPI.gdrive.getAccount())
-      .then(setGdriveAccount)
-      .catch(() => {});
-  }, [activeSection]);
-
-  const handleGdriveSignIn = async () => {
-    setGdriveLoading(true);
-    setGdriveMsg('');
-    try {
-      const result = await ipc<{ email: string }>(window.electronAPI.gdrive.signIn());
-      setGdriveAccount({ email: result.email, connected: true });
-    } catch (err: any) {
-      if (!err?.message?.includes('closed by user')) {
-        setGdriveMsgIsError(true);
-        setGdriveMsg(t('settingsPage.gdriveSignInFailed'));
-      }
-    } finally {
-      setGdriveLoading(false);
-    }
-  };
-
-  const handleGdriveSignOut = () => {
-    ipc(window.electronAPI.gdrive.signOut()).catch(() => {});
-    setGdriveAccount({ email: '', connected: false });
-    setGdriveMsg('');
-  };
-
-  const handleGdriveUpload = async () => {
-    setGdriveUploading(true);
-    setGdriveMsg('');
-    setGdriveMsgIsError(false);
-    try {
-      await ipc(window.electronAPI.gdrive.uploadBackup());
-      await fetchSettings(SETTING_KEYS);
-      setGdriveMsg(t('settingsPage.gdriveUploadSuccess'));
-      setGdriveMsgIsError(false);
-    } catch (err: any) {
-      setGdriveMsgIsError(true);
-      setGdriveMsg(t('settingsPage.backupError', { message: err?.message ?? t('settingsPage.gdriveUploadFailed') }));
-    } finally {
-      setGdriveUploading(false);
-    }
-  };
-
-  const openGdriveRestore = async () => {
-    setGdriveLoading(true);
-    try {
-      const list = await ipc<any[]>(window.electronAPI.gdrive.listBackups());
-      setGdriveBackups(list);
-      setShowGdriveRestore(true);
-    } catch (err: any) {
-      setGdriveMsgIsError(true);
-      setGdriveMsg(t('settingsPage.backupError', { message: err?.message ?? t('settingsPage.gdriveRestoreFailed') }));
-    } finally {
-      setGdriveLoading(false);
-    }
-  };
-
-  const handleGdriveRestore = async (fileId: string) => {
-    if (!confirm(t('settingsPage.gdriveRestoreConfirmDesc'))) return;
-    setGdriveRestoring(true);
-    try {
-      await ipc(window.electronAPI.gdrive.restoreBackup(fileId));
-    } catch (err: any) {
-      setGdriveMsgIsError(true);
-      setGdriveMsg(t('settingsPage.backupError', { message: err?.message ?? t('settingsPage.gdriveRestoreFailed') }));
-      setGdriveRestoring(false);
-    }
-  };
 
   // ── Cloud Dashboard (remote owner view) state ──
   interface CloudStatus {
@@ -2226,116 +2146,7 @@ const Settings: React.FC = () => {
             <span>{t('settingsPage.lastBackup', { time: formatDateTime(settings.last_backup) })}</span>
           </div>
         )}
-
-        {/* ── Google Drive section ── */}
-        <div className="border-t border-gray-200 pt-6 mt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">{t('settingsPage.gdriveTitle')}</h3>
-          <p className="text-sm text-gray-500 mb-4">{t('settingsPage.gdriveDesc')}</p>
-
-          {!gdriveAccount.connected ? (
-            <Button
-              variant="primary"
-              loading={gdriveLoading}
-              onClick={handleGdriveSignIn}
-            >
-              {t('settingsPage.gdriveSignIn')}
-            </Button>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
-                    {gdriveAccount.email.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">
-                      {t('settingsPage.gdriveSignedInAs', { email: gdriveAccount.email })}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="secondary" size="sm" onClick={handleGdriveSignOut}>
-                  {t('settingsPage.gdriveSignOut')}
-                </Button>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="primary"
-                  icon={<Upload size={16} />}
-                  loading={gdriveUploading}
-                  onClick={handleGdriveUpload}
-                >
-                  {t('settingsPage.gdriveBackupNow')}
-                </Button>
-                <Button
-                  variant="secondary"
-                  icon={<Download size={16} />}
-                  loading={gdriveLoading}
-                  onClick={openGdriveRestore}
-                >
-                  {t('settingsPage.gdriveRestoreFrom')}
-                </Button>
-              </div>
-
-              {settings.last_gdrive_backup && (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Clock size={14} />
-                  <span>{t('settingsPage.gdriveLastBackup', { time: formatDateTime(settings.last_gdrive_backup) })}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {gdriveMsg && (
-            <p className={`mt-3 text-xs ${gdriveMsgIsError ? 'text-red-500' : 'text-green-600'}`}>
-              {gdriveMsg}
-            </p>
-          )}
-        </div>
       </div>
-
-      {/* GDrive restore modal */}
-      {showGdriveRestore && (
-        <Modal
-          isOpen={showGdriveRestore}
-          onClose={() => setShowGdriveRestore(false)}
-          title={t('settingsPage.gdriveRestoreFrom')}
-          size="lg"
-          footer={
-            <Button variant="secondary" onClick={() => setShowGdriveRestore(false)}>
-              {t('settingsPage.gdriveCancel')}
-            </Button>
-          }
-        >
-          {gdriveBackups.length === 0 ? (
-            <p className="text-sm text-gray-500 py-8 text-center">{t('settingsPage.gdriveNoBackups')}</p>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600 mb-3">{t('settingsPage.gdriveSelectBackup')}</p>
-              <div className="divide-y divide-gray-100 border border-gray-200 rounded-lg overflow-hidden">
-                {gdriveBackups.map((bk) => (
-                  <div key={bk.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">{bk.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {new Date(bk.createdTime).toLocaleString()} · {(Number(bk.size) / (1024 * 1024)).toFixed(1)} MB
-                      </p>
-                    </div>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      loading={gdriveRestoring}
-                      onClick={() => handleGdriveRestore(bk.id)}
-                    >
-                      {t('settingsPage.gdriveRestore')}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </Modal>
-      )}
     </div>
   );
 

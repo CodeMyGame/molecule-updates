@@ -207,15 +207,6 @@ const api = {
     delete: (id: number) => ipcRenderer.invoke('offers:delete', id),
   },
 
-  gdrive: {
-    signIn: () => ipcRenderer.invoke('gdrive:signIn'),
-    signOut: () => ipcRenderer.invoke('gdrive:signOut'),
-    getAccount: () => ipcRenderer.invoke('gdrive:getAccount'),
-    uploadBackup: () => ipcRenderer.invoke('gdrive:uploadBackup'),
-    listBackups: () => ipcRenderer.invoke('gdrive:listBackups'),
-    restoreBackup: (fileId: string) => ipcRenderer.invoke('gdrive:restoreBackup', fileId),
-  },
-
   cloud: {
     getStatus: () => ipcRenderer.invoke('cloud:getStatus'),
     connect: (email: string, password: string, opts?: { create?: boolean }) =>

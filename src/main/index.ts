@@ -24,7 +24,7 @@ import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
 import * as settingsRepo from './db/repositories/settings.repo';
 import * as whatsappService from './services/whatsapp.service';
-import * as gdriveService from './services/gdrive.service';
+import * as supabaseBackupService from './services/supabase-backup.service';
 import * as cloudSync from './services/cloud-sync.service';
 import * as kitchenServer from './services/kitchen-server.service';
 import { WHATSAPP_FEATURE_ENABLED } from '../shared/featureFlags';
@@ -138,16 +138,17 @@ async function runAutoBackupIfDue(): Promise<void> {
 
     logger.info(`Auto-backup saved to ${backupPath}`);
 
-    // Upload to Google Drive if signed in. The GDrive uploader replaces any
-    // existing file with the same name, so it stays a single file there too.
-    if (gdriveService.isSignedIn()) {
-      try {
-        await gdriveService.uploadBackup(backupPath);
-        settingsRepo.set('last_gdrive_backup', new Date().toISOString(), 'general');
-        logger.info('Auto-backup uploaded to Google Drive');
-      } catch (gErr) {
-        logger.error('GDrive auto-upload failed (local backup is fine):', gErr);
+    // Upload to Supabase Storage monthly
+    try {
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+      const lastSupabaseBackup = settingsRepo.get('last_supabase_backup');
+      if (lastSupabaseBackup !== currentMonth) {
+        await supabaseBackupService.uploadBackup(backupPath);
+        settingsRepo.set('last_supabase_backup', currentMonth, 'general');
+        logger.info('Auto-backup uploaded to Supabase Storage');
       }
+    } catch (sErr) {
+      logger.error('Supabase monthly auto-upload failed (local backup is fine):', sErr);
     }
   } catch (err) {
     logger.error('Auto-backup failed:', err);

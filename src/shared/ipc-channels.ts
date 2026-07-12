@@ -208,15 +208,6 @@ export const WHATSAPP_EVENTS = {
   statusChange: 'whatsapp:event:statusChange',
 } as const;
 
-export const GDRIVE = {
-  signIn: 'gdrive:signIn',
-  signOut: 'gdrive:signOut',
-  getAccount: 'gdrive:getAccount',
-  uploadBackup: 'gdrive:uploadBackup',
-  listBackups: 'gdrive:listBackups',
-  restoreBackup: 'gdrive:restoreBackup',
-} as const;
-
 export const CLOUD = {
   getStatus: 'cloud:getStatus',
   connect: 'cloud:connect',
