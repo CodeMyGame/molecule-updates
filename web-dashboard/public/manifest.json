@@ -1,0 +1,21 @@
+{
+  "name": "Molecule Dashboard",
+  "short_name": "Molecule",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3176/3176366.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3176/3176366.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#4f46e5" />
   <title>Molecule — Owner Dashboard</title>
+  <link rel="manifest" href="/manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -113,6 +114,11 @@
           <button title="Toggle Theme" class="theme-toggle text-slate-400 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 border border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-500 rounded-lg p-1.5 transition">
             <svg class="hidden dark:block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
             <svg class="block dark:hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </button>
+          <button id="notifyBtn" title="Enable Notifications" class="hidden text-slate-400 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 border border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-500 rounded-lg p-1.5 transition">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M12 22a3 3 0 0 0 3-3H9a3 3 0 0 0 3 3z"/>
+            </svg>
           </button>
           <button id="refreshBtn" title="Refresh" class="text-slate-400 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 border border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-500 rounded-lg p-1.5 transition">
             <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
@@ -308,7 +314,7 @@
     } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
     import {
       getFirestore, doc, onSnapshot, collection, query, orderBy, limit, getDocs, where,
-      documentId,
+      documentId, setDoc,
     } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
 
     // Same PUBLIC config as the POS — security is enforced by Firestore rules.
@@ -1543,6 +1549,52 @@
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
       });
     });
+
+    // ── PWA Notification Support ──
+    const VAPID_PUBLIC_KEY = 'BH2r6557JKWnSCzJ3f94LaKC2_GuYLGKCmPLFzG2SfIHmZyjeLy6uRA30egeS8KTzJvrLzRFwN-Y0WCgxlH5ygQ';
+
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      const notifyBtn = $('notifyBtn');
+      if (notifyBtn) {
+        notifyBtn.classList.remove('hidden');
+        notifyBtn.addEventListener('click', () => subscribeToNotifications());
+      }
+      
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((reg) => console.log('Service Worker Registered'))
+        .catch((err) => console.error('Service Worker Registry Failed', err));
+    }
+
+    async function subscribeToNotifications() {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          alert('Notification permission denied. Please allow notifications in your iPhone settings for this Home Screen App.');
+          return;
+        }
+
+        const reg = await navigator.serviceWorker.ready;
+        let sub = await reg.pushManager.getSubscription();
+        if (!sub) {
+          sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: VAPID_PUBLIC_KEY
+          });
+        }
+
+        if (sub && currentUid) {
+          const tokenRef = doc(db, `restaurants/${currentUid}/notificationTokens`, btoa(sub.endpoint));
+          await setDoc(tokenRef, {
+            subscription: JSON.stringify(sub),
+            createdAt: new Date()
+          });
+          alert('Daily revenue notifications enabled successfully! 🔔');
+        }
+      } catch (err) {
+        console.error('Subscription error:', err);
+        alert('Failed to register notifications: ' + err.message);
+      }
+    }
   </script>
 </body>
 </html>
