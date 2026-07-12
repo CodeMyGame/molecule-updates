@@ -24,9 +24,8 @@ export async function uploadBackup(filePath: string): Promise<void> {
     const restaurantName = restaurant?.name;
     const uid = cloudSync.getUid() || 'local-' + (restaurantName ? restaurantName.replace(/[^a-zA-Z0-9]/g, '_') : 'unnamed');
     
-    // Generate monthly filename: e.g. backup-2026-07.db
-    const dateStr = new Date().toISOString().slice(0, 7); // YYYY-MM
-    const fileName = `${uid}/backup-${dateStr}.db`;
+    // Generate filename: backup-latest.db (overwrites the previous backup)
+    const fileName = `${uid}/backup-latest.db`;
 
     logger.info(`Supabase Backup: Uploading ${filePath} to bucket "${supabaseBucket}" as "${fileName}"...`);
 
