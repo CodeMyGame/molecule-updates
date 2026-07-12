@@ -138,20 +138,46 @@ async function runAutoBackupIfDue(): Promise<void> {
 
     logger.info(`Auto-backup saved to ${backupPath}`);
 
-    // Upload to Supabase Storage monthly
-    try {
-      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-      const lastSupabaseBackup = settingsRepo.get('last_supabase_backup');
-      if (lastSupabaseBackup !== currentMonth) {
-        await supabaseBackupService.uploadBackup(backupPath);
-        settingsRepo.set('last_supabase_backup', currentMonth, 'general');
-        logger.info('Auto-backup uploaded to Supabase Storage');
-      }
-    } catch (sErr) {
-      logger.error('Supabase monthly auto-upload failed (local backup is fine):', sErr);
-    }
   } catch (err) {
     logger.error('Auto-backup failed:', err);
+  }
+}
+
+async function runSupabaseBackupIfDue(): Promise<void> {
+  try {
+    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const lastSupabaseBackup = settingsRepo.get('last_supabase_backup');
+
+    if (lastSupabaseBackup === currentMonth) {
+      return; // Already backed up this month
+    }
+
+    logger.info('Supabase Monthly Backup: Checking backup due...');
+
+    const backupDir = join(app.getPath('userData'), 'backups');
+    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+
+    // Use a temp file for the upload so we don't interfere with the daily backup file
+    const tempBackupPath = join(backupDir, `supabase-backup-temp-${Date.now()}.db`);
+
+    const db = getDb();
+    await db.backup(tempBackupPath);
+
+    logger.info(`Supabase Monthly Backup: Local backup cloned to ${tempBackupPath}, uploading to Supabase...`);
+
+    await supabaseBackupService.uploadBackup(tempBackupPath);
+    settingsRepo.set('last_supabase_backup', currentMonth, 'general');
+
+    // Clean up the temporary local file
+    try {
+      if (fs.existsSync(tempBackupPath)) {
+        fs.unlinkSync(tempBackupPath);
+      }
+    } catch { /* ignore */ }
+
+    logger.info('Supabase Monthly Backup: Done.');
+  } catch (err) {
+    logger.error('Supabase Monthly Backup: Failed:', err);
   }
 }
 
@@ -237,6 +263,9 @@ app.whenReady().then(async () => {
 
   // Run auto-backup if due (non-blocking)
   runAutoBackupIfDue();
+
+  // Run Supabase monthly backup if due (non-blocking)
+  runSupabaseBackupIfDue();
 
   // Run VACUUM if it's been > 30 days (non-blocking; deferred so it doesn't
   // race startup window creation).
