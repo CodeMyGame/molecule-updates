@@ -16,7 +16,7 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-webpush.setVAPIDDetails(
+webpush.setVapidDetails(
   'mailto:support@moleculepos.com',
   vapidPublicKey,
   vapidPrivateKey
