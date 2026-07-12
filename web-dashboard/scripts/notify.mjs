@@ -32,12 +32,13 @@ async function run() {
   const yesterdayStr = `${y}-${m}-${day}`;
   console.log(`Sending notifications for date: ${yesterdayStr}`);
 
-  const restaurants = await db.collection('restaurants').get();
-  console.log(`Found ${restaurants.size} restaurants.`);
+  const metaSnaps = await db.collectionGroup('meta').get();
+  const statusDocs = metaSnaps.docs.filter(d => d.id === 'status');
+  console.log(`Found ${statusDocs.length} restaurants via meta status.`);
 
-  for (const restDoc of restaurants.docs) {
-    const uid = restDoc.id;
-    const restData = restDoc.data() || {};
+  for (const statusDoc of statusDocs) {
+    const uid = statusDoc.ref.parent.parent.id;
+    const restData = statusDoc.data() || {};
     const name = restData.restaurantName || "your restaurant";
 
     const dailyDoc = await db.doc(`restaurants/${uid}/daily/${yesterdayStr}`).get();
