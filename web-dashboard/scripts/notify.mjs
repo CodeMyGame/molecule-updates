@@ -52,8 +52,8 @@ async function run() {
     const orders = Number(data.orders) || 0;
 
     const payload = JSON.stringify({
-      title: "Daily Sales Summary",
-      body: `Yesterday, ${name} earned ₹${revenue.toLocaleString()} across ${orders} order(s).`
+      title: `${name}: Yesterday's Sales`,
+      body: `Yesterday, the restaurant earned ₹${revenue.toLocaleString()} across ${orders} orders.`
     });
 
     const tokensSnap = await db.collection(`restaurants/${uid}/notificationTokens`).get();

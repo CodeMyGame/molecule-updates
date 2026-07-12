@@ -11,8 +11,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || "Daily Sales Summary";
   const options = {
     body: data.body || "Daily closed day revenue data updated.",
-    icon: "https://cdn-icons-png.flaticon.com/512/3176/3176366.png",
-    badge: "https://cdn-icons-png.flaticon.com/512/3176/3176366.png",
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
     tag: "daily-revenue-summary",
     renotify: true
   };
