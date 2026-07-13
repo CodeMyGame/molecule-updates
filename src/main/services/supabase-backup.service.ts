@@ -11,8 +11,7 @@ const supabaseBucket = import.meta.env.MAIN_VITE_SUPABASE_BUCKET || process.env.
 
 export async function uploadBackup(filePath: string): Promise<void> {
   if (!supabaseUrl || !supabaseKey) {
-    logger.warn('Supabase backup skipped: MAIN_VITE_SUPABASE_URL or MAIN_VITE_SUPABASE_KEY not configured.');
-    return;
+    throw new Error('Supabase URL or Key is not configured in environment variables.');
   }
 
   try {

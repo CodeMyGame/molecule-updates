@@ -19,6 +19,7 @@ import { syncVariationBasePrices } from './db/migrations/012_sync_variation_base
 import { addPerfIndexes } from './db/migrations/013_add_perf_indexes';
 import { addTableNameSnapshot } from './db/migrations/014_table_name_snapshot';
 import { addPinToItemsAndTables } from './db/migrations/015_pin_items_and_tables';
+import { resetSupabaseBackupFlag } from './db/migrations/016_reset_supabase_backup_flag';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -83,6 +84,7 @@ function initializeDatabase(): void {
     addPerfIndexes,
     addTableNameSnapshot,
     addPinToItemsAndTables,
+    resetSupabaseBackupFlag,
   ]);
 
   // Seed default data
