@@ -66,6 +66,7 @@ jobs:
       - name: Build & Publish Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAIN_VITE_GDRIVE_CLIENT_ID: ${{ secrets.MAIN_VITE_GDRIVE_CLIENT_ID }}
-          MAIN_VITE_GDRIVE_CLIENT_SECRET: ${{ secrets.MAIN_VITE_GDRIVE_CLIENT_SECRET }}
+          MAIN_VITE_SUPABASE_URL: ${{ secrets.MAIN_VITE_SUPABASE_URL }}
+          MAIN_VITE_SUPABASE_KEY: ${{ secrets.MAIN_VITE_SUPABASE_KEY }}
+          MAIN_VITE_SUPABASE_BUCKET: ${{ secrets.MAIN_VITE_SUPABASE_BUCKET }}
         run: npm run release:win
