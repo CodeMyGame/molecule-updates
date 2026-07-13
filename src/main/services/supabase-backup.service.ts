@@ -5,9 +5,9 @@ import * as settingsRepo from '../db/repositories/settings.repo';
 import * as cloudSync from './cloud-sync.service';
 import { logger } from '../utils/logger';
 
-const supabaseUrl = (import.meta as any).env?.MAIN_VITE_SUPABASE_URL || process.env.MAIN_VITE_SUPABASE_URL || '';
-const supabaseKey = (import.meta as any).env?.MAIN_VITE_SUPABASE_KEY || process.env.MAIN_VITE_SUPABASE_KEY || '';
-const supabaseBucket = (import.meta as any).env?.MAIN_VITE_SUPABASE_BUCKET || process.env.MAIN_VITE_SUPABASE_BUCKET || 'backups';
+const supabaseUrl = import.meta.env.MAIN_VITE_SUPABASE_URL || process.env.MAIN_VITE_SUPABASE_URL || '';
+const supabaseKey = import.meta.env.MAIN_VITE_SUPABASE_KEY || process.env.MAIN_VITE_SUPABASE_KEY || '';
+const supabaseBucket = import.meta.env.MAIN_VITE_SUPABASE_BUCKET || process.env.MAIN_VITE_SUPABASE_BUCKET || 'backups';
 
 export async function uploadBackup(filePath: string): Promise<void> {
   if (!supabaseUrl || !supabaseKey) {
