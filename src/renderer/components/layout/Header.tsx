@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Clock, LogOut, Banknote, CreditCard, Smartphone } from 'lucide-react';
+import { Clock, LogOut, Banknote, CreditCard, Smartphone, ArrowUpCircle, RefreshCw } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 import { useBillingStore } from '../../stores/billing.store';
 import { useDaySessionStore } from '../../stores/daySession.store';
@@ -14,6 +14,7 @@ import Button from '../common/Button';
 const Header: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const { currentUser, logout } = useAuthStore();
   const clearCart = useBillingStore((s) => s.clearCart);
   const cartLength = useBillingStore((s) => s.cart.length);
@@ -26,6 +27,31 @@ const Header: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [shiftReport, setShiftReport] = useState<any>(null);
   const [showShiftReport, setShowShiftReport] = useState(false);
+
+  const [updateState, setUpdateState] = useState<'idle' | 'available' | 'downloading' | 'ready'>('idle');
+  const [updateVersion, setUpdateVersion] = useState('');
+
+  useEffect(() => {
+    if (!window.electronAPI?.updater) return;
+
+    const unsub1 = window.electronAPI.updater.onUpdateAvailable((info: any) => {
+      setUpdateVersion(info.version);
+      setUpdateState('available');
+    });
+    const unsub2 = window.electronAPI.updater.onDownloadProgress(() => {
+      setUpdateState('downloading');
+    });
+    const unsub3 = window.electronAPI.updater.onUpdateDownloaded((info: any) => {
+      setUpdateVersion(info.version);
+      setUpdateState('ready');
+    });
+
+    return () => {
+      unsub1();
+      unsub2();
+      unsub3();
+    };
+  }, []);
 
   useEffect(() => {
     fetchDaySession();
@@ -115,7 +141,39 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-2" />
+      <div className="flex items-center gap-2">
+        {updateState !== 'idle' && (
+          <button
+            onClick={() => {
+              if (updateState === 'ready') {
+                if (window.confirm(t('header.confirmRestartUpdate', 'Application will restart to apply the update. Restart now?'))) {
+                  window.electronAPI.updater.installNow();
+                }
+              } else {
+                navigate('/settings');
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border ${
+              updateState === 'ready'
+                ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100 animate-pulse'
+                : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
+            }`}
+            title={updateState === 'ready'
+              ? `Update Ready (v${updateVersion}). Click to restart and update.`
+              : `Downloading Update (v${updateVersion})...`
+            }
+          >
+            {updateState === 'ready' ? (
+              <RefreshCw size={14} className="animate-spin" style={{ animationDuration: '4s' }} />
+            ) : (
+              <ArrowUpCircle size={14} className="animate-bounce" />
+            )}
+            <span className="hidden sm:inline">
+              {updateState === 'ready' ? t('header.restartUpdate', 'Restart to Update') : t('header.updating', 'Updating...')}
+            </span>
+          </button>
+        )}
+      </div>
     </header>
 
     {/* Shift Handover Modal */}
