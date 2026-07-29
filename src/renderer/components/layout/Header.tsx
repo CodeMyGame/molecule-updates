@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Clock, LogOut, Banknote, CreditCard, Smartphone, ArrowUpCircle, RefreshCw } from 'lucide-react';
+import { Clock, LogOut, Banknote, CreditCard, Smartphone, Bell } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 import { useBillingStore } from '../../stores/billing.store';
 import { useDaySessionStore } from '../../stores/daySession.store';
@@ -144,32 +144,17 @@ const Header: React.FC = () => {
       <div className="flex items-center gap-2">
         {updateState !== 'idle' && (
           <button
-            onClick={() => {
-              if (updateState === 'ready') {
-                if (window.confirm(t('header.confirmRestartUpdate', 'Application will restart to apply the update. Restart now?'))) {
-                  window.electronAPI.updater.installNow();
-                }
-              } else {
-                navigate('/settings');
-              }
-            }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm border ${
-              updateState === 'ready'
-                ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100 animate-pulse'
-                : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
-            }`}
+            onClick={() => navigate('/settings')}
+            className="relative flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 text-amber-500 transition-colors animate-pulse"
             title={updateState === 'ready'
-              ? `Update Ready (v${updateVersion}). Click to restart and update.`
-              : `Downloading Update (v${updateVersion})...`
+              ? t('header.updateReadyTooltip', `Software update v${updateVersion} is ready to install! Click to go to settings.`)
+              : t('header.updateAvailableTooltip', `Software update v${updateVersion} is downloading... Click to check progress.`)
             }
           >
-            {updateState === 'ready' ? (
-              <RefreshCw size={14} className="animate-spin" style={{ animationDuration: '4s' }} />
-            ) : (
-              <ArrowUpCircle size={14} className="animate-bounce" />
-            )}
-            <span className="hidden sm:inline">
-              {updateState === 'ready' ? t('header.restartUpdate', 'Restart to Update') : t('header.updating', 'Updating...')}
+            <Bell size={18} />
+            <span className="absolute top-1 right-1 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
           </button>
         )}

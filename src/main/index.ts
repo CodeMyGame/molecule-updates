@@ -252,6 +252,13 @@ function setupAutoUpdater(): void {
   ipcMain.on('updater:install-now', () => {
     autoUpdater.quitAndInstall();
   });
+
+  // Automatically check for updates on app startup (in production)
+  if (!is.dev) {
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+      logger.error('Background auto-update check failed:', err);
+    });
+  }
 }
 
 app.whenReady().then(async () => {
