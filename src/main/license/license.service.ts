@@ -93,6 +93,7 @@ async function syncLicenseWithServer(key: string): Promise<void> {
     if (err?.message?.includes('already been used')) {
       throw err;
     }
+    throw new Error('Internet connection required. Please connect to the internet to activate your license.');
   }
 }
 
