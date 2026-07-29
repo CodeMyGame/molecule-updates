@@ -41,13 +41,13 @@ if (!SECRET) {
 // ── Parse --tier and --test arguments ──────────────────────────────────────
 const tierIndex = process.argv.indexOf('--tier');
 const tierArg = tierIndex !== -1 ? process.argv[tierIndex + 1] : undefined;
-const tier = parseInt(tierArg ?? '', 10) as 3 | 6 | 12;
+const tier = parseInt(tierArg ?? '', 10) as 1 | 2 | 3 | 6 | 12;
 
 const testMode = process.argv.includes('--test');
 const timeUnitMs = testMode ? 60_000 : 86_400_000; // 1 minute vs 1 day
 
-if (![3, 6, 12].includes(tier)) {
-  console.error('\n  Error: --tier must be 3, 6, or 12\n');
+if (![1, 2, 3, 6, 12].includes(tier)) {
+  console.error('\n  Error: --tier must be 1, 2, 3, 6, or 12\n');
   console.error('  Example: npx ts-node scripts/keygen.ts --tier 12\n');
   console.error('  For testing: npx ts-node scripts/keygen.ts --tier 3 --test (expires in 3 minutes)\n');
   process.exit(1);

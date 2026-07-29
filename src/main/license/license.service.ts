@@ -203,7 +203,7 @@ export function parseAndValidateKey(rawKey: string): ParseResult {
   }
 
   const tier = bytes[1];
-  if (![3, 6, 12].includes(tier)) {
+  if (![1, 2, 3, 6, 12].includes(tier)) {
     return { valid: false, reason: 'Invalid license tier in key' };
   }
 
