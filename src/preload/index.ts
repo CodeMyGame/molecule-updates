@@ -232,6 +232,7 @@ const api = {
 
   updater: {
     checkForUpdates: () => ipcRenderer.invoke('updater:check-for-updates'),
+    downloadUpdate: () => ipcRenderer.invoke('updater:download-update'),
     getVersion: () => ipcRenderer.invoke('updater:get-version'),
     onUpdateAvailable: (cb: (info: any) => void) => {
       const handler = (_e: IpcRendererEvent, info: any) => cb(info);

@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Clock, LogOut, Banknote, CreditCard, Smartphone, Bell } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
+import toast from 'react-hot-toast';
 import { useBillingStore } from '../../stores/billing.store';
 import { useDaySessionStore } from '../../stores/daySession.store';
 import { useSettings } from '../../hooks/useSettings';
@@ -30,6 +31,7 @@ const Header: React.FC = () => {
 
   const [updateState, setUpdateState] = useState<'idle' | 'available' | 'downloading' | 'ready'>('idle');
   const [updateVersion, setUpdateVersion] = useState('');
+  const [showBellMenu, setShowBellMenu] = useState(false);
 
   useEffect(() => {
     if (!window.electronAPI?.updater) return;
@@ -143,20 +145,61 @@ const Header: React.FC = () => {
 
       <div className="flex items-center gap-2">
         {updateState !== 'idle' && (
-          <button
-            onClick={() => navigate('/settings')}
-            className="relative flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 text-amber-500 transition-colors animate-pulse"
-            title={updateState === 'ready'
-              ? t('header.updateReadyTooltip', `Software update v${updateVersion} is ready to install! Click to go to settings.`)
-              : t('header.updateAvailableTooltip', `Software update v${updateVersion} is downloading... Click to check progress.`)
-            }
-          >
-            <Bell size={18} />
-            <span className="absolute top-1 right-1 flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-            </span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setShowBellMenu(!showBellMenu)}
+              className="relative flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 text-amber-500 transition-colors animate-pulse"
+              title={t('header.updatesNotifications', 'Updates & Notifications')}
+            >
+              <Bell size={18} />
+              <span className="absolute top-1 right-1 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+            </button>
+
+            {showBellMenu && (
+              <>
+                {/* Backdrop to close the menu on outside click */}
+                <div 
+                  className="fixed inset-0 z-40 cursor-default" 
+                  onClick={() => setShowBellMenu(false)} 
+                />
+                
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-100 rounded-xl shadow-xl py-2 z-50">
+                  <div className="px-4 py-2 border-b border-gray-100">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      {t('header.notifications', 'Notifications')}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowBellMenu(false);
+                      navigate('/settings');
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition flex gap-3 items-start"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {updateState === 'ready' 
+                          ? t('header.updateReadyItem', 'Software Update Ready') 
+                          : t('header.updateAvailableItem', 'New Update Available')
+                        }
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {updateState === 'ready'
+                          ? t('header.updateReadyDesc', 'Version {{version}} is ready. Restart to install.', { version: updateVersion })
+                          : t('header.updateAvailableDesc', 'Version {{version}} is available. Click to download.', { version: updateVersion })
+                        }
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
     </header>

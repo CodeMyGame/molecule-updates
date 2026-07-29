@@ -223,9 +223,22 @@ function setupAutoUpdater(): void {
     }
   });
 
+  ipcMain.handle('updater:download-update', async () => {
+    if (is.dev) {
+      return { success: true };
+    }
+    try {
+      await autoUpdater.downloadUpdate();
+      return { success: true };
+    } catch (err: any) {
+      logger.error('Failed to start update download:', err);
+      return { success: false, error: err.message };
+    }
+  });
+
   if (is.dev) return; // skip in dev
 
-  autoUpdater.autoDownload = true;
+  autoUpdater.autoDownload = false;
   autoUpdater.autoInstallOnAppQuit = true;
 
   autoUpdater.on('update-available', (info) => {

@@ -2817,13 +2817,31 @@ const Settings: React.FC = () => {
             )}
 
             {updateState === 'available' && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-gray-800">
-                  {t('settings.updateAvailable', 'Update available: {{version}}', { version: updateVersion })}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Downloading update in the background...
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-amber-900">
+                    {t('settings.updateAvailable', 'Update available: {{version}}', { version: updateVersion })}
+                  </p>
+                  <p className="text-xs text-amber-700">
+                    {t('settings.updateManualDownloadPrompt', 'A new software version is available. Click below to start the download.')}
+                  </p>
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={async () => {
+                    setUpdateState('downloading');
+                    setDownloadProgress(0);
+                    try {
+                      await window.electronAPI.updater.downloadUpdate();
+                    } catch (err: any) {
+                      setUpdateState('error');
+                      setUpdateError(err.message || 'Failed to download update');
+                    }
+                  }}
+                  icon={<Download size={16} />}
+                >
+                  {t('settings.downloadUpdate', 'Download Update')}
+                </Button>
               </div>
             )}
 
