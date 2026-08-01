@@ -112,6 +112,7 @@ export function registerAllHandlers(): void {
   handle(MENU.forceDeleteItem, (id: number) => menuRepo.forceDeleteItem(id));
   handle(MENU.toggleAvailability, (id: number) => menuRepo.toggleAvailability(id));
   handle(MENU.togglePin, (id: number) => menuRepo.togglePin(id));
+  handle(MENU.replaceMenu, (data: any) => menuRepo.replaceMenu(data));
   handle(MENU.getTopSellingIds, (limit: number) => {
     const db = getDb();
     const rows = db.prepare(`

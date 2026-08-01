@@ -584,3 +584,174 @@ export function togglePin(id: number): MenuItem | undefined {
   const row = db.prepare('SELECT * FROM menu_items WHERE id = ?').get(id) as any;
   return row ? mapItem(row) : undefined;
 }
+
+export function replaceMenu(data: { categories: any[]; items: any[]; addonGroups: any[] }): void {
+  const db = getDb();
+  
+  const tx = db.transaction(() => {
+    // 1. Create a special "Legacy Addon Group" and "Legacy Addon" to map past orders' addons to.
+    let legacyGroupId: number;
+    const existingGroup = db.prepare("SELECT id FROM addon_groups WHERE name = 'Legacy Addon Group'").get() as { id: number } | undefined;
+    if (existingGroup) {
+      legacyGroupId = existingGroup.id;
+    } else {
+      const res = db.prepare("INSERT INTO addon_groups (name, min_select, max_select, is_required) VALUES ('Legacy Addon Group', 0, 99, 0)").run();
+      legacyGroupId = res.lastInsertRowid as number;
+    }
+    
+    let legacyAddonId: number;
+    const existingAddon = db.prepare("SELECT id FROM addons WHERE name = 'Legacy Addon' AND addon_group_id = ?").get(legacyGroupId) as { id: number } | undefined;
+    if (existingAddon) {
+      legacyAddonId = existingAddon.id;
+    } else {
+      const res = db.prepare("INSERT INTO addons (addon_group_id, name, price) VALUES (?, 'Legacy Addon', 0)").run(legacyGroupId);
+      legacyAddonId = res.lastInsertRowid as number;
+    }
+    
+    // 2. Nullify all existing order references to items / variations so they are not orphaned
+    db.prepare("UPDATE order_items SET menu_item_id = NULL, variation_id = NULL, combo_id = NULL").run();
+    db.prepare("UPDATE order_item_addons SET addon_id = ?").run(legacyAddonId);
+    
+    // 3. Delete existing menu tables
+    db.prepare("DELETE FROM combo_items").run();
+    db.prepare("DELETE FROM combos").run();
+    db.prepare("DELETE FROM menu_item_addon_groups").run();
+    db.prepare("DELETE FROM item_variations").run();
+    db.prepare("DELETE FROM menu_items").run();
+    db.prepare("DELETE FROM menu_categories").run();
+    db.prepare("DELETE FROM addon_variation_prices").run();
+    db.prepare("DELETE FROM addons WHERE id != ?").run(legacyAddonId);
+    db.prepare("DELETE FROM addon_groups WHERE id != ?").run(legacyGroupId);
+    
+    // 4. Insert new categories
+    const insertCategory = db.prepare(`
+      INSERT INTO menu_categories (id, name, sort_order, is_active, parent_id)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    
+    if (Array.isArray(data.categories)) {
+      for (const cat of data.categories) {
+        insertCategory.run(
+          cat.id,
+          cat.name,
+          cat.sortOrder ?? cat.sort_order ?? 0,
+          cat.isActive !== false && cat.is_active !== 0 ? 1 : 0,
+          cat.parentId ?? cat.parent_id ?? null
+        );
+      }
+    }
+    
+    // 5. Insert new items and variations
+    const insertItem = db.prepare(`
+      INSERT INTO menu_items (id, name, short_code, category_id, base_price, tax_rate, is_veg, is_available, sort_order, image_path, station)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    const insertVariation = db.prepare(`
+      INSERT INTO item_variations (id, menu_item_id, name, price_delta, is_default)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    
+    if (Array.isArray(data.items)) {
+      let nextVarId = 1;
+      const getNextVarId = () => nextVarId++;
+      
+      for (const item of data.items) {
+        insertItem.run(
+          item.id,
+          item.name,
+          item.shortCode ?? item.short_code ?? null,
+          item.categoryId ?? item.category_id,
+          item.basePrice ?? item.base_price,
+          item.taxRate ?? item.tax_rate ?? 5.0,
+          item.isVeg !== false && item.is_veg !== 0 ? 1 : 0,
+          item.isAvailable !== false && item.is_available !== 0 ? 1 : 0,
+          item.sortOrder ?? item.sort_order ?? 0,
+          item.imagePath ?? item.image_path ?? null,
+          item.station ?? null
+        );
+        
+        if (Array.isArray(item.variations)) {
+          for (const v of item.variations) {
+            const varId = v.id ?? getNextVarId();
+            insertVariation.run(
+              varId,
+              item.id,
+              v.name,
+              v.priceDelta ?? v.price_delta ?? (v.price !== undefined ? (v.price - (item.basePrice ?? item.base_price ?? 0)) : 0),
+              v.isDefault ? 1 : 0
+            );
+          }
+        }
+      }
+    }
+    
+    // 6. Insert new addon groups and addons
+    const insertAddonGroup = db.prepare(`
+      INSERT INTO addon_groups (id, name, min_select, max_select, is_required)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    
+    const insertAddon = db.prepare(`
+      INSERT INTO addons (id, addon_group_id, name, price)
+      VALUES (?, ?, ?, ?)
+    `);
+    
+    const insertAddonVarPrice = db.prepare(`
+      INSERT OR IGNORE INTO addon_variation_prices (addon_id, variation_name, price)
+      VALUES (?, ?, ?)
+    `);
+    
+    const linkAddonGroup = db.prepare(`
+      INSERT OR IGNORE INTO menu_item_addon_groups (menu_item_id, addon_group_id)
+      VALUES (?, ?)
+    `);
+    
+    if (Array.isArray(data.addonGroups)) {
+      for (const group of data.addonGroups) {
+        insertAddonGroup.run(
+          group.id,
+          group.name,
+          group.minSelect ?? group.min_select ?? 0,
+          group.maxSelect ?? group.max_select ?? 5,
+          group.isRequired !== false && group.is_required !== 0 ? 1 : 0
+        );
+        
+        if (Array.isArray(group.addons)) {
+          for (const addon of group.addons) {
+            insertAddon.run(
+              addon.id,
+              group.id,
+              addon.name,
+              addon.price
+            );
+            
+            if (addon.variationPrices) {
+              for (const [varName, price] of Object.entries(addon.variationPrices)) {
+                insertAddonVarPrice.run(
+                  addon.id,
+                  varName,
+                  price as number
+                );
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    // 7. Link addon groups to items
+    if (Array.isArray(data.items)) {
+      for (const item of data.items) {
+        const groupIds = item.addonGroupIds ?? item.addon_group_ids;
+        if (Array.isArray(groupIds)) {
+          for (const groupId of groupIds) {
+            linkAddonGroup.run(item.id, groupId);
+          }
+        }
+      }
+    }
+  });
+  
+  tx();
+}

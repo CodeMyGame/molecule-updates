@@ -36,6 +36,7 @@ const api = {
     toggleAvailability: (id: number) => ipcRenderer.invoke('menu:toggleAvailability', id),
     togglePin: (id: number) => ipcRenderer.invoke('menu:togglePin', id),
     getTopSellingIds: (limit?: number) => ipcRenderer.invoke('menu:getTopSellingIds', limit ?? 10),
+    replaceMenu: (data: any) => ipcRenderer.invoke('menu:replaceMenu', data),
   },
 
   orders: {

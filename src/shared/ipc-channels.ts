@@ -33,6 +33,7 @@ export const MENU = {
   toggleAvailability: 'menu:toggleAvailability',
   togglePin: 'menu:togglePin',
   getTopSellingIds: 'menu:getTopSellingIds',
+  replaceMenu: 'menu:replaceMenu',
 } as const;
 
 export const ORDERS = {

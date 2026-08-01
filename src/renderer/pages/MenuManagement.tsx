@@ -667,175 +667,18 @@ const MenuManagement: React.FC = () => {
         const text = await file.text();
         const data = JSON.parse(text);
 
-        // Additive import — only add NEW items, categories, variations, addons.
-        // Never overwrite or delete existing data.
-
-        const categoryIdMap = new Map<number, number>();
-        const categoryNameMap = new Map(
-          categories.map((c) => [c.name.trim().toLowerCase(), c.id])
-        );
-
-        let catCount = 0;
-        let itemCount = 0;
-
-        // 1. Import categories — skip existing
-        if (data.categories) {
-          for (const cat of data.categories) {
-            const existingId = categoryNameMap.get(cat.name.trim().toLowerCase());
-            if (existingId !== undefined) {
-              categoryIdMap.set(cat.id, existingId);
-            } else {
-              const created = await ipc<{ id: number }>(window.electronAPI.menu.createCategory({ name: cat.name, sortOrder: cat.sortOrder }));
-              categoryIdMap.set(cat.id, created.id);
-              categoryNameMap.set(cat.name.trim().toLowerCase(), created.id);
-              catCount++;
-            }
-          }
+        if (!data.categories || !data.items || !data.addonGroups) {
+          throw new Error('Invalid menu file format');
         }
 
-        // 2. Import items — skip existing, only add new
-        const itemNameMap = new Map(
-          items.map((i) => [i.name.trim().toLowerCase(), i])
-        );
-
-        if (data.items) {
-          for (const item of data.items) {
-            const mappedCategoryId = categoryIdMap.get(item.categoryId) ?? item.categoryId;
-            const existing = itemNameMap.get(item.name.trim().toLowerCase());
-
-            if (existing) {
-              // Item exists — only add missing variations
-              if (Array.isArray(item.variations) && item.variations.length > 0) {
-                const existingVariations = await getVariations(existing.id);
-                const existingVarNames = new Set(existingVariations.map((v) => v.name.trim().toLowerCase()));
-                for (let i = 0; i < item.variations.length; i++) {
-                  const v = item.variations[i];
-                  if (!existingVarNames.has(v.name.trim().toLowerCase())) {
-                    await createVariation({
-                      menuItemId: existing.id,
-                      name: v.name,
-                      priceDelta: v.price - item.basePrice,
-                      isDefault: false,
-                    });
-                  }
-                }
-              }
-            } else {
-              // New item — create it with all variations
-              const created = await ipc<{ id: number }>(window.electronAPI.menu.createItem({
-                name: item.name,
-                shortCode: item.shortCode,
-                categoryId: mappedCategoryId,
-                basePrice: item.basePrice,
-                taxRate: item.taxRate,
-                isVeg: item.isVeg,
-                isAvailable: item.isAvailable,
-              }));
-              itemNameMap.set(item.name.trim().toLowerCase(), { id: created.id } as any);
-
-              if (Array.isArray(item.variations) && item.variations.length > 0) {
-                for (let i = 0; i < item.variations.length; i++) {
-                  const v = item.variations[i];
-                  await createVariation({
-                    menuItemId: created.id,
-                    name: v.name,
-                    priceDelta: v.price - item.basePrice,
-                    isDefault: i === 0,
-                  });
-                }
-              }
-              itemCount++;
-            }
-          }
-        }
-
-        // 3. Import addon groups — skip existing by name, only add new
-        if (Array.isArray(data.addonGroups) && data.addonGroups.length > 0) {
-          const existingGroups = await getAddonGroups();
-          const existingGroupNames = new Map(
-            existingGroups.map((g) => [g.name.trim().toLowerCase(), g])
-          );
-
-          const addonGroupIdMap = new Map<number, number>();
-
-          for (const group of data.addonGroups) {
-            const existingGroup = existingGroupNames.get(group.name.trim().toLowerCase());
-
-            if (existingGroup) {
-              // Group exists — only add missing addons
-              addonGroupIdMap.set(group.id, existingGroup.id);
-              if (Array.isArray(group.addons)) {
-                const existingAddonNames = new Set(
-                  (existingGroup.addons ?? []).map((a: any) => a.name.trim().toLowerCase())
-                );
-                for (const addon of group.addons) {
-                  if (!existingAddonNames.has(addon.name.trim().toLowerCase())) {
-                    const createdAddon = await createAddon({
-                      addonGroupId: existingGroup.id,
-                      name: addon.name,
-                      price: addon.price,
-                    });
-                    if (addon.variationPrices && Object.keys(addon.variationPrices).length > 0) {
-                      await ipc(window.electronAPI.menu.setAddonVariationPrices(createdAddon.id, addon.variationPrices));
-                    }
-                  }
-                }
-              }
-            } else {
-              // New group — create with all addons
-              const created = await createAddonGroup({
-                name: group.name,
-                minSelect: group.minSelect,
-                maxSelect: group.maxSelect,
-                isRequired: group.isRequired,
-              });
-              addonGroupIdMap.set(group.id, created.id);
-
-              if (Array.isArray(group.addons)) {
-                for (const addon of group.addons) {
-                  const createdAddon = await createAddon({
-                    addonGroupId: created.id,
-                    name: addon.name,
-                    price: addon.price,
-                  });
-                  if (addon.variationPrices && Object.keys(addon.variationPrices).length > 0) {
-                    await ipc(window.electronAPI.menu.setAddonVariationPrices(createdAddon.id, addon.variationPrices));
-                  }
-                }
-              }
-            }
-          }
-
-          // Link new addon groups to items (only new links)
-          const refreshedItems = await ipc<any[]>(window.electronAPI.menu.getItems());
-          const itemNameToId = new Map(
-            (refreshedItems ?? []).map((i: any) => [i.name.trim().toLowerCase(), i.id])
-          );
-
-          if (data.items) {
-            for (const item of data.items) {
-              if (Array.isArray(item.addonGroupIds) && item.addonGroupIds.length > 0) {
-                const newItemId = itemNameToId.get(item.name.trim().toLowerCase());
-                if (newItemId) {
-                  const existingLinks = await getItemAddonGroupIds(newItemId);
-                  const existingLinkSet = new Set(existingLinks);
-                  for (const oldGroupId of item.addonGroupIds) {
-                    const newGroupId = addonGroupIdMap.get(oldGroupId);
-                    if (newGroupId && !existingLinkSet.has(newGroupId)) {
-                      await linkAddonGroupToItem(newItemId, newGroupId);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        // Replace the menu atomically on the backend
+        await ipc(window.electronAPI.menu.replaceMenu(data));
 
         await refetch();
-        toast.success(t('menu.importSuccess', { categories: catCount, items: itemCount }));
-      } catch (err) {
+        toast.success(t('menu.importSuccessBulk', 'Menu successfully replaced with the uploaded one!'));
+      } catch (err: any) {
         console.error('Import failed:', err);
-        toast.error(t('menu.importFailed'));
+        toast.error(err.message || t('menu.importFailed'));
       } finally {
         setImporting(false);
       }
