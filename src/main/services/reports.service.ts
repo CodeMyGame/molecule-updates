@@ -46,13 +46,15 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
   const rows = db.prepare(`
     SELECT
       DATE(created_at) AS date,
-      COUNT(*) AS total_orders,
-      COALESCE(SUM(grand_total), 0) AS total_revenue,
-      COALESCE(SUM(discount_amount), 0) AS total_discount,
-      COALESCE(SUM(tax_amount), 0) AS total_tax,
-      COALESCE(SUM(subtotal - discount_amount), 0) AS net_revenue
+      COUNT(CASE WHEN status != 'cancelled' THEN 1 END) AS total_orders,
+      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN grand_total ELSE 0 END), 0) AS total_revenue,
+      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN discount_amount ELSE 0 END), 0) AS total_discount,
+      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN tax_amount ELSE 0 END), 0) AS total_tax,
+      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN (subtotal - discount_amount) ELSE 0 END), 0) AS net_revenue,
+      COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled_orders,
+      COALESCE(SUM(CASE WHEN status = 'cancelled' THEN grand_total ELSE 0 END), 0) AS cancelled_revenue
     FROM orders
-    WHERE created_at >= ? AND created_at <= ? AND status != 'cancelled'
+    WHERE created_at >= ? AND created_at <= ?
     GROUP BY DATE(created_at)
     ORDER BY date
   `).all(startDate, endDate) as any[];
@@ -87,6 +89,8 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
       })),
       coinsRedeemed: coins.coinsRedeemed,
       coinsEarned: coins.coinsEarned,
+      cancelledOrders: row.cancelled_orders,
+      cancelledRevenue: row.cancelled_revenue,
     };
   });
 }

@@ -510,6 +510,9 @@ const Reports: React.FC = () => {
     const totalTax = data.reduce((sum, d) => sum + d.totalTax, 0);
     const totalCoinsRedeemed = data.reduce((sum, d) => sum + (d.coinsRedeemed ?? 0), 0);
 
+    const totalCancelledCount = data.reduce((sum, d) => sum + (d.cancelledOrders ?? 0), 0);
+    const totalCancelledValue = data.reduce((sum, d) => sum + (d.cancelledRevenue ?? 0), 0);
+
     const chartData = data.map((d) => ({
       date: formatDate(d.date),
       revenue: d.netRevenue / 100,
@@ -524,6 +527,22 @@ const Reports: React.FC = () => {
           <SummaryCard title={t('reports.avgOrderValue')} value={formatCurrency(avgOrderValue)} icon={<TrendingUp size={20} />} />
           <SummaryCard title={t('reports.totalTax')} value={formatCurrency(totalTax)} icon={<FileText size={20} />} />
         </div>
+
+        {totalCancelledCount > 0 && (
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-rose-800">{t('reports.cancelledOrders', 'Cancelled Orders')}</p>
+              <p className="text-xs text-rose-600">{t('reports.cancelledOrdersDesc', 'Orders that were voided or cancelled by staff')}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-rose-800">
+                {t('reports.cancelledCountVal', { count: totalCancelledCount, value: formatCurrency(totalCancelledValue) }, `${totalCancelledCount} order(s) — ${formatCurrency(totalCancelledValue)}`)}
+              </p>
+              <p className="text-xs text-rose-600 font-medium">{t('reports.cancelledValueOnly', 'Total Cancelled Value')}</p>
+            </div>
+          </div>
+        )}
+
         {totalCoinsRedeemed > 0 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
             <div>
@@ -562,6 +581,8 @@ const Reports: React.FC = () => {
             { header: t('reports.tax'), accessor: 'totalTax', align: 'right', render: (item) => formatCurrency(item.totalTax) },
             ...(totalCoinsRedeemed > 0 ? [{ header: t('reports.coinsRedeemed'), accessor: 'coinsRedeemed' as const, align: 'right' as const, render: (item: any) => formatCurrency(item.coinsRedeemed ?? 0) }] : []),
             { header: t('reports.netRevenue'), accessor: 'netRevenue', align: 'right', render: (item) => formatCurrency(item.netRevenue) },
+            { header: t('reports.cancelledOrders', 'Cancelled Orders'), accessor: 'cancelledOrders', align: 'right', render: (item) => item.cancelledOrders ?? 0 },
+            { header: t('reports.cancelledValue', 'Cancelled Value'), accessor: 'cancelledRevenue', align: 'right', render: (item) => formatCurrency(item.cancelledRevenue ?? 0) },
           ]}
           data={data}
           keyExtractor={(item) => item.date}

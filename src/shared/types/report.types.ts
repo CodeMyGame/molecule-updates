@@ -16,6 +16,8 @@ export interface DailySalesReport {
   ordersByType: { type: string; count: number; revenue: number }[];
   coinsRedeemed: number;   // paise value of coins redeemed
   coinsEarned: number;     // number of coins earned
+  cancelledOrders?: number;
+  cancelledRevenue?: number;
 }
 
 export interface ItemSalesReport {
