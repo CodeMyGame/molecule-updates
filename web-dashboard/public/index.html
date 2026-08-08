@@ -223,6 +223,36 @@
         </div>
       </section>
 
+      <!-- Smart Velocity & Takeaway Insights Row -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4 fade-up" style="animation-delay: 0.08s;">
+        <div class="glass rounded-2xl p-4 hover-lift">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">⚡ Sales Velocity</h3>
+            <span id="sphVal" class="text-xs font-bold text-emerald-400">₹0/hr</span>
+          </div>
+          <div class="text-xl font-bold text-white mb-1" id="ophVal">0 orders/hr</div>
+          <div class="text-[11px] text-zinc-500 font-medium" id="shiftSplitVal">Lunch: 0% • Dinner: 0%</div>
+        </div>
+
+        <div class="glass rounded-2xl p-4 hover-lift">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">💵 Net Owner Takeaway</h3>
+            <span id="digitalRatioVal" class="text-xs font-bold text-indigo-400">0% Digital</span>
+          </div>
+          <div class="text-xl font-bold text-white mb-1" id="netTakeawayVal">₹0.00</div>
+          <div class="text-[11px] text-zinc-500 font-medium" id="netSubtextVal">Subtotal minus Discounts</div>
+        </div>
+
+        <div class="glass rounded-2xl p-4 hover-lift">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400">⏱️ Table Speed & Dwell</h3>
+            <span id="slowTableBadge" class="hidden px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400">0 Slow</span>
+          </div>
+          <div class="text-xl font-bold text-white mb-1" id="avgDwellVal">0 mins avg</div>
+          <div class="text-[11px] text-zinc-500 font-medium" id="dwellSubtextVal">Active table dining duration</div>
+        </div>
+      </section>
+
       <!-- Active Orders Horizon -->
       <section class="fade-up" style="animation-delay: 0.1s;">
         <div class="flex items-center gap-3 mb-3 px-1">
@@ -270,8 +300,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 h-[calc(100%-2rem)]">
             <div class="glass rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden group">
               <div class="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-colors"></div>
-              <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center mb-3 text-amber-500">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <span id="discountRateBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">0% rate</span>
               </div>
               <div id="lpDiscount" class="text-3xl font-bold text-white mb-1">₹0</div>
               <div class="text-sm text-zinc-400 font-medium">Discounts Given</div>
@@ -279,8 +312,11 @@
             </div>
             <div class="glass rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden group">
               <div class="absolute right-0 top-0 w-32 h-32 bg-netflix-red/10 rounded-full blur-3xl group-hover:bg-netflix-red/20 transition-colors"></div>
-              <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mb-3 text-netflix-red">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-netflix-red">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </div>
+                <span id="voidRateBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-netflix-red">0% rate</span>
               </div>
               <div class="flex items-baseline gap-2 mb-1">
                 <div id="lpCancelled" class="text-3xl font-bold text-white">0</div>
@@ -1434,6 +1470,72 @@ _Sent from Molecule Owner Dashboard_`;
       $('lpCancelled').textContent = num(can.count);
       $('lpCancelledVal').textContent = money(can.value) + ' value';
 
+      // Smart Metrics: Velocity, Net Takeaway, Leakage Rates
+      const revPaise = Number(p.revenue) || 0;
+      const ordersCount = Number(p.orders) || 0;
+      const discPaise = Number(p.discountTotal) || 0;
+      const taxPaise = Number(p.taxTotal) || 0;
+      const canPaise = Number(can.value) || 0;
+
+      // Leakage Rates
+      const discRate = revPaise > 0 ? ((discPaise / revPaise) * 100).toFixed(1) : '0';
+      const voidRate = revPaise > 0 ? ((canPaise / revPaise) * 100).toFixed(1) : '0';
+      const discBadge = $('discountRateBadge');
+      if (discBadge) {
+        discBadge.textContent = discRate + '% rate';
+        discBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded ' +
+          (Number(discRate) > 10 ? 'bg-red-500/20 text-netflix-red' : 'bg-amber-500/20 text-amber-400');
+      }
+      const voidBadge = $('voidRateBadge');
+      if (voidBadge) {
+        voidBadge.textContent = voidRate + '% rate';
+        voidBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded ' +
+          (Number(voidRate) > 5 ? 'bg-red-500/20 text-netflix-red' : 'bg-zinc-800 text-zinc-400');
+      }
+
+      // Sales Velocity (Sales/hr & Orders/hr)
+      const now = new Date();
+      const currentH = now.getHours() + (now.getMinutes() / 60);
+      const elapsedH = Math.max(1, currentH - 9); // assuming 9am start
+      const sphRupees = Math.round((revPaise / 100) / elapsedH);
+      const oph = (ordersCount / elapsedH).toFixed(1);
+      
+      const sphEl = $('sphVal');
+      if (sphEl) sphEl.textContent = currencySymbol + num(sphRupees) + '/hr';
+      const ophEl = $('ophVal');
+      if (ophEl) ophEl.textContent = oph + ' orders/hr';
+
+      // Lunch vs Dinner shift split
+      const hourly = p.hourlySales || [];
+      let lunchRev = 0, dinnerRev = 0, totalShiftRev = 0;
+      hourly.forEach(h => {
+        const rev = Number(h.revenue) || 0;
+        totalShiftRev += rev;
+        if (h.hour >= 12 && h.hour <= 16) lunchRev += rev;
+        if (h.hour >= 19 && h.hour <= 23) dinnerRev += rev;
+      });
+      const lunchPct = totalShiftRev > 0 ? Math.round((lunchRev / totalShiftRev) * 100) : 0;
+      const dinnerPct = totalShiftRev > 0 ? Math.round((dinnerRev / totalShiftRev) * 100) : 0;
+      const shiftEl = $('shiftSplitVal');
+      if (shiftEl) shiftEl.textContent = `Lunch: ${lunchPct}% • Dinner: ${dinnerPct}%`;
+
+      // Net Owner Takeaway
+      const netPaise = Math.max(0, revPaise - taxPaise - discPaise);
+      const netEl = $('netTakeawayVal');
+      if (netEl) netEl.textContent = money(netPaise);
+
+      // Digital vs Cash ratio
+      const payments = p.payments || [];
+      let totalPay = 0, digitalPay = 0;
+      payments.forEach(pay => {
+        const val = Number(pay.value || pay.total) || 0;
+        totalPay += val;
+        if (String(pay.label || pay.mode).toLowerCase() !== 'cash') digitalPay += val;
+      });
+      const digitalPct = totalPay > 0 ? Math.round((digitalPay / totalPay) * 100) : 0;
+      const digEl = $('digitalRatioVal');
+      if (digEl) digEl.textContent = digitalPct + '% Digital';
+
       // Payments
       renderBars('payments', (p.payments || []).map((x) => ({
         label: prettyLabel(x.mode), value: Number(x.total) || 0, sub: num(x.count) + ' txn',
@@ -1779,6 +1881,34 @@ _Sent from Molecule Owner Dashboard_`;
     function renderActiveOrders(list, totalValue) {
       lastActive = list; lastActiveValue = totalValue;
       const el = $('activeOrders'), countEl = $('activeCount'), valEl = $('activeValue');
+
+      // Calculate Table Dwell & Slow Tables
+      let totalDwellMins = 0;
+      let slowCount = 0;
+      list.forEach((o) => {
+        if (o.openedAt) {
+          const opened = new Date(String(o.openedAt).replace(' ', 'T') + 'Z');
+          if (!isNaN(opened.getTime())) {
+            const mins = Math.max(0, Math.round((Date.now() - opened.getTime()) / 60000));
+            totalDwellMins += mins;
+            if (mins >= 60) slowCount++;
+          }
+        }
+      });
+      const avgMins = list.length > 0 ? Math.round(totalDwellMins / list.length) : 0;
+      const avgDwellEl = $('avgDwellVal');
+      if (avgDwellEl) avgDwellEl.textContent = avgMins + ' mins avg';
+      
+      const slowBadge = $('slowTableBadge');
+      if (slowBadge) {
+        if (slowCount > 0) {
+          slowBadge.textContent = slowCount + ' Slow (60m+)';
+          slowBadge.classList.remove('hidden');
+        } else {
+          slowBadge.classList.add('hidden');
+        }
+      }
+
       if (list.length) { countEl.textContent = list.length; countEl.classList.remove('hidden'); valEl.textContent = money(totalValue) + ' open'; }
       else { countEl.classList.add('hidden'); valEl.textContent = ''; }
       if (!list.length) { el.innerHTML = `<p class="text-sm text-zinc-500">No open orders right now.</p>`; return; }
