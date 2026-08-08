@@ -386,6 +386,7 @@
     const db = getFirestore(app);
     let currentUid = null;
     let historicalRows = [];
+    let currentChartView = 'weekly';
     const $ = (id) => document.getElementById(id);
 
     // ── Sound & Web Audio Alert System ──
