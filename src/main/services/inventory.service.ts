@@ -101,6 +101,41 @@ export function restoreForOrder(orderId: number): void {
   restoreInTransaction();
 }
 
+export function restoreForRemovedItem(orderItemId: number, menuItemId: number, quantity: number): void {
+  const db = getDb();
+  const restoreInTransaction = db.transaction(() => {
+    const recipes = db.prepare(`
+      SELECT inventory_item_id, quantity_used
+      FROM recipes
+      WHERE menu_item_id = ?
+    `).all(menuItemId) as any[];
+
+    for (const recipe of recipes) {
+      const totalRestore = recipe.quantity_used * quantity;
+
+      db.prepare(`
+        UPDATE inventory_items
+        SET current_stock = current_stock + ?, updated_at = datetime('now')
+        WHERE id = ?
+      `).run(totalRestore, recipe.inventory_item_id);
+
+      db.prepare(`
+        INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(
+        recipe.inventory_item_id,
+        StockTransactionType.ADJUSTMENT,
+        totalRestore,
+        'item_removal',
+        orderItemId,
+        `Restored stock for removed item #${orderItemId}`,
+      );
+    }
+  });
+
+  restoreInTransaction();
+}
+
 export function checkLowStock(): InventoryItem[] {
   return inventoryRepo.getLowStock();
 }

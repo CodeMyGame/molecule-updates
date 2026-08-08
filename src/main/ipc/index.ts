@@ -298,6 +298,13 @@ export function registerAllHandlers(): void {
       referenceNo: p.reference ?? p.referenceNo ?? null,
     }));
 
+    // Validate payment amounts are non-negative
+    for (const p of payments) {
+      if (typeof p.amount !== 'number' || isNaN(p.amount) || p.amount < 0) {
+        throw new Error('All payment amounts must be non-negative numbers.');
+      }
+    }
+
     // Validate loyalty coin redemption balance if coins are being redeemed
     const redeemCoins = typeof data.coinsToRedeem === 'number' && data.coinsToRedeem > 0 ? data.coinsToRedeem : 0;
     if (redeemCoins > 0) {
@@ -308,6 +315,12 @@ export function registerAllHandlers(): void {
       if (!existingCustomer || (existingCustomer.loyaltyPoints ?? 0) < redeemCoins) {
         throw new Error(`Insufficient loyalty coins. Requested: ${redeemCoins}, Available: ${existingCustomer?.loyaltyPoints ?? 0}`);
       }
+    }
+
+    // Prevent double-payment on already completed orders
+    const existingPayments = db.prepare('SELECT COUNT(*) as count FROM payments WHERE order_id = ?').get(orderId) as { count: number };
+    if (existingPayments.count > 0) {
+      throw new Error('Payment already exists for this order. Cannot process duplicate payment.');
     }
 
     // Validate payment total covers order amount
@@ -379,7 +392,11 @@ export function registerAllHandlers(): void {
               }
             }
           }
-        } catch (err) {
+        } catch (err: any) {
+          // If coin redemption was requested, the error is critical — abort the payment
+          if (redeemCoins > 0) {
+            throw err;
+          }
           console.error('Customer handling failed:', err);
         }
       }
@@ -933,6 +950,7 @@ export function registerAllHandlers(): void {
       WHERE p.mode = 'cash'
         AND o.status = 'completed'
         AND p.created_at >= ?
+        AND p.created_at <= datetime('now')
     `).get(sessionOpenedAt) as { cash_total: number } | undefined;
 
     const cashSales = cashSalesRow?.cash_total ?? 0;

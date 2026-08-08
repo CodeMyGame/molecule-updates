@@ -192,8 +192,8 @@ export function moveTable(orderId: number, newTableId: number): Order & { items:
     if (!targetTable) throw new Error('Target table does not exist');
     if (targetTable.status === TableStatus.OCCUPIED) {
       const activeOnTarget = db.prepare(
-        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status = ? AND id != ?"
-      ).get(newTableId, OrderStatus.ACTIVE, orderId) as any;
+        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status IN (?, ?) AND id != ?"
+      ).get(newTableId, OrderStatus.ACTIVE, OrderStatus.HOLD, orderId) as any;
       if (activeOnTarget.count > 0) throw new Error('Target table is occupied by another order');
     }
 
@@ -208,8 +208,8 @@ export function moveTable(orderId: number, newTableId: number): Order & { items:
     if (oldTableId) {
       // Only free old table if no other active orders
       const activeOnOld = db.prepare(
-        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status = ? AND id != ?"
-      ).get(oldTableId, OrderStatus.ACTIVE, orderId) as any;
+        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status IN (?, ?) AND id != ?"
+      ).get(oldTableId, OrderStatus.ACTIVE, OrderStatus.HOLD, orderId) as any;
       if (activeOnOld.count === 0) {
         db.prepare('UPDATE tables SET status = ? WHERE id = ?').run(TableStatus.FREE, oldTableId);
       }

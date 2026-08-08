@@ -219,10 +219,26 @@ export function getAll(filters?: {
   }));
 }
 
+const VALID_TRANSITIONS: Record<string, OrderStatus[]> = {
+  [OrderStatus.ACTIVE]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED, OrderStatus.HOLD, OrderStatus.MERGED],
+  [OrderStatus.HOLD]: [OrderStatus.ACTIVE, OrderStatus.CANCELLED],
+  [OrderStatus.COMPLETED]: [],
+  [OrderStatus.CANCELLED]: [],
+  [OrderStatus.MERGED]: [],
+};
+
 export function updateStatus(id: number, status: OrderStatus): Order | undefined {
   const db = getDb();
 
   const updateInTransaction = db.transaction(() => {
+    // Validate status transition
+    const current = db.prepare('SELECT status FROM orders WHERE id = ?').get(id) as any;
+    if (!current) throw new Error('Order not found');
+    const allowed = VALID_TRANSITIONS[current.status] ?? [];
+    if (!allowed.includes(status)) {
+      throw new Error(`Invalid status transition: ${current.status} → ${status}`);
+    }
+
     const updates: string[] = ["status = ?", "updated_at = datetime('now')"];
     const params: unknown[] = [status];
 
@@ -239,8 +255,8 @@ export function updateStatus(id: number, status: OrderStatus): Order | undefined
       if (order?.table_id) {
         // Only free if no other active orders on the table
         const activeOnTable = db.prepare(
-          "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status = ? AND id != ?"
-        ).get(order.table_id, OrderStatus.ACTIVE, id) as any;
+          "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status IN (?, ?) AND id != ?"
+        ).get(order.table_id, OrderStatus.ACTIVE, OrderStatus.HOLD, id) as any;
         if (activeOnTable.count === 0) {
           db.prepare("UPDATE tables SET status = 'free' WHERE id = ?").run(order.table_id);
         }
@@ -274,6 +290,13 @@ export function updateStatus(id: number, status: OrderStatus): Order | undefined
 
 export function addItems(orderId: number, items: CartItem[]): Order | undefined {
   const db = getDb();
+
+  // Prevent adding items to completed/cancelled/merged orders
+  const orderCheck = db.prepare('SELECT status FROM orders WHERE id = ?').get(orderId) as any;
+  if (!orderCheck) throw new Error('Order not found');
+  if (orderCheck.status !== OrderStatus.ACTIVE && orderCheck.status !== OrderStatus.HOLD) {
+    throw new Error(`Cannot add items to an order with status: ${orderCheck.status}`);
+  }
 
   const insertOrderItem = db.prepare(`
     INSERT INTO order_items (order_id, menu_item_id, combo_id, variation_id, name, quantity, unit_price, tax_rate, tax_amount, total, notes, kot_status)
@@ -356,27 +379,38 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
 export function removeItem(orderItemId: number): void {
   const db = getDb();
 
-  const removeInTransaction = db.transaction(() => {
-    const item = db.prepare('SELECT order_id FROM order_items WHERE id = ?').get(orderItemId) as any;
-    if (!item) return;
+  // Capture item details BEFORE deletion for inventory restoration
+  const itemDetails = db.prepare('SELECT id, order_id, menu_item_id, quantity FROM order_items WHERE id = ?').get(orderItemId) as any;
+  if (!itemDetails) return;
 
-    db.prepare('DELETE FROM kot_items WHERE order_item_id = ?').run(orderItemId);
+  const removeInTransaction = db.transaction(() => {
+    // Soft-cancel KOT items instead of hard-deleting to preserve kitchen audit trail
+    db.prepare('UPDATE kot_items SET is_cancelled = 1 WHERE order_item_id = ?').run(orderItemId);
     db.prepare('DELETE FROM order_item_addons WHERE order_item_id = ?').run(orderItemId);
     db.prepare('DELETE FROM order_items WHERE id = ?').run(orderItemId);
 
-    // Delete any KOTs that now have zero items
+    // Delete any KOTs that now have zero non-cancelled items
     db.prepare(`
       DELETE FROM kots WHERE order_id = ? AND id NOT IN (
         SELECT DISTINCT kot_id FROM kot_items WHERE kot_id IN (
           SELECT id FROM kots WHERE order_id = ?
-        )
+        ) AND is_cancelled = 0
       )
-    `).run(item.order_id, item.order_id);
+    `).run(itemDetails.order_id, itemDetails.order_id);
 
-    recalculateOrderTotals(item.order_id);
+    recalculateOrderTotals(itemDetails.order_id);
   });
 
   removeInTransaction();
+
+  // Restore inventory for the removed item
+  if (itemDetails.menu_item_id) {
+    try {
+      inventoryService.restoreForRemovedItem(orderItemId, itemDetails.menu_item_id, itemDetails.quantity);
+    } catch (err) {
+      console.error('Inventory restoration failed for removed item', orderItemId, err);
+    }
+  }
 }
 
 export function applyDiscount(
