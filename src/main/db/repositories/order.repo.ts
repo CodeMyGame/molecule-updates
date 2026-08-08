@@ -220,42 +220,46 @@ export function getAll(filters?: {
 
 export function updateStatus(id: number, status: OrderStatus): Order | undefined {
   const db = getDb();
-  const updates: string[] = ["status = ?", "updated_at = datetime('now')"];
-  const params: unknown[] = [status];
 
-  if (status === OrderStatus.COMPLETED) {
-    updates.push("completed_at = datetime('now')");
-  }
+  const updateInTransaction = db.transaction(() => {
+    const updates: string[] = ["status = ?", "updated_at = datetime('now')"];
+    const params: unknown[] = [status];
 
-  params.push(id);
-  db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`).run(...params);
-
-  // Free up table and clear KOTs if order completed or cancelled
-  if (status === OrderStatus.COMPLETED || status === OrderStatus.CANCELLED) {
-    const order = db.prepare('SELECT table_id FROM orders WHERE id = ?').get(id) as any;
-    if (order?.table_id) {
-      // Only free if no other active orders on the table
-      const activeOnTable = db.prepare(
-        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status = ? AND id != ?"
-      ).get(order.table_id, OrderStatus.ACTIVE, id) as any;
-      if (activeOnTable.count === 0) {
-        db.prepare("UPDATE tables SET status = 'free' WHERE id = ?").run(order.table_id);
-      }
+    if (status === OrderStatus.COMPLETED) {
+      updates.push("completed_at = datetime('now')");
     }
 
-    // Mark all active KOTs for this order as served
-    db.prepare(`
-      UPDATE kots SET status = 'served'
-      WHERE order_id = ? AND status IN ('pending', 'sent', 'preparing', 'ready')
-    `).run(id);
+    params.push(id);
+    db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 
-    // Also update order_items kot_status
-    db.prepare(`
-      UPDATE order_items SET kot_status = 'served'
-      WHERE order_id = ? AND kot_status != 'served'
-    `).run(id);
-  }
+    // Free up table and clear KOTs if order completed or cancelled
+    if (status === OrderStatus.COMPLETED || status === OrderStatus.CANCELLED) {
+      const order = db.prepare('SELECT table_id FROM orders WHERE id = ?').get(id) as any;
+      if (order?.table_id) {
+        // Only free if no other active orders on the table
+        const activeOnTable = db.prepare(
+          "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status = ? AND id != ?"
+        ).get(order.table_id, OrderStatus.ACTIVE, id) as any;
+        if (activeOnTable.count === 0) {
+          db.prepare("UPDATE tables SET status = 'free' WHERE id = ?").run(order.table_id);
+        }
+      }
 
+      // Mark all active KOTs for this order as served
+      db.prepare(`
+        UPDATE kots SET status = 'served'
+        WHERE order_id = ? AND status IN ('pending', 'sent', 'preparing', 'ready')
+      `).run(id);
+
+      // Also update order_items kot_status
+      db.prepare(`
+        UPDATE order_items SET kot_status = 'served'
+        WHERE order_id = ? AND kot_status != 'served'
+      `).run(id);
+    }
+  });
+
+  updateInTransaction();
   return getById(id);
 }
 

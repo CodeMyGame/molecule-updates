@@ -84,28 +84,32 @@ export function getActive(): KOT[] {
 
 export function updateStatus(id: number, status: KOTStatus): KOT | undefined {
   const db = getDb();
-  const updates: string[] = ['status = ?'];
-  const params: unknown[] = [status];
 
-  if (status === KOTStatus.PREPARING) {
-    updates.push("accepted_at = datetime('now')");
-  } else if (status === KOTStatus.READY) {
-    updates.push("ready_at = datetime('now')");
-  }
+  const updateInTransaction = db.transaction(() => {
+    const updates: string[] = ['status = ?'];
+    const params: unknown[] = [status];
 
-  params.push(id);
-  db.prepare(`UPDATE kots SET ${updates.join(', ')} WHERE id = ?`).run(...params);
-
-  // Update associated order items kot_status so the billing page reflects the
-  // kitchen's progress (preparing / ready / served).
-  if (status === KOTStatus.PREPARING || status === KOTStatus.READY || status === KOTStatus.SERVED) {
-    const kotItems = db.prepare('SELECT order_item_id FROM kot_items WHERE kot_id = ?').all(id) as any[];
-    const updateOrderItem = db.prepare('UPDATE order_items SET kot_status = ? WHERE id = ?');
-    for (const item of kotItems) {
-      updateOrderItem.run(status, item.order_item_id);
+    if (status === KOTStatus.PREPARING) {
+      updates.push("accepted_at = datetime('now')");
+    } else if (status === KOTStatus.READY) {
+      updates.push("ready_at = datetime('now')");
     }
-  }
 
+    params.push(id);
+    db.prepare(`UPDATE kots SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+
+    // Update associated order items kot_status so the billing page reflects the
+    // kitchen's progress (preparing / ready / served).
+    if (status === KOTStatus.PREPARING || status === KOTStatus.READY || status === KOTStatus.SERVED) {
+      const kotItems = db.prepare('SELECT order_item_id FROM kot_items WHERE kot_id = ?').all(id) as any[];
+      const updateOrderItem = db.prepare('UPDATE order_items SET kot_status = ? WHERE id = ?');
+      for (const item of kotItems) {
+        updateOrderItem.run(status, item.order_item_id);
+      }
+    }
+  });
+
+  updateInTransaction();
   return getKotById(id);
 }
 
