@@ -195,8 +195,8 @@ const Tables: React.FC = () => {
     if (orderId) {
       try {
         const order = await ipc<any>(window.electronAPI.orders.getByTable(tableId));
-        if (order && order.items && order.items.length > 0) {
-          const cartItems = order.items.map((oi: any) => ({
+        if (order) {
+          const cartItems = (order.items || []).map((oi: any) => ({
             menuItem: {
               id: oi.menuItemId ?? oi.menu_item_id,
               name: (oi.name ?? '').split(' (')[0],
@@ -256,8 +256,8 @@ const Tables: React.FC = () => {
   const handlePayFromTable = useCallback(async (tableId: number, orderId: number) => {
     try {
       const order = await ipc<any>(window.electronAPI.orders.getByTable(tableId));
-      if (order && order.items && order.items.length > 0) {
-        const cartItems = order.items.map((oi: any) => ({
+      if (order) {
+        const cartItems = (order.items || []).map((oi: any) => ({
           menuItem: {
             id: oi.menuItemId ?? oi.menu_item_id,
             name: (oi.name ?? '').split(' (')[0],

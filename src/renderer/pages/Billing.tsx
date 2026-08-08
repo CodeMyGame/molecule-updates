@@ -525,8 +525,8 @@ const Billing: React.FC = () => {
   const loadTableOrder = useCallback(
     async (tableId: number) => {
       const order = await ipc<any>(window.electronAPI.orders.getByTable(tableId));
-      if (order && order.items && order.items.length > 0) {
-        const cartItems = order.items.map((oi: any) => ({
+      if (order) {
+        const cartItems = (order.items || []).map((oi: any) => ({
           menuItem: {
             id: oi.menuItemId ?? oi.menu_item_id ?? 0,
             name: oi.name?.split(' (')[0] ?? oi.name,
@@ -612,7 +612,7 @@ const Billing: React.FC = () => {
     async (e: React.MouseEvent, table: Table) => {
       e.preventDefault();
       const order = await ipc<any>(window.electronAPI.orders.getByTable(table.id)).catch(() => null);
-      const orderId = order && order.items && order.items.length > 0 ? order.id : 0;
+      const orderId = order ? order.id : 0;
       setTransferMenu({ sourceTableId: table.id, orderId, x: e.clientX, y: e.clientY, mode: 'menu' });
     },
     []

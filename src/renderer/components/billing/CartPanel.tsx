@@ -196,6 +196,18 @@ const CartPanel: React.FC<CartPanelProps> = ({
           </div>
           <p className="text-xs font-medium text-gray-500">{t('cart.empty')}</p>
           <p className="text-[10px] text-gray-400 mt-0.5 text-center">{t('cart.emptyDesc')}</p>
+
+          {currentOrderId && (
+            <Button
+              variant="danger"
+              size="sm"
+              icon={<Trash2 size={13} />}
+              onClick={onCancelOrder}
+              className="mt-4"
+            >
+              {t('cart.cancelOrder', 'Cancel Order')}
+            </Button>
+          )}
         </div>
       </div>
     );
