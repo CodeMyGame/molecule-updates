@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { ipc } from '../lib/ipc';
 import { useBillingStore } from '../stores/billing.store';
 import { useAuthStore } from '../stores/auth.store';
+import { useTranslation } from 'react-i18next';
 
 export interface Order {
   id: number;
@@ -56,6 +57,7 @@ interface UseOrdersReturn {
 }
 
 export function useOrders(): UseOrdersReturn {
+  const { t } = useTranslation();
   const [activeOrders, setActiveOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,11 +79,23 @@ export function useOrders(): UseOrdersReturn {
   }, []);
 
   const createOrder = useCallback(async (): Promise<Order> => {
-    const { cart, orderType, selectedTableId, selectedCustomerId, discount, notes } = billingStore;
+    const { cart, orderType, selectedCustomerId, discount, notes } = billingStore;
+    let tableId = billingStore.selectedTableId;
+
+    if (orderType === 'dine_in' && !tableId) {
+      const tables = await ipc<any[]>(window.electronAPI.tables.getAll());
+      const freeTables = tables.filter((t) => t.status === 'free');
+      if (freeTables.length === 0) {
+        throw new Error(t('toast.noFreeTables', 'No empty tables available for Dine-In. Please free a table first.'));
+      }
+      const selectedFreeTable = freeTables[0];
+      tableId = selectedFreeTable.id;
+      billingStore.setTable(selectedFreeTable.id);
+    }
 
     const orderData = {
       orderType: orderType,
-      tableId: selectedTableId,
+      tableId: tableId,
       customerId: selectedCustomerId,
       staffId: (() => {
         if (!currentUser?.id) throw new Error('No staff logged in. Please log in first.');
@@ -118,7 +132,7 @@ export function useOrders(): UseOrdersReturn {
       }
     } catch { /* ignore — IDs will be set on next load */ }
     return order;
-  }, [billingStore]);
+  }, [billingStore, t]);
 
   const holdOrder = useCallback(async () => {
     try {
