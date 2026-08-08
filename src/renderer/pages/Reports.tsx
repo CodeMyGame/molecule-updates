@@ -536,7 +536,7 @@ const Reports: React.FC = () => {
             </div>
             <div className="text-right">
               <p className="text-lg font-bold text-rose-800">
-                {t('reports.cancelledCountVal', { count: totalCancelledCount, value: formatCurrency(totalCancelledValue) }, `${totalCancelledCount} order(s) — ${formatCurrency(totalCancelledValue)}`)}
+                {t('reports.cancelledCountVal', { defaultValue: `${totalCancelledCount} order(s) — ${formatCurrency(totalCancelledValue)}`, count: totalCancelledCount, value: formatCurrency(totalCancelledValue) })}
               </p>
               <p className="text-xs text-rose-600 font-medium">{t('reports.cancelledValueOnly', 'Total Cancelled Value')}</p>
             </div>
