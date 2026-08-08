@@ -292,12 +292,24 @@ export function registerAllHandlers(): void {
       referenceNo: p.reference ?? p.referenceNo ?? null,
     }));
 
+    // Validate loyalty coin redemption balance if coins are being redeemed
+    const redeemCoins = typeof data.coinsToRedeem === 'number' && data.coinsToRedeem > 0 ? data.coinsToRedeem : 0;
+    if (redeemCoins > 0) {
+      if (!data.customer?.phone) {
+        throw new Error('Customer phone number is required to redeem loyalty coins.');
+      }
+      const existingCustomer = customerRepo.findByPhone(data.customer.phone);
+      if (!existingCustomer || (existingCustomer.loyaltyPoints ?? 0) < redeemCoins) {
+        throw new Error(`Insufficient loyalty coins. Requested: ${redeemCoins}, Available: ${existingCustomer?.loyaltyPoints ?? 0}`);
+      }
+    }
+
     // Validate payment total covers order amount
     const order = db.prepare('SELECT grand_total FROM orders WHERE id = ?').get(orderId) as any;
     if (!order) throw new Error('Order not found');
     const paymentTotal = payments.reduce((sum: number, p: any) => sum + (p.amount ?? 0), 0);
     const tip = typeof data.tip === 'number' ? data.tip : 0;
-    const coinDiscount = typeof data.coinsToRedeem === 'number' ? data.coinsToRedeem * 100 : 0; // coins to paise
+    const coinDiscount = redeemCoins * 100; // coins to paise
     if (paymentTotal + coinDiscount < order.grand_total + tip) {
       throw new Error(`Payment total (${paymentTotal + coinDiscount}) is less than order total (${order.grand_total + tip})`);
     }
@@ -331,13 +343,13 @@ export function registerAllHandlers(): void {
             customerRepo.recordVisit(customerId, order.grand_total);
 
             // --- Coin redemption ---
-            const redeemCoins = typeof data.coinsToRedeem === 'number' ? data.coinsToRedeem : 0;
             if (redeemCoins > 0) {
               const customer = customerRepo.getById(customerId);
-              if (customer && customer.loyaltyPoints >= redeemCoins) {
-                customerRepo.addLoyalty(customerId, orderId, -redeemCoins, `Redeemed ${redeemCoins} coins on order #${orderId}`);
-                coinsRedeemed = redeemCoins;
+              if (!customer || (customer.loyaltyPoints ?? 0) < redeemCoins) {
+                throw new Error(`Insufficient loyalty coins balance for redemption.`);
               }
+              customerRepo.addLoyalty(customerId, orderId, -redeemCoins, `Redeemed ${redeemCoins} coins on order #${orderId}`);
+              coinsRedeemed = redeemCoins;
             }
 
             // --- Coin awarding based on slabs ---

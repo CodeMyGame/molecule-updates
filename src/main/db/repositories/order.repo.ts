@@ -106,6 +106,9 @@ export function create(data: CreateOrderDTO): Order {
       }
     }
 
+    // Recalculate totals including all addon prices
+    recalculateOrderTotals(orderId);
+
     // Update table status if dine-in
     if (data.tableId) {
       db.prepare("UPDATE tables SET status = 'occupied' WHERE id = ?").run(data.tableId);
@@ -572,11 +575,16 @@ function generateOrderNumber(): string {
 
 export function recalculateOrderTotals(orderId: number): void {
   const db = getDb();
-  const items = db.prepare('SELECT unit_price, quantity, tax_rate FROM order_items WHERE order_id = ?').all(orderId) as any[];
+  const items = db.prepare(`
+    SELECT oi.id, oi.unit_price, oi.quantity, oi.tax_rate,
+      COALESCE((SELECT SUM(price) FROM order_item_addons oia WHERE oia.order_item_id = oi.id), 0) AS addon_total
+    FROM order_items oi
+    WHERE oi.order_id = ?
+  `).all(orderId) as any[];
 
   let subtotal = 0;
   for (const item of items) {
-    subtotal += item.unit_price * item.quantity;
+    subtotal += (item.unit_price * item.quantity) + (item.addon_total ?? 0);
   }
 
   const order = db.prepare('SELECT discount_type, discount_value FROM orders WHERE id = ?').get(orderId) as any;
@@ -587,11 +595,11 @@ export function recalculateOrderTotals(orderId: number): void {
     discountAmount = order.discount_value || 0;
   }
 
-  // Tax is calculated on post-discount amounts (proportional reduction per item)
+  // Tax is calculated on post-discount amounts (proportional reduction per item + addons)
   const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
   let taxAmount = 0;
   for (const item of items) {
-    const itemTotal = item.unit_price * item.quantity;
+    const itemTotal = (item.unit_price * item.quantity) + (item.addon_total ?? 0);
     const discountedItemTotal = Math.round(itemTotal * (1 - discountRatio));
     taxAmount += Math.round(discountedItemTotal * item.tax_rate / 100);
   }
