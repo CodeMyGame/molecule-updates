@@ -163,6 +163,10 @@ export const REPORTS = {
   kitchenPrepTime: 'reports:kitchenPrepTime',
   shiftHandover: 'reports:shiftHandover',
   busyHours: 'reports:busyHours',
+  customerLoyalty: 'reports:customerLoyalty',
+  cogsAnalytics: 'reports:cogsAnalytics',
+  tableTurnaround: 'reports:tableTurnaround',
+  lossPrevention: 'reports:lossPrevention',
 } as const;
 
 export const SETTINGS = {

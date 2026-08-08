@@ -9,6 +9,10 @@ import type {
   GSTReport,
   BusyHoursReport,
   DateRangeFilter,
+  CustomerLoyaltyReport,
+  CogsReport,
+  TableTurnaroundReport,
+  LossPreventionReport,
 } from '../../shared/types/report.types';
 
 export interface StaffPerformanceReport {
@@ -17,6 +21,8 @@ export interface StaffPerformanceReport {
   totalOrders: number;
   totalRevenue: number;
   averageOrderValue: number;
+  totalHoursWorked: number;
+  revenuePerHour: number;
 }
 
 export interface InventoryConsumptionReport {
@@ -73,6 +79,10 @@ interface UseReportsReturn {
   staffPerformance: StaffPerformanceReport[];
   inventoryConsumption: InventoryConsumptionReport[];
   busyHours: BusyHoursReport | null;
+  customerLoyalty: CustomerLoyaltyReport | null;
+  cogsAnalytics: CogsReport | null;
+  tableTurnaround: TableTurnaroundReport[];
+  lossPrevention: LossPreventionReport | null;
   // Fetch functions
   fetchDailySales: () => Promise<void>;
   fetchItemSales: () => Promise<void>;
@@ -83,6 +93,10 @@ interface UseReportsReturn {
   fetchStaffPerformance: () => Promise<void>;
   fetchInventoryConsumption: () => Promise<void>;
   fetchBusyHours: () => Promise<void>;
+  fetchCustomerLoyalty: () => Promise<void>;
+  fetchCogsAnalytics: () => Promise<void>;
+  fetchTableTurnaround: () => Promise<void>;
+  fetchLossPrevention: () => Promise<void>;
 }
 
 export function useReports(): UseReportsReturn {
@@ -100,6 +114,10 @@ export function useReports(): UseReportsReturn {
   const [staffPerformance, setStaffPerformance] = useState<StaffPerformanceReport[]>([]);
   const [inventoryConsumption, setInventoryConsumption] = useState<InventoryConsumptionReport[]>([]);
   const [busyHours, setBusyHours] = useState<BusyHoursReport | null>(null);
+  const [customerLoyalty, setCustomerLoyalty] = useState<CustomerLoyaltyReport | null>(null);
+  const [cogsAnalytics, setCogsAnalytics] = useState<CogsReport | null>(null);
+  const [tableTurnaround, setTableTurnaround] = useState<TableTurnaroundReport[]>([]);
+  const [lossPrevention, setLossPrevention] = useState<LossPreventionReport | null>(null);
 
   const setDatePreset = useCallback((preset: DatePreset) => {
     setDatePresetState(preset);
@@ -243,6 +261,66 @@ export function useReports(): UseReportsReturn {
     }
   }, [dateRange]);
 
+  const fetchCustomerLoyalty = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ipc<CustomerLoyaltyReport>(
+        window.electronAPI.reports.customerLoyalty(dateRange)
+      );
+      setCustomerLoyalty(data ?? null);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to fetch customer loyalty reports');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange]);
+
+  const fetchCogsAnalytics = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ipc<CogsReport>(
+        window.electronAPI.reports.cogsAnalytics(dateRange)
+      );
+      setCogsAnalytics(data ?? null);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to fetch COGS analytics');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange]);
+
+  const fetchTableTurnaround = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ipc<TableTurnaroundReport[]>(
+        window.electronAPI.reports.tableTurnaround(dateRange)
+      );
+      setTableTurnaround(data ?? []);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to fetch table turnaround analytics');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange]);
+
+  const fetchLossPrevention = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ipc<LossPreventionReport>(
+        window.electronAPI.reports.lossPrevention(dateRange)
+      );
+      setLossPrevention(data ?? null);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to fetch loss prevention reports');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange]);
+
   return {
     datePreset,
     dateRange,
@@ -259,6 +337,10 @@ export function useReports(): UseReportsReturn {
     staffPerformance,
     inventoryConsumption,
     busyHours,
+    customerLoyalty,
+    cogsAnalytics,
+    tableTurnaround,
+    lossPrevention,
     fetchDailySales,
     fetchItemSales,
     fetchCategorySales,
@@ -268,5 +350,9 @@ export function useReports(): UseReportsReturn {
     fetchStaffPerformance,
     fetchInventoryConsumption,
     fetchBusyHours,
+    fetchCustomerLoyalty,
+    fetchCogsAnalytics,
+    fetchTableTurnaround,
+    fetchLossPrevention,
   };
 }

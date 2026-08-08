@@ -1,5 +1,19 @@
 import { getDb } from '../db/connection';
-import type { DateRangeFilter, DailySalesReport, ItemSalesReport, CategorySalesReport, PaymentSummaryReport, CashFlowReport, GSTReport, BusyBucket, BusyHoursReport } from '../../shared/types/report.types';
+import type {
+  DateRangeFilter,
+  DailySalesReport,
+  ItemSalesReport,
+  CategorySalesReport,
+  PaymentSummaryReport,
+  CashFlowReport,
+  GSTReport,
+  BusyBucket,
+  BusyHoursReport,
+  CustomerLoyaltyReport,
+  CogsReport,
+  TableTurnaroundReport,
+  LossPreventionReport,
+} from '../../shared/types/report.types';
 import type { PaymentMode } from '../../shared/enums';
 
 /** Normalize date range so endDate includes the full day (appends 23:59:59) */
@@ -506,6 +520,8 @@ export function staffPerformance(dateRange: DateRangeFilter): {
   totalOrders: number;
   totalRevenue: number;
   averageOrderValue: number;
+  totalHoursWorked: number;
+  revenuePerHour: number;
 }[] {
   const db = getDb();
   const { startDate, endDate } = normalizeDateRange(dateRange);
@@ -513,24 +529,220 @@ export function staffPerformance(dateRange: DateRangeFilter): {
     SELECT
       s.id AS staff_id,
       s.name AS staff_name,
-      COUNT(o.id) AS total_orders,
-      COALESCE(SUM(o.grand_total), 0) AS total_revenue
+      COUNT(DISTINCT o.id) AS total_orders,
+      COALESCE(SUM(o.grand_total), 0) AS total_revenue,
+      COALESCE(SUM(
+        (julianday(COALESCE(a.clock_out, datetime('now'))) - julianday(a.clock_in)) * 24
+      ), 0) AS total_hours
     FROM staff s
     LEFT JOIN orders o ON s.id = o.staff_id
       AND o.created_at >= ? AND o.created_at <= ?
       AND o.status != 'cancelled'
+    LEFT JOIN attendance a ON s.id = a.staff_id
+      AND a.clock_in >= ? AND a.clock_in <= ?
     WHERE s.is_active = 1
     GROUP BY s.id, s.name
     ORDER BY total_revenue DESC
+  `).all(startDate, endDate, startDate, endDate) as any[];
+
+  return rows.map((row) => {
+    const totalHours = Math.round(row.total_hours * 10) / 10;
+    return {
+      staffId: row.staff_id,
+      staffName: row.staff_name,
+      totalOrders: row.total_orders,
+      totalRevenue: row.total_revenue,
+      averageOrderValue: row.total_orders > 0
+        ? Math.round(row.total_revenue / row.total_orders)
+        : 0,
+      totalHoursWorked: totalHours,
+      revenuePerHour: totalHours > 0 ? Math.round(row.total_revenue / totalHours) : 0,
+    };
+  });
+}
+
+export function customerLoyalty(dateRange: DateRangeFilter): CustomerLoyaltyReport {
+  const db = getDb();
+  const { startDate, endDate } = normalizeDateRange(dateRange);
+
+  const topCustomers = db.prepare(`
+    SELECT 
+      c.id, c.name, c.phone,
+      COUNT(o.id) as total_orders,
+      COALESCE(SUM(o.grand_total), 0) as total_spend,
+      COALESCE(AVG(o.grand_total), 0) as avg_order_value
+    FROM customers c
+    JOIN orders o ON o.customer_id = c.id
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status != 'cancelled'
+    GROUP BY c.id
+    ORDER BY total_spend DESC
+    LIMIT 20
   `).all(startDate, endDate) as any[];
 
-  return rows.map((row) => ({
-    staffId: row.staff_id,
-    staffName: row.staff_name,
-    totalOrders: row.total_orders,
-    totalRevenue: row.total_revenue,
-    averageOrderValue: row.total_orders > 0
-      ? Math.round(row.total_revenue / row.total_orders)
-      : 0,
+  const customerMix = db.prepare(`
+    SELECT 
+      COUNT(CASE WHEN o.customer_id IS NULL THEN 1 END) as walk_in_orders,
+      COUNT(CASE WHEN o.customer_id IS NOT NULL THEN 1 END) as registered_orders
+    FROM orders o
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status != 'cancelled'
+  `).get(startDate, endDate) as any;
+
+  const loyaltySummary = db.prepare(`
+    SELECT 
+      COALESCE(SUM(CASE WHEN points > 0 THEN points ELSE 0 END), 0) as points_earned,
+      COALESCE(SUM(CASE WHEN points < 0 THEN ABS(points) ELSE 0 END), 0) as points_redeemed
+    FROM loyalty_transactions
+    WHERE created_at >= ? AND created_at <= ?
+  `).get(startDate, endDate) as any;
+
+  return {
+    topCustomers: topCustomers.map(c => ({
+      id: c.id,
+      name: c.name,
+      phone: c.phone,
+      totalOrders: c.total_orders,
+      totalSpend: c.total_spend,
+      avgOrderValue: Math.round(c.avg_order_value)
+    })),
+    walkInOrders: customerMix?.walk_in_orders ?? 0,
+    registeredOrders: customerMix?.registered_orders ?? 0,
+    pointsEarned: loyaltySummary?.points_earned ?? 0,
+    pointsRedeemed: loyaltySummary?.points_redeemed ?? 0
+  };
+}
+
+export function cogsAnalytics(dateRange: DateRangeFilter): CogsReport {
+  const db = getDb();
+  const { startDate, endDate } = normalizeDateRange(dateRange);
+
+  const items = db.prepare(`
+    SELECT 
+      mi.id as menu_item_id,
+      mi.name as item_name,
+      mc.name as category_name,
+      SUM(oi.quantity) as quantity_sold,
+      SUM(oi.total) as total_revenue,
+      COALESCE((
+        SELECT SUM(r.quantity * ii.cost_price)
+        FROM recipes r
+        JOIN inventory_items ii ON r.inventory_item_id = ii.id
+        WHERE r.menu_item_id = mi.id
+      ), 0) as unit_cost
+    FROM order_items oi
+    JOIN orders o ON oi.order_id = o.id
+    JOIN menu_items mi ON oi.menu_item_id = mi.id
+    JOIN menu_categories mc ON mi.category_id = mc.id
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status != 'cancelled'
+    GROUP BY mi.id
+    ORDER BY total_revenue DESC
+  `).all(startDate, endDate) as any[];
+
+  const wastage = db.prepare(`
+    SELECT 
+      ii.name as item_name,
+      SUM(st.quantity) as quantity,
+      SUM(st.quantity * ii.cost_price) as cost
+    FROM stock_transactions st
+    JOIN inventory_items ii ON st.inventory_item_id = ii.id
+    WHERE (st.transaction_type = 'waste' OR st.transaction_type = 'wasted' OR st.notes LIKE '%waste%')
+      AND st.created_at >= ? AND st.created_at <= ?
+    GROUP BY ii.id
+  `).all(startDate, endDate) as any[];
+
+  return {
+    items: items.map(i => {
+      const totalCost = i.unit_cost * i.quantity_sold;
+      const profit = i.total_revenue - totalCost;
+      const marginPercent = i.total_revenue > 0 ? Math.round((profit / i.total_revenue) * 100) : 0;
+      return {
+        menuItemId: i.menu_item_id,
+        itemName: i.item_name,
+        categoryName: i.category_name,
+        quantitySold: i.quantity_sold,
+        totalRevenue: i.total_revenue,
+        unitCost: i.unit_cost,
+        totalCost,
+        profit,
+        marginPercent
+      };
+    }),
+    wastage: wastage.map(w => ({
+      itemName: w.item_name,
+      quantity: w.quantity,
+      cost: w.cost
+    }))
+  };
+}
+
+export function tableTurnaround(dateRange: DateRangeFilter): TableTurnaroundReport[] {
+  const db = getDb();
+  const { startDate, endDate } = normalizeDateRange(dateRange);
+
+  const tables = db.prepare(`
+    SELECT 
+      t.id, t.name,
+      COUNT(o.id) as total_bookings,
+      AVG((julianday(o.completed_at) - julianday(o.created_at)) * 24 * 60) as avg_duration_mins
+    FROM tables t
+    JOIN orders o ON o.table_id = t.id
+    WHERE o.order_type = 'dine_in' AND o.status = 'completed'
+      AND o.created_at >= ? AND o.created_at <= ?
+    GROUP BY t.id
+    ORDER BY total_bookings DESC
+  `).all(startDate, endDate) as any[];
+
+  return tables.map(t => ({
+    id: t.id,
+    name: t.name,
+    totalBookings: t.total_bookings,
+    avgDurationMins: Math.round(t.avg_duration_mins ?? 0)
   }));
+}
+
+export function lossPrevention(dateRange: DateRangeFilter): LossPreventionReport {
+  const db = getDb();
+  const { startDate, endDate } = normalizeDateRange(dateRange);
+
+  const cancellationsByStaff = db.prepare(`
+    SELECT 
+      s.id, s.name,
+      COUNT(o.id) as cancelled_count,
+      COALESCE(SUM(o.grand_total), 0) as cancelled_value
+    FROM orders o
+    JOIN staff s ON o.staff_id = s.id
+    WHERE o.status = 'cancelled'
+      AND o.created_at >= ? AND o.created_at <= ?
+    GROUP BY s.id
+    ORDER BY cancelled_value DESC
+  `).all(startDate, endDate) as any[];
+
+  const highDiscounts = db.prepare(`
+    SELECT 
+      o.id, o.order_number, o.grand_total, o.discount_amount,
+      s.name as staff_name, c.name as customer_name
+    FROM orders o
+    JOIN staff s ON o.staff_id = s.id
+    LEFT JOIN customers c ON o.customer_id = c.id
+    WHERE o.discount_amount > 0 AND o.status != 'cancelled'
+      AND o.created_at >= ? AND o.created_at <= ?
+    ORDER BY o.discount_amount DESC
+    LIMIT 25
+  `).all(startDate, endDate) as any[];
+
+  return {
+    cancellationsByStaff: cancellationsByStaff.map(c => ({
+      id: c.id,
+      name: c.name,
+      count: c.cancelled_count,
+      value: c.cancelled_value
+    })),
+    highDiscounts: highDiscounts.map(d => ({
+      id: d.id,
+      orderNumber: d.order_number,
+      grandTotal: d.grand_total,
+      discountAmount: d.discount_amount,
+      staffName: d.staff_name,
+      customerName: d.customer_name ?? 'Walk-in'
+    }))
+  };
 }

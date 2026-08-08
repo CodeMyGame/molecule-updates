@@ -798,6 +798,10 @@ export function registerAllHandlers(): void {
   handle(REPORTS.kitchenPrepTime, (dateRange) => reportsService.kitchenPrepTime(dateRange));
   handle(REPORTS.shiftHandover, (staffId: number, dateRange) => reportsService.shiftHandover(staffId, dateRange));
   handle(REPORTS.busyHours, (dateRange) => reportsService.busyHours(dateRange));
+  handle(REPORTS.customerLoyalty, (dateRange) => reportsService.customerLoyalty(dateRange));
+  handle(REPORTS.cogsAnalytics, (dateRange) => reportsService.cogsAnalytics(dateRange));
+  handle(REPORTS.tableTurnaround, (dateRange) => reportsService.tableTurnaround(dateRange));
+  handle(REPORTS.lossPrevention, (dateRange) => reportsService.lossPrevention(dateRange));
 
   // ---- Settings ----
   handle(SETTINGS.get, (key: string) => settingsRepo.get(key));

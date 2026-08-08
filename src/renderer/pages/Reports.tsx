@@ -63,7 +63,11 @@ type ReportTab =
   | 'inventory'
   | 'kitchen_prep'
   | 'table_wise'
-  | 'busy_hours';
+  | 'busy_hours'
+  | 'customer_loyalty'
+  | 'cogs'
+  | 'table_turnaround'
+  | 'loss_prevention';
 
 const TABS: { key: ReportTab; icon: React.ReactNode }[] = [
   { key: 'order_history', icon: <ClipboardList size={16} /> },
@@ -78,6 +82,10 @@ const TABS: { key: ReportTab; icon: React.ReactNode }[] = [
   { key: 'kitchen_prep', icon: <ShoppingCart size={16} /> },
   { key: 'table_wise', icon: <LayoutGrid size={16} /> },
   { key: 'busy_hours', icon: <Clock size={16} /> },
+  { key: 'customer_loyalty', icon: <Users size={16} /> },
+  { key: 'cogs', icon: <TrendingUp size={16} /> },
+  { key: 'table_turnaround', icon: <LayoutGrid size={16} /> },
+  { key: 'loss_prevention', icon: <AlertCircle size={16} /> },
 ];
 
 const DATE_PRESETS: { key: DatePreset }[] = [
@@ -467,6 +475,18 @@ const Reports: React.FC = () => {
       case 'busy_hours':
         reports.fetchBusyHours();
         break;
+      case 'customer_loyalty':
+        reports.fetchCustomerLoyalty();
+        break;
+      case 'cogs':
+        reports.fetchCogsAnalytics();
+        break;
+      case 'table_turnaround':
+        reports.fetchTableTurnaround();
+        break;
+      case 'loss_prevention':
+        reports.fetchLossPrevention();
+        break;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, reports.dateRange]);
@@ -489,6 +509,10 @@ const Reports: React.FC = () => {
       case 'kitchen_prep': return t('reports.kitchenPrep');
       case 'table_wise': return t('reports.tableWise', 'Table-wise');
       case 'busy_hours': return t('reports.busyHours', 'Busy Hours');
+      case 'customer_loyalty': return t('reports.customerLoyaltyTab', 'Customer & Loyalty');
+      case 'cogs': return t('reports.cogsTab', 'COGS & Profit Margins');
+      case 'table_turnaround': return t('reports.tableTurnaroundTab', 'Table Turnaround');
+      case 'loss_prevention': return t('reports.lossPreventionTab', 'Loss Prevention');
     }
   };
 
@@ -1012,6 +1036,8 @@ const Reports: React.FC = () => {
             { header: t('reports.orders'), accessor: 'totalOrders', align: 'right' },
             { header: t('reports.revenue'), accessor: 'totalRevenue', align: 'right', render: (item) => formatCurrency(item.totalRevenue) },
             { header: t('reports.avgOrderValue'), accessor: 'averageOrderValue', align: 'right', render: (item) => formatCurrency(item.averageOrderValue) },
+            { header: t('reports.hoursWorked', 'Hours Worked'), accessor: 'totalHoursWorked', align: 'right' },
+            { header: t('reports.revenuePerHour', 'Sales/Hour'), accessor: 'revenuePerHour', align: 'right', render: (item) => formatCurrency(item.revenuePerHour) },
           ]}
           data={data}
           keyExtractor={(item) => item.staffId}
@@ -1023,8 +1049,8 @@ const Reports: React.FC = () => {
           icon={<Download size={16} />}
           onClick={() =>
             exportToCSV(
-              [t('reports.staffName'), t('reports.orders'), t('reports.revenue'), t('reports.avgOrderValue')],
-              data.map((d) => [d.staffName, d.totalOrders.toString(), formatCurrency(d.totalRevenue), formatCurrency(d.averageOrderValue)]),
+              [t('reports.staffName'), t('reports.orders'), t('reports.revenue'), t('reports.avgOrderValue'), t('reports.hoursWorked', 'Hours Worked'), t('reports.revenuePerHour', 'Sales/Hour')],
+              data.map((d) => [d.staffName, d.totalOrders.toString(), formatCurrency(d.totalRevenue), formatCurrency(d.averageOrderValue), d.totalHoursWorked.toString(), formatCurrency(d.revenuePerHour)]),
               'staff-performance-report'
             )
           }
@@ -1791,6 +1817,215 @@ const Reports: React.FC = () => {
     );
   };
 
+  const renderCustomerLoyalty = () => {
+    const data = reports.customerLoyalty;
+    if (!data) return <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin text-blue-500" /></div>;
+
+    const pieData = [
+      { name: t('reports.registeredCustomers', 'Registered Customers'), value: data.registeredOrders, color: '#3B82F6' },
+      { name: t('reports.walkInCustomers', 'Walk-in Customers'), value: data.walkInOrders, color: '#9CA3AF' }
+    ].filter(d => d.value > 0);
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SummaryCard title={t('reports.walkInOrders', 'Walk-in Orders')} value={data.walkInOrders.toString()} icon={<ShoppingCart size={20} />} />
+          <SummaryCard title={t('reports.registeredOrders', 'Registered Orders')} value={data.registeredOrders.toString()} icon={<Users size={20} />} />
+          <SummaryCard title={t('reports.loyaltyPointsEarned', 'Coins Earned')} value={data.pointsEarned.toString()} icon={<TrendingUp size={20} />} />
+          <SummaryCard title={t('reports.loyaltyPointsRedeemed', 'Coins Redeemed')} value={data.pointsRedeemed.toString()} icon={<CreditCard size={20} />} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {pieData.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.customerMix', 'Customer Mix (Orders)')}</h3>
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie data={pieData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} labelLine>
+                    {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl border border-gray-200 p-5 lg:col-span-2">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.topCustomersSpend', 'Top Customers by Spend')}</h3>
+            <DataTable
+              columns={[
+                { header: t('reports.customerName', 'Customer Name'), accessor: 'name' },
+                { header: t('reports.phone', 'Phone'), accessor: 'phone' },
+                { header: t('reports.orders', 'Orders'), accessor: 'totalOrders', align: 'right' },
+                { header: t('reports.totalSpend', 'Total Spend'), accessor: 'totalSpend', align: 'right', render: (item) => formatCurrency(item.totalSpend) },
+                { header: t('reports.avgOrderValue', 'Avg Order Value'), accessor: 'avgOrderValue', align: 'right', render: (item) => formatCurrency(item.avgOrderValue) },
+              ]}
+              data={data.topCustomers}
+              keyExtractor={(item) => item.id}
+              emptyMessage={t('reports.noCustomerData', 'No customer spend transactions found')}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCogs = () => {
+    const data = reports.cogsAnalytics;
+    if (!data) return <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin text-blue-500" /></div>;
+
+    const totalRevenue = data.items.reduce((sum, d) => sum + d.totalRevenue, 0);
+    const totalCost = data.items.reduce((sum, d) => sum + d.totalCost, 0);
+    const totalProfit = totalRevenue - totalCost;
+    const avgMargin = totalRevenue > 0 ? Math.round((totalProfit / totalRevenue) * 100) : 0;
+    const totalWastageCost = data.wastage.reduce((sum, d) => sum + d.cost, 0);
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SummaryCard title={t('reports.menuRevenue', 'Menu Revenue')} value={formatCurrency(totalRevenue)} icon={<CurrencyIcon size={20} />} />
+          <SummaryCard title={t('reports.theoreticalCogs', 'Theoretical COGS')} value={formatCurrency(totalCost)} icon={<Package size={20} />} />
+          <SummaryCard title={t('reports.theoreticalProfit', 'Theoretical Profit')} value={formatCurrency(totalProfit)} icon={<TrendingUp size={20} />} />
+          <SummaryCard title={t('reports.avgProfitMargin', 'Average Profit Margin')} value={`${avgMargin}%`} icon={<CheckCircle size={20} />} />
+        </div>
+
+        {totalWastageCost > 0 && (
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-rose-800">{t('reports.inventoryWastage', 'Inventory Wastage Loss')}</p>
+              <p className="text-xs text-rose-600">{t('reports.inventoryWastageDesc', 'Financial loss from ingredients marked as wasted')}</p>
+            </div>
+            <p className="text-lg font-bold text-rose-800">{formatCurrency(totalWastageCost)}</p>
+          </div>
+        )}
+
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.itemMarginsLeaderboard', 'Menu Items Profit Margins')}</h3>
+          <DataTable
+            columns={[
+              { header: t('reports.itemName', 'Item Name'), accessor: 'itemName' },
+              { header: t('reports.category', 'Category'), accessor: 'categoryName' },
+              { header: t('reports.qtySold', 'Qty Sold'), accessor: 'quantitySold', align: 'right' },
+              { header: t('reports.revenue', 'Revenue'), accessor: 'totalRevenue', align: 'right', render: (item) => formatCurrency(item.totalRevenue) },
+              { header: t('reports.unitCost', 'Unit Cost (Recipe)'), accessor: 'unitCost', align: 'right', render: (item) => formatCurrency(item.unitCost) },
+              { header: t('reports.totalCost', 'Total Cost'), accessor: 'totalCost', align: 'right', render: (item) => formatCurrency(item.totalCost) },
+              { header: t('reports.profit', 'Gross Profit'), accessor: 'profit', align: 'right', render: (item) => formatCurrency(item.profit) },
+              { 
+                header: t('reports.marginPercent', 'Margin %'), 
+                accessor: 'marginPercent', 
+                align: 'right', 
+                render: (item) => (
+                  <span className={`px-2 py-0.5 rounded text-xs font-semibold ${item.marginPercent >= 50 ? 'bg-green-100 text-green-700' : item.marginPercent >= 25 ? 'bg-blue-100 text-blue-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    {item.marginPercent}%
+                  </span>
+                ) 
+              },
+            ]}
+            data={data.items}
+            keyExtractor={(item) => item.menuItemId}
+            emptyMessage={t('reports.noCogsData', 'No sales recipes data available')}
+          />
+        </div>
+      </div>
+    );
+  };
+
+  const renderTableTurnaround = () => {
+    const data = reports.tableTurnaround;
+
+    const chartData = data.map(t => ({
+      name: t.name,
+      bookings: t.totalBookings,
+      duration: t.avgDurationMins
+    }));
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SummaryCard title={t('reports.totalBookings', 'Total Bookings')} value={data.reduce((sum, d) => sum + d.totalBookings, 0).toString()} icon={<ShoppingCart size={20} />} />
+          <SummaryCard title={t('reports.avgDiningDuration', 'Average Dining Duration')} value={`${data.length > 0 ? Math.round(data.reduce((sum, d) => sum + d.avgDurationMins, 0) / data.length) : 0} mins`} icon={<Clock size={20} />} />
+        </div>
+
+        {chartData.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.tableDurationChart', 'Table Booking Frequency and Average Duration')}</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <XAxis dataKey="name" fontSize={12} tick={{ fill: '#6B7280' }} />
+                <YAxis fontSize={12} tick={{ fill: '#6B7280' }} />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="bookings" fill="#3B82F6" radius={[4, 4, 0, 0]} name={t('reports.totalBookings', 'Total Bookings')} />
+                <Bar dataKey="duration" fill="#F59E0B" radius={[4, 4, 0, 0]} name={t('reports.avgDurationMins', 'Avg Duration (Mins)')} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        <DataTable
+          columns={[
+            { header: t('reports.tableName', 'Table Name'), accessor: 'name' },
+            { header: t('reports.bookingsCount', 'Total Bookings'), accessor: 'totalBookings', align: 'right' },
+            { header: t('reports.avgDuration', 'Average Duration'), accessor: 'avgDurationMins', align: 'right', render: (item) => `${item.avgDurationMins} mins` },
+          ]}
+          data={data}
+          keyExtractor={(item) => item.id}
+          emptyMessage={t('reports.noTableTurnaroundData', 'No dine-in table logs found')}
+        />
+      </div>
+    );
+  };
+
+  const renderLossPrevention = () => {
+    const data = reports.lossPrevention;
+    if (!data) return <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin text-blue-500" /></div>;
+
+    const totalCancellationsValue = data.cancellationsByStaff.reduce((sum, d) => sum + d.value, 0);
+    const totalDiscountsValue = data.highDiscounts.reduce((sum, d) => sum + d.discountAmount, 0);
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <SummaryCard title={t('reports.voidValue', 'Total Cancelled Value')} value={formatCurrency(totalCancellationsValue)} icon={<Trash2 size={20} />} />
+          <SummaryCard title={t('reports.discountValueTotal', 'Total Discount Value')} value={formatCurrency(totalDiscountsValue)} icon={<FileText size={20} />} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.voidsByStaff', 'Cancelled Orders by Staff')}</h3>
+            <DataTable
+              columns={[
+                { header: t('reports.staffName', 'Staff Name'), accessor: 'name' },
+                { header: t('reports.cancelledOrders', 'Count'), accessor: 'count', align: 'right' },
+                { header: t('reports.cancelledValue', 'Void Value'), accessor: 'value', align: 'right', render: (item) => formatCurrency(item.value) },
+              ]}
+              data={data.cancellationsByStaff}
+              keyExtractor={(item) => item.id}
+              emptyMessage={t('reports.noVoidsData', 'No cancelled orders recorded')}
+            />
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-5">
+            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.highDiscountAudit', 'High Value Discounts Audit')}</h3>
+            <DataTable
+              columns={[
+                { header: t('reports.orderNumber', 'Order #'), accessor: 'orderNumber' },
+                { header: t('reports.customer', 'Customer'), accessor: 'customerName' },
+                { header: t('reports.staff', 'Staff'), accessor: 'staffName' },
+                { header: t('reports.discount', 'Discount'), accessor: 'discountAmount', align: 'right', render: (item) => formatCurrency(item.discountAmount) },
+                { header: t('reports.total', 'Total Bill'), accessor: 'grandTotal', align: 'right', render: (item) => formatCurrency(item.grandTotal) },
+              ]}
+              data={data.highDiscounts}
+              keyExtractor={(item) => item.id}
+              emptyMessage={t('reports.noDiscountsData', 'No discount transactions found')}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'order_history': return renderOrderHistory();
@@ -1805,6 +2040,10 @@ const Reports: React.FC = () => {
       case 'kitchen_prep': return renderKitchenPrepTime();
       case 'table_wise': return renderTableWise();
       case 'busy_hours': return renderBusyHours();
+      case 'customer_loyalty': return renderCustomerLoyalty();
+      case 'cogs': return renderCogs();
+      case 'table_turnaround': return renderTableTurnaround();
+      case 'loss_prevention': return renderLossPrevention();
       default: return null;
     }
   };

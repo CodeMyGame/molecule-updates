@@ -166,6 +166,10 @@ const api = {
     kitchenPrepTime: (filters?: any) => ipcRenderer.invoke('reports:kitchenPrepTime', filters),
     shiftHandover: (staffId: number, filters?: any) => ipcRenderer.invoke('reports:shiftHandover', staffId, filters),
     busyHours: (filters?: any) => ipcRenderer.invoke('reports:busyHours', filters),
+    customerLoyalty: (filters?: any) => ipcRenderer.invoke('reports:customerLoyalty', filters),
+    cogsAnalytics: (filters?: any) => ipcRenderer.invoke('reports:cogsAnalytics', filters),
+    tableTurnaround: (filters?: any) => ipcRenderer.invoke('reports:tableTurnaround', filters),
+    lossPrevention: (filters?: any) => ipcRenderer.invoke('reports:lossPrevention', filters),
   },
 
   settings: {

@@ -71,10 +71,67 @@ export interface BusyBucket {
   revenue: number;
 }
 
-/** Busy-hours breakdown across multiple time granularities for the selected range. */
 export interface BusyHoursReport {
   byHour: BusyBucket[];     // hour of day, 0-23 ("Day" view)
   byWeekday: BusyBucket[];  // day of week, 0-6 ("Week" view)
   byMonth: BusyBucket[];    // month of year, 1-12 ("Month" view)
   byYear: BusyBucket[];     // calendar year ("Year" view)
+}
+
+export interface CustomerLoyaltyReport {
+  topCustomers: {
+    id: number;
+    name: string;
+    phone: string;
+    totalOrders: number;
+    totalSpend: number;
+    avgOrderValue: number;
+  }[];
+  walkInOrders: number;
+  registeredOrders: number;
+  pointsEarned: number;
+  pointsRedeemed: number;
+}
+
+export interface CogsReport {
+  items: {
+    menuItemId: number;
+    itemName: string;
+    categoryName: string;
+    quantitySold: number;
+    totalRevenue: number;
+    unitCost: number;
+    totalCost: number;
+    profit: number;
+    marginPercent: number;
+  }[];
+  wastage: {
+    itemName: string;
+    quantity: number;
+    cost: number;
+  }[];
+}
+
+export interface TableTurnaroundReport {
+  id: number;
+  name: string;
+  totalBookings: number;
+  avgDurationMins: number;
+}
+
+export interface LossPreventionReport {
+  cancellationsByStaff: {
+    id: number;
+    name: string;
+    count: number;
+    value: number;
+  }[];
+  highDiscounts: {
+    id: number;
+    orderNumber: string;
+    grandTotal: number;
+    discountAmount: number;
+    staffName: string;
+    customerName: string;
+  }[];
 }
