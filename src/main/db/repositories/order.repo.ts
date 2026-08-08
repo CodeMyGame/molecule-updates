@@ -2,6 +2,7 @@ import { getDb } from '../connection';
 import { format } from 'date-fns';
 import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem } from '../../../shared/types/order.types';
 import { OrderStatus, KOTStatus } from '../../../shared/enums';
+import * as inventoryService from '../../services/inventory.service';
 
 export function create(data: CreateOrderDTO): Order {
   const db = getDb();
@@ -257,6 +258,14 @@ export function updateStatus(id: number, status: OrderStatus): Order | undefined
         WHERE order_id = ? AND kot_status != 'served'
       `).run(id);
     }
+
+    if (status === OrderStatus.CANCELLED) {
+      try {
+        inventoryService.restoreForOrder(id);
+      } catch (err) {
+        console.error('Inventory restoration failed for cancelled order', id, err);
+      }
+    }
   });
 
   updateInTransaction();
@@ -282,6 +291,7 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
     'SELECT price FROM addon_variation_prices WHERE addon_id = ? AND variation_name = ?'
   );
 
+  const newInsertedItemIds: number[] = [];
   const addInTransaction = db.transaction(() => {
     let additionalSubtotal = 0;
     let additionalTax = 0;
@@ -308,6 +318,7 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
       );
 
       const orderItemId = result.lastInsertRowid as number;
+      newInsertedItemIds.push(orderItemId);
 
       if (item.addonIds && item.addonIds.length > 0) {
         const varName = item.variationId
@@ -333,6 +344,12 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
   });
 
   addInTransaction();
+
+  try {
+    inventoryService.deductForItems(orderId, newInsertedItemIds);
+  } catch (err) {
+    console.error('Inventory deduction failed for added items', orderId, err);
+  }
   return getById(orderId);
 }
 

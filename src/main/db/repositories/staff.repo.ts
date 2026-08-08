@@ -74,7 +74,7 @@ export function deleteStaff(id: number): void {
   db.prepare("UPDATE staff SET is_active = 0, updated_at = datetime('now') WHERE id = ?").run(id);
 }
 
-export function findByPin(pin: string): Staff | undefined {
+export async function findByPin(pin: string): Promise<Staff | undefined> {
   const db = getDb();
   const rows = db.prepare(`
     SELECT s.*, r.name AS role_name, r.permissions AS role_permissions
@@ -84,7 +84,8 @@ export function findByPin(pin: string): Staff | undefined {
   `).all() as any[];
 
   for (const row of rows) {
-    if (bcrypt.compareSync(pin, row.pin_hash)) {
+    const match = await bcrypt.compare(pin, row.pin_hash);
+    if (match) {
       return mapStaffWithRole(row);
     }
   }

@@ -60,28 +60,28 @@ const PIN_MAX_ATTEMPTS = 5;
 const PIN_LOCKOUT_MS = 30_000; // 30 seconds
 const pinFailures = new Map<string, { count: number; lockedUntil: number }>();
 
-function checkPinRateLimit(): void {
+function checkPinRateLimit(key: string = 'global'): void {
   const now = Date.now();
-  const entry = pinFailures.get('global') ?? { count: 0, lockedUntil: 0 };
+  const entry = pinFailures.get(key) ?? { count: 0, lockedUntil: 0 };
   if (entry.lockedUntil > now) {
     const secsLeft = Math.ceil((entry.lockedUntil - now) / 1000);
     throw new Error(`LOCKOUT:${secsLeft}`);
   }
 }
 
-function recordPinFailure(): void {
+function recordPinFailure(key: string = 'global'): void {
   const now = Date.now();
-  const entry = pinFailures.get('global') ?? { count: 0, lockedUntil: 0 };
+  const entry = pinFailures.get(key) ?? { count: 0, lockedUntil: 0 };
   entry.count += 1;
   if (entry.count >= PIN_MAX_ATTEMPTS) {
     entry.lockedUntil = now + PIN_LOCKOUT_MS;
     entry.count = 0;
   }
-  pinFailures.set('global', entry);
+  pinFailures.set(key, entry);
 }
 
-function clearPinFailures(): void {
-  pinFailures.delete('global');
+function clearPinFailures(key: string = 'global'): void {
+  pinFailures.delete(key);
 }
 
 function handle<T>(channel: string, handler: (...args: any[]) => T): void {
@@ -251,15 +251,21 @@ export function registerAllHandlers(): void {
   handle(STAFF.create, (data) => staffRepo.create(data));
   handle(STAFF.update, (id: number, data) => staffRepo.update(id, data));
   handle(STAFF.delete, (id: number) => staffRepo.deleteStaff(id));
-  handle(STAFF.login, (pin: string) => {
-    checkPinRateLimit();
-    const staff = staffRepo.findByPin(pin);
-    if (!staff) {
-      recordPinFailure();
-      throw new Error('INVALID_PIN');
+  ipcMain.handle(STAFF.login, async (event, pin: string): Promise<IpcResult<any>> => {
+    const key = event.sender ? `win_${event.sender.id}` : 'global';
+    try {
+      checkPinRateLimit(key);
+      const staff = await staffRepo.findByPin(pin);
+      if (!staff) {
+        recordPinFailure(key);
+        return { success: false, error: 'INVALID_PIN' };
+      }
+      clearPinFailures(key);
+      return { success: true, data: staff };
+    } catch (err: any) {
+      console.error(`IPC error [${STAFF.login}]:`, err);
+      return { success: false, error: err.message || 'Unknown error' };
     }
-    clearPinFailures();
-    return staff;
   });
   handle(STAFF.clockIn, (staffId: number) => staffRepo.clockIn(staffId));
   handle(STAFF.clockOut, (staffId: number) => staffRepo.clockOut(staffId));
