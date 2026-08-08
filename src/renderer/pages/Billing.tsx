@@ -115,7 +115,7 @@ const Billing: React.FC = () => {
   const clearCart = useBillingStore((s) => s.clearCart);
   const cart = useBillingStore((s) => s.cart);
   const syncedItemCount = useBillingStore((s) => s.syncedItemCount);
-  const [unsavedSwitchTarget, setUnsavedSwitchTarget] = useState<number | string | null>(null);
+  const [unsavedSwitchTarget, setUnsavedSwitchTarget] = useState<number | null>(null);
   const applyDiscount = useBillingStore((s) => s.applyDiscount);
   const discount = useBillingStore((s) => s.discount);
   const getSubtotal = useBillingStore((s) => s.getSubtotal);
@@ -588,23 +588,6 @@ const Billing: React.FC = () => {
       }
     },
     [selectedTableId, setTable, loadTableOrder, resetForNewTable, cart, currentOrderId, syncedItemCount]
-  );
-
-  // Handle order type switch with unsaved items check
-  const handleOrderTypeSwitch = useCallback(
-    (newType: OrderType) => {
-      if (newType === orderType) return;
-      const hasUnsavedItems = cart.length > 0 && (!currentOrderId || cart.length > syncedItemCount);
-      if (hasUnsavedItems) {
-        setUnsavedSwitchTarget(newType);
-        return;
-      }
-      setOrderType(newType);
-      if (newType !== 'dine_in') {
-        resetForNewTable(null);
-      }
-    },
-    [orderType, cart, currentOrderId, syncedItemCount, setOrderType, resetForNewTable]
   );
 
   // --- Table context menu: transfer, merge, split ---
@@ -1147,7 +1130,7 @@ const Billing: React.FC = () => {
             {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => (
               <Tooltip key={key} text={t(tKey)} position="bottom">
                 <button
-                  onClick={() => handleOrderTypeSwitch(key as OrderType)}
+                  onClick={() => setOrderType(key)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium
                     transition-colors select-none
                     ${
@@ -2029,22 +2012,11 @@ const Billing: React.FC = () => {
                 onClick={async () => {
                   const target = unsavedSwitchTarget;
                   setUnsavedSwitchTarget(null);
-                  if (typeof target === 'string') {
-                    try {
-                      await handleKot();
-                      setOrderType(target as any);
-                      resetForNewTable(null);
-                    } catch {
-                      setOrderType(target as any);
-                      resetForNewTable(null);
-                    }
-                  } else if (typeof target === 'number') {
-                    try {
-                      await handleKot();
-                      await loadTableOrder(target);
-                    } catch {
-                      resetForNewTable(target);
-                    }
+                  try {
+                    await handleKot();
+                    await loadTableOrder(target);
+                  } catch {
+                    resetForNewTable(target);
                   }
                 }}
                 className="w-full py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
@@ -2062,15 +2034,10 @@ const Billing: React.FC = () => {
                   onClick={async () => {
                     const target = unsavedSwitchTarget;
                     setUnsavedSwitchTarget(null);
-                    if (typeof target === 'string') {
-                      setOrderType(target as any);
-                      resetForNewTable(null);
-                    } else if (typeof target === 'number') {
-                      try {
-                        await loadTableOrder(target);
-                      } catch {
-                        resetForNewTable(target);
-                      }
+                    try {
+                      await loadTableOrder(target);
+                    } catch {
+                      resetForNewTable(target);
                     }
                   }}
                   className="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
