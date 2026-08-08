@@ -386,13 +386,14 @@
     const db = getFirestore(app);
     let currentUid = null;
     let historicalRows = [];
-    let currentChartView = 'weekly';
+    const $ = (id) => document.getElementById(id);
 
     // ── Sound & Web Audio Alert System ──
     let soundEnabled = localStorage.getItem('soundAlerts') === 'true';
     function updateSoundUI() {
       const onIcon = $('soundOnIcon');
       const offIcon = $('soundOffIcon');
+      if (!onIcon || !offIcon) return;
       if (soundEnabled) {
         onIcon.classList.remove('hidden'); offIcon.classList.add('hidden');
       } else {
@@ -503,7 +504,8 @@
 
     // ── Daily Goal Target Tracker ──
     let dailyTargetGoal = Number(localStorage.getItem('dailyTargetGoal')) || 50000;
-    $('targetGoalVal').textContent = num(dailyTargetGoal);
+    const targetGoalEl = $('targetGoalVal');
+    if (targetGoalEl) targetGoalEl.textContent = num(dailyTargetGoal);
 
     $('editTargetBtn')?.addEventListener('click', () => {
       const input = prompt('Set Daily Revenue Goal Target (in Rupees):', dailyTargetGoal);
@@ -619,7 +621,6 @@ _Sent from Molecule Owner Dashboard_`;
       if (secs < 86400) return Math.floor(secs / 3600) + ' hr ago';
       return date.toLocaleDateString();
     }
-    const $ = (id) => document.getElementById(id);
 
     // ── View switching ──
     function showLogin() {
