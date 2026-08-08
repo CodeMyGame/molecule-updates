@@ -151,8 +151,9 @@ export function mergeBills(
     const target = orderRepo.getById(targetOrderId);
     if (!source || !target) throw new Error('Order not found');
 
-    // Move all items from source to target
+    // Move all items and KOT tickets from source to target to preserve full kitchen ticket history
     db.prepare('UPDATE order_items SET order_id = ? WHERE order_id = ?').run(targetOrderId, sourceOrderId);
+    db.prepare('UPDATE kots SET order_id = ? WHERE order_id = ?').run(targetOrderId, sourceOrderId);
 
     // Mark source as merged
     db.prepare(`

@@ -913,10 +913,35 @@ export function registerAllHandlers(): void {
     }
     if (!sessionId) throw new Error('No open session to close');
 
+    // 1. Prevent closing day session if active/held orders exist
+    const activeOrders = db.prepare(
+      "SELECT COUNT(*) as count FROM orders WHERE status IN ('active', 'hold')"
+    ).get() as { count: number };
+    if (activeOrders.count > 0) {
+      throw new Error(`Cannot close day session while there are ${activeOrders.count} active/held orders. Please complete or cancel all active orders first.`);
+    }
+
+    // 2. Server-side expected cash calculation
+    const sessionRow = db.prepare('SELECT opened_at, opening_cash FROM day_sessions WHERE id = ?').get(sessionId) as any;
+    const sessionOpenedAt = sessionRow?.opened_at ?? '1970-01-01 00:00:00';
+    const openingCash = sessionRow?.opening_cash ?? 0;
+
+    const cashSalesRow = db.prepare(`
+      SELECT COALESCE(SUM(p.amount), 0) as cash_total
+      FROM payments p
+      JOIN orders o ON p.order_id = o.id
+      WHERE p.mode = 'cash'
+        AND o.status = 'completed'
+        AND p.created_at >= ?
+    `).get(sessionOpenedAt) as { cash_total: number } | undefined;
+
+    const cashSales = cashSalesRow?.cash_total ?? 0;
+    const computedExpectedCash = openingCash + cashSales;
+
     db.prepare(`
       UPDATE day_sessions SET closed_by = ?, closing_cash = ?, expected_cash = ?, closed_at = datetime('now'), notes = ?
       WHERE id = ? AND closed_at IS NULL
-    `).run(data.closedBy ?? data.staffId ?? 1, data.closingCash ?? 0, data.expectedCash ?? 0, data.notes ?? null, sessionId);
+    `).run(data.closedBy ?? data.staffId ?? 1, data.closingCash ?? 0, computedExpectedCash, data.notes ?? null, sessionId);
     const row = db.prepare('SELECT * FROM day_sessions WHERE id = ?').get(sessionId);
     // Day close finalizes cash reconciliation — push live snapshot + archive daily.
     cloudSync.scheduleSync();

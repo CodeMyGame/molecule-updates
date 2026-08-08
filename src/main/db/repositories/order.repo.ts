@@ -385,6 +385,14 @@ export function applyDiscount(
   value: number,
   reason?: string,
 ): Order | undefined {
+  if (typeof value !== 'number' || isNaN(value) || value < 0) {
+    throw new Error('Discount value cannot be negative or invalid.');
+  }
+
+  if (type === 'percentage' && value > 100) {
+    throw new Error('Percentage discount cannot exceed 100%.');
+  }
+
   const db = getDb();
 
   const applyInTransaction = db.transaction(() => {
@@ -393,9 +401,9 @@ export function applyDiscount(
 
     let discountAmount: number;
     if (type === 'percentage') {
-      discountAmount = Math.round(order.subtotal * value / 100);
+      discountAmount = Math.round((order.subtotal * value) / 100);
     } else {
-      discountAmount = Math.min(value, order.subtotal);
+      discountAmount = Math.max(0, Math.min(value, order.subtotal));
     }
 
     db.prepare(`
