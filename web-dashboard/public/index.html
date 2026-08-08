@@ -380,6 +380,39 @@
           <div id="lowStock" class="space-y-3 flex-1 overflow-y-auto max-h-48 no-scrollbar pr-2"></div>
         </div>
       </section>
+
+      <!-- Secondary Extended Analytics Row (Bottom Section) -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up" style="animation-delay: 0.55s;">
+        <!-- ARPU / Guest Spend -->
+        <div class="glass rounded-2xl p-5 hover-lift">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400">👤 Guest Headcount (ARPU)</h2>
+            <span id="arpuBadge" class="text-xs font-bold text-emerald-400">₹0/guest</span>
+          </div>
+          <div class="text-2xl font-bold text-white mb-1" id="arpuValue">₹0.00</div>
+          <p class="text-xs text-zinc-500 font-medium" id="arpuSub">Avg spend per diner head</p>
+        </div>
+
+        <!-- Top Item Concentration -->
+        <div class="glass rounded-2xl p-5 hover-lift">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400">🏆 Hero Items Share</h2>
+            <span id="heroShareBadge" class="text-xs font-bold text-indigo-400">0% Share</span>
+          </div>
+          <div class="text-2xl font-bold text-white mb-1" id="heroShareValue">0% Top 3</div>
+          <p class="text-xs text-zinc-500 font-medium" id="heroShareSub">Revenue share of top 3 dishes</p>
+        </div>
+
+        <!-- Store Security & Audit Health Rating -->
+        <div class="glass rounded-2xl p-5 hover-lift">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-zinc-400">🛡️ Store Audit Rating</h2>
+            <span id="securityScoreBadge" class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400">100/100</span>
+          </div>
+          <div class="text-2xl font-bold text-white mb-1" id="securityStatusVal">Clean Audit</div>
+          <p class="text-xs text-zinc-500 font-medium" id="securitySubVal">Zero cash & leakage mismatch</p>
+        </div>
+      </section>
       
       <!-- Footer -->
       <footer class="pt-8 pb-4 text-center">
@@ -1535,6 +1568,54 @@ _Sent from Molecule Owner Dashboard_`;
       const digitalPct = totalPay > 0 ? Math.round((digitalPay / totalPay) * 100) : 0;
       const digEl = $('digitalRatioVal');
       if (digEl) digEl.textContent = digitalPct + '% Digital';
+
+      // Extended Analytics: ARPU Guest Spend
+      const coversCount = Number(p.covers) || 0;
+      const arpuRupees = coversCount > 0 ? Math.round((revPaise / 100) / coversCount) : 0;
+      const arpuBadge = $('arpuBadge');
+      if (arpuBadge) arpuBadge.textContent = currencySymbol + num(arpuRupees) + '/guest';
+      const arpuVal = $('arpuValue');
+      if (arpuVal) arpuVal.textContent = money(arpuRupees * 100);
+
+      // Extended Analytics: Top Dish Concentration
+      const topItemsList = p.topItems || [];
+      let top3Rev = 0;
+      for (let i = 0; i < Math.min(3, topItemsList.length); i++) {
+        top3Rev += Number(topItemsList[i].revenue) || 0;
+      }
+      const top3Share = revPaise > 0 ? Math.round((top3Rev / revPaise) * 100) : 0;
+      const heroBadge = $('heroShareBadge');
+      if (heroBadge) heroBadge.textContent = top3Share + '% Share';
+      const heroVal = $('heroShareValue');
+      if (heroVal) heroVal.textContent = top3Share + '% Top 3';
+
+      // Extended Analytics: Store Audit Health Score
+      let secScore = 100;
+      const cashDiff = Number(d.cash?.difference) || 0;
+      if (cashDiff !== 0) secScore -= 15;
+      if (Number(discRate) > 10) secScore -= 15;
+      if (Number(voidRate) > 5) secScore -= 20;
+      secScore = Math.max(0, secScore);
+
+      const secBadge = $('securityScoreBadge');
+      const secVal = $('securityStatusVal');
+      const secSub = $('securitySubVal');
+      if (secBadge && secVal && secSub) {
+        secBadge.textContent = secScore + '/100';
+        if (secScore >= 90) {
+          secBadge.className = 'px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-400';
+          secVal.textContent = 'Clean Audit';
+          secSub.textContent = 'Normal cash & discount levels';
+        } else if (secScore >= 70) {
+          secBadge.className = 'px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-amber-400';
+          secVal.textContent = 'Minor Discrepancy';
+          secSub.textContent = 'Check cash drawer or discounts';
+        } else {
+          secBadge.className = 'px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-netflix-red';
+          secVal.textContent = 'High Leakage Risk';
+          secSub.textContent = 'Cash mismatch or high voids detected';
+        }
+      }
 
       // Payments
       renderBars('payments', (p.payments || []).map((x) => ({
