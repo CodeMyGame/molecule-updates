@@ -192,7 +192,7 @@
           <span id="activeCount" class="hidden px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold"></span>
           <span id="activeValue" class="text-sm font-medium text-zinc-500"></span>
         </div>
-        <div id="activeOrders" class="flex overflow-x-auto gap-4 no-scrollbar pb-4 snap-x">
+        <div id="activeOrders" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <!-- Populated by JS -->
         </div>
       </section>
@@ -1530,7 +1530,7 @@
       el.innerHTML = list.map((o) => {
         const title = o.table ? escapeHtml(o.table) : prettyLabel(o.type);
         return `
-          <div class="glass rounded-xl ${o.onHold ? 'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : ''} p-4 min-w-[220px] flex-shrink-0 snap-start hover-lift">
+          <div class="glass rounded-xl ${o.onHold ? 'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : ''} p-4 hover-lift">
             <div class="flex items-center justify-between mb-2">
               <span class="text-sm font-bold text-white truncate">${title}</span>
               ${o.onHold ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 flex-shrink-0">HOLD</span>' : ''}
