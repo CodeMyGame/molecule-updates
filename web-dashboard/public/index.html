@@ -1,311 +1,320 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#4f46e5" />
-  <title>Molecule — Owner Dashboard</title>
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Molecule Dashboard</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
+          colors: {
+            netflix: { red: '#E50914', dark: '#0a0a0a' }
+          }
         },
       },
     };
   </script>
-  <script>
-    // Initialize theme inline to prevent color flash
-    const savedTheme = localStorage.getItem('theme');
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  </script>
+  
   <style>
-    body { -webkit-font-smoothing: antialiased; }
-    @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
-    .live-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
-    @keyframes fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-    .fade-up { animation: fade-up .35s ease both; }
+    body { background-color: #0a0a0a; color: #ffffff; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .fade-up { animation: fade-up 0.5s ease-out both; }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .live-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    
+    .glass { 
+      background: rgba(20,20,20,0.8); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px); 
+      border: 1px solid rgba(255,255,255,0.06); 
+    }
+    
     .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+    
+    .card-grad-1 { background: linear-gradient(135deg, rgba(88,28,135,0.4) 0%, rgba(49,46,129,0.3) 100%); border-color: rgba(99,102,241,0.2); }
+    .card-grad-2 { background: linear-gradient(135deg, rgba(6,78,59,0.4) 0%, rgba(19,78,74,0.3) 100%); border-color: rgba(16,185,129,0.2); }
+    .card-grad-3 { background: linear-gradient(135deg, rgba(124,45,18,0.4) 0%, rgba(120,53,15,0.3) 100%); border-color: rgba(245,158,11,0.2); }
+    
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
   </style>
 </head>
-<body class="h-full bg-slate-50 dark:bg-slate-950 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-200">
+<body class="antialiased min-h-screen selection:bg-netflix-red selection:text-white">
 
-  <!-- ───────────────── INITIAL LOADER ───────────────── -->
-  <div id="initialLoader" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-    <div class="flex flex-col items-center">
-      <div class="w-10 h-10 border-4 border-indigo-150 dark:border-indigo-950 border-t-indigo-600 rounded-full animate-spin"></div>
-      <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-4 tracking-wider uppercase animate-pulse">Loading Molecule…</p>
+<!-- Initial Loader -->
+<div id="initialLoader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-netflix-dark">
+  <div class="w-12 h-12 rounded-full border-4 border-zinc-800 border-t-netflix-red animate-spin mb-4"></div>
+  <p class="text-zinc-500 font-medium tracking-wide">Loading Molecule...</p>
+</div>
+
+<!-- Login View -->
+<div id="loginView" class="hidden min-h-screen flex items-center justify-center p-4 bg-netflix-dark relative overflow-hidden">
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-netflix-red/10 rounded-full blur-[100px] pointer-events-none"></div>
+  
+  <div class="glass w-full max-w-md rounded-2xl p-8 relative z-10">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-netflix-dark border border-zinc-800 shadow-[0_0_30px_rgba(229,9,20,0.3)] mb-4">
+        <svg class="w-8 h-8 text-netflix-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h1 class="text-2xl font-bold text-white tracking-tight">Welcome Back</h1>
+      <p class="text-zinc-400 text-sm mt-2">Sign in to your dashboard</p>
     </div>
+    
+    <form id="loginForm" class="space-y-5">
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Email</label>
+        <input type="email" id="email" required class="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red transition-colors" placeholder="name@restaurant.com">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Password</label>
+        <input type="password" id="password" required class="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red transition-colors" placeholder="••••••••">
+      </div>
+      <div id="loginError" class="hidden text-netflix-red text-sm font-medium text-center bg-red-950/30 py-2 rounded border border-red-900/50"></div>
+      <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-red-700 to-netflix-red hover:from-red-600 hover:to-red-500 text-white font-bold py-3 rounded-lg transition-all shadow-[0_0_20px_rgba(229,9,20,0.4)]">Sign in</button>
+    </form>
   </div>
+</div>
 
-  <!-- ───────────────── LOGIN ───────────────── -->
-  <div id="loginView" class="min-h-full hidden items-center justify-center px-4 py-10 relative">
-    <!-- Floating Theme Toggle inside Login screen -->
-    <div class="absolute top-4 right-4">
-      <button title="Toggle Theme" class="theme-toggle text-slate-400 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 border border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-500 rounded-lg p-2 bg-white/85 dark:bg-slate-900/85 backdrop-blur transition shadow-sm">
-        <svg class="hidden dark:block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-        <svg class="block dark:hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-      </button>
-    </div>
-
-    <div class="w-full max-w-sm">
-      <div class="flex flex-col items-center mb-8">
-        <div class="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 mb-4">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="1.6"/><circle cx="19" cy="6" r="1.6"/><circle cx="5" cy="18" r="1.6"/><circle cx="19" cy="18" r="1.6"/><path d="M10 11 6.5 7M14 11l3.5-4M10 13l-3.5 4M14 13l3.5 4"/></svg>
+<!-- Dashboard View -->
+<div id="dashView" class="hidden min-h-screen pb-20">
+  
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-netflix-dark/80 backdrop-blur-xl border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded bg-gradient-to-br from-red-600 to-netflix-red flex items-center justify-center shadow-[0_0_15px_rgba(229,9,20,0.5)]">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <h1 class="text-xl font-bold text-slate-900 dark:text-white">Molecule</h1>
-        <p class="text-sm text-slate-500 dark:text-slate-400">Owner Dashboard</p>
-      </div>
-
-      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-6">
-        <form id="loginForm" class="space-y-4">
-          <div>
-            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Email</label>
-            <input id="email" type="email" autocomplete="username" required
-              class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
-              placeholder="owner@example.com" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Password</label>
-            <input id="password" type="password" autocomplete="current-password" required
-              class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition"
-              placeholder="••••••••" />
-          </div>
-          <button id="loginBtn" type="submit"
-            class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition disabled:opacity-60 disabled:cursor-not-allowed">
-            Sign in
-          </button>
-          <p id="loginError" class="text-xs text-rose-600 text-center hidden"></p>
-        </form>
-      </div>
-      <p class="text-center text-[11px] text-slate-400 dark:text-slate-550 mt-5 leading-relaxed">
-        Use the same email &amp; password you set in your POS<br/>under Settings → Cloud Dashboard.
-      </p>
-    </div>
-  </div>
-
-  <!-- ───────────────── DASHBOARD ───────────────── -->
-  <div id="dashView" class="hidden min-h-full">
-    <!-- Top bar -->
-    <header class="sticky top-0 z-20 bg-white/85 dark:bg-slate-900/85 backdrop-blur border-b border-slate-200 dark:border-slate-800/80">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-        <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <h1 id="restName" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white truncate">Dashboard</h1>
-            <span id="dayBadge" class="hidden text-[10px] font-semibold px-2 py-0.5 rounded-full"></span>
-          </div>
-          <p id="syncInfo" class="text-[11px] text-slate-400 dark:text-slate-550 flex items-center gap-1.5 mt-0.5">
-            <span class="live-dot inline-block w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            <span id="syncText">Connecting…</span>
-          </p>
-        </div>
-        <div class="flex items-center gap-2">
-          <button title="Toggle Theme" class="theme-toggle text-slate-400 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 border border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-500 rounded-lg p-1.5 transition">
-            <svg class="hidden dark:block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-            <svg class="block dark:hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-          </button>
-          <button id="notifyBtn" title="Enable Notifications" class="hidden text-slate-400 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 border border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-500 rounded-lg p-1.5 transition">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M12 22a3 3 0 0 0 3-3H9a3 3 0 0 0 3 3z"/>
-            </svg>
-          </button>
-          <button id="refreshBtn" title="Refresh" class="text-slate-400 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 border border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-500 rounded-lg p-1.5 transition">
-            <svg id="refreshIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-          </button>
-          <button id="signOutBtn" class="text-xs font-medium text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-white border border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 rounded-lg px-3 py-1.5 transition">
-            Sign out
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-6">
-
-      <!-- Empty / waiting state -->
-      <div id="emptyState" class="hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 p-10 text-center">
-        <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-slate-850 flex items-center justify-center mb-4">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
-        </div>
-        <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Waiting for your POS to sync…</p>
-        <p class="text-xs text-slate-400 dark:text-slate-550 mt-1">Open the POS and make sure Cloud Dashboard is connected. Data appears here within a few minutes.</p>
-      </div>
-
-      <div id="content" class="hidden space-y-6">
-
-        <!-- Revenue (tabbed by period) -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-          <div class="flex items-center justify-between gap-3 mb-3">
-            <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Revenue</p>
-            <div id="periodTabs" class="inline-flex rounded-lg bg-slate-100 dark:bg-slate-950 p-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-              <button data-period="today" class="px-2.5 sm:px-3 py-1 rounded-md transition">Today</button>
-              <button data-period="week" class="px-2.5 sm:px-3 py-1 rounded-md transition">Week</button>
-              <button data-period="month" class="px-2.5 sm:px-3 py-1 rounded-md transition">Month</button>
-              <button data-period="year" class="px-2.5 sm:px-3 py-1 rounded-md transition">Year</button>
-              <button data-period="custom" class="px-2.5 sm:px-3 py-1 rounded-md transition">Custom</button>
-            </div>
-          </div>
-          <!-- Custom Date Range Selector -->
-          <div id="customDateRange" class="hidden flex flex-wrap items-center gap-3 mb-4 p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-150 dark:border-slate-800/80">
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">From</span>
-              <input id="customStart" type="date" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-805 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none" />
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">To</span>
-              <input id="customEnd" type="date" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-805 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none" />
-            </div>
-            <button id="applyCustomDates" class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm">
-              Apply
-            </button>
-            <span id="customRangeError" class="text-xs text-rose-600 hidden font-semibold"></span>
-          </div>
-          <p id="periodRevenue" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">—</p>
-          <p id="periodSub" class="text-xs text-slate-400 dark:text-slate-500 mt-1"></p>
-        </section>
-
-        <!-- KPI cards (today) -->
-        <section class="grid grid-cols-3 gap-3 sm:gap-4">
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-3 sm:p-5">
-            <p id="kpiOrdersLabel" class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-550 leading-tight">Orders today</p>
-            <p id="kpiOrders" class="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 truncate">—</p>
-            <p id="kpiCovers" class="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 mt-1 truncate"></p>
-          </div>
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-3 sm:p-5">
-            <p class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-550 leading-tight">Avg order</p>
-            <p id="kpiAov" class="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 truncate">—</p>
-          </div>
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-3 sm:p-5">
-            <p id="kpiTaxLabel" class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-550 leading-tight">Tax today</p>
-            <p id="kpiTax" class="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1.5 truncate">—</p>
-          </div>
-        </section>
-
-        <!-- Active orders (live) -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              Active orders
-              <span id="activeCount" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/70 text-indigo-600 dark:text-indigo-300"></span>
-            </h2>
-            <span id="activeValue" class="text-xs font-medium text-slate-400 dark:text-slate-550"></span>
-          </div>
-          <div id="activeOrders" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-        </section>
-
-        <!-- Cash + loss prevention -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <!-- Cash reconciliation -->
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5 lg:col-span-1">
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Cash drawer</h2>
-            <dl class="space-y-2.5 text-sm">
-              <div class="flex justify-between"><dt class="text-slate-500 dark:text-slate-400">Opening</dt><dd id="cashOpening" class="font-medium text-slate-800 dark:text-slate-200">—</dd></div>
-              <div class="flex justify-between"><dt class="text-slate-500 dark:text-slate-400">Cash sales</dt><dd id="cashSales" class="font-medium text-slate-800 dark:text-slate-200">—</dd></div>
-              <div class="flex justify-between"><dt class="text-slate-500 dark:text-slate-400">Expected</dt><dd id="cashExpected" class="font-medium text-slate-800 dark:text-slate-200">—</dd></div>
-              <div class="flex justify-between"><dt class="text-slate-500 dark:text-slate-400">Counted (closing)</dt><dd id="cashClosing" class="font-medium text-slate-800 dark:text-slate-200">—</dd></div>
-            </dl>
-            <div id="cashDiffWrap" class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
-              <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Difference</span>
-              <span id="cashDiff" class="text-sm font-bold px-2.5 py-1 rounded-lg">—</span>
-            </div>
-          </div>
-
-          <!-- Loss prevention -->
-          <div class="grid grid-cols-2 gap-4 lg:col-span-2 lg:grid-cols-2">
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-                </span>
-                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-550">Discounts</p>
-              </div>
-              <p id="lpDiscount" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">—</p>
-              <p id="lpDiscountCount" class="text-[11px] text-slate-400 dark:text-slate-505 mt-1"></p>
-            </div>
-            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="w-7 h-7 rounded-lg bg-rose-100 dark:bg-rose-950/40 flex items-center justify-center">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/></svg>
-                </span>
-                <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-550">Cancelled</p>
-              </div>
-              <p id="lpCancelled" class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">—</p>
-              <p id="lpCancelledVal" class="text-[11px] text-slate-400 dark:text-slate-505 mt-1"></p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Payments + Orders by type -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Payment methods</h2>
-            <div id="payments" class="space-y-3"></div>
-          </div>
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Orders by type</h2>
-            <div id="ordersByType" class="space-y-3"></div>
-          </div>
-        </section>
-
-        <!-- Business Analytics Card -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-          <div class="flex flex-wrap items-center justify-between gap-4 mb-5 border-b border-slate-100 dark:border-slate-800/60 pb-3">
-            <h2 id="analyticsTitle" class="text-sm font-bold text-slate-900 dark:text-white">Business Analytics</h2>
-            
-            <!-- Chart Tabs Selector -->
-            <div class="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl text-[11px] font-bold">
-              <button data-chart="weekly" class="chart-tab px-3 py-1.5 rounded-lg transition bg-white dark:bg-slate-900 shadow-sm text-slate-800 dark:text-slate-100">Weekly WoW</button>
-              <button data-chart="moving" class="chart-tab px-3 py-1.5 rounded-lg transition text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">Moving Average</button>
-              <button data-chart="trajectory" class="chart-tab px-3 py-1.5 rounded-lg transition text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">MTD Trajectory</button>
-              <button data-chart="weekday" class="chart-tab px-3 py-1.5 rounded-lg transition text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300">Weekday Averages</button>
-            </div>
-          </div>
-          <div id="trend" class="h-56 w-full"></div>
-        </section>
-
-        <!-- Top items + Busy hours + Low stock -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-            <h2 id="topItemsLabel" class="text-sm font-bold text-slate-900 dark:text-white mb-4">Top items today</h2>
-            <div id="topItems" class="space-y-2.5"></div>
-          </div>
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5 flex flex-col">
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4">Busy hours peak times</h2>
-            <div id="busyHours" class="h-44 w-full mt-auto"></div>
-          </div>
-          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800/80 shadow-sm p-5">
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-              Low stock
-              <span id="lowStockCount" class="hidden text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-300"></span>
-            </h2>
-            <div id="lowStock" class="space-y-2.5"></div>
-          </div>
-        </section>
-
-      </div>
-
-      <footer class="text-center text-[11px] text-slate-400 dark:text-slate-500 pt-2 pb-6 space-y-1.5">
         <div>
-          <span id="appVersion"></span> · Live data from your POS
+          <h1 id="restName" class="text-white font-bold text-lg leading-tight">Molecule</h1>
+          <div id="syncInfo" class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 live-dot"></span>
+            <span id="syncText" class="text-[10px] text-zinc-400 font-medium">Connecting...</span>
+          </div>
         </div>
-        <div id="licenseInfo" class="hidden text-slate-400 dark:text-slate-500 font-medium">
-          License Expiry: <span id="licenseExpiry"></span>
+        <span id="dayBadge" class="hidden ml-2 px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-800 text-zinc-300"></span>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <button class="theme-toggle hidden"></button>
+        <button id="notifyBtn" class="hidden p-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </button>
+        <button id="refreshBtn" class="p-2 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition group">
+          <svg id="refreshIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+        <button id="signOutBtn" class="p-2 rounded-lg text-zinc-400 hover:bg-red-950/50 hover:text-netflix-red transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+    
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden py-20 text-center">
+      <div class="w-20 h-20 mx-auto bg-zinc-900 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-10 h-10 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      </div>
+      <h2 class="text-xl font-bold text-white mb-2">Awaiting Data</h2>
+      <p class="text-zinc-400">Dashboard will populate when the POS comes online.</p>
+    </div>
+
+    <!-- Main Content -->
+    <div id="content" class="hidden space-y-6">
+      
+      <!-- Hero Section -->
+      <section class="relative rounded-3xl overflow-hidden pt-12 pb-10 px-6 border border-white/5 bg-netflix-dark shadow-2xl">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-netflix-red/20 via-netflix-dark to-netflix-dark pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col items-center text-center">
+          
+          <div id="periodTabs" class="inline-flex bg-zinc-900/80 backdrop-blur-md p-1 rounded-full mb-8 border border-zinc-800">
+            <button data-period="today" class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors bg-white text-black shadow-sm">Today</button>
+            <button data-period="week" class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors text-zinc-400 hover:text-white">Week</button>
+            <button data-period="month" class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors text-zinc-400 hover:text-white">Month</button>
+            <button data-period="year" class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors text-zinc-400 hover:text-white">Year</button>
+            <button data-period="custom" class="px-4 py-1.5 rounded-full text-sm font-medium transition-colors text-zinc-400 hover:text-white">Custom</button>
+          </div>
+
+          <div id="customDateRange" class="hidden mb-6 flex flex-wrap justify-center items-center gap-2 bg-zinc-900/60 p-2 rounded-xl border border-zinc-800 backdrop-blur-sm fade-up">
+            <input type="date" id="customStart" class="bg-zinc-800 border-none rounded-lg px-3 py-1.5 text-sm text-white focus:ring-1 focus:ring-netflix-red">
+            <span class="text-zinc-500 text-sm">to</span>
+            <input type="date" id="customEnd" class="bg-zinc-800 border-none rounded-lg px-3 py-1.5 text-sm text-white focus:ring-1 focus:ring-netflix-red">
+            <button id="applyCustomDates" class="bg-netflix-red hover:bg-red-600 text-white text-sm font-semibold px-4 py-1.5 rounded-lg transition-colors">Apply</button>
+            <p id="customRangeError" class="hidden w-full text-center text-netflix-red text-xs mt-1"></p>
+          </div>
+
+          <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-netflix-red mb-2">Gross Revenue</h2>
+          <div id="periodRevenue" class="text-5xl sm:text-7xl font-black text-white tracking-tighter mb-3 shadow-black drop-shadow-lg">₹0.00</div>
+          <div id="periodSub" class="text-zinc-400 font-medium">0 order(s)</div>
+        </div>
+      </section>
+
+      <!-- KPI Row -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass card-grad-1 rounded-2xl p-5 hover-lift">
+          <h3 id="kpiOrdersLabel" class="text-xs font-bold uppercase tracking-wider text-indigo-300/70 mb-1">Orders</h3>
+          <div class="flex items-end justify-between">
+            <div id="kpiOrders" class="text-3xl font-bold text-white">0</div>
+            <div id="kpiCovers" class="text-sm font-medium text-indigo-200/50">0 covers</div>
+          </div>
+        </div>
+        <div class="glass card-grad-2 rounded-2xl p-5 hover-lift">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-300/70 mb-1">Avg Order Val</h3>
+          <div id="kpiAov" class="text-3xl font-bold text-white">₹0</div>
+        </div>
+        <div class="glass card-grad-3 rounded-2xl p-5 hover-lift">
+          <h3 id="kpiTaxLabel" class="text-xs font-bold uppercase tracking-wider text-amber-300/70 mb-1">Tax</h3>
+          <div id="kpiTax" class="text-3xl font-bold text-white">₹0</div>
+        </div>
+      </section>
+
+      <!-- Active Orders Horizon -->
+      <section class="fade-up" style="animation-delay: 0.1s;">
+        <div class="flex items-center gap-3 mb-3 px-1">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400">Active Orders</h2>
+          <span id="activeCount" class="hidden px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-xs font-bold"></span>
+          <span id="activeValue" class="text-sm font-medium text-zinc-500"></span>
+        </div>
+        <div id="activeOrders" class="flex overflow-x-auto gap-4 no-scrollbar pb-4 snap-x">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- Grid Layout: Cash & Loss Prev -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-up" style="animation-delay: 0.2s;">
+        <!-- Cash Drawer -->
+        <div class="glass rounded-2xl p-5 lg:col-span-1">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-4">Cash Drawer</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-white/5">
+              <span class="text-zinc-400">Opening</span>
+              <span id="cashOpening" class="font-bold">₹0</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/5">
+              <span class="text-zinc-400">Cash Sales</span>
+              <span id="cashSales" class="font-bold text-emerald-400">+ ₹0</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/5">
+              <span class="text-zinc-400">Expected</span>
+              <span id="cashExpected" class="font-bold">₹0</span>
+            </div>
+            <div class="flex justify-between items-center pb-3 border-b border-white/5">
+              <span class="text-zinc-400">Closing</span>
+              <span id="cashClosing" class="font-bold text-white">—</span>
+            </div>
+            <div id="cashDiffWrap" class="flex justify-between items-center pt-1">
+              <span class="text-zinc-400">Status</span>
+              <span id="cashDiff" class="text-sm font-bold px-2 py-1 rounded bg-zinc-800 text-zinc-400">Day Open</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loss Prevention -->
+        <div class="lg:col-span-2">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-4 px-1">Loss Prevention</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 h-[calc(100%-2rem)]">
+            <div class="glass rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-colors"></div>
+              <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center mb-3 text-amber-500">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              <div id="lpDiscount" class="text-3xl font-bold text-white mb-1">₹0</div>
+              <div class="text-sm text-zinc-400 font-medium">Discounts Given</div>
+              <div id="lpDiscountCount" class="text-xs text-zinc-500 mt-1">0 discounted order(s)</div>
+            </div>
+            <div class="glass rounded-2xl p-5 flex flex-col justify-center relative overflow-hidden group">
+              <div class="absolute right-0 top-0 w-32 h-32 bg-netflix-red/10 rounded-full blur-3xl group-hover:bg-netflix-red/20 transition-colors"></div>
+              <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mb-3 text-netflix-red">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </div>
+              <div class="flex items-baseline gap-2 mb-1">
+                <div id="lpCancelled" class="text-3xl font-bold text-white">0</div>
+                <div class="text-sm text-zinc-400 font-medium">Voids</div>
+              </div>
+              <div id="lpCancelledVal" class="text-xs text-zinc-500 mt-1">₹0 value</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pay/Type Split -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-up" style="animation-delay: 0.3s;">
+        <div class="glass rounded-2xl p-5">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-5">Payment Methods</h2>
+          <div id="payments" class="space-y-4"></div>
+        </div>
+        <div class="glass rounded-2xl p-5">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-5">Orders by Type</h2>
+          <div id="ordersByType" class="space-y-4"></div>
+        </div>
+      </section>
+
+      <!-- Analytics -->
+      <section class="glass rounded-2xl p-5 fade-up" style="animation-delay: 0.4s;">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h2 id="analyticsTitle" class="text-sm font-bold uppercase tracking-wider text-zinc-400">Business Analytics</h2>
+          <div class="flex bg-zinc-900/80 p-1 rounded-xl border border-white/5">
+            <button class="chart-tab px-3 py-1.5 rounded-lg text-sm font-semibold bg-zinc-800 text-white shadow-sm" data-chart="weekly">WoW</button>
+            <button class="chart-tab px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white transition" data-chart="moving">Moving Avg</button>
+            <button class="chart-tab px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white transition" data-chart="trajectory">MTD</button>
+            <button class="chart-tab px-3 py-1.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-white transition" data-chart="weekday">Weekday</button>
+          </div>
+        </div>
+        <div id="trend" class="h-[260px] w-full"></div>
+      </section>
+
+      <!-- Bottom Row -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-up" style="animation-delay: 0.5s;">
+        <div class="glass rounded-2xl p-5 flex flex-col">
+          <h2 id="topItemsLabel" class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-5">Top Items</h2>
+          <div id="topItems" class="space-y-3 flex-1"></div>
+        </div>
+        
+        <div class="glass rounded-2xl p-5 flex flex-col">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400 mb-5">Busy Hours</h2>
+          <div id="busyHours" class="h-32 w-full mt-auto"></div>
+        </div>
+        
+        <div class="glass rounded-2xl p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-zinc-400">Low Stock</h2>
+            <span id="lowStockCount" class="hidden px-2 py-0.5 rounded-full bg-netflix-red/20 text-netflix-red text-xs font-bold"></span>
+          </div>
+          <div id="lowStock" class="space-y-3 flex-1 overflow-y-auto max-h-48 no-scrollbar pr-2"></div>
+        </div>
+      </section>
+      
+      <!-- Footer -->
+      <footer class="pt-8 pb-4 text-center">
+        <p class="text-xs text-zinc-600 font-medium tracking-wide">
+          <span id="appVersion"></span>
+        </p>
+        <div id="licenseInfo" class="hidden mt-1 text-xs text-zinc-600">
+          License: <span id="licenseExpiry"></span>
         </div>
       </footer>
-    </main>
+      
+    </div>
   </div>
+</div>
 
-  <!-- ───────────────── APP ───────────────── -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
     import {
@@ -432,8 +441,8 @@
         $('appVersion').textContent = m.appVersion ? ('v' + m.appVersion) : '';
         const badge = $('dayBadge');
         badge.classList.remove('hidden');
-        if (m.dayOpen) { badge.textContent = 'OPEN'; badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'; }
-        else { badge.textContent = 'CLOSED'; badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'; }
+        if (m.dayOpen) { badge.textContent = 'OPEN'; badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400'; }
+        else { badge.textContent = 'CLOSED'; badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400'; }
         renderActiveOrders(m.activeOrders || [], m.activeOrderValue || 0);
 
         // Render License Info
@@ -522,12 +531,12 @@
       const diff = Number(c.difference) || 0;
       const diffEl = $('cashDiff');
       if (!c.closing) {
-        diffEl.textContent = 'Day open'; diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400';
+        diffEl.textContent = 'Day open'; diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-400';
       } else if (diff === 0) {
-        diffEl.textContent = 'Balanced'; diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300';
+        diffEl.textContent = 'Balanced'; diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400';
       } else {
         diffEl.textContent = (diff > 0 ? '+' : '') + money(diff);
-        diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300';
+        diffEl.className = 'text-sm font-bold px-2.5 py-1 rounded-lg bg-red-500/20 text-netflix-red';
       }
 
       // Low stock (today / "right now")
@@ -538,9 +547,9 @@
       else { lsCount.classList.add('hidden'); }
       ls.innerHTML = low.length ? low.map((s) => `
         <div class="flex items-center justify-between">
-          <span class="text-sm text-slate-700 dark:text-slate-300 truncate">${escapeHtml(s.name)}</span>
-          <span class="text-xs font-semibold text-rose-600 dark:text-rose-455">${num(s.currentStock)} / ${num(s.minStock)} ${escapeHtml(s.unit || '')}</span>
-        </div>`).join('') : `<div class="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> All stocked up</div>`;
+          <span class="text-sm text-zinc-300 truncate">${escapeHtml(s.name)}</span>
+          <span class="text-xs font-semibold text-netflix-red">${num(s.currentStock)} / ${num(s.minStock)} ${escapeHtml(s.unit || '')}</span>
+        </div>`).join('') : `<div class="flex items-center gap-2 text-sm text-emerald-400"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg> All stocked up</div>`;
     }
 
     const BAR_COLORS = { indigo: 'bg-indigo-500', emerald: 'bg-emerald-500' };
@@ -551,10 +560,10 @@
       el.innerHTML = rows.map((r) => `
         <div>
           <div class="flex items-center justify-between text-sm mb-1">
-            <span class="text-slate-600 dark:text-slate-400">${escapeHtml(r.label)} <span class="text-slate-400 dark:text-slate-500 text-xs">· ${r.sub}</span></span>
-            <span class="font-semibold text-slate-800 dark:text-slate-200">${money(r.value)}</span>
+            <span class="text-zinc-400">${escapeHtml(r.label)} <span class="text-zinc-500 text-xs">· ${r.sub}</span></span>
+            <span class="font-semibold text-white">${money(r.value)}</span>
           </div>
-          <div class="h-2 rounded-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
+          <div class="h-2 rounded-full bg-zinc-800/80 overflow-hidden">
             <div class="h-full ${BAR_COLORS[color]} rounded-full transition-all duration-500" style="width:${Math.max(4, (r.value / max) * 100)}%"></div>
           </div>
         </div>`).join('');
@@ -1139,8 +1148,8 @@
       const tabs = document.querySelectorAll('#periodTabs button');
       tabs.forEach((b) => {
         const active = b.dataset.period === selectedPeriod;
-        b.className = 'px-2.5 sm:px-3 py-1 rounded-md transition ' +
-          (active ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-semibold' : 'text-slate-500 dark:text-slate-455');
+        b.className = 'px-4 py-1.5 rounded-full text-sm font-medium transition-colors ' +
+          (active ? 'bg-white text-black shadow-sm' : 'text-zinc-400 hover:text-white');
       });
       if (selectedPeriod === 'custom') return;
       if (!d) return;
@@ -1186,11 +1195,11 @@
       const items = p.topItems || [];
       ti.innerHTML = items.length ? items.map((it, i) => `
         <div class="flex items-center gap-3">
-          <span class="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 text-[11px] font-bold flex items-center justify-center flex-shrink-0">${i + 1}</span>
-          <span class="flex-1 text-sm text-slate-700 dark:text-slate-300 truncate">${escapeHtml(it.name)}</span>
-          <span class="text-xs text-slate-400 dark:text-slate-500">×${num(it.quantity)}</span>
-          <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 w-20 text-right">${money(it.revenue)}</span>
-        </div>`).join('') : emptyRow('No sales ' + suffix);
+          <span class="w-6 h-6 rounded-lg bg-zinc-800 text-zinc-400 text-[11px] font-bold flex items-center justify-center flex-shrink-0">${i + 1}</span>
+          <span class="flex-1 text-sm text-zinc-300 truncate">${escapeHtml(it.name)}</span>
+          <span class="text-xs text-zinc-500">×${num(it.quantity)}</span>
+          <span class="text-sm font-semibold text-white w-20 text-right">${money(it.revenue)}</span>
+        </div>`).join('') : emptyRow('No sales data');
 
       renderBusyHours();
     }
@@ -1448,10 +1457,10 @@
       const items = p.topItems || [];
       ti.innerHTML = items.length ? items.map((it, i) => `
         <div class="flex items-center gap-3">
-          <span class="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 text-[11px] font-bold flex items-center justify-center flex-shrink-0">${i + 1}</span>
-          <span class="flex-1 text-sm text-slate-700 dark:text-slate-300 truncate">${escapeHtml(it.name)}</span>
-          <span class="text-xs text-slate-400 dark:text-slate-500">×${num(it.quantity)}</span>
-          <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 w-20 text-right">${money(it.revenue)}</span>
+          <span class="w-6 h-6 rounded-lg bg-zinc-800 text-zinc-400 text-[11px] font-bold flex items-center justify-center flex-shrink-0">${i + 1}</span>
+          <span class="flex-1 text-sm text-zinc-300 truncate">${escapeHtml(it.name)}</span>
+          <span class="text-xs text-zinc-500">×${num(it.quantity)}</span>
+          <span class="text-sm font-semibold text-white w-20 text-right">${money(it.revenue)}</span>
         </div>`).join('') : emptyRow('No sales in range');
 
       renderBusyHours();
@@ -1471,8 +1480,8 @@
           }
           document.querySelectorAll('#periodTabs button').forEach((btn) => {
             const active = btn.dataset.period === 'custom';
-            btn.className = 'px-2.5 sm:px-3 py-1 rounded-md transition ' +
-              (active ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm font-semibold' : 'text-slate-500 dark:text-slate-455');
+            btn.className = 'px-4 py-1.5 rounded-full text-sm font-medium transition-colors ' +
+              (active ? 'bg-white text-black shadow-sm' : 'text-zinc-400 hover:text-white');
           });
           if (currentUid) {
             fetchAndAggregateCustomRange(currentUid, $('customStart').value, $('customEnd').value);
@@ -1490,8 +1499,8 @@
         currentChartView = b.dataset.chart;
         document.querySelectorAll('.chart-tab').forEach((btn) => {
           const active = btn.dataset.chart === currentChartView;
-          btn.className = 'chart-tab px-3 py-1.5 rounded-lg transition ' +
-            (active ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-800 dark:text-slate-100 font-semibold' : 'text-slate-500 dark:text-slate-455 hover:text-slate-700 dark:hover:text-slate-300');
+          btn.className = 'chart-tab px-3 py-1.5 rounded-lg text-sm font-medium transition ' +
+            (active ? 'bg-zinc-800 text-white shadow-sm font-semibold' : 'text-zinc-400 hover:text-white');
         });
         renderSelectedChart();
       });
@@ -1517,19 +1526,19 @@
       const el = $('activeOrders'), countEl = $('activeCount'), valEl = $('activeValue');
       if (list.length) { countEl.textContent = list.length; countEl.classList.remove('hidden'); valEl.textContent = money(totalValue) + ' open'; }
       else { countEl.classList.add('hidden'); valEl.textContent = ''; }
-      if (!list.length) { el.innerHTML = `<p class="text-sm text-slate-400 col-span-full">No open orders right now.</p>`; return; }
+      if (!list.length) { el.innerHTML = `<p class="text-sm text-zinc-500">No open orders right now.</p>`; return; }
       el.innerHTML = list.map((o) => {
         const title = o.table ? escapeHtml(o.table) : prettyLabel(o.type);
         return `
-          <div class="rounded-xl border ${o.onHold ? 'border-amber-250 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20' : 'border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40'} p-3.5">
-            <div class="flex items-center justify-between mb-1.5">
-              <span class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">${title}</span>
-              ${o.onHold ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300 flex-shrink-0">HOLD</span>' : ''}
+          <div class="glass rounded-xl ${o.onHold ? 'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : ''} p-4 min-w-[220px] flex-shrink-0 snap-start hover-lift">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-bold text-white truncate">${title}</span>
+              ${o.onHold ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 flex-shrink-0">HOLD</span>' : ''}
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400">${escapeHtml(prettyLabel(o.type))} · ${num(o.itemCount)} item(s)</p>
-            <div class="flex items-center justify-between mt-2">
-              <span class="text-sm font-bold text-slate-900 dark:text-white">${money(o.total)}</span>
-              <span class="text-[11px] text-slate-400 dark:text-slate-500">${openFor(o.openedAt)}${o.orderNumber ? ' · #' + escapeHtml(String(o.orderNumber)) : ''}</span>
+            <p class="text-xs text-zinc-400">${escapeHtml(prettyLabel(o.type))} · ${num(o.itemCount)} item(s)</p>
+            <div class="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+              <span class="text-sm font-bold text-white">${money(o.total)}</span>
+              <span class="text-[10px] text-zinc-500">${openFor(o.openedAt)}${o.orderNumber ? ' · #' + escapeHtml(String(o.orderNumber)) : ''}</span>
             </div>
           </div>`;
       }).join('');
@@ -1537,7 +1546,7 @@
     // Keep the "open Xm" durations ticking even between syncs.
     setInterval(() => { if (lastActive.length) renderActiveOrders(lastActive, lastActiveValue); }, 60000);
 
-    function emptyRow(text) { return `<p class="text-sm text-slate-400 dark:text-slate-550">${text}</p>`; }
+    function emptyRow(text) { return `<p class="text-sm text-zinc-500">${text}</p>`; }
     function escapeHtml(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
