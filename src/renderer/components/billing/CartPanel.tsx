@@ -387,7 +387,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
-                          className={`p-1 rounded transition-colors ${
+                          className={`p-1 rounded transition-all opacity-0 group-hover:opacity-100 ${
                             item.notes
                               ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
                               : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
