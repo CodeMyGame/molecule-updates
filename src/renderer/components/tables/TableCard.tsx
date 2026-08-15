@@ -111,10 +111,10 @@ const TableCard: React.FC<TableCardProps> = ({
       onContextMenu={onContextMenu ? (e) => { e.preventDefault(); onContextMenu(e, table); } : undefined}
       className={`
         relative flex flex-col items-center justify-center
-        rounded-lg w-full border-2
-        ${compact ? 'h-[68px] p-1.5' : 'min-h-[100px] p-2.5'}
+        rounded-md w-full border
+        ${compact ? 'h-[58px] p-1' : 'min-h-[72px] p-1.5'}
         ${isOccupied && elapsedMins >= 60 ? 'border-red-500 bg-red-50' : isOccupied && elapsedMins >= 30 ? 'border-yellow-500 bg-yellow-50' : `${config.border} ${config.bg}`}
-        shadow-sm hover:shadow-md
+        shadow-xs hover:shadow-sm
         transition-all duration-150
         active:scale-95
         cursor-pointer select-none
@@ -125,32 +125,32 @@ const TableCard: React.FC<TableCardProps> = ({
       title={isLongHour ? t('tables.longHourAlert', { defaultValue: 'Occupied over 2 hours' }) : undefined}
     >
       <span
-        className={`absolute -top-1.5 -right-1.5 font-bold rounded-full ${config.badge} ${compact ? 'text-[8px] px-1 py-0' : 'text-[10px] px-2 py-0.5'}`}
+        className={`absolute -top-1 -right-1 font-bold rounded-full ${config.badge} ${compact ? 'text-[8px] px-1 py-0' : 'text-[9px] px-1.5 py-0.2'}`}
       >
         {compact ? badgeLetter : config.label}
       </span>
 
       {table.isPinned && (
-        <span className={`absolute ${compact ? '-top-1 -left-1' : '-top-1.5 -left-1.5'} bg-blue-500 text-white rounded-full p-0.5 shadow-sm`} title={t('common.pinned')}>
-          <Pin size={compact ? 8 : 11} className="fill-current" />
+        <span className={`absolute ${compact ? '-top-1 -left-1' : '-top-1 -left-1'} bg-blue-500 text-white rounded-full p-0.5 shadow-xs`} title={t('common.pinned')}>
+          <Pin size={compact ? 7 : 9} className="fill-current" />
         </span>
       )}
 
-      <span className={`font-semibold text-gray-800 ${compact ? 'text-[11px] mb-0' : 'text-sm mb-1'}`}>{table.name}</span>
+      <span className={`font-bold text-gray-800 ${compact ? 'text-[10px] mb-0' : 'text-xs mb-0.5'}`}>{table.name}</span>
 
-      <span className={`flex items-center gap-0.5 text-gray-500 ${compact ? 'text-[9px]' : 'text-xs'}`}>
-        <Users size={compact ? 8 : 12} />
+      <span className={`flex items-center gap-0.5 text-gray-500 ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
+        <Users size={compact ? 8 : 10} />
         <span>{table.capacity}</span>
       </span>
 
       {hasOrderInfo && (
-        <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-2 gap-1'}`}>
-          <span className={`font-bold text-red-700 ${compact ? 'text-[9px]' : 'text-sm'}`}>
+        <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-1 gap-0.5'}`}>
+          <span className={`font-bold text-red-700 ${compact ? 'text-[9px]' : 'text-xs'}`}>
             {formatPaise(orderTotal!)}
           </span>
           {orderStartedAt && (
-            <span className={`flex items-center gap-0.5 font-medium ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
-              <Clock size={compact ? 7 : 10} />
+            <span className={`flex items-center gap-0.5 font-medium ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
+              <Clock size={compact ? 7 : 9} />
               {formatElapsedTime(elapsedMins)}
             </span>
           )}
@@ -158,8 +158,8 @@ const TableCard: React.FC<TableCardProps> = ({
       )}
 
       {isOccupied && !hasOrderInfo && orderStartedAt && (
-        <span className={`flex items-center gap-0.5 font-medium mt-0.5 ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
-          <Clock size={compact ? 7 : 10} />
+        <span className={`flex items-center gap-0.5 font-medium mt-0.5 ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
+          <Clock size={compact ? 7 : 9} />
           {formatElapsedTime(elapsedMins)}
         </span>
       )}

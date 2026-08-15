@@ -188,13 +188,13 @@ const Inventory: React.FC = () => {
   return (
     <div className="h-full flex flex-col">
       {/* Page header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-3">
-          <Package size={24} className="text-blue-600" />
-          <h1 className="text-xl font-bold text-gray-900">{t('inventory.pageTitle')}</h1>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-1.5">
+          <Package size={15} className="text-blue-600 shrink-0" />
+          <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('inventory.pageTitle')}</h1>
           {lowStockCount > 0 && (
-            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
-              <AlertTriangle size={14} />
+            <span className="flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
+              <AlertTriangle size={11} />
               {t('inventory.lowStockBadge', { count: lowStockCount })}
             </span>
           )}
@@ -202,7 +202,7 @@ const Inventory: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 px-6 pt-3 bg-white border-b border-gray-200">
+      <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -211,23 +211,23 @@ const Inventory: React.FC = () => {
               setSearchQuery('');
             }}
             className={`
-              flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg
-              transition-colors border-b-2
+              flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold rounded
+              transition-colors select-none tap-target
               ${
                 activeTab === tab.key
-                  ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
               }
             `}
           >
-            {tab.icon}
-            {tab.label}
+            {React.cloneElement(tab.icon as React.ReactElement, { size: 12 })}
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-3 bg-gray-50/50">
         {activeTab === 'stock' && (
           <StockOverviewTab
             items={filteredItems}
@@ -542,18 +542,18 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <SearchInput
           placeholder={t('inventory.searchPlaceholder')}
           onChange={onSearchChange}
-          className="w-64"
+          className="w-56"
         />
         <select
           value={categoryFilter}
           onChange={(e) => onCategoryFilterChange(e.target.value)}
-          className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="px-2 py-1 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="all">{t('inventory.allCategories')}</option>
           {categories.map((c) => (
@@ -565,23 +565,27 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
         <select
           value={stockFilter}
           onChange={(e) => onStockFilterChange(e.target.value)}
-          className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="px-2 py-1 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="all">{t('inventory.allStatus')}</option>
           <option value="low">{t('inventory.stockStatusLow')}</option>
           <option value="out">{t('inventory.stockStatusOut')}</option>
         </select>
         <div className="flex-1" />
-        <Button
-          variant="secondary"
-          icon={<ArrowDownUp size={16} />}
+        <button
           onClick={onAdjustStock}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
         >
-          {t('inventory.stockAdjustment')}
-        </Button>
-        <Button icon={<Plus size={16} />} onClick={onAddItem}>
-          {t('inventory.addItem')}
-        </Button>
+          <ArrowDownUp size={11} className="text-gray-500" />
+          <span>{t('inventory.stockAdjustment')}</span>
+        </button>
+        <button
+          onClick={onAddItem}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+        >
+          <Plus size={11} />
+          <span>{t('inventory.addItem')}</span>
+        </button>
       </div>
 
       <DataTable
@@ -670,10 +674,10 @@ const PurchaseOrdersTab: React.FC<PurchaseOrdersTabProps> = ({
               e.stopPropagation();
               onView(po);
             }}
-            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
             title={t('inventory.viewDetails')}
           >
-            <Eye size={15} />
+            <Eye size={13} />
           </button>
           {po.status === POStatus.ORDERED && (
             <button
@@ -681,10 +685,10 @@ const PurchaseOrdersTab: React.FC<PurchaseOrdersTabProps> = ({
                 e.stopPropagation();
                 onReceive(po);
               }}
-              className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+              className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
               title={t('inventory.receive')}
             >
-              <CheckCircle2 size={15} />
+              <CheckCircle2 size={13} />
             </button>
           )}
         </div>
@@ -693,12 +697,16 @@ const PurchaseOrdersTab: React.FC<PurchaseOrdersTabProps> = ({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">{t('inventory.purchaseOrders')}</h2>
-        <Button icon={<Plus size={16} />} onClick={onCreate}>
-          {t('inventory.createPurchaseOrder')}
-        </Button>
+        <h2 className="text-xs font-bold text-gray-900">{t('inventory.purchaseOrders')}</h2>
+        <button
+          onClick={onCreate}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+        >
+          <Plus size={11} />
+          <span>{t('inventory.createPurchaseOrder')}</span>
+        </button>
       </div>
       <DataTable
         columns={columns}
@@ -726,7 +734,7 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
     {
       header: t('inventory.name'),
       accessor: 'name',
-      render: (s: Supplier) => <span className="font-medium text-gray-900">{s.name}</span>,
+      render: (s: Supplier) => <span className="font-semibold text-gray-900">{s.name}</span>,
     },
     { header: t('inventory.phone'), accessor: 'phone' },
     { header: t('inventory.email'), accessor: 'email' },
@@ -736,11 +744,11 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
       accessor: 'isActive',
       render: (s: Supplier) =>
         s.isActive ? (
-          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
             {t('common.active')}
           </span>
         ) : (
-          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
+          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500">
             {t('common.inactive')}
           </span>
         ),
@@ -756,22 +764,26 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
             e.stopPropagation();
             onEdit(s);
           }}
-          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+          className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
           title={t('common.edit')}
         >
-          <Edit2 size={15} />
+          <Edit2 size={13} />
         </button>
       ),
     },
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">{t('inventory.suppliers')}</h2>
-        <Button icon={<Plus size={16} />} onClick={onAdd}>
-          {t('inventory.addSupplier')}
-        </Button>
+        <h2 className="text-xs font-bold text-gray-900">{t('inventory.suppliers')}</h2>
+        <button
+          onClick={onAdd}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+        >
+          <Plus size={11} />
+          <span>{t('inventory.addSupplier')}</span>
+        </button>
       </div>
       <DataTable
         columns={columns}
@@ -817,14 +829,14 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
   const foodCostPct = sellingPrice > 0 ? (totalFoodCost / sellingPrice) * 100 : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center gap-4">
-        <h2 className="text-lg font-semibold text-gray-800">{t('inventory.recipeManagement')}</h2>
+        <h2 className="text-xs font-bold text-gray-900">{t('inventory.recipeManagement')}</h2>
       </div>
 
       {/* Menu item selector */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="bg-white rounded-md border border-gray-200 p-2.5">
+        <label className="block text-xs font-semibold text-gray-700 mb-1">
           {t('inventory.selectMenuItem')}
         </label>
         <select
@@ -833,7 +845,7 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
             const id = Number(e.target.value);
             if (id) onSelectMenuItem(id);
           }}
-          className="w-full max-w-md px-3 py-2.5 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-full max-w-md px-2.5 py-1 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value="">{t('inventory.selectMenuItemOption')}</option>
           {menuItems.map((m) => (
@@ -847,23 +859,23 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
       {selectedMenuItemId && (
         <>
           {/* Cost summary */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="text-sm text-gray-500">{t('inventory.sellingPrice')}</div>
-              <div className="text-xl font-bold text-gray-900 mt-1">
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="bg-white rounded-md border border-gray-200 p-2.5">
+              <div className="text-[10px] text-gray-500">{t('inventory.sellingPrice')}</div>
+              <div className="text-sm font-bold text-gray-900 mt-0.5">
                 {formatCurrency(sellingPrice)}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="text-sm text-gray-500">{t('inventory.foodCost')}</div>
-              <div className="text-xl font-bold text-gray-900 mt-1">
+            <div className="bg-white rounded-md border border-gray-200 p-2.5">
+              <div className="text-[10px] text-gray-500">{t('inventory.foodCost')}</div>
+              <div className="text-sm font-bold text-gray-900 mt-0.5">
                 {formatCurrency(totalFoodCost)}
               </div>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <div className="text-sm text-gray-500">{t('inventory.foodCostPct')}</div>
+            <div className="bg-white rounded-md border border-gray-200 p-2.5">
+              <div className="text-[10px] text-gray-500">{t('inventory.foodCostPct')}</div>
               <div
-                className={`text-xl font-bold mt-1 ${
+                className={`text-sm font-bold mt-0.5 ${
                   foodCostPct > 35 ? 'text-red-600' : foodCostPct > 25 ? 'text-orange-600' : 'text-green-600'
                 }`}
               >
@@ -874,10 +886,14 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
 
           {/* Recipe ingredients table */}
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-700">{t('inventory.ingredients')}</h3>
-            <Button size="sm" icon={<Plus size={14} />} onClick={onAddRecipe}>
-              {t('inventory.addIngredient')}
-            </Button>
+            <h3 className="text-xs font-semibold text-gray-700">{t('inventory.ingredients')}</h3>
+            <button
+              onClick={onAddRecipe}
+              className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+            >
+              <Plus size={11} />
+              <span>{t('inventory.addIngredient')}</span>
+            </button>
           </div>
 
           <DataTable
@@ -924,9 +940,9 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
                     onClick={() => {
                       if (confirm(t('inventory.removeIngredientConfirm'))) onDeleteRecipe(r.id);
                     }}
-                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                    className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                   </button>
                 ),
               },
@@ -965,7 +981,7 @@ const WastageTab: React.FC<WastageTabProps> = ({ history, items, onLogWastage })
       header: t('inventory.item'),
       accessor: 'inventoryItemId',
       render: (tx: StockTransaction) => (
-        <span className="font-medium text-gray-900">{getName(tx.inventoryItemId)}</span>
+        <span className="font-semibold text-gray-900">{getName(tx.inventoryItemId)}</span>
       ),
     },
     {
@@ -986,12 +1002,16 @@ const WastageTab: React.FC<WastageTabProps> = ({ history, items, onLogWastage })
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">{t('inventory.wastageLog')}</h2>
-        <Button icon={<Plus size={16} />} onClick={onLogWastage}>
-          {t('inventory.logWastage')}
-        </Button>
+        <h2 className="text-xs font-bold text-gray-900">{t('inventory.wastageLog')}</h2>
+        <button
+          onClick={onLogWastage}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+        >
+          <Plus size={11} />
+          <span>{t('inventory.logWastage')}</span>
+        </button>
       </div>
       <DataTable
         columns={columns}
@@ -1054,41 +1074,41 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, onClose, 
       size="md"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleSubmit} loading={saving}>
+          <Button size="sm" onClick={handleSubmit} loading={saving}>
             {item ? t('common.update') : t('inventory.addItem')}
           </Button>
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.name')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.name')} *</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('inventory.itemNamePlaceholder')}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.sku')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.sku')}</label>
             <input
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.skuPlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.unit')} *</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.unit')} *</label>
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="kg">{t('inventory.units.kg')}</option>
               <option value="g">{t('inventory.units.g')}</option>
@@ -1102,50 +1122,50 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, onClose, 
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.category')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.category')}</label>
           <input
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('inventory.categoryPlaceholder')}
           />
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">
               {item ? t('inventory.currentStock') : t('inventory.openingStock')}
             </label>
             <input
               type="number"
               value={currentStock}
               onChange={(e) => setCurrentStock(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
               step="0.5"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">
               {t('inventory.minStock')} *
             </label>
             <input
               type="number"
               value={minStock}
               onChange={(e) => setMinStock(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
               step="0.5"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">
               {t('inventory.costPerUnitLabel')} *
             </label>
             <input
               type="number"
               value={costPerUnit}
               onChange={(e) => setCostPerUnit(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
               step="0.01"
             />
@@ -1198,22 +1218,22 @@ const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
       size="md"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleSubmit} loading={saving}>
+          <Button size="sm" onClick={handleSubmit} loading={saving}>
             {t('inventory.saveAdjustment')}
           </Button>
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.item')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.item')} *</label>
           <select
             value={selectedItemId}
             onChange={(e) => setSelectedItemId(Number(e.target.value) || '')}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectItemOption')}</option>
             {items.map((item) => (
@@ -1223,23 +1243,23 @@ const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
             ))}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.quantity')} *</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.quantity')} *</label>
             <input
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.quantityAdjustPlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.type')} *</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.type')} *</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as StockTransactionType)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value={StockTransactionType.PURCHASE}>{t('inventory.movementType.purchase')}</option>
               <option value={StockTransactionType.ADJUSTMENT}>{t('inventory.movementType.adjustment')}</option>
@@ -1248,12 +1268,12 @@ const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.notes')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.notes')}</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-            rows={3}
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows={2}
             placeholder={t('inventory.adjustmentReason')}
           />
         </div>
@@ -1304,61 +1324,61 @@ const SupplierModal: React.FC<SupplierModalProps> = ({ supplier, onClose, onSave
       size="md"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleSubmit} loading={saving}>
+          <Button size="sm" onClick={handleSubmit} loading={saving}>
             {supplier ? t('common.update') : t('inventory.addSupplier')}
           </Button>
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.name')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.name')} *</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('inventory.supplierNamePlaceholder')}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.phone')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.phone')}</label>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.phonePlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.email')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.email')}</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.emailPlaceholder')}
             />
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{taxTerms.businessTaxId}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{taxTerms.businessTaxId}</label>
           <input
             value={gstin}
             onChange={(e) => setGstin(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('inventory.gstinPlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.address')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.address')}</label>
           <textarea
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={2}
           />
         </div>
@@ -1440,27 +1460,27 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
       footer={
         <>
           <div className="flex-1 text-left">
-            <span className="text-sm text-gray-500">{t('inventory.totalLabel')}</span>
-            <span className="text-lg font-bold text-gray-900">
+            <span className="text-xs text-gray-500">{t('inventory.totalLabel')}</span>
+            <span className="text-sm font-bold text-gray-900 ml-1">
               {formatCurrency(Math.round(total * 100))}
             </span>
           </div>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleSubmit} loading={saving}>
+          <Button size="sm" onClick={handleSubmit} loading={saving}>
             {t('inventory.createPurchaseOrder')}
           </Button>
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.supplier')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.supplier')} *</label>
           <select
             value={supplierId}
             onChange={(e) => setSupplierId(Number(e.target.value) || '')}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectSupplierOption')}</option>
             {suppliers.map((s) => (
@@ -1473,8 +1493,8 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
         {/* Line items */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('inventory.items')} *</label>
-          <div className="space-y-2">
+          <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t('inventory.items')} *</label>
+          <div className="space-y-1.5">
             {lineItems.map((li, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <select
@@ -1482,7 +1502,7 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
                   onChange={(e) =>
                     updateLine(idx, 'inventoryItemId', Number(e.target.value))
                   }
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="">{t('inventory.selectItemPlaceholder')}</option>
                   {items.map((item) => (
@@ -1496,7 +1516,7 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
                   placeholder={t('common.qty')}
                   value={li.quantity || ''}
                   onChange={(e) => updateLine(idx, 'quantity', Number(e.target.value))}
-                  className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-20 px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                   min="0"
                 />
                 <input
@@ -1504,34 +1524,34 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
                   placeholder={t('inventory.costRs')}
                   value={li.unitCost || ''}
                   onChange={(e) => updateLine(idx, 'unitCost', Number(e.target.value))}
-                  className="w-32 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="w-24 px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                   min="0"
                   step="0.01"
                 />
-                <span className="text-sm text-gray-500 w-24 text-right">
+                <span className="text-xs font-semibold text-gray-700 w-20 text-right">
                   {formatCurrency(Math.round(li.quantity * li.unitCost * 100))}
                 </span>
                 <button
                   onClick={() => removeLine(idx)}
-                  className="p-1.5 text-gray-400 hover:text-red-600 rounded transition-colors"
+                  className="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
                   disabled={lineItems.length <= 1}
                 >
-                  <XCircle size={16} />
+                  <XCircle size={14} />
                 </button>
               </div>
             ))}
           </div>
-          <Button variant="ghost" size="sm" onClick={addLine} className="mt-2">
-            <Plus size={14} /> {t('inventory.addItem')}
+          <Button variant="ghost" size="sm" onClick={addLine} className="mt-1.5">
+            <Plus size={12} /> {t('inventory.addItem')}
           </Button>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.notes')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.notes')}</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={2}
           />
         </div>
@@ -1557,11 +1577,11 @@ const ViewPOModal: React.FC<ViewPOModalProps> = ({ po, suppliers, items, onClose
 
   return (
     <Modal isOpen onClose={onClose} title={t('inventory.purchaseOrderTitle', { number: po.poNumber })} size="xl">
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3 text-xs">
           <div>
             <span className="text-gray-500">{t('inventory.supplier')}:</span>{' '}
-            <span className="font-medium">{supplierName}</span>
+            <span className="font-semibold text-gray-900">{supplierName}</span>
           </div>
           <div>
             <span className="text-gray-500">{t('inventory.status')}:</span> {getPOStatusBadge(po.status, t)}
@@ -1577,7 +1597,7 @@ const ViewPOModal: React.FC<ViewPOModalProps> = ({ po, suppliers, items, onClose
         </div>
 
         {po.notes && (
-          <div className="text-sm">
+          <div className="text-xs">
             <span className="text-gray-500">{t('inventory.notesLabel')}</span> {po.notes}
           </div>
         )}
@@ -1613,8 +1633,8 @@ const ViewPOModal: React.FC<ViewPOModalProps> = ({ po, suppliers, items, onClose
         />
 
         <div className="text-right pt-2 border-t border-gray-200">
-          <span className="text-gray-500 text-sm">{t('inventory.totalLabel')}</span>
-          <span className="text-lg font-bold">{formatCurrency(po.totalAmount)}</span>
+          <span className="text-gray-500 text-xs">{t('inventory.totalLabel')}</span>
+          <span className="text-sm font-bold text-gray-900 ml-1">{formatCurrency(po.totalAmount)}</span>
         </div>
       </div>
     </Modal>
@@ -1665,29 +1685,29 @@ const ReceivePOModal: React.FC<ReceivePOModalProps> = ({ po, items, onClose, onS
       size="lg"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button variant="success" onClick={handleSubmit} loading={saving}>
+          <Button variant="success" size="sm" onClick={handleSubmit} loading={saving}>
             {t('common.confirm')}
           </Button>
         </>
       }
     >
       <div className="space-y-3">
-        <p className="text-sm text-gray-500">
+        <p className="text-xs text-gray-500">
           {t('inventory.receiveInstructions')}
         </p>
         {(po.items ?? []).map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between gap-4 py-2 border-b border-gray-100"
+            className="flex items-center justify-between gap-3 py-1.5 border-b border-gray-100"
           >
             <div className="flex-1">
-              <div className="font-medium text-gray-900 text-sm">
+              <div className="font-semibold text-gray-900 text-xs">
                 {getItemName(item.inventoryItemId)}
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-[10px] text-gray-400">
                 {t('inventory.receiveOrderedReceived', { ordered: item.quantity, received: item.receivedQty })}
               </div>
             </div>
@@ -1697,7 +1717,7 @@ const ReceivePOModal: React.FC<ReceivePOModalProps> = ({ po, items, onClose, onS
               onChange={(e) =>
                 setReceivedQtys({ ...receivedQtys, [item.id]: Number(e.target.value) })
               }
-              className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-20 px-2.5 py-1 text-xs border border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
               max={item.quantity}
             />
@@ -1741,22 +1761,22 @@ const WastageLogModal: React.FC<WastageLogModalProps> = ({ items, onClose, onSav
       size="md"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button variant="danger" onClick={handleSubmit} loading={saving}>
+          <Button variant="danger" size="sm" onClick={handleSubmit} loading={saving}>
             {t('inventory.logWastage')}
           </Button>
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('inventory.item')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.item')} *</label>
           <select
             value={selectedItemId}
             onChange={(e) => setSelectedItemId(Number(e.target.value) || '')}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectItemOption')}</option>
             {items.map((item) => (
@@ -1767,27 +1787,27 @@ const WastageLogModal: React.FC<WastageLogModalProps> = ({ items, onClose, onSav
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             {t('inventory.quantityWasted')} *
           </label>
           <input
             type="number"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             min="0"
             step="0.5"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             {t('inventory.reason')}
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-            rows={3}
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            rows={2}
             placeholder={t('inventory.wastageReasonPlaceholder')}
           />
         </div>
@@ -1849,24 +1869,24 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
       size="md"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button onClick={handleSubmit} loading={saving}>
+          <Button size="sm" onClick={handleSubmit} loading={saving}>
             {t('inventory.addIngredient')}
           </Button>
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             {t('inventory.inventoryItem')} *
           </label>
           <select
             value={selectedItemId}
             onChange={(e) => handleItemChange(Number(e.target.value))}
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectIngredientOption')}</option>
             {inventoryItems.map((item) => (
@@ -1876,34 +1896,34 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
             ))}
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">
               {t('inventory.quantityUsed')} *
             </label>
             <input
               type="number"
               value={quantityUsed}
               onChange={(e) => setQuantityUsed(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
               step="0.01"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('common.unit')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.unit')}</label>
             <input
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.unitPlaceholder')}
             />
           </div>
         </div>
         {selectedInvItem && quantityUsed && (
-          <div className="bg-blue-50 rounded-lg px-4 py-3 text-sm">
+          <div className="bg-blue-50 rounded-md px-3 py-2 text-xs">
             <span className="text-gray-600">{t('inventory.ingredientCostLabel')}</span>
-            <span className="font-bold text-gray-900">
+            <span className="font-bold text-gray-900 ml-1">
               {formatCurrency(Number(quantityUsed) * selectedInvItem.costPerUnit)}
             </span>
           </div>

@@ -197,14 +197,14 @@ function SummaryCard({
   trend?: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
-      <div className="p-3 rounded-lg bg-blue-50 text-blue-600 flex-shrink-0">{icon}</div>
+    <div className="bg-white rounded-lg border border-gray-200 p-3 flex items-start gap-3">
+      <div className="p-2 rounded-md bg-blue-50 text-blue-600 flex-shrink-0">{React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { size: 16 }) : icon}</div>
       <div className="min-w-0">
-        <p className="text-sm text-gray-500 truncate">{title}</p>
-        <p className="text-xl font-bold text-gray-900 mt-0.5">{value}</p>
+        <p className="text-xs text-gray-500 truncate">{title}</p>
+        <p className="text-base font-bold text-gray-900 mt-0.5">{value}</p>
         {trend && (
-          <p className="text-xs text-green-600 flex items-center gap-0.5 mt-1">
-            <ArrowUpRight size={12} /> {trend}
+          <p className="text-[11px] text-green-600 flex items-center gap-0.5 mt-0.5">
+            <ArrowUpRight size={11} /> {trend}
           </p>
         )}
       </div>
@@ -599,7 +599,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [t('reports.date'), t('reports.orders'), t('reports.revenue'), t('reports.discount'), t('reports.tax'), ...(totalCoinsRedeemed > 0 ? [t('reports.coinsRedeemed')] : []), t('reports.netRevenue')],
@@ -676,7 +677,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [t('reports.item'), t('reports.category'), t('reports.qtySold'), t('reports.revenue'), t('reports.percentOfTotal')],
@@ -740,7 +742,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [t('reports.category'), t('reports.itemsSold'), t('reports.revenue'), t('reports.tax'), t('reports.percentOfTotal')],
@@ -819,7 +822,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [t('reports.paymentMode'), t('reports.transactions'), t('reports.totalAmount'), t('reports.tips')],
@@ -955,7 +959,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [
@@ -1028,7 +1033,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [t('reports.staffName'), t('reports.orders'), t('reports.revenue'), t('reports.avgOrderValue')],
@@ -1091,7 +1097,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [t('reports.ingredient'), t('common.unit'), t('reports.consumed'), t('reports.wasted'), t('reports.cost')],
@@ -1244,6 +1251,7 @@ const Reports: React.FC = () => {
             )}
             <Button
               variant="secondary"
+              size="sm"
               icon={<Download size={14} />}
               onClick={() =>
                 exportToCSV(
@@ -1565,6 +1573,7 @@ const Reports: React.FC = () => {
         <div className="flex justify-end mb-4">
           <Button
             variant="secondary"
+            size="sm"
             icon={<Download size={14} />}
             onClick={() =>
               exportToCSV(
@@ -1788,7 +1797,8 @@ const Reports: React.FC = () => {
 
         <Button
           variant="secondary"
-          icon={<Download size={16} />}
+          size="sm"
+          icon={<Download size={14} />}
           onClick={() =>
             exportToCSV(
               [t('reports.period', 'Period'), t('reports.orders'), t('reports.revenue'), t('reports.percentOfTotal')],
@@ -2062,22 +2072,22 @@ const Reports: React.FC = () => {
   return (
     <div className="h-full flex flex-col bg-gray-50">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-gray-900">{t('nav.reports')}</h1>
-          <Button variant="secondary" icon={<Printer size={16} />} onClick={handlePrint}>
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2.5">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="text-sm font-bold text-gray-900">{t('nav.reports')}</h1>
+          <Button variant="secondary" size="sm" icon={<Printer size={13} />} onClick={handlePrint}>
             {t('reports.print')}
           </Button>
         </div>
 
         {/* Date range filter */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Calendar size={16} className="text-gray-400" />
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <Calendar size={13} className="text-gray-400" />
           {DATE_PRESETS.map((p) => (
             <button
               key={p.key}
               onClick={() => reports.setDatePreset(p.key)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 reports.datePreset === p.key
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -2087,19 +2097,19 @@ const Reports: React.FC = () => {
             </button>
           ))}
           {reports.datePreset === 'custom' && (
-            <div className="flex items-center gap-2 ml-2">
+            <div className="flex items-center gap-1.5 ml-1">
               <input
                 type="date"
                 value={reports.dateRange.startDate}
                 onChange={(e) => reports.setDateRange({ ...reports.dateRange, startDate: e.target.value })}
-                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+                className="px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
               />
-              <span className="text-gray-400 text-sm">{t('reports.to')}</span>
+              <span className="text-gray-400 text-xs">{t('reports.to')}</span>
               <input
                 type="date"
                 value={reports.dateRange.endDate}
                 onChange={(e) => reports.setDateRange({ ...reports.dateRange, endDate: e.target.value })}
-                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+                className="px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
               />
             </div>
           )}
@@ -2107,27 +2117,27 @@ const Reports: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 overflow-x-auto">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 overflow-x-auto">
         <div className="flex gap-1">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-1 px-3 py-2 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab.key
                   ? 'border-blue-600 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              {tab.icon}
-              {getTabLabel(tab.key)}
+              {React.isValidElement(tab.icon) ? React.cloneElement(tab.icon as React.ReactElement, { size: 13 }) : tab.icon}
+              <span>{getTabLabel(tab.key)}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-4">
         {reports.loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 size={32} className="animate-spin text-blue-600" />

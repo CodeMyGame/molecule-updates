@@ -447,63 +447,60 @@ const Tables: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <LayoutGrid size={22} className="text-blue-600" />
-          <h1 className="text-xl font-semibold text-gray-900">{t('tables.title')}</h1>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-1.5">
+          <LayoutGrid size={15} className="text-blue-600 shrink-0" />
+          <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('tables.title')}</h1>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<RefreshCw size={16} />}
+        <div className="flex items-center gap-1">
+          <button
             onClick={refetch}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            {t('common.refresh')}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Plus size={16} />}
+            <RefreshCw size={11} className="text-gray-500" />
+            <span>{t('common.refresh')}</span>
+          </button>
+          <button
             onClick={() => setShowFloorModal(true)}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            {t('tables.addFloor')}
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Plus size={16} />}
+            <Plus size={11} className="text-gray-500" />
+            <span>{t('tables.addFloor')}</span>
+          </button>
+          <button
             onClick={openAddTableModal}
             disabled={!currentFloorId}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-xs transition-colors"
           >
-            {t('tables.addTable')}
-          </Button>
+            <Plus size={11} />
+            <span>{t('tables.addTable')}</span>
+          </button>
         </div>
       </div>
 
       {/* Floor tabs */}
       {floors.length > 0 && (
-        <div className="flex items-center gap-1 px-6 py-2 bg-gray-50 border-b border-gray-200 overflow-x-auto">
+        <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200 overflow-x-auto">
           {floors.map((floor) => (
             <button
               key={floor.id}
               onClick={() => setActiveFloorId(floor.id)}
               onContextMenu={(e) => handleFloorContextMenu(e, floor)}
               className={`
-                relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+                relative flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold
                 transition-colors select-none tap-target
                 ${
                   currentFloorId === floor.id
-                    ? 'bg-blue-600 text-white shadow-sm'
+                    ? 'bg-blue-600 text-white shadow-xs'
                     : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
                 }
               `}
             >
-              <Layers size={14} />
-              {floor.name}
-              <span className="ml-1 text-xs opacity-75">
-                ({tablesByFloor(floor.id).length})
+              <Layers size={12} />
+              <span>{floor.name}</span>
+              <span className={`text-[9px] px-1 py-0.2 rounded-full font-medium ${currentFloorId === floor.id ? 'bg-blue-500/80 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                {tablesByFloor(floor.id).length}
               </span>
               {isEditMode && floors.length > 1 && (
                 <button
@@ -511,9 +508,9 @@ const Tables: React.FC = () => {
                     e.stopPropagation();
                     handleDeleteFloor(floor.id);
                   }}
-                  className="ml-1 p-0.5 rounded hover:bg-white/20"
+                  className="ml-0.5 p-0.5 rounded hover:bg-white/20"
                 >
-                  <X size={12} />
+                  <X size={10} />
                 </button>
               )}
             </button>
@@ -523,7 +520,7 @@ const Tables: React.FC = () => {
 
       {/* Error banner */}
       {error && (
-        <div className="mx-6 mt-3 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div className="mx-4 mt-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-md text-xs text-red-700">
           {error}
         </div>
       )}
@@ -541,17 +538,16 @@ const Tables: React.FC = () => {
           />
         </div>
       ) : (
-        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
-          <Layers size={48} />
-          <p className="text-sm">{t('tables.emptyFloors')}</p>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Plus size={16} />}
+        <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-2 py-12">
+          <Layers size={36} />
+          <p className="text-xs">{t('tables.emptyFloors')}</p>
+          <button
             onClick={() => setShowFloorModal(true)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors mt-1"
           >
-            {t('tables.addFloor')}
-          </Button>
+            <Plus size={13} />
+            <span>{t('tables.addFloor')}</span>
+          </button>
         </div>
       )}
 
@@ -560,14 +556,15 @@ const Tables: React.FC = () => {
         isOpen={showTableModal}
         onClose={() => setShowTableModal(false)}
         title={editingTable ? t('tables.editTableTitle') : t('tables.addTableTitle')}
-        size="md"
+        size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setShowTableModal(false)}>
+            <Button variant="secondary" size="sm" onClick={() => setShowTableModal(false)}>
               {t('common.cancel')}
             </Button>
             <Button
               variant="primary"
+              size="sm"
               loading={saving}
               onClick={handleSaveTable}
               disabled={!tableForm.name.trim()}
@@ -577,23 +574,23 @@ const Tables: React.FC = () => {
           </>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('tables.tableNameLabel')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('tables.tableNameLabel')} *</label>
             <input
               type="text"
               value={tableForm.name}
               onChange={(e) => setTableForm((f) => ({ ...f, name: e.target.value }))}
               placeholder={t('tables.tableNamePlaceholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
               autoFocus
             />
           </div>
 
           {/* Capacity */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('tables.capacityLabel')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('tables.capacityLabel')}</label>
             <input
               type="number"
               min={1}
@@ -602,10 +599,9 @@ const Tables: React.FC = () => {
               onChange={(e) =>
                 setTableForm((f) => ({ ...f, capacity: parseInt(e.target.value) || 1 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             />
           </div>
-
         </div>
       </Modal>
 
@@ -617,11 +613,12 @@ const Tables: React.FC = () => {
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => { setShowFloorModal(false); setEditingFloor(null); setFloorName(''); }}>
+            <Button variant="secondary" size="sm" onClick={() => { setShowFloorModal(false); setEditingFloor(null); setFloorName(''); }}>
               {t('common.cancel')}
             </Button>
             <Button
               variant="primary"
+              size="sm"
               loading={saving}
               onClick={handleAddFloor}
               disabled={!floorName.trim()}
@@ -632,13 +629,13 @@ const Tables: React.FC = () => {
         }
       >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('tables.floorNameLabel')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('tables.floorNameLabel')} *</label>
           <input
             type="text"
             value={floorName}
             onChange={(e) => setFloorName(e.target.value)}
             placeholder={t('tables.floorNamePlaceholder')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             autoFocus
             onKeyDown={(e) => e.key === 'Enter' && handleAddFloor()}
           />

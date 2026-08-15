@@ -58,53 +58,53 @@ const TableLayout: React.FC<TableLayoutProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Stats bar */}
-      <div className="flex items-center gap-6 px-4 py-3 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-2 text-sm">
-          <div className="w-3 h-3 rounded-full bg-red-500" />
+      <div className="flex items-center gap-4 px-3 py-1.5 bg-white border-b border-gray-200 flex-wrap text-xs">
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
           <span className="text-gray-600">{t('tables.statsDineIn')}</span>
-          <span className="font-semibold text-gray-900">{dineInCount}</span>
+          <span className="font-bold text-gray-900">{dineInCount}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm">
-          <div className="w-3 h-3 rounded-full bg-green-500" />
+        <div className="flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
           <span className="text-gray-600">{t('tables.statsAvailable')}</span>
-          <span className="font-semibold text-gray-900">{availableCount}</span>
+          <span className="font-bold text-gray-900">{availableCount}</span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Armchair size={14} />
+        <div className="flex items-center gap-1.5 text-gray-500">
+          <Armchair size={12} />
           <span>{t('tables.statsTotal', { count: tables.length })}</span>
         </div>
 
         {/* Legend */}
-        <div className="ml-auto flex items-center gap-4 text-xs text-gray-500">
+        <div className="ml-auto flex items-center gap-3 text-[10px] text-gray-500 flex-wrap">
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-sm bg-green-400" /> {t('tables.statusFree')}
+            <span className="w-2 h-2 rounded-xs bg-green-400" /> {t('tables.statusFree')}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-sm bg-red-400" /> {t('tables.statusOccupied')}
+            <span className="w-2 h-2 rounded-xs bg-red-400" /> {t('tables.statusOccupied')}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-sm bg-yellow-400" /> {t('tables.statusReserved')}
+            <span className="w-2 h-2 rounded-xs bg-yellow-400" /> {t('tables.statusReserved')}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-sm bg-gray-400" /> {t('tables.statusDirty')}
+            <span className="w-2 h-2 rounded-xs bg-gray-400" /> {t('tables.statusDirty')}
           </span>
         </div>
       </div>
 
       {/* Floor plan */}
       <div
-        className="flex-1 bg-gray-50 overflow-auto p-6"
+        className="flex-1 bg-gray-50/50 overflow-auto p-3"
         onDragOver={isEditMode ? handleDragOver : undefined}
         onDrop={isEditMode ? handleDrop : undefined}
       >
         {tables.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
-            <Armchair size={48} />
-            <p className="text-sm">{t('tables.noTablesOnFloor')}</p>
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2 py-12">
+            <Armchair size={36} />
+            <p className="text-xs">{t('tables.noTablesOnFloor')}</p>
           </div>
         ) : isEditMode ? (
           /* Edit mode: absolute positioning for drag & drop */
-          <div className="relative w-full" style={{ minHeight: '500px' }}>
+          <div className="relative w-full" style={{ minHeight: '450px' }}>
             {tables.map((table) => (
               <div
                 key={table.id}
@@ -130,7 +130,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
           </div>
         ) : (
           /* Normal mode: grid layout */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2.5">
             {tables.map((table) => {
               const orderInfo = tableOrders?.get(table.id);
               return (

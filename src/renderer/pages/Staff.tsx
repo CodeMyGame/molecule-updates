@@ -259,62 +259,62 @@ const StaffPage: React.FC = () => {
   );
 
   const staffFormContent = (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-xs font-semibold text-gray-700 mb-1">
           {t('staff.name')} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+          className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
           placeholder={t('staff.namePlaceholder')}
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.phone')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('staff.phone')}</label>
           <input
             type="tel"
             value={formData.phone}
             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             placeholder={t('staff.phonePlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.email')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('staff.email')}</label>
           <input
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             placeholder={t('staff.emailPlaceholder')}
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 mb-1">
             {editingStaff ? t('staff.newPin') : t('staff.pin')} {!editingStaff && <span className="text-red-500">*</span>}
           </label>
           <input
             type="password"
             value={formData.pin}
             onChange={(e) => setFormData({ ...formData, pin: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             placeholder={t('staff.pinPlaceholder')}
             maxLength={6}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.hourlyRate')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('staff.hourlyRate')}</label>
           <input
             type="number"
             value={formData.hourlyRate}
             onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             placeholder="0"
             min="0"
             step="0.01"
@@ -322,11 +322,11 @@ const StaffPage: React.FC = () => {
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{t('staff.role')}</label>
+        <label className="block text-xs font-semibold text-gray-700 mb-1">{t('staff.role')}</label>
         <select
           value={formData.roleId}
           onChange={(e) => setFormData({ ...formData, roleId: parseInt(e.target.value, 10) })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none bg-white"
+          className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none bg-white"
         >
           {roles.map((r) => (
             <option key={r.id} value={r.id}>
@@ -339,7 +339,7 @@ const StaffPage: React.FC = () => {
   );
 
   const renderStaffList = () => (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <DataTable
         columns={[
           { header: t('staff.name'), accessor: 'name' },
@@ -347,7 +347,7 @@ const StaffPage: React.FC = () => {
             header: t('staff.role'),
             accessor: 'roleId',
             render: (item) => (
-              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+              <span className="px-1.5 py-0.2 text-[10px] font-semibold rounded-full bg-blue-100 text-blue-700">
                 {getRoleName(item.roleId)}
               </span>
             ),
@@ -362,17 +362,17 @@ const StaffPage: React.FC = () => {
                   e.stopPropagation();
                   toggleActive(item.id, !item.isActive);
                 }}
-                className="flex items-center gap-1.5"
+                className="flex items-center gap-1"
               >
                 {item.isActive ? (
                   <>
-                    <ToggleRight size={20} className="text-green-600" />
-                    <span className="text-xs text-green-600 font-medium">{t('staff.active')}</span>
+                    <ToggleRight size={18} className="text-green-600" />
+                    <span className="text-xs text-green-600 font-semibold">{t('staff.active')}</span>
                   </>
                 ) : (
                   <>
-                    <ToggleLeft size={20} className="text-gray-400" />
-                    <span className="text-xs text-gray-400 font-medium">{t('staff.inactive')}</span>
+                    <ToggleLeft size={18} className="text-gray-400" />
+                    <span className="text-xs text-gray-400 font-semibold">{t('staff.inactive')}</span>
                   </>
                 )}
               </button>
@@ -390,18 +390,18 @@ const StaffPage: React.FC = () => {
                     e.stopPropagation();
                     handleOpenEdit(item);
                   }}
-                  className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                  className="p-1 hover:bg-gray-100 rounded transition-colors text-gray-500 hover:text-blue-600"
                 >
-                  <Edit2 size={14} />
+                  <Edit2 size={13} />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setDeleteConfirm(item.id);
                   }}
-                  className="p-1.5 hover:bg-red-50 rounded-lg transition-colors text-gray-500 hover:text-red-600"
+                  className="p-1 hover:bg-red-50 rounded transition-colors text-gray-500 hover:text-red-600"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={13} />
                 </button>
               </div>
             ),
@@ -415,18 +415,18 @@ const StaffPage: React.FC = () => {
   );
 
   const renderAttendance = () => (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Calendar size={16} className="text-gray-400" />
+        <div className="flex items-center gap-2">
+          <Calendar size={13} className="text-gray-400" />
           <input
             type="date"
             value={attendanceDate}
             onChange={(e) => setAttendanceDate(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none"
+            className="px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
           />
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-3 text-xs text-gray-600">
           <span>{t('staff.present')}: <strong>{totalPresentToday}</strong></span>
           <span>{t('staff.totalHours')}: <strong>{totalHoursToday.toFixed(1)}h</strong></span>
         </div>
@@ -448,7 +448,7 @@ const StaffPage: React.FC = () => {
             header: t('staff.clockOut'),
             accessor: 'clockOut',
             render: (item) => item.clockOut ? formatTime(item.clockOut) : (
-              <span className="text-green-600 text-xs font-medium">{t('staff.active')}</span>
+              <span className="text-green-600 text-[10px] font-semibold">{t('staff.active')}</span>
             ),
           },
           {
@@ -464,9 +464,9 @@ const StaffPage: React.FC = () => {
       />
 
       {/* Manual clock in/out */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('staff.manualClockInOut')}</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <div className="bg-white rounded-md border border-gray-200 p-3">
+        <h3 className="text-xs font-semibold text-gray-700 mb-2">{t('staff.manualClockInOut')}</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {staff
             .filter((s) => s.isActive)
             .map((s) => {
@@ -476,27 +476,27 @@ const StaffPage: React.FC = () => {
               return (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+                  className="flex items-center justify-between p-2 border border-gray-200 rounded-md"
                 >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{s.name}</p>
-                    <p className="text-xs text-gray-500">{getRoleName(s.roleId)}</p>
+                    <p className="text-xs font-semibold text-gray-900">{s.name}</p>
+                    <p className="text-[10px] text-gray-500">{getRoleName(s.roleId)}</p>
                   </div>
                   {activeRecord ? (
                     <button
                       onClick={() => handleClockOut(s.id)}
-                      className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                      className="p-1 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
                       title={t('staff.clockOut')}
                     >
-                      <LogOut size={16} />
+                      <LogOut size={13} />
                     </button>
                   ) : (
                     <button
                       onClick={() => handleClockIn(s.id)}
-                      className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                      className="p-1 bg-green-50 text-green-600 rounded hover:bg-green-100 transition-colors"
                       title={t('staff.clockIn')}
                     >
-                      <LogIn size={16} />
+                      <LogIn size={13} />
                     </button>
                   )}
                 </div>
@@ -508,22 +508,22 @@ const StaffPage: React.FC = () => {
   );
 
   const renderRoles = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
       {/* Role list */}
-      <div className="lg:col-span-1 space-y-2">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('staff.roles')}</h3>
+      <div className="lg:col-span-1 space-y-1.5">
+        <h3 className="text-xs font-semibold text-gray-700 mb-2">{t('staff.roles')}</h3>
         {roles.map((role) => (
           <button
             key={role.id}
             onClick={() => handleSelectRole(role)}
-            className={`w-full text-left p-3 rounded-lg border transition-colors ${
+            className={`w-full text-left p-2 rounded-md border transition-colors ${
               selectedRole?.id === role.id
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 bg-white hover:bg-gray-50'
             }`}
           >
-            <p className="font-medium text-sm text-gray-900">{role.name}</p>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="font-semibold text-xs text-gray-900">{role.name}</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">
               {t('staff.permissionCount', { count: role.permissions.length })}
             </p>
           </button>
@@ -533,9 +533,9 @@ const StaffPage: React.FC = () => {
       {/* Permissions editor */}
       <div className="lg:col-span-2">
         {selectedRole ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-gray-700">
+          <div className="bg-white rounded-md border border-gray-200 p-3">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold text-gray-700">
                 {t('staff.permissionsFor', { roleName: selectedRole.name })}
               </h3>
               <Button onClick={handleSavePermissions} loading={saving} size="sm">
@@ -543,20 +543,20 @@ const StaffPage: React.FC = () => {
               </Button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {Object.entries(ALL_PERMISSIONS).map(([key, group]) => (
                 <div key={key}>
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                     {t(group.groupKey)}
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                     {group.permissions.map((perm) => (
                       <label
                         key={perm.key}
-                        className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+                        className="flex items-center gap-2 p-1.5 rounded hover:bg-gray-50 cursor-pointer"
                       >
                         <div
-                          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                          className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
                             editPermissions.includes(perm.key)
                               ? 'bg-blue-600 border-blue-600'
                               : 'border-gray-300'
@@ -564,10 +564,10 @@ const StaffPage: React.FC = () => {
                           onClick={() => handleTogglePermission(perm.key)}
                         >
                           {editPermissions.includes(perm.key) && (
-                            <Check size={14} className="text-white" />
+                            <Check size={11} className="text-white" />
                           )}
                         </div>
-                        <span className="text-sm text-gray-700">{t(perm.labelKey)}</span>
+                        <span className="text-xs text-gray-700">{t(perm.labelKey)}</span>
                       </label>
                     ))}
                   </div>
@@ -576,9 +576,9 @@ const StaffPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-            <Shield size={40} className="mb-3" />
-            <p className="text-sm">{t('staff.selectRoleToEdit')}</p>
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <Shield size={32} className="mb-2" />
+            <p className="text-xs">{t('staff.selectRoleToEdit')}</p>
           </div>
         )}
       </div>
@@ -588,51 +588,58 @@ const StaffPage: React.FC = () => {
   return (
     <div className="h-full flex flex-col bg-gray-50">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-1.5">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900">{t('staff.title')}</h1>
+          <div className="flex items-center gap-1.5">
+            <Users size={15} className="text-blue-600 shrink-0" />
+            <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('staff.title')}</h1>
+          </div>
           {activeTab === 'list' && (
-            <Button icon={<Plus size={16} />} onClick={handleOpenAdd}>
-              {t('staff.addStaff')}
-            </Button>
+            <button
+              onClick={handleOpenAdd}
+              className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+            >
+              <Plus size={11} />
+              <span>{t('staff.addStaff')}</span>
+            </button>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6">
+      <div className="flex-shrink-0 bg-gray-50/80 border-b border-gray-200 px-3 py-1 overflow-x-auto">
         <div className="flex gap-1">
           {[
-            { key: 'list' as StaffTab, label: t('staff.staffList'), icon: <Users size={16} /> },
-            { key: 'attendance' as StaffTab, label: t('staff.attendance'), icon: <Clock size={16} /> },
-            { key: 'roles' as StaffTab, label: t('staff.rolesPermissions'), icon: <Shield size={16} /> },
+            { key: 'list' as StaffTab, label: t('staff.staffList'), icon: <Users size={13} /> },
+            { key: 'attendance' as StaffTab, label: t('staff.attendance'), icon: <Clock size={13} /> },
+            { key: 'roles' as StaffTab, label: t('staff.rolesPermissions'), icon: <Shield size={13} /> },
           ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold rounded whitespace-nowrap transition-colors tap-target ${
                 activeTab === tab.key
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'bg-blue-600 text-white shadow-xs'
+                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
               }`}
             >
               {tab.icon}
-              {tab.label}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-3">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 size={32} className="animate-spin text-blue-600" />
+          <div className="flex items-center justify-center py-16">
+            <Loader2 size={24} className="animate-spin text-blue-600" />
           </div>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center py-20 text-red-500">
-            <AlertCircle size={32} className="mb-2" />
-            <p className="text-sm">{error}</p>
+          <div className="flex flex-col items-center justify-center py-16 text-red-500">
+            <AlertCircle size={24} className="mb-2" />
+            <p className="text-xs">{error}</p>
           </div>
         ) : activeTab === 'list' ? (
           renderStaffList()
@@ -651,8 +658,8 @@ const StaffPage: React.FC = () => {
         size="lg"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setShowAddModal(false)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} loading={saving}>{t('staff.addStaff')}</Button>
+            <Button variant="secondary" size="sm" onClick={() => setShowAddModal(false)}>{t('common.cancel')}</Button>
+            <Button size="sm" onClick={handleSave} loading={saving}>{t('staff.addStaff')}</Button>
           </>
         }
       >
@@ -667,8 +674,8 @@ const StaffPage: React.FC = () => {
         size="lg"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setEditingStaff(null)}>{t('common.cancel')}</Button>
-            <Button onClick={handleSave} loading={saving}>{t('staff.update')}</Button>
+            <Button variant="secondary" size="sm" onClick={() => setEditingStaff(null)}>{t('common.cancel')}</Button>
+            <Button size="sm" onClick={handleSave} loading={saving}>{t('staff.update')}</Button>
           </>
         }
       >
@@ -683,14 +690,14 @@ const StaffPage: React.FC = () => {
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setDeleteConfirm(null)}>{t('common.cancel')}</Button>
-            <Button variant="danger" onClick={() => deleteConfirm !== null && handleDelete(deleteConfirm)}>
+            <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(null)}>{t('common.cancel')}</Button>
+            <Button variant="danger" size="sm" onClick={() => deleteConfirm !== null && handleDelete(deleteConfirm)}>
               {t('common.delete')}
             </Button>
           </>
         }
       >
-        <p className="text-sm text-gray-600">
+        <p className="text-xs text-gray-600">
           {t('staff.deleteMessage')}
         </p>
       </Modal>

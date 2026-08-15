@@ -710,27 +710,42 @@ const MenuManagement: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <Package size={22} className="text-blue-600" />
-          <h1 className="text-xl font-semibold text-gray-900">{t('menu.menuManagement')}</h1>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-1.5">
+          <Package size={15} className="text-blue-600 shrink-0" />
+          <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('menu.menuManagement')}</h1>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" icon={<Download size={16} />} onClick={handleExport}>
-            {t('menu.export')}
-          </Button>
-          <Button variant="secondary" size="sm" icon={importing ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} onClick={handleImport} disabled={importing}>
-            {importing ? t('menu.importing', 'Importing...') : t('menu.import')}
-          </Button>
-          <Button variant="primary" size="sm" icon={<Plus size={16} />} onClick={openAddItem}>
-            {t('menu.addItem')}
-          </Button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Download size={11} className="text-gray-500" />
+            <span>{t('menu.export')}</span>
+          </button>
+
+          <button
+            onClick={handleImport}
+            disabled={importing}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+          >
+            {importing ? <Loader2 size={11} className="animate-spin text-blue-600" /> : <Upload size={11} className="text-gray-500" />}
+            <span>{importing ? t('menu.importing', 'Importing...') : t('menu.import')}</span>
+          </button>
+
+          <button
+            onClick={openAddItem}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          >
+            <Plus size={11} />
+            <span>{t('menu.addItem')}</span>
+          </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 px-6 py-2 bg-gray-50 border-b border-gray-200">
+      <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200">
         {([
           { key: 'items', label: t('menu.items') },
           { key: 'combos', label: t('menu.combos') },
@@ -739,9 +754,9 @@ const MenuManagement: React.FC = () => {
           <button
             key={key}
             onClick={() => setActiveTab(key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors tap-target ${
+            className={`px-2.5 py-0.5 rounded text-[11px] font-semibold transition-colors tap-target ${
               activeTab === key
-                ? 'bg-blue-600 text-white shadow-sm'
+                ? 'bg-blue-600 text-white shadow-xs'
                 : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
             }`}
           >
@@ -752,7 +767,7 @@ const MenuManagement: React.FC = () => {
 
       {/* Error banner */}
       {error && (
-        <div className="mx-6 mt-3 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div className="mx-4 mt-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-md text-xs text-red-700">
           {error}
         </div>
       )}
@@ -761,15 +776,15 @@ const MenuManagement: React.FC = () => {
       {activeTab === 'items' && (
         <div className="flex flex-1 overflow-hidden">
           {/* Left panel - Categories */}
-          <div className="w-64 border-r border-gray-200 flex flex-col bg-gray-50/50">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <span className="text-sm font-semibold text-gray-700">{t('menu.categories')}</span>
+          <div className="w-52 border-r border-gray-200 flex flex-col bg-gray-50/50 flex-shrink-0">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+              <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t('menu.categories')}</span>
               <button
                 onClick={openAddCategory}
-                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 title={t('menu.addCategory')}
               >
-                <FolderPlus size={16} />
+                <FolderPlus size={14} />
               </button>
             </div>
 
@@ -777,14 +792,14 @@ const MenuManagement: React.FC = () => {
               {/* All items */}
               <button
                 onClick={() => setSelectedCategoryId(null)}
-                className={`w-full flex items-center justify-between px-4 py-3 text-sm transition-colors tap-target ${
+                className={`w-full flex items-center justify-between px-3 py-1.5 text-xs transition-colors ${
                   selectedCategoryId === null
-                    ? 'bg-blue-50 text-blue-700 font-medium border-r-2 border-blue-600'
+                    ? 'bg-blue-50 text-blue-700 font-bold border-r-2 border-blue-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <span>{t('menu.allItems')}</span>
-                <span className="text-xs text-gray-400">{items.length}</span>
+                <span className="truncate">{t('menu.allItems')}</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-gray-200 text-gray-700 font-medium">{items.length}</span>
               </button>
 
               {categories.map((cat) => {
@@ -792,9 +807,9 @@ const MenuManagement: React.FC = () => {
                 return (
                   <div
                     key={cat.id}
-                    className={`group flex items-center justify-between px-4 py-3 text-sm transition-colors tap-target ${
+                    className={`group flex items-center justify-between px-3 py-1.5 text-xs transition-colors ${
                       selectedCategoryId === cat.id
-                        ? 'bg-blue-50 text-blue-700 font-medium border-r-2 border-blue-600'
+                        ? 'bg-blue-50 text-blue-700 font-bold border-r-2 border-blue-600'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
@@ -804,19 +819,19 @@ const MenuManagement: React.FC = () => {
                     >
                       {cat.name}
                     </button>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-gray-400 mr-1">{count}</span>
+                    <div className="flex items-center gap-0.5">
+                      <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-gray-200 text-gray-700 font-medium mr-0.5">{count}</span>
                       <button
                         onClick={() => openEditCategory(cat)}
-                        className="p-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 rounded transition-all"
+                        className="p-0.5 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 rounded transition-all"
                       >
-                        <Edit2 size={12} />
+                        <Edit2 size={11} />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(cat)}
-                        className="p-1 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 rounded transition-all"
+                        className="p-0.5 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-600 rounded transition-all"
                       >
-                        <Trash2 size={12} />
+                        <Trash2 size={11} />
                       </button>
                     </div>
                   </div>
@@ -828,26 +843,26 @@ const MenuManagement: React.FC = () => {
           {/* Right panel - Items */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Toolbar */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200 flex-wrap">
               {/* Search */}
-              <div className="relative flex-1 max-w-sm">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <div className="relative flex-1 min-w-[200px] max-w-sm">
+                <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('menu.searchItems')}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full pl-7 pr-2.5 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
                 />
               </div>
 
               {/* Sort */}
               <div className="flex items-center gap-1 text-xs text-gray-500">
-                <Filter size={14} />
+                <Filter size={12} />
                 <select
                   value={sortField}
                   onChange={(e) => handleSort(e.target.value as SortField)}
-                  className="bg-white border border-gray-300 rounded-md px-2 py-1.5 text-xs outline-none"
+                  className="bg-white border border-gray-300 rounded-md px-2 py-1 text-xs outline-none"
                 >
                   <option value="name">{t('menu.itemName')}</option>
                   <option value="basePrice">{t('menu.price')}</option>
@@ -855,32 +870,32 @@ const MenuManagement: React.FC = () => {
                 </select>
                 <button
                   onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))}
-                  className="px-1.5 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-xs"
+                  className="px-2 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-xs"
                 >
                   {sortDir === 'asc' ? t('menuMgmt.sortAsc') : t('menuMgmt.sortDesc')}
                 </button>
               </div>
 
               {/* View toggle */}
-              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+              <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-50'}`}
+                  className={`p-1.5 ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-50'}`}
                 >
-                  <List size={16} />
+                  <List size={14} />
                 </button>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-50'}`}
+                  className={`p-1.5 ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'text-gray-400 hover:bg-gray-50'}`}
                 >
-                  <LayoutGrid size={16} />
+                  <LayoutGrid size={14} />
                 </button>
               </div>
 
               {/* Bulk actions */}
               {selectedItemIds.size > 0 && (
-                <div className="flex items-center gap-2 ml-2 pl-2 border-l border-gray-200">
-                  <span className="text-xs text-gray-500">{t('menuMgmt.selectedCount', { count: selectedItemIds.size })}</span>
+                <div className="flex items-center gap-1.5 ml-auto pl-2 border-l border-gray-200">
+                  <span className="text-xs text-gray-500 font-medium">{t('menuMgmt.selectedCount', { count: selectedItemIds.size })}</span>
                   <Button size="sm" variant="success" onClick={() => handleBulkToggle(true)}>
                     {t('menuMgmt.enable')}
                   </Button>
@@ -892,11 +907,11 @@ const MenuManagement: React.FC = () => {
             </div>
 
             {/* Items display */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-3 bg-gray-50/40">
               {sortedItems.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
-                  <Package size={48} />
-                  <p className="text-sm">
+                <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2 py-12">
+                  <Package size={36} />
+                  <p className="text-xs">
                     {t('menu.noItemsFound')}
                   </p>
                 </div>
@@ -904,121 +919,122 @@ const MenuManagement: React.FC = () => {
                 /* List view */
                 <div className="space-y-1">
                   {/* Header */}
-                  <div className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <div className="flex items-center gap-2.5 px-3 py-1.5 text-[11px] font-bold text-gray-500 uppercase tracking-wider bg-gray-100/70 rounded-md">
                     <input
                       type="checkbox"
                       checked={selectedItemIds.size === sortedItems.length && sortedItems.length > 0}
                       onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-gray-300"
+                      className="w-3.5 h-3.5 rounded border-gray-300"
                     />
                     <span className="flex-1">{t('menu.itemName')}</span>
                     <span className="w-24">{t('menu.categoryName')}</span>
+                    <span className="w-20">{t('menu.station', 'Station')}</span>
                     <span className="w-20 text-right">{t('menu.price')}</span>
                     <span className="w-16 text-center">{t('menu.type')}</span>
-                    <span className="w-20 text-center">{t('menu.available')}</span>
-                    <span className="w-40 text-right">{t('menu.actions')}</span>
+                    <span className="w-16 text-center">{t('menu.available')}</span>
+                    <span className="w-32 text-right">{t('menu.actions')}</span>
                   </div>
 
                   {sortedItems.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-100 rounded-lg hover:border-gray-200 hover:shadow-sm transition-all"
+                      className="flex items-center gap-2.5 px-3 py-1.5 bg-white border border-gray-200/80 rounded-md hover:border-blue-300 hover:shadow-xs transition-all"
                     >
                       <input
                         type="checkbox"
                         checked={selectedItemIds.has(item.id)}
                         onChange={() => toggleItemSelection(item.id)}
-                        className="w-4 h-4 rounded border-gray-300"
+                        className="w-3.5 h-3.5 rounded border-gray-300"
                       />
 
                       {/* Name + code */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
+                        <p className="text-xs font-semibold text-gray-900 truncate">{item.name}</p>
                         {item.shortCode && (
-                          <p className="text-xs text-gray-400">{item.shortCode}</p>
+                          <p className="text-[10px] text-gray-400">{item.shortCode}</p>
                         )}
                       </div>
 
                       {/* Category */}
-                      <span className="w-24 text-xs text-gray-500 truncate">
+                      <span className="w-24 text-[11px] text-gray-500 truncate">
                         {getCategoryName(item.categoryId)}
                       </span>
 
                       {/* Station */}
-                      <span className="w-24 text-xs truncate">
+                      <span className="w-20 text-[11px] truncate">
                         {item.station ? (
-                          <span className="inline-block px-1.5 py-0.5 rounded bg-orange-50 text-orange-600 border border-orange-200">
+                          <span className="inline-block px-1.5 py-0.2 rounded bg-orange-50 text-orange-600 border border-orange-200 text-[10px] font-medium">
                             {getStationLabel(item.station)}
                           </span>
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-gray-300 text-xs">—</span>
                         )}
                       </span>
 
                       {/* Price */}
-                      <span className="w-20 text-sm font-medium text-gray-900 text-right">
+                      <span className="w-20 text-xs font-bold text-gray-900 text-right">
                         {formatCurrency(item.basePrice)}
                       </span>
 
                       {/* Veg/Non-veg */}
                       <span className="w-16 flex justify-center">
                         {item.isVeg ? (
-                          <span className="flex items-center gap-1 text-xs text-green-600">
-                            <Leaf size={12} /> {t('menu.veg')}
+                          <span className="flex items-center gap-0.5 text-[10px] font-medium text-green-600 bg-green-50 px-1.5 py-0.2 rounded">
+                            <Leaf size={10} /> {t('menu.veg')}
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-xs text-red-600">
-                            <Circle size={12} /> {t('menu.nonVeg')}
+                          <span className="flex items-center gap-0.5 text-[10px] font-medium text-red-600 bg-red-50 px-1.5 py-0.2 rounded">
+                            <Circle size={10} /> {t('menu.nonVeg')}
                           </span>
                         )}
                       </span>
 
                       {/* Availability toggle */}
-                      <span className="w-20 flex justify-center">
+                      <span className="w-16 flex justify-center">
                         <button
                           onClick={() => toggleAvailability(item.id, !(item.isAvailable !== false))}
-                          className="tap-target"
+                          className="p-0.5"
                         >
                           {item.isAvailable !== false ? (
-                            <ToggleRight size={24} className="text-green-600" />
+                            <ToggleRight size={18} className="text-green-600" />
                           ) : (
-                            <ToggleLeft size={24} className="text-gray-400" />
+                            <ToggleLeft size={18} className="text-gray-400" />
                           )}
                         </button>
                       </span>
 
                       {/* Actions */}
-                      <div className="w-40 flex items-center justify-end gap-1">
+                      <div className="w-32 flex items-center justify-end gap-0.5">
                         <button
                           onClick={() => openVariations(item)}
-                          className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                          className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors"
                           title={t('menu.variations')}
                         >
-                          <List size={14} />
+                          <List size={12} />
                         </button>
                         <button
                           onClick={() => openItemAddons(item)}
-                          className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                          className="p-1 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
                           title={t('menu.addons')}
                         >
-                          <PlusCircle size={14} />
+                          <PlusCircle size={12} />
                         </button>
                         <button
                           onClick={() => openEditItem(item)}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                           title={t('common.edit')}
                         >
-                          <Edit2 size={14} />
+                          <Edit2 size={12} />
                         </button>
                         <button
                           onClick={() => {
                             setDeletingItem(item);
                             setShowDeleteConfirm(true);
                           }}
-                          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                           title={t('common.delete')}
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
@@ -1026,20 +1042,20 @@ const MenuManagement: React.FC = () => {
                 </div>
               ) : (
                 /* Grid view */
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
                   {sortedItems.map((item) => (
                     <div
                       key={item.id}
-                      className={`relative flex flex-col rounded-xl border-2 overflow-hidden transition-all hover:shadow-md ${
+                      className={`relative flex flex-col rounded-lg border overflow-hidden transition-all hover:shadow-xs ${
                         item.isAvailable !== false
                           ? 'border-gray-200 bg-white'
                           : 'border-gray-200 bg-gray-50 opacity-60'
                       }`}
                     >
                       {/* Veg badge */}
-                      <div className="absolute top-2 left-2 z-10">
+                      <div className="absolute top-1.5 left-1.5 z-10">
                         <span
-                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          className={`inline-flex items-center gap-0.5 px-1 py-0.2 rounded text-[9px] font-bold ${
                             item.isVeg
                               ? 'bg-green-100 text-green-700 border border-green-300'
                               : 'bg-red-100 text-red-700 border border-red-300'
@@ -1050,7 +1066,7 @@ const MenuManagement: React.FC = () => {
                       </div>
 
                       {/* Image area */}
-                      <div className="h-28 bg-gray-100 flex items-center justify-center">
+                      <div className="h-20 bg-gray-50 flex items-center justify-center border-b border-gray-100">
                         {item.imagePath ? (
                           <img
                             src={item.imagePath}
@@ -1058,42 +1074,59 @@ const MenuManagement: React.FC = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <Image size={32} className="text-gray-300" />
+                          <Image size={22} className="text-gray-300" />
                         )}
                       </div>
 
                       {/* Info */}
-                      <div className="p-3 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {getCategoryName(item.categoryId)}
-                        </p>
-                        {item.station && (
-                          <p className="text-xs text-orange-600 mt-0.5 truncate">{getStationLabel(item.station)}</p>
-                        )}
-                        <p className="text-sm font-semibold text-gray-900 mt-1">
+                      <div className="p-2 flex-1 flex flex-col justify-between">
+                        <div>
+                          <p className="text-xs font-semibold text-gray-900 truncate" title={item.name}>{item.name}</p>
+                          <p className="text-[10px] text-gray-400 truncate">
+                            {getCategoryName(item.categoryId)}
+                          </p>
+                          {item.station && (
+                            <p className="text-[9px] text-orange-600 font-medium truncate">{getStationLabel(item.station)}</p>
+                          )}
+                        </div>
+                        <p className="text-xs font-bold text-gray-900 mt-1">
                           {formatCurrency(item.basePrice)}
                         </p>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center justify-between px-3 py-2 border-t border-gray-100">
+                      <div className="flex items-center justify-between px-2 py-1 border-t border-gray-100 bg-gray-50/60">
                         <button
                           onClick={() => toggleAvailability(item.id, !(item.isAvailable !== false))}
-                          className="tap-target"
+                          className="p-0.5"
                         >
                           {item.isAvailable !== false ? (
-                            <ToggleRight size={20} className="text-green-600" />
+                            <ToggleRight size={16} className="text-green-600" />
                           ) : (
-                            <ToggleLeft size={20} className="text-gray-400" />
+                            <ToggleLeft size={16} className="text-gray-400" />
                           )}
                         </button>
-                        <div className="flex gap-1">
+                        <div className="flex gap-0.5">
+                          <button
+                            onClick={() => openVariations(item)}
+                            className="p-1 text-gray-400 hover:text-purple-600 rounded"
+                            title={t('menu.variations')}
+                          >
+                            <List size={11} />
+                          </button>
+                          <button
+                            onClick={() => openItemAddons(item)}
+                            className="p-1 text-gray-400 hover:text-orange-600 rounded"
+                            title={t('menu.addons')}
+                          >
+                            <PlusCircle size={11} />
+                          </button>
                           <button
                             onClick={() => openEditItem(item)}
                             className="p-1 text-gray-400 hover:text-blue-600 rounded"
+                            title={t('common.edit')}
                           >
-                            <Edit2 size={14} />
+                            <Edit2 size={11} />
                           </button>
                           <button
                             onClick={() => {
@@ -1101,8 +1134,9 @@ const MenuManagement: React.FC = () => {
                               setShowDeleteConfirm(true);
                             }}
                             className="p-1 text-gray-400 hover:text-red-600 rounded"
+                            title={t('common.delete')}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={11} />
                           </button>
                         </div>
                       </div>
@@ -1117,13 +1151,10 @@ const MenuManagement: React.FC = () => {
 
       {/* Combos tab */}
       {activeTab === 'combos' && (
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">{t('menu.combos')}</h2>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Plus size={16} />}
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50/40">
+          <div className="flex items-center justify-between mb-2.5">
+            <h2 className="text-xs font-bold text-gray-900">{t('menu.combos')}</h2>
+            <button
               onClick={() => {
                 setEditingComboId(null);
                 setComboName('');
@@ -1132,32 +1163,34 @@ const MenuManagement: React.FC = () => {
                 setComboItemSearch('');
                 setShowComboModal(true);
               }}
+              className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
             >
-              {t('menu.addCombo')}
-            </Button>
+              <Plus size={11} />
+              <span>{t('menu.addCombo')}</span>
+            </button>
           </div>
 
           {combos.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-3">
-              <Package size={48} />
-              <p className="text-sm">{t('menu.noItemsFound')}</p>
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-2">
+              <Package size={36} />
+              <p className="text-xs">{t('menu.noItemsFound')}</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {combos.map((combo) => (
                 <div
                   key={combo.id}
-                  className="flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg bg-white"
+                  className="flex items-center justify-between px-3 py-2 border border-gray-200 rounded-md bg-white hover:border-gray-300 transition-all text-xs"
                 >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{combo.name}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="font-semibold text-gray-900">{combo.name}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">
                       {t('menuMgmt.comboItemsSummary', { count: combo.items.length, price: formatCurrency(combo.price) })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] px-2 py-0.2 rounded-full font-medium ${
                         combo.isActive
                           ? 'bg-green-100 text-green-700'
                           : 'bg-gray-100 text-gray-500'
@@ -1179,18 +1212,18 @@ const MenuManagement: React.FC = () => {
                         setComboItemSearch('');
                         setShowComboModal(true);
                       }}
-                      className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                     >
-                      <Edit2 size={14} />
+                      <Edit2 size={12} />
                     </button>
                     <button
                       onClick={async () => {
                         await deleteCombo(combo.id);
                         await loadCombos();
                       }}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={12} />
                     </button>
                   </div>
                 </div>
@@ -1202,70 +1235,68 @@ const MenuManagement: React.FC = () => {
 
       {/* Addons tab */}
       {activeTab === 'addons' && (
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">{t('menu.addons')}</h2>
+        <div className="flex-1 overflow-y-auto p-4 bg-gray-50/40">
+          <div className="flex items-center justify-between mb-2.5">
+            <h2 className="text-xs font-bold text-gray-900">{t('menu.addons')}</h2>
           </div>
 
           {/* Add group form */}
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2 mb-3">
             <input
               type="text"
               value={newGroupName}
               onChange={(e) => setNewGroupName(e.target.value)}
               placeholder={t('menuMgmt.newGroupNamePlaceholder')}
-              className="flex-1 max-w-sm px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="flex-1 max-w-sm px-2.5 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
               onKeyDown={(e) => e.key === 'Enter' && handleAddAddonGroup()}
             />
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<Plus size={16} />}
-              loading={saving}
+            <button
               onClick={handleAddAddonGroup}
-              disabled={!newGroupName.trim()}
+              disabled={!newGroupName.trim() || saving}
+              className="flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-xs transition-colors"
             >
-              {t('menu.addGroup')}
-            </Button>
+              {saving ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />}
+              <span>{t('menu.addGroup')}</span>
+            </button>
           </div>
 
           {addonGroups.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-3">
-              <Package size={48} />
-              <p className="text-sm">{t('menu.noItemsFound')}</p>
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-2">
+              <Package size={36} />
+              <p className="text-xs">{t('menu.noItemsFound')}</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {addonGroups.map((group) => (
                 <div
                   key={group.id}
-                  className="border border-gray-200 rounded-lg bg-white overflow-hidden"
+                  className="border border-gray-200 rounded-md bg-white overflow-hidden text-xs"
                 >
-                  <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <div className="flex items-center justify-between px-3 py-2 bg-gray-50/80 border-b border-gray-200">
                     <div>
-                      <p className="text-sm font-semibold text-gray-800">{group.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="font-semibold text-gray-800">{group.name}</p>
+                      <p className="text-[10px] text-gray-500">
                         {t('menuMgmt.select')}{group.minSelect}-{group.maxSelect} &middot;{' '}
                         {group.isRequired ? t('common.required') : t('common.optional')}
                       </p>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-0.5">
                       <button
                         onClick={() =>
                           setSelectedGroupId(selectedGroupId === group.id ? null : group.id)
                         }
-                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                       >
-                        <Plus size={14} />
+                        <Plus size={12} />
                       </button>
                       <button
                         onClick={async () => {
                           await deleteAddonGroup(group.id);
                           await loadAddonGroups();
                         }}
-                        className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
@@ -1274,10 +1305,10 @@ const MenuManagement: React.FC = () => {
                   <div className="divide-y divide-gray-100">
                     {(group.addons ?? []).map((addon) => (
                       <div key={addon.id}>
-                        <div className="flex items-center justify-between px-4 py-2">
-                          <span className="text-sm text-gray-700">{addon.name}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-900">
+                        <div className="flex items-center justify-between px-3 py-1.5 text-xs">
+                          <span className="text-gray-700">{addon.name}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-gray-900">
                               {addon.variationPrices && Object.keys(addon.variationPrices).length > 0
                                 ? (() => {
                                     const prices = Object.values(addon.variationPrices!);
@@ -1291,19 +1322,19 @@ const MenuManagement: React.FC = () => {
                             </span>
                             <button
                               onClick={() => expandAddonVariationPrices(addon, group.id)}
-                              className={`p-1 rounded transition-colors ${expandedAddonId === addon.id ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-blue-600'}`}
+                              className={`p-0.5 rounded transition-colors ${expandedAddonId === addon.id ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:text-blue-600'}`}
                               title={t('menuMgmt.variationPricesTitle')}
                             >
-                              <Edit2 size={12} />
+                              <Edit2 size={11} />
                             </button>
                             <button
                               onClick={async () => {
                                 await deleteAddon(addon.id);
                                 await loadAddonGroups();
                               }}
-                              className="p-1 text-gray-400 hover:text-red-600 rounded"
+                              className="p-0.5 text-gray-400 hover:text-red-600 rounded"
                             >
-                              <Trash2 size={12} />
+                              <Trash2 size={11} />
                             </button>
                           </div>
                         </div>
@@ -1424,51 +1455,52 @@ const MenuManagement: React.FC = () => {
         size="lg"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setShowItemModal(false)}>
+            <Button variant="secondary" size="sm" onClick={() => setShowItemModal(false)}>
               {t('common.cancel')}
             </Button>
             <Button
               variant="primary"
+              size="sm"
               loading={saving}
               onClick={handleSaveItem}
-              disabled={!itemForm.name.trim() || !itemForm.categoryId}
+              disabled={!itemForm.name.trim() || !itemForm.basePrice}
             >
               {editingItem ? t('common.save') : t('menu.addItem')}
             </Button>
           </>
         }
       >
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.itemName')}</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.itemName')} *</label>
               <input
                 type="text"
                 value={itemForm.name}
                 onChange={(e) => setItemForm((f) => ({ ...f, name: e.target.value }))}
                 placeholder={t('menuMgmt.itemNamePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
                 autoFocus
               />
             </div>
 
             {/* Short code */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.shortCode')}</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.shortCode')}</label>
               <input
                 type="text"
                 value={itemForm.shortCode}
                 onChange={(e) => setItemForm((f) => ({ ...f, shortCode: e.target.value }))}
                 placeholder={t('menuMgmt.shortCodePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
               />
             </div>
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.categoryName')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.categoryName')}</label>
             <select
               value={itemForm.categoryId ?? ''}
               onChange={(e) =>
@@ -1477,7 +1509,7 @@ const MenuManagement: React.FC = () => {
                   categoryId: e.target.value ? Number(e.target.value) : null,
                 }))
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white"
+              className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none bg-white"
             >
               <option value="">{t('menu.selectCategory')}</option>
               {categories.map((cat) => (
@@ -1488,10 +1520,10 @@ const MenuManagement: React.FC = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {/* Price */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.price')}</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.price')} *</label>
               <input
                 type="number"
                 step="0.01"
@@ -1499,13 +1531,13 @@ const MenuManagement: React.FC = () => {
                 value={itemForm.basePrice}
                 onChange={(e) => setItemForm((f) => ({ ...f, basePrice: e.target.value }))}
                 placeholder="0.00"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
               />
             </div>
 
             {/* Tax */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.taxRate')}</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.taxRate')}</label>
               <input
                 type="number"
                 step="0.1"
@@ -1514,53 +1546,56 @@ const MenuManagement: React.FC = () => {
                 value={itemForm.taxRate}
                 onChange={(e) => setItemForm((f) => ({ ...f, taxRate: e.target.value }))}
                 placeholder="5"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
               />
             </div>
           </div>
 
-          {/* Veg/Non-veg toggle */}
-          <div className="flex items-center gap-6">
+          {/* Veg/Non-veg toggle & Availability */}
+          <div className="flex items-center gap-6 pt-1">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t('menu.type')}</label>
-              <div className="flex gap-3">
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t('menu.type')}</label>
+              <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => setItemForm((f) => ({ ...f, isVeg: true }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-medium transition-colors ${
                     itemForm.isVeg
-                      ? 'border-green-500 bg-green-50 text-green-700'
+                      ? 'border-green-500 bg-green-50 text-green-700 shadow-xs'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}
                 >
-                  <Leaf size={16} />
+                  <Leaf size={13} />
                   {t('menu.veg')}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setItemForm((f) => ({ ...f, isVeg: false }))}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-xs font-medium transition-colors ${
                     !itemForm.isVeg
-                      ? 'border-red-500 bg-red-50 text-red-700'
+                      ? 'border-red-500 bg-red-50 text-red-700 shadow-xs'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
                   }`}
                 >
-                  <Circle size={16} />
+                  <Circle size={13} />
                   {t('menu.nonVeg')}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">{t('menu.availability')}</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t('menu.availability')}</label>
               <button
+                type="button"
                 onClick={() => setItemForm((f) => ({ ...f, isAvailable: !f.isAvailable }))}
-                className="flex items-center gap-2 tap-target"
+                className="flex items-center gap-1.5 py-1"
               >
                 {itemForm.isAvailable ? (
-                  <ToggleRight size={28} className="text-green-600" />
+                  <ToggleRight size={22} className="text-green-600" />
                 ) : (
-                  <ToggleLeft size={28} className="text-gray-400" />
+                  <ToggleLeft size={22} className="text-gray-400" />
                 )}
-                <span className="text-sm text-gray-600">
+                <span className="text-xs text-gray-700 font-medium">
                   {itemForm.isAvailable ? t('menu.available') : t('menu.unavailable')}
                 </span>
               </button>
@@ -1569,29 +1604,29 @@ const MenuManagement: React.FC = () => {
 
           {/* Image path */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.imagePath')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.imagePath')}</label>
             <input
               type="text"
               value={itemForm.imagePath}
               onChange={(e) => setItemForm((f) => ({ ...f, imagePath: e.target.value }))}
               placeholder={t('menuMgmt.imagePathPlaceholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             />
           </div>
 
           {/* Kitchen station */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.kitchenStation')}</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.kitchenStation')}</label>
             <select
               value={itemForm.station}
               onChange={(e) => setItemForm((f) => ({ ...f, station: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             >
               {KITCHEN_STATION_DEFS.map((s) => (
                 <option key={s.value || 'none'} value={s.value}>{t(s.labelKey)}</option>
               ))}
             </select>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-[10px] text-gray-400 mt-1">
               {t('menuMgmt.kitchenStationHint')}
             </p>
           </div>
@@ -1606,11 +1641,12 @@ const MenuManagement: React.FC = () => {
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => setShowCategoryModal(false)}>
+            <Button variant="secondary" size="sm" onClick={() => setShowCategoryModal(false)}>
               {t('common.cancel')}
             </Button>
             <Button
               variant="primary"
+              size="sm"
               loading={saving}
               onClick={handleSaveCategory}
               disabled={!categoryName.trim()}
@@ -1621,13 +1657,13 @@ const MenuManagement: React.FC = () => {
         }
       >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">{t('menu.categoryName')}</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('menu.categoryName')}</label>
           <input
             type="text"
             value={categoryName}
             onChange={(e) => setCategoryName(e.target.value)}
             placeholder={t('menuMgmt.categoryNamePlaceholder')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none"
             autoFocus
             onKeyDown={(e) => e.key === 'Enter' && handleSaveCategory()}
           />
