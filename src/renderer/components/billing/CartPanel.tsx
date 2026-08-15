@@ -12,16 +12,33 @@ import {
   ShoppingCart,
   Tag,
   Sparkles,
+  Check,
+  Pencil,
 } from 'lucide-react';
 import { useBillingStore } from '../../stores/billing.store';
 import { formatCurrency } from '../../lib/formatters';
 import { ipc } from '../../lib/ipc';
 import Button from '../common/Button';
+import Modal from '../common/Modal';
 import Tooltip from '../common/Tooltip';
 import { useTranslation } from 'react-i18next';
 import { useMenuTranslations } from '../../hooks/useMenuTranslations';
 import { useTaxTerminology } from '../../hooks/useTaxTerminology';
 import { getTaxRegionForLanguage } from '../../lib/taxLocalePresets';
+
+const PRESET_COOKING_INSTRUCTIONS = [
+  { id: 'less_spicy', label: '🌶️ Less Spicy', text: 'Less Spicy' },
+  { id: 'extra_spicy', label: '🔥 Extra Spicy', text: 'Extra Spicy' },
+  { id: 'jain', label: '🧅 Jain (No Onion/Garlic)', text: 'Jain (No Onion/Garlic)' },
+  { id: 'no_sugar', label: '🚫 No Sugar', text: 'No Sugar' },
+  { id: 'extra_sauce', label: '🥫 Extra Sauce', text: 'Extra Sauce' },
+  { id: 'extra_cheese', label: '🧀 Extra Cheese', text: 'Extra Cheese' },
+  { id: 'crispy', label: '⚡ Extra Crispy', text: 'Extra Crispy' },
+  { id: 'pack_sep', label: '🥡 Pack Separately', text: 'Pack Separately' },
+  { id: 'less_salt', label: '🧂 Less Salt', text: 'Less Salt' },
+  { id: 'less_oil', label: '🫒 Less Oil', text: 'Less Oil' },
+  { id: 'less_ice', label: '🧊 Less Ice', text: 'Less Ice' },
+];
 
 interface CartPanelProps {
   onHoldOrder: () => void;
@@ -62,7 +79,11 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const taxRegion = getTaxRegionForLanguage(i18n.language);
   const showIndiaGstSplit = taxRegion === 'in';
   const { getName } = useMenuTranslations(cart.map((i) => i.menuItem));
-  const [editingNoteIndex, setEditingNoteIndex] = useState<number | null>(null);
+  const [editingItemNote, setEditingItemNote] = useState<{
+    indices: number[];
+    itemName: string;
+    variationName?: string;
+  } | null>(null);
   const [noteText, setNoteText] = useState('');
   const [comboSuggestions, setComboSuggestions] = useState<any[]>([]);
   const [dismissedCombos, setDismissedCombos] = useState<Set<number>>(new Set());
@@ -133,18 +154,39 @@ const CartPanel: React.FC<CartPanelProps> = ({
     }
   }
 
-  const handleOpenNotes = useCallback((index: number, currentNotes?: string) => {
-    setEditingNoteIndex(index);
+  const handleOpenNotes = useCallback((indices: number[], itemName: string, variationName?: string, currentNotes?: string) => {
+    setEditingItemNote({ indices, itemName, variationName });
     setNoteText(currentNotes ?? '');
   }, []);
 
   const handleSaveNotes = useCallback(() => {
-    if (editingNoteIndex !== null) {
-      updateItemNotes(editingNoteIndex, noteText);
-      setEditingNoteIndex(null);
+    if (editingItemNote && editingItemNote.indices.length > 0) {
+      const trimmed = noteText.trim();
+      for (const idx of editingItemNote.indices) {
+        updateItemNotes(idx, trimmed);
+      }
+      setEditingItemNote(null);
       setNoteText('');
     }
-  }, [editingNoteIndex, noteText, updateItemNotes]);
+  }, [editingItemNote, noteText, updateItemNotes]);
+
+  const togglePreset = useCallback((presetText: string) => {
+    setNoteText((prev) => {
+      const parts = prev.split(',').map((p) => p.trim()).filter(Boolean);
+      const existingIndex = parts.findIndex((p) => p.toLowerCase() === presetText.toLowerCase());
+      if (existingIndex >= 0) {
+        parts.splice(existingIndex, 1);
+      } else {
+        parts.push(presetText);
+      }
+      return parts.join(', ');
+    });
+  }, []);
+
+  const isPresetActive = useCallback((presetText: string) => {
+    const parts = noteText.split(',').map((p) => p.trim().toLowerCase());
+    return parts.includes(presetText.toLowerCase());
+  }, [noteText]);
 
   const clearCart = useBillingStore((s) => s.clearCart);
 
@@ -269,9 +311,17 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     </div>
                   )}
 
-                  {item.notes && (
-                    <p className="text-[10px] text-amber-600 italic">{t('cart.notePrefix', { value: item.notes })}</p>
-                  )}
+                  {item.notes ? (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
+                      className="mt-1 flex items-center gap-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors max-w-full text-left font-medium"
+                    >
+                      <StickyNote size={10} className="text-amber-600 flex-shrink-0" />
+                      <span className="truncate">{item.notes}</span>
+                      <Pencil size={9} className="text-amber-500 flex-shrink-0 opacity-70 ml-0.5" />
+                    </button>
+                  ) : null}
 
                   <div className="flex items-center gap-1.5 mt-1">
                     <div className="flex items-center border border-gray-200 rounded">
@@ -333,13 +383,17 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     )}
 
                     <div className="ml-auto flex items-center gap-0.5">
-                      <Tooltip text={t('cart.addNote')} position="top" delay={false}>
+                      <Tooltip text={item.notes ? t('cart.editNote', 'Edit cooking note') : t('cart.addNote', 'Add cooking note')} position="top" delay={false}>
                         <button
-                          onClick={() => handleOpenNotes(lastIndex, item.notes)}
-                          className="p-0.5 text-gray-400 hover:text-amber-600 rounded transition-colors
-                            opacity-0 group-hover:opacity-100"
+                          type="button"
+                          onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
+                          className={`p-1 rounded transition-colors ${
+                            item.notes
+                              ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
+                              : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
+                          }`}
                         >
-                          <StickyNote size={11} />
+                          <StickyNote size={12} />
                         </button>
                       </Tooltip>
                       <Tooltip text={t('cart.removeItem')} position="top" delay={false}>
@@ -386,32 +440,6 @@ const CartPanel: React.FC<CartPanelProps> = ({
               </button>
             </div>
           ))}
-        </div>
-      )}
-
-      {editingNoteIndex !== null && (
-        <div className="px-3 py-1.5 border-t border-gray-200 bg-amber-50 flex-shrink-0">
-          <div className="flex gap-1.5">
-            <input
-              type="text"
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder={t('cart.notePlaceholder')}
-              className="flex-1 text-[11px] px-2 py-1 border border-amber-300 rounded
-                focus:outline-none focus:ring-2 focus:ring-amber-300 bg-white"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSaveNotes();
-                if (e.key === 'Escape') setEditingNoteIndex(null);
-              }}
-            />
-            <Button size="sm" variant="primary" onClick={handleSaveNotes}>
-              {t('cart.saveNote')}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setEditingNoteIndex(null)}>
-              {t('cart.cancelNote')}
-            </Button>
-          </div>
         </div>
       )}
 
@@ -527,6 +555,97 @@ const CartPanel: React.FC<CartPanelProps> = ({
           </Button>
         </div>
       </div>
+
+      {/* Cooking Instructions & Preparation Notes Modal */}
+      {editingItemNote && (
+        <Modal
+          isOpen={true}
+          onClose={() => setEditingItemNote(null)}
+          title={t('cart.cookingInstructions', 'Cooking Instructions & Notes')}
+          size="md"
+          footer={
+            <div className="flex items-center justify-between w-full">
+              <button
+                type="button"
+                onClick={() => setNoteText('')}
+                className="text-xs text-gray-500 hover:text-red-600 transition-colors font-medium"
+              >
+                {t('common.clear', 'Clear Note')}
+              </button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setEditingItemNote(null)}>
+                  {t('common.cancel', 'Cancel')}
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleSaveNotes}>
+                  {t('common.save', 'Save Instructions')}
+                </Button>
+              </div>
+            </div>
+          }
+        >
+          <div className="space-y-3.5">
+            {/* Target Item Header */}
+            <div className="bg-amber-50/80 border border-amber-200 rounded-lg p-2.5 flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 flex-shrink-0">
+                <StickyNote size={16} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-gray-900 truncate">
+                  {editingItemNote.itemName}
+                </p>
+                {editingItemNote.variationName && (
+                  <p className="text-[10px] text-gray-500">{editingItemNote.variationName}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Presets Section */}
+            <div>
+              <label className="text-xs font-semibold text-gray-700 block mb-1.5">
+                {t('cart.quickPresets', 'Quick Presets (Click to Add / Remove)')}:
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_COOKING_INSTRUCTIONS.map((preset) => {
+                  const active = isPresetActive(preset.text);
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => togglePreset(preset.text)}
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all select-none border flex items-center gap-1 ${
+                        active
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-gray-300'
+                      }`}
+                    >
+                      {active && <Check size={11} />}
+                      {preset.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Instruction Input */}
+            <div>
+              <label className="text-xs font-semibold text-gray-700 block mb-1">
+                {t('cart.customInstructions', 'Custom Preparation Note')}:
+              </label>
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder={t('cart.notePlaceholder', 'e.g., Less spicy, no onion/garlic, extra crispy...')}
+                rows={3}
+                className="w-full text-xs px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-400 resize-none"
+                autoFocus
+              />
+              <p className="text-[10px] text-gray-400 mt-1">
+                {t('cart.kotNoteHint', 'These notes will be printed on the KOT and displayed on the Kitchen Display System (KDS).')}
+              </p>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };
