@@ -25,6 +25,7 @@ import {
   ArrowUpDown,
   ArrowDownAZ,
   ArrowUpZA,
+  HelpCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBillingStore } from '../stores/billing.store';
@@ -40,6 +41,7 @@ import CartPanel from '../components/billing/CartPanel';
 import PaymentModal from '../components/billing/PaymentModal';
 import DiscountModal from '../components/billing/DiscountModal';
 import BillPreview from '../components/billing/BillPreview';
+import ShortcutsModal from '../components/billing/ShortcutsModal';
 import TableCard from '../components/tables/TableCard';
 import Tooltip from '../components/common/Tooltip';
 import { useTranslation } from 'react-i18next';
@@ -136,6 +138,7 @@ const Billing: React.FC = () => {
   const [nameSort, setNameSort] = useState<'none' | 'asc' | 'desc'>('none');
   const [menuViewMode, setMenuViewMode] = useState<'grid' | 'list'>('grid');
   const [showTempItemModal, setShowTempItemModal] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [tempItemName, setTempItemName] = useState('');
   const [tempItemPrice, setTempItemPrice] = useState('');
 
@@ -961,7 +964,17 @@ const Billing: React.FC = () => {
   // Keyboard shortcuts (placed after handler declarations to avoid TDZ errors)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // F1-F12 for categories
+      const targetTag = (e.target as HTMLElement)?.tagName;
+      const isInputActive = targetTag === 'INPUT' || targetTag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable;
+
+      // Shortcuts Cheat Sheet (? or Ctrl+/)
+      if ((e.ctrlKey && e.key === '/') || (!isInputActive && e.key === '?')) {
+        e.preventDefault();
+        setShowShortcuts((prev) => !prev);
+        return;
+      }
+
+      // F1-F12 for categories (when not pressing modifiers)
       if (e.key.startsWith('F') && !e.ctrlKey && !e.altKey && !e.metaKey) {
         const fNum = parseInt(e.key.slice(1));
         if (fNum >= 1 && fNum <= 12) {
@@ -971,49 +984,77 @@ const Billing: React.FC = () => {
           } else if (fNum - 2 < categories.length) {
             setSelectedCategoryId(categories[fNum - 2].id);
           }
+          return;
         }
       }
 
-      // Ctrl+P = Pay
+      // Order Type Switchers (Alt+1 = Dine In, Alt+2 = Takeaway, Alt+3 = Delivery)
+      if (e.altKey && !e.ctrlKey && !e.metaKey) {
+        if (e.key === '1') { e.preventDefault(); setOrderType('dine_in'); return; }
+        if (e.key === '2') { e.preventDefault(); setOrderType('takeaway'); return; }
+        if (e.key === '3') { e.preventDefault(); setOrderType('delivery'); return; }
+      }
+
+      // Ctrl+T = Temp Item
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault();
+        setShowTempItemModal(true);
+        return;
+      }
+
+      // Ctrl+P = Pay / Checkout
       if (e.ctrlKey && e.key === 'p') {
         e.preventDefault();
         if (cart.length > 0) setShowPayment(true);
+        return;
+      }
+
+      // Space = Quick Pay (when cart > 0 and not typing in text fields)
+      if (e.key === ' ' && !isInputActive && cart.length > 0) {
+        e.preventDefault();
+        setShowPayment(true);
+        return;
       }
 
       // Ctrl+H = Hold
       if (e.ctrlKey && e.key === 'h') {
         e.preventDefault();
         if (cart.length > 0) handleHoldOrder();
+        return;
       }
 
       // Ctrl+K = KOT (digital only)
       if (e.ctrlKey && !e.shiftKey && e.key === 'k') {
         e.preventDefault();
         if (cart.length > 0) handleKot();
+        return;
       }
 
       // Ctrl+Shift+K = Print KOT (digital + thermal)
       if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
         e.preventDefault();
         if (cart.length > 0) handlePrintKot();
+        return;
       }
 
       // Ctrl+D = Discount
       if (e.ctrlKey && e.key === 'd') {
         e.preventDefault();
         if (cart.length > 0) setShowDiscount(true);
+        return;
       }
 
       // Ctrl+B = Bill preview
       if (e.ctrlKey && e.key === 'b') {
         e.preventDefault();
         if (cart.length > 0) setShowBillPreview(true);
+        return;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [categories, cart.length, setSelectedCategoryId, handleHoldOrder, handleKot, handlePrintKot]);
+  }, [categories, cart.length, setSelectedCategoryId, setOrderType, handleHoldOrder, handleKot, handlePrintKot]);
 
   const handlePay = useCallback(() => {
     setShowPayment(true);
@@ -1245,20 +1286,32 @@ const Billing: React.FC = () => {
             </button>
           </Tooltip>
 
-          <div className="ml-auto" />
-
-          {/* Bill preview button */}
-          {cart.length > 0 && (
-            <Tooltip text={t('billing.previewBill')} position="bottom">
+          <div className="ml-auto flex items-center gap-1.5">
+            {/* Shortcuts cheat sheet button */}
+            <Tooltip text={t('shortcuts.tooltip', 'Keyboard Shortcuts (Press ? or Ctrl+/)')} position="bottom">
               <button
-                onClick={() => setShowBillPreview(true)}
-                className="flex items-center p-1 text-gray-600
-                  hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+                onClick={() => setShowShortcuts(true)}
+                className="flex items-center gap-1 px-2 py-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 border border-gray-200 rounded-md transition-colors text-xs font-medium select-none"
               >
-                <FileText size={14} />
+                <HelpCircle size={13} />
+                <span className="hidden sm:inline">{t('shortcuts.button', 'Shortcuts')}</span>
+                <kbd className="text-[9px] font-mono font-bold bg-gray-100 dark:bg-gray-700 px-1 rounded">?</kbd>
               </button>
             </Tooltip>
-          )}
+
+            {/* Bill preview button */}
+            {cart.length > 0 && (
+              <Tooltip text={t('billing.previewBill')} position="bottom">
+                <button
+                  onClick={() => setShowBillPreview(true)}
+                  className="flex items-center p-1 text-gray-600
+                    hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  <FileText size={14} />
+                </button>
+              </Tooltip>
+            )}
+          </div>
         </div>
       </div>
 
@@ -2165,6 +2218,9 @@ const Billing: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Keyboard Shortcuts Cheat Sheet Modal */}
+      <ShortcutsModal isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
     </div>
   );
 };
