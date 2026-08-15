@@ -49,6 +49,16 @@ import {
   Sparkles,
   CheckCircle2,
   MessageCircle,
+  Globe,
+  ExternalLink,
+  QrCode,
+  Zap,
+  BarChart3,
+  Maximize2,
+  Activity,
+  Flame,
+  ArrowUpRight,
+  CheckCheck,
 } from 'lucide-react';
 import { useLicenseStore } from '../stores/license.store';
 import Button from '../components/common/Button';
@@ -59,7 +69,6 @@ import { ipc } from '../lib/ipc';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import i18n from '../lib/i18n';
-import { Globe } from 'lucide-react';
 import { LOCALE_CODES, type LocaleCode } from '../locales';
 import {
   COUNTRIES,
@@ -111,7 +120,7 @@ const SECTION_DEFS: { key: SettingsSection; labelKey: string; icon: React.ReactN
   { key: 'billing', labelKey: 'settingsPage.billingSettings', icon: <CreditCard size={18} /> },
   { key: 'offers', labelKey: 'settings.offers', icon: <Tag size={18} /> },
   { key: 'backup', labelKey: 'settings.backup', icon: <Database size={18} /> },
-  { key: 'cloud', labelKey: 'settings.cloud', icon: <Cloud size={18} /> },
+  { key: 'cloud', labelKey: 'settings.cloud', icon: <Smartphone size={18} /> },
   { key: 'day_session', labelKey: 'settings.daySession', icon: <Sun size={18} /> },
   { key: 'license', labelKey: 'settings.license', icon: <KeyRound size={18} /> },
   { key: 'refer_and_earn', labelKey: 'settings.referAndEarn', icon: <Gift size={18} /> },
@@ -1660,7 +1669,7 @@ const Settings: React.FC = () => {
 
 
 
-  // ── Cloud Dashboard (remote owner view) state ──
+  // ── Owner Mobile App & Live Web Dashboard (remote owner view) state ──
   interface CloudStatus {
     configured: boolean;
     connected: boolean;
@@ -1679,17 +1688,27 @@ const Settings: React.FC = () => {
   const [cloudSyncing, setCloudSyncing] = useState(false);
   const [cloudMsg, setCloudMsg] = useState('');
   const [cloudMsgIsError, setCloudMsgIsError] = useState(false);
+  const [cloudQr, setCloudQr] = useState<string | null>(null);
+  const [copiedDashboardUrl, setCopiedDashboardUrl] = useState(false);
+
+  const dashboardWebUrl = 'https://molecule-e2e95.web.app';
 
   useEffect(() => {
     if (activeSection !== 'cloud') return;
     ipc<CloudStatus>(window.electronAPI.cloud.getStatus())
       .then(setCloudStatus)
       .catch(() => {});
+    generateQr(dashboardWebUrl).then(setCloudQr);
   }, [activeSection]);
 
-  // Turn a raw Firebase auth error into a clear message. The error code only
-  // survives across IPC inside the message text (e.g. "(auth/weak-password)"),
-  // so we extract it from there.
+  const handleCopyDashboardUrl = () => {
+    navigator.clipboard.writeText(dashboardWebUrl);
+    setCopiedDashboardUrl(true);
+    toast.success(t('common.copied', 'Dashboard URL copied to clipboard!'));
+    setTimeout(() => setCopiedDashboardUrl(false), 2000);
+  };
+
+  // Turn a raw cloud auth error into a clear message.
   const friendlyCloudError = (raw: string): string => {
     const code = (raw.match(/\(auth\/[a-z-]+\)/i)?.[0] ?? '').replace(/[()]/g, '');
     const map: Record<string, string> = {
@@ -1727,7 +1746,8 @@ const Settings: React.FC = () => {
       setCloudStatus(status);
       setCloudPassword('');
       setCloudMsgIsError(false);
-      setCloudMsg(t('settingsPage.cloudConnected', 'Connected. Your dashboard will update automatically.'));
+      setCloudMsg(t('settingsPage.cloudConnected', 'Connected successfully! Your mobile web dashboard is now syncing live.'));
+      toast.success(t('settingsPage.cloudConnected', 'Connected! Mobile web dashboard is live.'));
     } catch (err: any) {
       setCloudMsgIsError(true);
       setCloudMsg(friendlyCloudError(err?.message ?? ''));
@@ -1737,12 +1757,13 @@ const Settings: React.FC = () => {
   };
 
   const handleCloudDisconnect = async () => {
-    if (!confirm(t('settingsPage.cloudDisconnectConfirm', 'Stop syncing to the cloud dashboard on this device?'))) return;
+    if (!confirm(t('settingsPage.cloudDisconnectConfirm', 'Stop syncing to your remote mobile dashboard on this device?'))) return;
     try {
       await ipc(window.electronAPI.cloud.disconnect());
     } catch { /* ignore */ }
     setCloudStatus({ configured: cloudStatus.configured, connected: false, email: null, lastSyncAt: null, lastError: null });
     setCloudMsg('');
+    toast.success(t('settingsPage.cloudDisconnected', 'Disconnected from mobile dashboard sync.'));
   };
 
   const handleCloudSyncNow = async () => {
@@ -1753,7 +1774,8 @@ const Settings: React.FC = () => {
       const status = await ipc<CloudStatus>(window.electronAPI.cloud.syncNow());
       setCloudStatus(status);
       setCloudMsgIsError(false);
-      setCloudMsg(t('settingsPage.cloudSyncSuccess', 'Dashboard synced.'));
+      setCloudMsg(t('settingsPage.cloudSyncSuccess', 'Dashboard synced successfully.'));
+      toast.success(t('settingsPage.cloudSyncSuccess', 'Live sync updated.'));
     } catch (err: any) {
       setCloudMsgIsError(true);
       setCloudMsg(err?.message ?? t('settingsPage.cloudSyncFailed', 'Sync failed.'));
@@ -1763,120 +1785,397 @@ const Settings: React.FC = () => {
   };
 
   const renderCloud = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">
-          {t('settingsPage.cloudTitle', 'Cloud Dashboard')}
-        </h2>
-        <p className="text-sm text-gray-500">
-          {t('settingsPage.cloudDesc', "Sign in to push a live business summary to the cloud so you can watch today's sales, cash, and alerts from your phone or another device.")}
-        </p>
+    <div className="space-y-6 w-full">
+      {/* Top Hero Banner */}
+      <div className="w-full bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-7 text-white shadow-xl border border-indigo-900/40 relative overflow-hidden">
+        <div className="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute right-1/4 -bottom-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Live Mobile PWA App
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+              <Globe size={13} />
+              Owner Web Dashboard
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+              <Zap size={13} />
+              Instant Live Cloud Sync
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-700/60 text-slate-300 border border-slate-600/40 flex items-center gap-1">
+              <ShieldCheck size={13} />
+              Zero Sensitive Data Leaks
+            </span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2 flex items-center gap-2.5">
+            <Smartphone className="text-indigo-400" size={28} />
+            {t('settingsPage.mobileAppDashboardTitle', 'Owner Mobile App & Live Web Dashboard')}
+          </h2>
+
+          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-4xl">
+            {t(
+              'settingsPage.mobileAppDashboardDesc',
+              "Molecule comes with a companion Web & Mobile Application (PWA) built specifically for restaurant owners and admins. Open it on your smartphone (iPhone or Android) or any web browser anytime, anywhere to watch today's live sales, active tables, cash drawer, and staff activity without having to be at the counter."
+            )}
+          </p>
+        </div>
       </div>
 
-      {!cloudStatus.configured ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-5 flex items-start gap-3">
-          <AlertCircle size={18} className="text-amber-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-amber-800">
-            {t('settingsPage.cloudNotConfigured', 'Cloud sync is not configured in this build. Add your Firebase project details and try again.')}
-          </p>
-        </div>
-      ) : !cloudStatus.connected ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-5 space-y-4 max-w-md">
+      {!cloudStatus.configured && (
+        <div className="w-full bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3.5 shadow-sm">
+          <AlertCircle size={20} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              {t('settingsPage.cloudEmail', 'Owner email')}
-            </label>
-            <input
-              type="email"
-              value={cloudEmail}
-              onChange={(e) => setCloudEmail(e.target.value)}
-              placeholder="owner@example.com"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <h4 className="text-sm font-semibold text-amber-900">Cloud Sync Not Configured</h4>
+            <p className="text-xs text-amber-800 mt-0.5">
+              {t('settingsPage.cloudNotConfigured', 'Cloud sync is not configured in this build. Please configure cloud service details and try again.')}
+            </p>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              {t('settingsPage.cloudPassword', 'Password')}
-            </label>
-            <div className="relative">
-              <input
-                type={cloudShowPassword ? 'text' : 'password'}
-                value={cloudPassword}
-                onChange={(e) => setCloudPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <button
-                type="button"
-                onClick={() => setCloudShowPassword((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {cloudShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={cloudCreateMode}
-              onChange={(e) => setCloudCreateMode(e.target.checked)}
-              className="rounded border-gray-300"
-            />
-            {t('settingsPage.cloudCreateMode', 'Create a new account (first-time setup)')}
-          </label>
-
-          <Button variant="primary" loading={cloudLoading} icon={<Cloud size={16} />} onClick={handleCloudConnect}>
-            {cloudCreateMode
-              ? t('settingsPage.cloudCreateConnect', 'Create & Connect')
-              : t('settingsPage.cloudConnect', 'Connect')}
-          </Button>
-
-          {cloudMsg && (
-            <p className={`text-xs ${cloudMsgIsError ? 'text-red-500' : 'text-green-600'}`}>{cloudMsg}</p>
-          )}
-          <p className="text-[11px] text-gray-400 leading-relaxed">
-            {t('settingsPage.cloudSecurityNote', 'Use the same email and password to sign in to your remote dashboard. Only summary totals are sent — no customer details leave this device.')}
-          </p>
         </div>
-      ) : (
-        <div className="space-y-4 max-w-md">
-          <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <Cloud size={16} />
+      )}
+
+      {/* Main 2-Column Grid: Account Setup + Direct Mobile Access */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-stretch">
+        {/* Column 1: Owner Account & Cloud Sync Controls */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-5 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${cloudStatus.connected ? 'bg-green-100 text-green-700' : 'bg-indigo-50 text-indigo-600'}`}>
+                  <Cloud size={20} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900">Owner Account & Cloud Sync</h3>
+                  <p className="text-xs text-gray-500">
+                    {cloudStatus.connected ? 'Live connection active' : 'Owner credentials required for remote sync'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-800">
-                  {t('settingsPage.cloudConnectedAs', { email: cloudStatus.email, defaultValue: 'Connected as {{email}}' })}
+              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${cloudStatus.connected ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-600'}`}>
+                {cloudStatus.connected ? '● Live Connected' : '○ Not Linked'}
+              </span>
+            </div>
+
+            {!cloudStatus.connected ? (
+              <div className="space-y-4">
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Sign in with your Owner Email & Password. Use these same credentials to log in on your phone or web browser.
                 </p>
-                {cloudStatus.lastSyncAt && (
-                  <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
-                    <Clock size={12} />
-                    {t('settingsPage.cloudLastSync', { time: formatDateTime(cloudStatus.lastSyncAt), defaultValue: 'Last synced {{time}}' })}
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    {t('settingsPage.cloudEmail', 'Owner Email Address')}
+                  </label>
+                  <input
+                    type="email"
+                    value={cloudEmail}
+                    onChange={(e) => setCloudEmail(e.target.value)}
+                    placeholder="owner@yourrestaurant.com"
+                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    {t('settingsPage.cloudPassword', 'Password')}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={cloudShowPassword ? 'text' : 'password'}
+                      value={cloudPassword}
+                      onChange={(e) => setCloudPassword(e.target.value)}
+                      placeholder="Minimum 6 characters"
+                      className="w-full px-3.5 py-2.5 pr-10 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCloudShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {cloudShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-2.5 text-xs text-gray-700 cursor-pointer select-none bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                  <input
+                    type="checkbox"
+                    checked={cloudCreateMode}
+                    onChange={(e) => setCloudCreateMode(e.target.checked)}
+                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                  />
+                  <span>
+                    <strong className="font-semibold text-gray-900">Create a new account</strong> (check this if setting up for the first time)
+                  </span>
+                </label>
+
+                <Button
+                  variant="primary"
+                  loading={cloudLoading}
+                  icon={<Smartphone size={16} />}
+                  onClick={handleCloudConnect}
+                  className="w-full justify-center py-2.5"
+                >
+                  {cloudCreateMode
+                    ? t('settingsPage.cloudCreateConnect', 'Create Account & Connect Mobile App')
+                    : t('settingsPage.cloudConnect', 'Connect Mobile App')}
+                </Button>
+
+                {cloudMsg && (
+                  <div className={`p-3 rounded-lg text-xs font-medium ${cloudMsgIsError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'}`}>
+                    {cloudMsg}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-green-50/80 border border-green-200 rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-green-800 font-semibold text-sm">
+                    <CheckCircle2 size={16} className="text-green-600" />
+                    Connected as: <span className="font-mono font-bold text-gray-900">{cloudStatus.email}</span>
+                  </div>
+                  {cloudStatus.lastSyncAt && (
+                    <p className="text-xs text-gray-600 flex items-center gap-1.5">
+                      <Clock size={13} className="text-gray-400" />
+                      {t('settingsPage.cloudLastSync', { time: formatDateTime(cloudStatus.lastSyncAt), defaultValue: 'Last synced {{time}}' })}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    icon={<RefreshCw size={15} />}
+                    loading={cloudSyncing}
+                    onClick={handleCloudSyncNow}
+                    className="flex-1 justify-center"
+                  >
+                    {t('settingsPage.cloudSyncNow', 'Sync Now')}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleCloudDisconnect}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                  >
+                    {t('settingsPage.cloudDisconnect', 'Disconnect')}
+                  </Button>
+                </div>
+
+                {cloudStatus.lastError && (
+                  <p className="text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
+                    {t('settingsPage.cloudLastError', { message: cloudStatus.lastError, defaultValue: 'Last error: {{message}}' })}
+                  </p>
+                )}
+
+                {cloudMsg && (
+                  <p className={`text-xs ${cloudMsgIsError ? 'text-red-500' : 'text-green-600'}`}>
+                    {cloudMsg}
                   </p>
                 )}
               </div>
-            </div>
-            <Button variant="secondary" size="sm" onClick={handleCloudDisconnect}>
-              {t('settingsPage.cloudDisconnect', 'Disconnect')}
-            </Button>
+            )}
           </div>
 
-          <Button variant="primary" size="sm" icon={<RefreshCw size={16} />} loading={cloudSyncing} onClick={handleCloudSyncNow}>
-            {t('settingsPage.cloudSyncNow', 'Sync now')}
-          </Button>
-
-          {cloudStatus.lastError && (
-            <p className="text-xs text-red-500">
-              {t('settingsPage.cloudLastError', { message: cloudStatus.lastError, defaultValue: 'Last error: {{message}}' })}
+          <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-1 text-[11px] text-gray-500 leading-relaxed mt-4">
+            <p className="font-semibold text-gray-700 flex items-center gap-1">
+              <ShieldCheck size={13} className="text-green-600" />
+              Privacy & Isolation Guarantee:
             </p>
-          )}
-          {cloudMsg && (
-            <p className={`text-xs ${cloudMsgIsError ? 'text-red-500' : 'text-green-600'}`}>{cloudMsg}</p>
-          )}
+            <p>
+              {t('settingsPage.cloudSecurityNote', 'Only summary totals, table status, and loss prevention alerts are synced. Customer phone numbers and sensitive data never leave this machine.')}
+            </p>
+          </div>
         </div>
-      )}
+
+        {/* Column 2: Mobile Access URL & Quick QR Scanner */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-5 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Smartphone size={20} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Mobile Phone & Browser Access</h3>
+                <p className="text-xs text-gray-500">Open on iPhone, Android, iPad, or any laptop browser</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                Dashboard URL
+              </label>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="flex-1 flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-800 select-all overflow-hidden text-ellipsis">
+                  <Globe size={14} className="text-indigo-600 mr-2 flex-shrink-0" />
+                  <span className="truncate">{dashboardWebUrl}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyDashboardUrl}
+                    className="px-3 py-2 text-xs font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center gap-1.5 transition-colors"
+                  >
+                    {copiedDashboardUrl ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                    {copiedDashboardUrl ? 'Copied' : 'Copy URL'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.open(dashboardWebUrl, '_blank')}
+                    className="px-3 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1.5 transition-colors shadow-sm"
+                  >
+                    <ExternalLink size={14} />
+                    Open in Browser
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* QR Code Box */}
+            <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4">
+              {cloudQr ? (
+                <div className="bg-white p-2 rounded-xl border border-indigo-200 shadow-sm flex-shrink-0">
+                  <img src={cloudQr} alt="Scan QR to open mobile dashboard" className="w-28 h-28" />
+                </div>
+              ) : (
+                <div className="w-28 h-28 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 flex-shrink-0">
+                  <QrCode size={36} />
+                </div>
+              )}
+
+              <div className="space-y-2 text-xs text-gray-700">
+                <p className="font-bold text-gray-900 flex items-center gap-1.5 text-sm">
+                  <QrCode size={16} className="text-indigo-600" />
+                  Scan with Phone Camera
+                </p>
+                <p className="text-gray-600 text-xs leading-relaxed">
+                  Open your mobile camera or scanner app and point it at this QR code to load your dashboard on your smartphone instantly.
+                </p>
+                <div className="pt-1 flex flex-col gap-1 text-[11px] font-medium text-indigo-900">
+                  <span className="bg-white px-2.5 py-1 rounded-lg border border-indigo-200">
+                    📱 <b>iPhone (Safari):</b> Tap Share → <b>Add to Home Screen</b>
+                  </span>
+                  <span className="bg-white px-2.5 py-1 rounded-lg border border-indigo-200">
+                    🤖 <b>Android (Chrome):</b> Tap Menu (⋮) → <b>Install App</b>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-emerald-50 rounded-xl p-3.5 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+            <span>Progressive Web App: Runs in full screen without needing App Store downloads.</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Comprehensive Usages and Features Breakdown */}
+      <div className="space-y-4 pt-2 w-full">
+        <div className="border-b border-gray-200 pb-3">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <Sparkles className="text-indigo-600" size={20} />
+            {t('settingsPage.mobileAppFeaturesTitle', 'All Capabilities & Usages of the Mobile & Web Dashboard')}
+          </h3>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+            Everything you can monitor, track, and manage remotely from your smartphone or browser in real time:
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+          {/* Feature 1 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-3">
+              <TrendingUp size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Live Sales & Gross Revenue</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Track today's live revenue, order volume, live Average Order Value (AOV), and customer headcount (ARPU) updated automatically as bills are closed.
+            </p>
+          </div>
+
+          {/* Feature 2 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mb-3">
+              <Zap size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Sales Velocity & Target Goals</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              View real-time run rates in ₹/hr and orders/hr, lunch vs dinner split, and dynamic progress towards your daily target goal with end-of-day projections.
+            </p>
+          </div>
+
+          {/* Feature 3 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-3">
+              <Activity size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Live Tables & Order Activity</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Watch active dining tables, guest dwell times, slow table alerts (&gt;45m), and a live activity feed ticker as items are punched at the counter.
+            </p>
+          </div>
+
+          {/* Feature 4 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center mb-3">
+              <Banknote size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Cash Drawer & Day Session</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Supervise opening cash float, total cash sales collected, expected cash in register, and day session closure status from anywhere.
+            </p>
+          </div>
+
+          {/* Feature 5 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-red-100 text-red-700 flex items-center justify-center mb-3">
+              <ShieldAlert size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Loss Prevention & Anti-Theft</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Detect leakages with instant alerts on order cancellations, voided items, void rates, discounts given, and store audit health ratings.
+            </p>
+          </div>
+
+          {/* Feature 6 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mb-3">
+              <BarChart3 size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Analytics & CSV Export</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Analyze multi-period sales (Today, Week, Month, Year, Custom dates), Week-over-Week comparisons, 7-day moving averages, and 1-click CSV export.
+            </p>
+          </div>
+
+          {/* Feature 7 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center mb-3">
+              <Flame size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Top Dishes & Low Stock</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Spot bestsellers, revenue share of hero menu items, peak hourly rush heatmaps, and instant low stock inventory warnings.
+            </p>
+          </div>
+
+          {/* Feature 8 */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all">
+            <div className="w-9 h-9 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center mb-3">
+              <Share2 size={18} />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">WhatsApp Share & Chimes</h4>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              1-click WhatsApp daily summary export directly from your phone, plus real-time audio sound chimes whenever a new sale is completed.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -3453,7 +3752,7 @@ const Settings: React.FC = () => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-8">
-          <div className={activeSection === 'printer' ? 'max-w-6xl' : 'max-w-2xl'}>
+          <div className={activeSection === 'printer' || activeSection === 'cloud' ? 'w-full max-w-6xl' : 'max-w-2xl'}>
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-600 text-sm">
                 <AlertCircle size={16} />
