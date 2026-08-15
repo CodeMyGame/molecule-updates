@@ -331,7 +331,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     <button
                       type="button"
                       onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
-                      className="mt-1 flex items-center gap-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors max-w-full text-left font-medium"
+                      className="mt-1 flex items-center gap-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-lg px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors max-w-full text-left font-medium"
                     >
                       <StickyNote size={10} className="text-amber-600 flex-shrink-0" />
                       <span className="truncate">{item.notes}</span>
@@ -340,7 +340,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   ) : null}
 
                   <div className="flex items-center gap-1.5 mt-1">
-                    <div className="flex items-center border border-gray-200 rounded">
+                    <div className="flex items-center border border-gray-200 rounded-lg">
                       <button
                         onClick={() => {
                           const now = Date.now();
@@ -371,7 +371,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                           incrementQuantity(targetIdx, -1);
                         }}
                         className="p-0.5 text-gray-500 hover:text-red-600 hover:bg-red-50
-                          rounded-l transition-colors"
+                          rounded-l-lg transition-colors"
                       >
                         <Minus size={11} />
                       </button>
@@ -389,7 +389,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                           incrementQuantity(targetIdx, 1);
                         }}
                         className="p-0.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50
-                          rounded-r transition-colors"
+                          rounded-r-lg transition-colors"
                       >
                         <Plus size={11} />
                       </button>
@@ -409,7 +409,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
-                          className={`p-1 rounded transition-all opacity-0 group-hover:opacity-100 ${
+                          className={`p-1 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${
                             item.notes
                               ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
                               : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
@@ -435,7 +435,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                               }
                             }
                           }}
-                          className="p-0.5 text-gray-400 hover:text-red-600 rounded transition-colors
+                          className="p-0.5 text-gray-400 hover:text-red-600 rounded-lg transition-colors
                             opacity-0 group-hover:opacity-100"
                         >
                           <X size={11} />
@@ -483,7 +483,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
 
           <button
             onClick={onOpenDiscount}
-            className="flex justify-between text-[11px] w-full hover:bg-gray-50 -mx-0.5 px-0.5 py-0 rounded transition-colors"
+            className="flex justify-between text-[11px] w-full hover:bg-gray-50 -mx-0.5 px-0.5 py-0 rounded-lg transition-colors"
           >
             <span className="text-gray-600 flex items-center gap-0.5 flex-wrap">
               <Tag size={10} />
@@ -579,7 +579,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
             size="sm"
             icon={<Trash2 size={13} />}
             onClick={onCancelOrder}
-            className="px-2"
+            className="px-3.5"
           >
             <span className="sr-only sm:not-sr-only">{t('cart.cancel')}</span>
           </Button>

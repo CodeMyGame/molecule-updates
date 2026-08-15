@@ -122,7 +122,7 @@ const Sidebar: React.FC = () => {
             <Tooltip text={t('nav.collapseSidebar')} position="bottom">
               <button
                 onClick={toggleSidebar}
-                className="p-0.5 text-gray-400 hover:text-white transition-colors rounded-md hover:bg-gray-800"
+                className="p-0.5 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-gray-800"
               >
                 <Menu size={16} />
               </button>
@@ -139,7 +139,7 @@ const Sidebar: React.FC = () => {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 py-2 mx-1.5 my-px rounded-md transition-colors duration-150 tap-target justify-center px-1.5 ${
+                  `flex items-center gap-2 py-2 mx-1.5 my-px rounded-xl transition-colors duration-150 tap-target justify-center px-1.5 ${
                     isActive
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -156,7 +156,7 @@ const Sidebar: React.FC = () => {
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2 mx-1.5 my-px rounded-md transition-colors duration-150 min-h-[36px] justify-start ${
+                `flex items-center gap-2.5 px-3 py-2 mx-1.5 my-px rounded-xl transition-colors duration-150 min-h-[36px] justify-start ${
                   isActive
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-300 hover:bg-gray-800 hover:text-white'
@@ -179,7 +179,7 @@ const Sidebar: React.FC = () => {
             <Tooltip text={t('header.newOrder')} position="right">
               <button
                 onClick={handleNewOrder}
-                className="flex items-center justify-center w-full py-1.5 rounded-md text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
+                className="flex items-center justify-center w-full py-1.5 rounded-xl text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
               >
                 <Plus size={14} />
               </button>
@@ -187,7 +187,7 @@ const Sidebar: React.FC = () => {
             <Tooltip text={isDayOpen ? t('header.closeDay') : t('header.openDay')} position="right">
               <button
                 onClick={handleDayToggle}
-                className={`flex items-center justify-center w-full py-1.5 rounded-md transition-colors
+                className={`flex items-center justify-center w-full py-1.5 rounded-xl transition-colors
                   ${isDayOpen
                     ? 'text-red-400 hover:bg-red-900/30'
                     : 'text-green-400 hover:bg-green-900/30'
@@ -201,14 +201,14 @@ const Sidebar: React.FC = () => {
           <>
             <button
               onClick={handleNewOrder}
-              className="flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-md text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
+              className="flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-xl text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
             >
               <Plus size={13} />
               {t('header.newOrder')}
             </button>
             <button
               onClick={handleDayToggle}
-              className={`flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors
+              className={`flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors
                 ${isDayOpen
                   ? 'text-red-400 hover:bg-red-900/30'
                   : 'text-green-400 hover:bg-green-900/30'
@@ -245,7 +245,7 @@ const Sidebar: React.FC = () => {
             <Tooltip text={t('nav.logout')} position="top">
               <button
                 onClick={handleLogout}
-                className="p-1.5 text-gray-400 hover:text-red-400 transition-colors rounded-md hover:bg-gray-800"
+                className="p-1.5 text-gray-400 hover:text-red-400 transition-colors rounded-xl hover:bg-gray-800"
               >
                 <LogOut size={14} />
               </button>
@@ -293,13 +293,13 @@ const Sidebar: React.FC = () => {
             <div className="px-6 pb-5 flex gap-3">
               <button
                 onClick={() => setLogoutModal(null)}
-                className="flex-1 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="flex-1 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
               >
                 {t('common.cancel')}
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+                className="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
               >
                 {t('nav.logout')}
               </button>

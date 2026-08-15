@@ -10,6 +10,7 @@ interface TableCardProps {
   onClick: (table: Table) => void;
   onContextMenu?: (e: React.MouseEvent, table: Table) => void;
   isEditMode?: boolean;
+  isSelected?: boolean;
   orderStartedAt?: string;
   serverName?: string;
   orderTotal?: number;
@@ -66,6 +67,7 @@ const TableCard: React.FC<TableCardProps> = ({
   onClick,
   onContextMenu,
   isEditMode = false,
+  isSelected = false,
   orderStartedAt,
   serverName: _serverName,
   orderTotal,
@@ -110,16 +112,17 @@ const TableCard: React.FC<TableCardProps> = ({
       onClick={() => onClick(table)}
       onContextMenu={onContextMenu ? (e) => { e.preventDefault(); onContextMenu(e, table); } : undefined}
       className={`
-        relative flex flex-col items-center justify-center
-        rounded-md w-full border
-        ${compact ? 'h-[58px] p-1' : 'min-h-[72px] p-1.5'}
+        table-card relative flex flex-col items-center justify-center
+        rounded-lg w-full border
+        ${compact ? 'min-h-[68px] p-1.5' : 'min-h-[72px] p-1.5'}
         ${isOccupied && elapsedMins >= 60 ? 'border-red-500 bg-red-50' : isOccupied && elapsedMins >= 30 ? 'border-yellow-500 bg-yellow-50' : `${config.border} ${config.bg}`}
+        ${isSelected ? '!border-blue-600 ring-2 ring-blue-600 shadow-md z-10' : ''}
         shadow-xs hover:shadow-sm
         transition-all duration-150
         active:scale-95
         cursor-pointer select-none
         ${isEditMode ? 'ring-2 ring-dashed ring-blue-300' : ''}
-        ${isLongHour ? 'animate-long-hour' : ''}
+        ${isLongHour && !isSelected ? 'animate-long-hour' : ''}
         tap-target
       `}
       title={isLongHour ? t('tables.longHourAlert', { defaultValue: 'Occupied over 2 hours' }) : undefined}
@@ -136,21 +139,21 @@ const TableCard: React.FC<TableCardProps> = ({
         </span>
       )}
 
-      <span className={`font-bold text-gray-800 ${compact ? 'text-[10px] mb-0' : 'text-xs mb-0.5'}`}>{table.name}</span>
+      <span className={`font-bold text-gray-800 px-1 truncate max-w-full text-center ${compact ? 'text-[11px] mb-0' : 'text-xs mb-0.5'}`}>{table.name}</span>
 
-      <span className={`flex items-center gap-0.5 text-gray-500 ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
-        <Users size={compact ? 8 : 10} />
+      <span className={`flex items-center gap-0.5 text-gray-500 ${compact ? 'text-[9px]' : 'text-[10px]'}`}>
+        <Users size={compact ? 9 : 10} />
         <span>{table.capacity}</span>
       </span>
 
       {hasOrderInfo && (
         <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-1 gap-0.5'}`}>
-          <span className={`font-bold text-red-700 ${compact ? 'text-[9px]' : 'text-xs'}`}>
+          <span className={`font-bold text-red-700 ${compact ? 'text-[10px]' : 'text-xs'}`}>
             {formatPaise(orderTotal!)}
           </span>
           {orderStartedAt && (
-            <span className={`flex items-center gap-0.5 font-medium ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
-              <Clock size={compact ? 7 : 9} />
+            <span className={`flex items-center gap-0.5 font-medium ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[9px]' : 'text-[9px]'}`}>
+              <Clock size={compact ? 8 : 9} />
               {formatElapsedTime(elapsedMins)}
             </span>
           )}
@@ -158,8 +161,8 @@ const TableCard: React.FC<TableCardProps> = ({
       )}
 
       {isOccupied && !hasOrderInfo && orderStartedAt && (
-        <span className={`flex items-center gap-0.5 font-medium mt-0.5 ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[8px]' : 'text-[9px]'}`}>
-          <Clock size={compact ? 7 : 9} />
+        <span className={`flex items-center gap-0.5 font-medium mt-0.5 ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[9px]' : 'text-[9px]'}`}>
+          <Clock size={compact ? 8 : 9} />
           {formatElapsedTime(elapsedMins)}
         </span>
       )}

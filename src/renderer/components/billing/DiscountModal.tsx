@@ -261,7 +261,7 @@ const DiscountModal: React.FC<DiscountModalProps> = ({ isOpen, onClose }) => {
                 key={key}
                 type="button"
                 onClick={() => selectPreset(key, label)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors
+                className={`px-3.5 py-1.5 text-xs font-medium rounded-full transition-colors
                   ${isPresetSelected(key, label)
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'

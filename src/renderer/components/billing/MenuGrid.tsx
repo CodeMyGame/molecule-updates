@@ -672,7 +672,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
               <div className={`grid ${compact ? 'grid-cols-[repeat(auto-fill,minmax(108px,1fr))] gap-1.5' : 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2'}`}>
                 <button
                   onClick={() => setShowAddItemDialog(true)}
-                  className={`group relative flex flex-col items-center justify-center bg-white border-2 border-dashed border-gray-200
+                  className={`menu-item-card group relative flex flex-col items-center justify-center bg-white border-2 border-dashed border-gray-200
                     rounded-lg text-left transition-all duration-150 select-none
                     hover:border-blue-400 hover:bg-blue-50/50
                     ${compact ? 'p-2 min-h-[68px]' : 'p-2.5 min-h-[80px]'}`}
@@ -693,8 +693,8 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                     key={item.id}
                     onClick={() => handleItemClick(item)}
                     disabled={loadingItem === item.id}
-                    className="relative w-full flex items-center gap-1.5 bg-white border border-gray-200
-                      rounded px-2 py-[5px] text-left transition-all duration-100
+                    className="menu-item-card relative w-full flex items-center gap-1.5 bg-white border border-gray-200
+                      rounded-lg px-2 py-[5px] text-left transition-all duration-100
                       hover:border-blue-300 hover:bg-blue-50 active:scale-[0.98]
                       focus:outline-none focus:ring-1 focus:ring-blue-300
                       disabled:opacity-60 disabled:cursor-wait select-none mb-0.5 break-inside-avoid"
@@ -738,7 +738,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                 onClick={() => handleItemClick(item)}
                 onContextMenu={(e) => { e.preventDefault(); openItemContextMenu(e, item); }}
                 disabled={loadingItem === item.id}
-                className={`relative flex flex-col items-start bg-white border border-gray-200
+                className={`menu-item-card relative flex flex-col items-start bg-white border border-gray-200
                   rounded-lg text-left transition-all duration-150
                   hover:border-blue-300 hover:shadow-md active:scale-[0.97] active:shadow-sm
                   focus:outline-none focus:ring-2 focus:ring-blue-300
@@ -863,14 +863,14 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                         onChange={(e) => setEditVariationForm((f) => ({ ...f, price: e.target.value }))}
                         className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                       />
-                      <div className="flex gap-1">
-                        <button onClick={() => handleDeleteVariation(v.id)} className="px-2 py-1 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100">
+                      <div className="flex gap-1.5">
+                        <button onClick={() => handleDeleteVariation(v.id)} className="px-2.5 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100">
                           <Trash2 size={11} />
                         </button>
-                        <button onClick={() => setEditVariationId(null)} className="flex-1 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200">
+                        <button onClick={() => setEditVariationId(null)} className="flex-1 px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                           {t('common.cancel')}
                         </button>
-                        <button onClick={() => handleSaveVariationEdit(v.id)} className="flex-1 px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                        <button onClick={() => handleSaveVariationEdit(v.id)} className="flex-1 px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
                           {t('common.save')}
                         </button>
                       </div>
@@ -993,14 +993,14 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                                   onChange={(e) => setEditAddonForm((f) => ({ ...f, price: e.target.value }))}
                                   className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                                 />
-                                <div className="flex gap-1">
-                                  <button onClick={() => handleDeleteAddon(addon.id)} className="px-2 py-1 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100">
+                                <div className="flex gap-1.5">
+                                  <button onClick={() => handleDeleteAddon(addon.id)} className="px-2.5 py-1 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100">
                                     <Trash2 size={11} />
                                   </button>
-                                  <button onClick={() => setEditAddonId(null)} className="flex-1 px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200">
+                                  <button onClick={() => setEditAddonId(null)} className="flex-1 px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                                     {t('common.cancel')}
                                   </button>
-                                  <button onClick={() => handleSaveAddonEdit(addon.id)} className="flex-1 px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
+                                  <button onClick={() => handleSaveAddonEdit(addon.id)} className="flex-1 px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
                                     {t('common.save')}
                                   </button>
                                 </div>

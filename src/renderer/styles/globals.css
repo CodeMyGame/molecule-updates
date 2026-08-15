@@ -108,6 +108,11 @@
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* Make all interactive buttons (except menu cards, table cards, keypad digits, and split segments) rounded left and right */
+  button:not(.menu-item-card):not(.table-cell):not([data-card="true"]):not(.table-card):not(.numpad-btn):not(.numpad-btn-primary):not(.rounded-none):not(.rounded-l):not(.rounded-r):not(.rounded-t):not(.rounded-b):not(.rounded-tl):not(.rounded-tr):not(.rounded-bl):not(.rounded-br):not(.rounded-l-lg):not(.rounded-r-lg):not(.rounded-l-full):not(.rounded-r-full):not(.rounded-l-md):not(.rounded-r-md):not(.rounded-l-sm):not(.rounded-r-sm) {
+    border-radius: 9999px !important;
+  }
 }
 
 /* Custom scrollbar styles: Auto-hiding, floating capsule pill with curved rounded ends */
@@ -221,13 +226,13 @@
 
   /* POS number pad button */
   .numpad-btn {
-    @apply h-14 w-14 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500
+    @apply h-14 w-14 rounded-2xl bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:bg-gray-300 dark:active:bg-gray-500
       text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center justify-center
       transition-colors duration-100 select-none;
   }
 
   .numpad-btn-primary {
-    @apply h-14 w-14 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+    @apply h-14 w-14 rounded-2xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800
       text-xl font-semibold text-white flex items-center justify-center
       transition-colors duration-100 select-none;
   }

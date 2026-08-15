@@ -70,7 +70,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         <button
           onClick={handleClear}
           className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-gray-400
-            hover:text-gray-600 rounded transition-colors"
+            hover:text-gray-600 rounded-lg transition-colors"
         >
           <X size={16} />
         </button>

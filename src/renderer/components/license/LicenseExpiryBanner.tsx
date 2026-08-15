@@ -30,7 +30,7 @@ const LicenseExpiryBanner: React.FC<LicenseExpiryBannerProps> = ({ status }) => 
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        className="p-0.5 hover:bg-white/20 rounded transition-colors flex-shrink-0"
+        className="p-0.5 hover:bg-white/20 rounded-lg transition-colors flex-shrink-0"
         title={t('licenseBanner.dismiss')}
         aria-label={t('licenseBanner.dismiss')}
       >

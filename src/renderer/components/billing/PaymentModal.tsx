@@ -282,7 +282,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
               <button
                 key={key}
                 onClick={() => { setActiveMode(key); setReferenceError(''); }}
-                className={`flex flex-col items-center justify-center gap-1 py-2 px-2 rounded-lg
+                className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg
                   transition-all text-white font-medium
                   ${
                     activeMode === key

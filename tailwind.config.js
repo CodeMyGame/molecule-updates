@@ -4,6 +4,15 @@ module.exports = {
   content: ['./src/renderer/**/*.{html,tsx,ts}'],
   theme: {
     extend: {
+      borderRadius: {
+        'sm': '0.25rem',
+        DEFAULT: '0.375rem',
+        'md': '0.5rem',
+        'lg': '0.625rem',
+        'xl': '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
       colors: {
         primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
         success: { 50: '#f0fdf4', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' },
