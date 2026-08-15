@@ -1122,24 +1122,24 @@ const Billing: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
-      {/* Top bar */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-2.5">
-        <div className="flex items-center gap-4">
+      {/* Top bar (2nd Header - Order type, filters, view mode) */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-1.5">
+        <div className="flex items-center gap-2.5">
           {/* Order type selector */}
-          <div className="flex bg-gray-100 rounded-lg p-1 gap-0.5">
+          <div className="flex bg-gray-100 rounded-md p-0.5 gap-0.5">
             {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => (
               <Tooltip key={key} text={t(tKey)} position="bottom">
                 <button
                   onClick={() => setOrderType(key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold
                     transition-colors select-none
                     ${
                       orderType === key
-                        ? 'bg-white text-blue-700 shadow-sm'
+                        ? 'bg-white text-blue-700 shadow-xs'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                 >
-                  <Icon size={16} />
+                  <Icon size={13} />
                   {t(tKey)}
                 </button>
               </Tooltip>
@@ -1147,8 +1147,8 @@ const Billing: React.FC = () => {
           </div>
 
           {orderType === 'dine_in' && selectedTable && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 font-medium">
-              <LayoutGrid size={14} />
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-700 font-semibold">
+              <LayoutGrid size={12} />
               {selectedTable.name}
             </div>
           )}
@@ -1163,14 +1163,14 @@ const Billing: React.FC = () => {
               <button
                 key={key}
                 onClick={() => setVegFilter(key)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors
                   ${vegFilter === key
                     ? `${color} text-white`
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
-                {key === 'veg' && <CircleDot size={9} className={vegFilter === key ? 'text-white' : 'text-green-600'} />}
-                {key === 'nonveg' && <CircleDot size={9} className={vegFilter === key ? 'text-white' : 'text-red-600'} />}
+                {key === 'veg' && <CircleDot size={8} className={vegFilter === key ? 'text-white' : 'text-green-600'} />}
+                {key === 'nonveg' && <CircleDot size={8} className={vegFilter === key ? 'text-white' : 'text-red-600'} />}
                 {label}
               </button>
             ))}
@@ -1180,15 +1180,15 @@ const Billing: React.FC = () => {
           <div className="flex bg-gray-100 rounded p-0.5 gap-0.5">
             <button
               onClick={() => setMenuViewMode('grid')}
-              className={`p-1 rounded transition-colors ${menuViewMode === 'grid' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`p-1 rounded transition-colors ${menuViewMode === 'grid' ? 'bg-white text-blue-600 shadow-xs' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              <Grid3X3 size={14} />
+              <Grid3X3 size={12} />
             </button>
             <button
               onClick={() => setMenuViewMode('list')}
-              className={`p-1 rounded transition-colors ${menuViewMode === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`p-1 rounded transition-colors ${menuViewMode === 'list' ? 'bg-white text-blue-600 shadow-xs' : 'text-gray-500 hover:text-gray-700'}`}
             >
-              <List size={14} />
+              <List size={12} />
             </button>
           </div>
 
@@ -1196,10 +1196,10 @@ const Billing: React.FC = () => {
           <Tooltip text={t('billing.addTempItem')} position="bottom">
             <button
               onClick={() => setShowTempItemModal(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-orange-600 bg-orange-50
-                hover:bg-orange-100 border border-orange-200 rounded-lg transition-colors font-medium"
+              className="flex items-center gap-1 px-2 py-1 text-xs text-orange-600 bg-orange-50
+                hover:bg-orange-100 border border-orange-200 rounded-md transition-colors font-semibold"
             >
-              <PlusCircle size={15} />
+              <PlusCircle size={13} />
               {t('billing.tempItem')}
             </button>
           </Tooltip>
@@ -1211,10 +1211,10 @@ const Billing: React.FC = () => {
             <Tooltip text={t('billing.previewBill')} position="bottom">
               <button
                 onClick={() => setShowBillPreview(true)}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-600
-                  hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                className="flex items-center p-1 text-gray-600
+                  hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
               >
-                <FileText size={16} />
+                <FileText size={14} />
               </button>
             </Tooltip>
           )}

@@ -110,33 +110,72 @@
   }
 }
 
-/* Custom scrollbar styles */
+/* Custom scrollbar styles: Auto-hiding, ultra-thin (4px), appears on hover/action */
 @layer base {
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+    background: transparent;
   }
 
+  /* Hidden by default when idle / no action */
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+    background: transparent;
+    border-radius: 999px;
+    min-height: 28px;
+    min-width: 28px;
+    transition: background-color 0.25s ease-in-out;
   }
 
+  /* Appears when hovering over the scrollable container or interacting */
+  *:hover::-webkit-scrollbar-thumb,
+  *:focus-within::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+  }
+
+  .dark *:hover::-webkit-scrollbar-thumb,
+  .dark *:focus-within::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+
+  /* Active / direct hover on thumb */
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-500;
+    background: #94a3b8 !important;
   }
 
-  /* Thin scrollbar for Firefox */
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280 !important;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: #64748b !important;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:active {
+    background: #9ca3af !important;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox auto-hiding support */
   * {
     scrollbar-width: thin;
-    scrollbar-color: #d1d5db #f3f4f6;
+    scrollbar-color: transparent transparent;
   }
 
-  .dark * {
-    scrollbar-color: #4b5563 #1f2937;
+  *:hover,
+  *:focus-within {
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .dark *:hover,
+  .dark *:focus-within {
+    scrollbar-color: #4b5563 transparent;
   }
 }
 
@@ -158,9 +197,10 @@
 
   /* POS header */
   .pos-header {
-    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 flex items-center justify-between;
-    height: 32px;
-    min-height: 32px;
+    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2.5 flex items-center justify-between;
+    height: 26px;
+    min-height: 26px;
+    max-height: 26px;
   }
 
   /* Card component */

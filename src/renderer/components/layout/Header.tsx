@@ -203,36 +203,36 @@ const Header: React.FC = () => {
   return (
     <>
     <header className="pos-header">
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="text-xs font-bold text-gray-800 dark:text-gray-100 tracking-tight whitespace-nowrap">
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className="text-[11px] font-bold text-gray-800 dark:text-gray-100 tracking-tight whitespace-nowrap leading-none">
           {restaurantName}
         </span>
       </div>
 
       {/* Center slot: pages can portal content here; fallback shows clock */}
       <div className="flex-1 flex items-center justify-center min-w-0">
-        <div id="header-center-slot" className="flex items-center gap-2 overflow-x-auto max-w-full" />
-        <div className={`flex items-center gap-4 ${slotHasContent ? 'hidden' : ''}`}>
-          <div className="flex items-center gap-1.5 text-[11px] text-gray-600">
-            <Clock size={12} />
+        <div id="header-center-slot" className="flex items-center gap-1.5 overflow-x-auto max-w-full" />
+        <div className={`flex items-center gap-3 ${slotHasContent ? 'hidden' : ''}`}>
+          <div className="flex items-center gap-1 text-[10px] text-gray-600 leading-none">
+            <Clock size={10} />
             <span>{formattedDate}</span>
             <span className="font-mono font-medium text-gray-800">{formattedTime}</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 leading-none">
             <div className={`w-1.5 h-1.5 rounded-full ${isDayOpen ? 'bg-green-500 animate-pulse' : 'bg-red-400'}`} />
-            <span className={`text-[10px] font-medium ${isDayOpen ? 'text-green-700' : 'text-red-600'}`}>
+            <span className={`text-[9px] font-medium ${isDayOpen ? 'text-green-700' : 'text-red-600'}`}>
               {isDayOpen ? t('header.dayOpen') : t('header.dayClosed')}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {/* Daily Heads-Up & Notification Menu */}
-        <div className="relative">
+        <div className="relative flex items-center">
           <button
             onClick={handleToggleBell}
-            className={`relative flex items-center justify-center w-7 h-7 rounded-lg transition-colors ${
+            className={`relative flex items-center justify-center w-5 h-5 rounded transition-colors ${
               showBellMenu
                 ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
                 : hasAlerts
@@ -241,11 +241,11 @@ const Header: React.FC = () => {
             }`}
             title={t('header.dailyHeadsUp', 'Daily Heads-Up & Notifications')}
           >
-            <Bell size={15} className={hasAlerts ? 'animate-bounce' : ''} />
+            <Bell size={12} className={hasAlerts ? 'animate-bounce' : ''} />
             {hasAlerts && (
-              <span className="absolute 0.5 top-0.5 right-0.5 flex h-2 w-2">
+              <span className="absolute 0 top-0 right-0 flex h-1.5 w-1.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
               </span>
             )}
           </button>
@@ -259,7 +259,7 @@ const Header: React.FC = () => {
               />
 
               {/* Context Dropdown Menu */}
-              <div className="fixed top-12 right-3 w-[380px] max-w-[92vw] bg-white border border-gray-200 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="fixed top-8 right-2 w-[380px] max-w-[92vw] bg-white border border-gray-200 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* Header with Title and Refresh */}
                 <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/40 border-b border-gray-100 flex items-center justify-between">
                   <div className="flex items-center gap-2">
