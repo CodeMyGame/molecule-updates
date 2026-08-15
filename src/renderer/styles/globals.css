@@ -300,19 +300,42 @@
 @layer utilities {
   /* Bell chime / ring animation */
   @keyframes bell-ring {
+    0%, 65%, 100% { transform: rotate(0deg); }
+    70%           { transform: rotate(18deg); }
+    75%           { transform: rotate(-16deg); }
+    80%           { transform: rotate(12deg); }
+    85%           { transform: rotate(-8deg); }
+    90%           { transform: rotate(4deg); }
+    95%           { transform: rotate(-2deg); }
+  }
+
+  @keyframes bell-ring-fast {
     0%, 100% { transform: rotate(0deg); }
-    10%, 30% { transform: rotate(16deg); }
-    20%, 40% { transform: rotate(-16deg); }
-    50%      { transform: rotate(10deg); }
-    60%      { transform: rotate(-10deg); }
-    70%      { transform: rotate(4deg); }
-    80%      { transform: rotate(0deg); }
+    20%      { transform: rotate(22deg); }
+    40%      { transform: rotate(-20deg); }
+    60%      { transform: rotate(14deg); }
+    80%      { transform: rotate(-10deg); }
+  }
+
+  @keyframes amber-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35); }
+    50%      { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
   }
 
   .animate-bell-ring {
     display: inline-block;
     transform-origin: top center;
-    animation: bell-ring 2.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+    animation: bell-ring 3.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+  }
+
+  .animate-bell-ring-fast {
+    display: inline-block;
+    transform-origin: top center;
+    animation: bell-ring-fast 0.5s ease-in-out infinite;
+  }
+
+  .animate-amber-glow {
+    animation: amber-glow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
   .animate-fade-in {

@@ -232,20 +232,29 @@ const Header: React.FC = () => {
         <div className="relative flex items-center">
           <button
             onClick={handleToggleBell}
-            className={`group relative flex items-center justify-center w-6 h-6 rounded-md transition-colors ${
+            className={`group relative flex items-center justify-center w-7 h-7 rounded-full transition-all duration-200 shadow-xs ${
               showBellMenu
-                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                ? 'bg-amber-500 text-white shadow-amber-500/25 scale-105'
                 : hasAlerts
-                ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20'
-                : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700'
+                ? 'bg-amber-50 text-amber-600 border border-amber-300 animate-amber-glow hover:bg-amber-100 hover:border-amber-400 hover:scale-110 active:scale-95 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-700/60'
+                : 'bg-amber-50/80 text-amber-500 border border-amber-200/70 hover:bg-amber-100 hover:text-amber-600 hover:border-amber-300 hover:scale-110 active:scale-95 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/50'
             }`}
             title={t('header.dailyHeadsUp', 'Daily Heads-Up & Notifications')}
           >
-            <Bell size={13} className="animate-bell-ring" />
+            <Bell
+              size={14}
+              className={`transition-all duration-200 ${
+                showBellMenu
+                  ? 'fill-white text-white'
+                  : hasAlerts
+                  ? 'fill-amber-400 text-amber-600 animate-bell-ring group-hover:animate-bell-ring-fast'
+                  : 'fill-amber-400/50 text-amber-500 animate-bell-ring group-hover:animate-bell-ring-fast'
+              }`}
+            />
             {hasAlerts && (
-              <span className="absolute 0.5 top-0.5 right-0.5 flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+              <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-80" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 ring-2 ring-white dark:ring-gray-800" />
               </span>
             )}
           </button>
