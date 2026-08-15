@@ -37,7 +37,7 @@ function createWindow(): void {
     height: 800,
     minWidth: 1024,
     minHeight: 768,
-    show: false,
+    show: true,
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -48,7 +48,25 @@ function createWindow(): void {
   });
 
   mainWindow.on('ready-to-show', () => {
+    logger.info('MainWindow ready-to-show');
     mainWindow?.show();
+    mainWindow?.restore();
+    mainWindow?.focus();
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    logger.info('MainWindow did-finish-load');
+    if (mainWindow && !mainWindow.isVisible()) {
+      mainWindow.show();
+    }
+  });
+
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+    logger.error(`MainWindow did-fail-load: ${errorCode} ${errorDescription} url: ${validatedURL}`);
+  });
+
+  mainWindow.webContents.on('console-message', (_event, _level, message, line, sourceId) => {
+    logger.info(`[Renderer] ${message} (${sourceId}:${line})`);
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -58,6 +76,7 @@ function createWindow(): void {
 
   // Load the renderer
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    logger.info(`Loading dev URL: ${process.env['ELECTRON_RENDERER_URL']}`);
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));

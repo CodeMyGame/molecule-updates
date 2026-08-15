@@ -44,6 +44,11 @@ import {
   RotateCcw,
   Image as ImageIcon,
   Cloud,
+  Gift,
+  Share2,
+  Sparkles,
+  CheckCircle2,
+  MessageCircle,
 } from 'lucide-react';
 import { useLicenseStore } from '../stores/license.store';
 import Button from '../components/common/Button';
@@ -97,7 +102,7 @@ import {
 import { useUIStore } from '../stores/ui.store';
 import { useDaySessionStore } from '../stores/daySession.store';
 
-type SettingsSection = 'restaurant' | 'tax' | 'printer' | 'billing' | 'offers' | 'backup' | 'cloud' | 'day_session' | 'license' | 'language' | 'appearance' | 'coins' | 'kitchen_network' | 'waiter_network' | 'system_update';
+type SettingsSection = 'restaurant' | 'tax' | 'printer' | 'billing' | 'offers' | 'backup' | 'cloud' | 'day_session' | 'license' | 'refer_and_earn' | 'language' | 'appearance' | 'coins' | 'kitchen_network' | 'waiter_network' | 'system_update';
 
 const SECTION_DEFS: { key: SettingsSection; labelKey: string; icon: React.ReactNode }[] = [
   { key: 'restaurant', labelKey: 'settingsPage.restaurantProfile', icon: <Building2 size={18} /> },
@@ -109,6 +114,7 @@ const SECTION_DEFS: { key: SettingsSection; labelKey: string; icon: React.ReactN
   { key: 'cloud', labelKey: 'settings.cloud', icon: <Cloud size={18} /> },
   { key: 'day_session', labelKey: 'settings.daySession', icon: <Sun size={18} /> },
   { key: 'license', labelKey: 'settings.license', icon: <KeyRound size={18} /> },
+  { key: 'refer_and_earn', labelKey: 'settings.referAndEarn', icon: <Gift size={18} /> },
   { key: 'appearance', labelKey: 'settings.appearance', icon: <Palette size={18} /> },
   { key: 'language', labelKey: 'settings.regionLanguage', icon: <Globe size={18} /> },
   { key: 'coins', labelKey: 'settings.coins', icon: <Coins size={18} /> },
@@ -120,7 +126,7 @@ const SECTION_DEFS: { key: SettingsSection; labelKey: string; icon: React.ReactN
 // Group sections into labelled categories for a modern, professional-software
 // settings layout. Every section appears exactly once across these groups.
 const SECTION_GROUPS: { labelKey: string; fallback: string; keys: SettingsSection[] }[] = [
-  { labelKey: 'settingsPage.groupGeneral', fallback: 'General', keys: ['restaurant', 'appearance', 'language'] },
+  { labelKey: 'settingsPage.groupGeneral', fallback: 'General', keys: ['restaurant', 'refer_and_earn', 'appearance', 'language'] },
   { labelKey: 'settingsPage.groupSales', fallback: 'Sales & Billing', keys: ['tax', 'billing', 'offers', 'coins'] },
   { labelKey: 'settingsPage.groupDevices', fallback: 'Devices & Network', keys: ['printer', 'kitchen_network', 'waiter_network'] },
   { labelKey: 'settingsPage.groupSystem', fallback: 'System', keys: ['backup', 'cloud', 'day_session', 'license', 'system_update'] },
@@ -2555,6 +2561,146 @@ const Settings: React.FC = () => {
     );
   };
 
+  const renderReferAndEarn = () => {
+    const restaurantName = restaurant?.name || 'our restaurant';
+    const shareMessage = `Hey! I'm using Molecule POS for restaurant billing, KOTs, and table management. Highly recommend it! Check it out at https://moleculepos.com or contact Molecule team. Mention my restaurant "${restaurantName}" when you sign up to get an exclusive setup offer!`;
+
+    const handleCopyMessage = () => {
+      navigator.clipboard.writeText(shareMessage);
+      toast.success(t('settings.copied', 'Referral message copied to clipboard!'));
+    };
+
+    const handleShareWhatsApp = () => {
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareMessage)}`;
+      window.open(url, '_blank');
+    };
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('settings.referAndEarn', 'Refer & Earn')}</h2>
+          <p className="text-sm text-gray-500">
+            Invite fellow restaurant or café owners to Molecule POS and get rewarded with free subscription extensions.
+          </p>
+        </div>
+
+        {/* Hero Card */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-6 shadow-md">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-xs font-semibold tracking-wide">
+                <Sparkles size={14} className="text-amber-300" />
+                <span>EXCLUSIVE REFERRAL REWARD</span>
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight text-white">
+                Get 3 Months Free POS Subscription
+              </h3>
+              <p className="text-sm text-blue-100 leading-relaxed">
+                For every restaurant, café, bakery, or bar you refer that successfully signs up or activates Molecule POS, you will receive <strong className="text-white font-semibold">3 Months of Free Subscription</strong> added straight to your active plan.
+              </p>
+            </div>
+            <div className="flex-shrink-0 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 w-20 h-20 shadow-inner">
+              <Gift size={40} className="text-amber-300 animate-bounce" />
+            </div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-white/15 flex flex-wrap items-center gap-4 text-xs text-blue-100">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 size={15} className="text-emerald-300" />
+              <span>3 Months Free per Successful Referral</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 size={15} className="text-emerald-300" />
+              <span>Unlimited Referrals (e.g. 4 Referrals = 1 Year Free)</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 size={15} className="text-emerald-300" />
+              <span>Instant License Extension</span>
+            </span>
+          </div>
+        </div>
+
+        {/* How It Works Steps */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            How It Works
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm">
+                1
+              </div>
+              <h4 className="font-semibold text-gray-800 text-sm">Share with a Friend</h4>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Recommend Molecule POS to fellow food business owners, restaurants, cloud kitchens, or cafés.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm">
+                2
+              </div>
+              <h4 className="font-semibold text-gray-800 text-sm">They Subscribe</h4>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                When they purchase or activate their plan, they simply mention your restaurant name (<span className="font-medium text-gray-700">{restaurantName}</span>).
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-sm">
+                3
+              </div>
+              <h4 className="font-semibold text-gray-800 text-sm">Get 3 Months Free</h4>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Upon successful onboarding, 3 months are credited directly to your Molecule POS license at zero cost!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Share Referral Message */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900">Your Referral Message</h3>
+            <span className="text-xs text-gray-500">Ready to share</span>
+          </div>
+          <div className="p-3.5 bg-gray-50 border border-gray-200 rounded-lg text-xs sm:text-sm text-gray-700 font-mono leading-relaxed whitespace-pre-wrap select-all">
+            {shareMessage}
+          </div>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Button
+              variant="secondary"
+              icon={<Copy size={16} />}
+              onClick={handleCopyMessage}
+            >
+              {t('settings.copy', 'Copy Message')}
+            </Button>
+            <Button
+              variant="primary"
+              icon={<MessageCircle size={16} />}
+              onClick={handleShareWhatsApp}
+            >
+              Share via WhatsApp
+            </Button>
+          </div>
+        </div>
+
+        {/* Referral Details & Support */}
+        <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-5 flex items-start gap-4">
+          <div className="p-2 bg-blue-100 text-blue-700 rounded-lg flex-shrink-0">
+            <Share2 size={20} />
+          </div>
+          <div className="text-xs text-blue-900 space-y-1">
+            <p className="font-semibold text-sm text-blue-950">Have a direct referral or question?</p>
+            <p className="text-blue-800/90 leading-relaxed">
+              If you have a restaurant or café owner ready to onboard, contact your Molecule representative or email <span className="font-medium underline">contact@moleculepos.com</span> to fast-track their setup and apply your 3-month reward immediately.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderActiveSection = () => {
     switch (activeSection) {
       case 'restaurant': return renderRestaurantProfile();
@@ -2566,6 +2712,7 @@ const Settings: React.FC = () => {
       case 'cloud': return renderCloud();
       case 'day_session': return renderDaySession();
       case 'license': return renderLicense();
+      case 'refer_and_earn': return renderReferAndEarn();
       case 'appearance': return renderAppearance();
       case 'language': return renderLanguage();
       case 'coins': return renderCoins();
