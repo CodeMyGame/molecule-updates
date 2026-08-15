@@ -453,27 +453,27 @@ const Tables: React.FC = () => {
           <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('tables.title')}</h1>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={refetch}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <RefreshCw size={11} className="text-gray-500" />
+            <RefreshCw size={12} className="text-gray-500" />
             <span>{t('common.refresh')}</span>
           </button>
           <button
             onClick={() => setShowFloorModal(true)}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <Plus size={11} className="text-gray-500" />
+            <Plus size={12} className="text-gray-500" />
             <span>{t('tables.addFloor')}</span>
           </button>
           <button
             onClick={openAddTableModal}
             disabled={!currentFloorId}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-xs transition-colors"
           >
-            <Plus size={11} />
+            <Plus size={12} />
             <span>{t('tables.addTable')}</span>
           </button>
         </div>
@@ -481,15 +481,15 @@ const Tables: React.FC = () => {
 
       {/* Floor tabs */}
       {floors.length > 0 && (
-        <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50/80 border-b border-gray-200 overflow-x-auto no-scrollbar">
           {floors.map((floor) => (
             <button
               key={floor.id}
               onClick={() => setActiveFloorId(floor.id)}
               onContextMenu={(e) => handleFloorContextMenu(e, floor)}
               className={`
-                relative flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-semibold
-                transition-colors select-none tap-target
+                relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold
+                transition-colors select-none
                 ${
                   currentFloorId === floor.id
                     ? 'bg-blue-600 text-white shadow-xs'
@@ -497,9 +497,9 @@ const Tables: React.FC = () => {
                 }
               `}
             >
-              <Layers size={12} />
+              <Layers size={13} />
               <span>{floor.name}</span>
-              <span className={`text-[9px] px-1 py-0.2 rounded-full font-medium ${currentFloorId === floor.id ? 'bg-blue-500/80 text-white' : 'bg-gray-200 text-gray-600'}`}>
+              <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-medium ${currentFloorId === floor.id ? 'bg-blue-500/80 text-white' : 'bg-gray-200 text-gray-600'}`}>
                 {tablesByFloor(floor.id).length}
               </span>
               {isEditMode && floors.length > 1 && (
@@ -508,7 +508,7 @@ const Tables: React.FC = () => {
                     e.stopPropagation();
                     handleDeleteFloor(floor.id);
                   }}
-                  className="ml-0.5 p-0.5 rounded hover:bg-white/20"
+                  className="ml-0.5 p-0.5 rounded-full hover:bg-white/20"
                 >
                   <X size={10} />
                 </button>

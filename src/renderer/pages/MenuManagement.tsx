@@ -716,36 +716,36 @@ const MenuManagement: React.FC = () => {
           <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('menu.menuManagement')}</h1>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={handleExport}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            <Download size={11} className="text-gray-500" />
+            <Download size={12} className="text-gray-500" />
             <span>{t('menu.export')}</span>
           </button>
 
           <button
             onClick={handleImport}
             disabled={importing}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
           >
-            {importing ? <Loader2 size={11} className="animate-spin text-blue-600" /> : <Upload size={11} className="text-gray-500" />}
+            {importing ? <Loader2 size={12} className="animate-spin text-blue-600" /> : <Upload size={12} className="text-gray-500" />}
             <span>{importing ? t('menu.importing', 'Importing...') : t('menu.import')}</span>
           </button>
 
           <button
             onClick={openAddItem}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
           >
-            <Plus size={11} />
+            <Plus size={12} />
             <span>{t('menu.addItem')}</span>
           </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50/80 border-b border-gray-200">
         {([
           { key: 'items', label: t('menu.items') },
           { key: 'combos', label: t('menu.combos') },
@@ -754,7 +754,7 @@ const MenuManagement: React.FC = () => {
           <button
             key={key}
             onClick={() => setActiveTab(key)}
-            className={`px-2.5 py-0.5 rounded text-[11px] font-semibold transition-colors tap-target ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
               activeTab === key
                 ? 'bg-blue-600 text-white shadow-xs'
                 : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'

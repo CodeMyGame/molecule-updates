@@ -2087,9 +2087,9 @@ const Reports: React.FC = () => {
             <button
               key={p.key}
               onClick={() => reports.setDatePreset(p.key)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 reports.datePreset === p.key
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-600 text-white shadow-xs'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >

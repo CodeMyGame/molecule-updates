@@ -202,7 +202,7 @@ const Inventory: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50/80 border-b border-gray-200 overflow-x-auto no-scrollbar">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -211,8 +211,8 @@ const Inventory: React.FC = () => {
               setSearchQuery('');
             }}
             className={`
-              flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold rounded
-              transition-colors select-none tap-target
+              flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full
+              transition-colors select-none
               ${
                 activeTab === tab.key
                   ? 'bg-blue-600 text-white shadow-xs'
@@ -574,14 +574,14 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
         <div className="flex-1" />
         <button
           onClick={onAdjustStock}
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
         >
           <ArrowDownUp size={11} className="text-gray-500" />
           <span>{t('inventory.stockAdjustment')}</span>
         </button>
         <button
           onClick={onAddItem}
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
         >
           <Plus size={11} />
           <span>{t('inventory.addItem')}</span>
@@ -702,7 +702,7 @@ const PurchaseOrdersTab: React.FC<PurchaseOrdersTabProps> = ({
         <h2 className="text-xs font-bold text-gray-900">{t('inventory.purchaseOrders')}</h2>
         <button
           onClick={onCreate}
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
         >
           <Plus size={11} />
           <span>{t('inventory.createPurchaseOrder')}</span>
@@ -779,7 +779,7 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
         <h2 className="text-xs font-bold text-gray-900">{t('inventory.suppliers')}</h2>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
         >
           <Plus size={11} />
           <span>{t('inventory.addSupplier')}</span>
@@ -798,161 +798,179 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
 // ---------- Recipes ----------
 
 interface RecipesTabProps {
-  menuItems: MenuItem[];
+  items: MenuItem[];
   inventoryItems: InventoryItem[];
-  selectedMenuItemId: number | null;
   recipes: Recipe[];
-  onSelectMenuItem: (id: number) => void;
   onAddRecipe: () => void;
-  onDeleteRecipe: (id: number) => void;
+  onDeleteRecipe: (recipe: Recipe) => void;
 }
 
 const RecipesTab: React.FC<RecipesTabProps> = ({
-  menuItems,
+  items,
   inventoryItems,
-  selectedMenuItemId,
   recipes,
-  onSelectMenuItem,
   onAddRecipe,
   onDeleteRecipe,
 }) => {
   const { t } = useTranslation();
-  const getInvItem = (id: number) => inventoryItems.find((i) => i.id === id);
-  const selectedItem = menuItems.find((m) => m.id === selectedMenuItemId);
+  const [selectedMenuItemId, setSelectedMenuItemId] = useState<number | null>(
+    items[0]?.id ?? null
+  );
 
-  const totalFoodCost = recipes.reduce((sum, r) => {
-    const invItem = getInvItem(r.inventoryItemId);
-    return sum + (invItem ? r.quantityUsed * invItem.costPerUnit : 0);
+  const selectedItem = items.find((i) => i.id === selectedMenuItemId);
+  const itemRecipes = recipes.filter((r) => r.menuItemId === selectedMenuItemId);
+
+  const totalCost = itemRecipes.reduce((sum, r) => {
+    const inv = inventoryItems.find((i) => i.id === r.inventoryItemId);
+    return sum + (inv ? inv.costPrice * r.quantity : 0);
   }, 0);
 
-  const sellingPrice = selectedItem?.basePrice ?? 0;
-  const foodCostPct = sellingPrice > 0 ? (totalFoodCost / sellingPrice) * 100 : 0;
+  const profitMargin =
+    selectedItem && selectedItem.basePrice > 0
+      ? ((selectedItem.basePrice - totalCost) / selectedItem.basePrice) * 100
+      : 0;
+
+  const foodCostPct =
+    selectedItem && selectedItem.basePrice > 0
+      ? (totalCost / selectedItem.basePrice) * 100
+      : 0;
+
+  const getInvItem = (id: number) => inventoryItems.find((i) => i.id === id);
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-4">
-        <h2 className="text-xs font-bold text-gray-900">{t('inventory.recipeManagement')}</h2>
-      </div>
-
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Menu item selector */}
-      <div className="bg-white rounded-md border border-gray-200 p-2.5">
-        <label className="block text-xs font-semibold text-gray-700 mb-1">
-          {t('inventory.selectMenuItem')}
-        </label>
-        <select
-          value={selectedMenuItemId ?? ''}
-          onChange={(e) => {
-            const id = Number(e.target.value);
-            if (id) onSelectMenuItem(id);
-          }}
-          className="w-full max-w-md px-2.5 py-1 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="">{t('inventory.selectMenuItemOption')}</option>
-          {menuItems.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name} {m.shortCode ? `(${m.shortCode})` : ''}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {selectedMenuItemId && (
-        <>
-          {/* Cost summary */}
-          <div className="grid grid-cols-3 gap-2.5">
-            <div className="bg-white rounded-md border border-gray-200 p-2.5">
-              <div className="text-[10px] text-gray-500">{t('inventory.sellingPrice')}</div>
-              <div className="text-sm font-bold text-gray-900 mt-0.5">
-                {formatCurrency(sellingPrice)}
-              </div>
-            </div>
-            <div className="bg-white rounded-md border border-gray-200 p-2.5">
-              <div className="text-[10px] text-gray-500">{t('inventory.foodCost')}</div>
-              <div className="text-sm font-bold text-gray-900 mt-0.5">
-                {formatCurrency(totalFoodCost)}
-              </div>
-            </div>
-            <div className="bg-white rounded-md border border-gray-200 p-2.5">
-              <div className="text-[10px] text-gray-500">{t('inventory.foodCostPct')}</div>
-              <div
-                className={`text-sm font-bold mt-0.5 ${
-                  foodCostPct > 35 ? 'text-red-600' : foodCostPct > 25 ? 'text-orange-600' : 'text-green-600'
+      <div className="space-y-2">
+        <h3 className="text-xs font-semibold text-gray-700">{t('inventory.menuItems')}</h3>
+        <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+          {items.map((item) => {
+            const hasRecipe = recipes.some((r) => r.menuItemId === item.id);
+            return (
+              <button
+                key={item.id}
+                onClick={() => setSelectedMenuItemId(item.id)}
+                className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors ${
+                  selectedMenuItemId === item.id
+                    ? 'bg-blue-50 text-blue-700 font-semibold'
+                    : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
-                {foodCostPct.toFixed(1)}%
+                <span>{item.name}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ${
+                    hasRecipe
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-400'
+                  }`}
+                >
+                  {hasRecipe ? t('inventory.recipeConfigured') : t('inventory.noRecipe')}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recipe details */}
+      <div className="md:col-span-2 space-y-3">
+        {selectedItem ? (
+          <>
+            {/* Cost summary cards */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white p-2.5 rounded-lg border border-gray-200">
+                <span className="text-[10px] text-gray-500 block">{t('inventory.menuPrice')}</span>
+                <span className="text-sm font-bold text-gray-900">
+                  {formatCurrency(selectedItem.basePrice)}
+                </span>
+              </div>
+              <div className="bg-white p-2.5 rounded-lg border border-gray-200">
+                <span className="text-[10px] text-gray-500 block">{t('inventory.recipeCost')}</span>
+                <span className="text-sm font-bold text-blue-600">
+                  {formatCurrency(totalCost)}
+                </span>
+              </div>
+              <div className="bg-white p-2.5 rounded-lg border border-gray-200">
+                <span className="text-[10px] text-gray-500 block">{t('inventory.foodCostPercent')}</span>
+                <div
+                  className={`text-sm font-bold ${
+                    foodCostPct > 35
+                      ? 'text-red-600'
+                      : foodCostPct > 25
+                      ? 'text-amber-600'
+                      : 'text-green-600'
+                  }`}
+                >
+                  {foodCostPct.toFixed(1)}%
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Recipe ingredients table */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold text-gray-700">{t('inventory.ingredients')}</h3>
-            <button
-              onClick={onAddRecipe}
-              className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
-            >
-              <Plus size={11} />
-              <span>{t('inventory.addIngredient')}</span>
-            </button>
-          </div>
+            {/* Recipe ingredients table */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-gray-700">{t('inventory.ingredients')}</h3>
+              <button
+                onClick={onAddRecipe}
+                className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+              >
+                <Plus size={11} />
+                <span>{t('inventory.addIngredient')}</span>
+              </button>
+            </div>
 
-          <DataTable
-            columns={[
-              {
-                header: t('inventory.ingredient'),
-                accessor: 'inventoryItemId',
-                render: (r: Recipe) => {
-                  const inv = getInvItem(r.inventoryItemId);
-                  return inv?.name ?? t('inventory.itemNumberFallback', { id: r.inventoryItemId });
+            <DataTable
+              columns={[
+                {
+                  header: t('inventory.ingredient'),
+                  accessor: 'inventoryItemId',
+                  render: (r: Recipe) => {
+                    const inv = getInvItem(r.inventoryItemId);
+                    return <span className="font-semibold text-gray-900">{inv?.name ?? `#${r.inventoryItemId}`}</span>;
+                  },
                 },
-              },
-              {
-                header: t('inventory.quantity'),
-                accessor: 'quantityUsed',
-                align: 'right' as const,
-                render: (r: Recipe) => `${r.quantityUsed} ${r.unit}`,
-              },
-              {
-                header: t('inventory.unitCost'),
-                accessor: 'unitCost',
-                align: 'right' as const,
-                render: (r: Recipe) => {
-                  const inv = getInvItem(r.inventoryItemId);
-                  return inv ? formatCurrency(inv.costPerUnit) : '-';
+                {
+                  header: t('inventory.quantity'),
+                  accessor: 'quantity',
+                  render: (r: Recipe) => {
+                    const inv = getInvItem(r.inventoryItemId);
+                    return `${r.quantity} ${inv?.unit ?? ''}`;
+                  },
                 },
-              },
-              {
-                header: t('inventory.totalCost'),
-                accessor: 'totalCost',
-                align: 'right' as const,
-                render: (r: Recipe) => {
-                  const inv = getInvItem(r.inventoryItemId);
-                  return inv ? formatCurrency(r.quantityUsed * inv.costPerUnit) : '-';
+                {
+                  header: t('inventory.cost'),
+                  accessor: 'cost',
+                  render: (r: Recipe) => {
+                    const inv = getInvItem(r.inventoryItemId);
+                    return formatCurrency(inv ? inv.costPrice * r.quantity : 0);
+                  },
                 },
-              },
-              {
-                header: '',
-                accessor: 'actions',
-                sortable: false,
-                width: '60px',
-                render: (r: Recipe) => (
-                  <button
-                    onClick={() => {
-                      if (confirm(t('inventory.removeIngredientConfirm'))) onDeleteRecipe(r.id);
-                    }}
-                    className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                ),
-              },
-            ]}
-            data={recipes}
-            keyExtractor={(r) => r.id}
-            emptyMessage={t('inventory.noIngredientsAdded')}
-          />
-        </>
-      )}
+                {
+                  header: t('inventory.actions'),
+                  accessor: 'actions',
+                  sortable: false,
+                  width: '60px',
+                  render: (r: Recipe) => (
+                    <button
+                      onClick={() => onDeleteRecipe(r)}
+                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title={t('common.delete')}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  ),
+                },
+              ]}
+              data={itemRecipes}
+              keyExtractor={(r) => r.id}
+              emptyMessage={t('inventory.noIngredientsConfigured')}
+            />
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-48 text-gray-400 bg-white rounded-lg border border-gray-200">
+            <UtensilsCrossed size={32} className="mb-2" />
+            <p className="text-xs">{t('inventory.selectItemForRecipe')}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -960,42 +978,47 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
 // ---------- Wastage ----------
 
 interface WastageTabProps {
-  history: StockTransaction[];
   items: InventoryItem[];
+  history: StockTransaction[];
   onLogWastage: () => void;
 }
 
-const WastageTab: React.FC<WastageTabProps> = ({ history, items, onLogWastage }) => {
+const WastageTab: React.FC<WastageTabProps> = ({ items: _items, history, onLogWastage }) => {
   const { t } = useTranslation();
-  const getName = (id: number) =>
-    items.find((i) => i.id === id)?.name ?? t('inventory.itemNumberFallback', { id });
-  const getUnit = (id: number) => items.find((i) => i.id === id)?.unit ?? '';
 
   const columns = [
     {
       header: t('inventory.date'),
       accessor: 'createdAt',
-      render: (tx: StockTransaction) => formatDateTime(tx.createdAt),
+      render: (tx: StockTransaction) => formatDate(tx.createdAt),
     },
     {
       header: t('inventory.item'),
-      accessor: 'inventoryItemId',
+      accessor: 'itemName',
       render: (tx: StockTransaction) => (
-        <span className="font-semibold text-gray-900">{getName(tx.inventoryItemId)}</span>
+        <span className="font-semibold text-gray-900">{tx.itemName ?? `#${tx.inventoryItemId}`}</span>
       ),
     },
     {
       header: t('inventory.quantity'),
       accessor: 'quantity',
-      align: 'right' as const,
       render: (tx: StockTransaction) => (
-        <span className="text-red-600 font-semibold">
-          -{Math.abs(tx.quantity)} {getUnit(tx.inventoryItemId)}
+        <span className="font-semibold text-red-600">
+          -{tx.quantity} {tx.unit ?? ''}
         </span>
       ),
     },
     {
       header: t('inventory.reason'),
+      accessor: 'reason',
+      render: (tx: StockTransaction) => (
+        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-red-100 text-red-700">
+          {tx.reason || t('inventory.wastage')}
+        </span>
+      ),
+    },
+    {
+      header: t('inventory.notes'),
       accessor: 'notes',
       render: (tx: StockTransaction) => tx.notes || '-',
     },
@@ -1007,7 +1030,7 @@ const WastageTab: React.FC<WastageTabProps> = ({ history, items, onLogWastage })
         <h2 className="text-xs font-bold text-gray-900">{t('inventory.wastageLog')}</h2>
         <button
           onClick={onLogWastage}
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
         >
           <Plus size={11} />
           <span>{t('inventory.logWastage')}</span>

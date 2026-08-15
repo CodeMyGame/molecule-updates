@@ -597,9 +597,9 @@ const StaffPage: React.FC = () => {
           {activeTab === 'list' && (
             <button
               onClick={handleOpenAdd}
-              className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
             >
-              <Plus size={11} />
+              <Plus size={12} />
               <span>{t('staff.addStaff')}</span>
             </button>
           )}
@@ -607,8 +607,8 @@ const StaffPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 bg-gray-50/80 border-b border-gray-200 px-3 py-1 overflow-x-auto no-scrollbar">
-        <div className="flex gap-1">
+      <div className="flex-shrink-0 bg-gray-50/80 border-b border-gray-200 px-3 py-1.5 overflow-x-auto no-scrollbar">
+        <div className="flex gap-1.5">
           {[
             { key: 'list' as StaffTab, label: t('staff.staffList'), icon: <Users size={13} /> },
             { key: 'attendance' as StaffTab, label: t('staff.attendance'), icon: <Clock size={13} /> },
@@ -617,7 +617,7 @@ const StaffPage: React.FC = () => {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold rounded whitespace-nowrap transition-colors tap-target ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full whitespace-nowrap transition-colors ${
                 activeTab === tab.key
                   ? 'bg-blue-600 text-white shadow-xs'
                   : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'

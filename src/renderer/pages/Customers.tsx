@@ -217,7 +217,7 @@ const Customers: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedCustomer(null)}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
             >
               <ArrowLeft size={16} className="text-gray-600" />
             </button>
@@ -228,7 +228,7 @@ const Customers: React.FC = () => {
             <div className="ml-auto">
               <button
                 onClick={() => handleOpenEdit(selectedCustomer)}
-                className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <Edit2 size={11} className="text-gray-500" />
                 <span>{t('common.edit')}</span>
@@ -480,7 +480,7 @@ const Customers: React.FC = () => {
 
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
           >
             <Plus size={11} />
             <span>{t('customers.addCustomer')}</span>
