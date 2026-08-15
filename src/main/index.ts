@@ -19,6 +19,7 @@ import { syncVariationBasePrices } from './db/migrations/012_sync_variation_base
 import { addPerfIndexes } from './db/migrations/013_add_perf_indexes';
 import { addTableNameSnapshot } from './db/migrations/014_table_name_snapshot';
 import { addPinToItemsAndTables } from './db/migrations/015_pin_items_and_tables';
+import { addVoidItemsTable } from './db/migrations/016_void_items';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -102,6 +103,7 @@ function initializeDatabase(): void {
     addPerfIndexes,
     addTableNameSnapshot,
     addPinToItemsAndTables,
+    addVoidItemsTable,
   ]);
 
   // Seed default data

@@ -21,6 +21,7 @@ import { ipc } from '../../lib/ipc';
 import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Tooltip from '../common/Tooltip';
+import VoidReasonModal from './VoidReasonModal';
 import { useTranslation } from 'react-i18next';
 import { useMenuTranslations } from '../../hooks/useMenuTranslations';
 import { useTaxTerminology } from '../../hooks/useTaxTerminology';
@@ -188,14 +189,21 @@ const CartPanel: React.FC<CartPanelProps> = ({
     return parts.includes(presetText.toLowerCase());
   }, [noteText]);
 
+  const [pendingVoid, setPendingVoid] = useState<{
+    indices: number[];
+    name: string;
+    quantity: number;
+    amount: number;
+  } | null>(null);
+
   const clearCart = useBillingStore((s) => s.clearCart);
 
-  // Remove item: if it's already saved to the DB order, delete it there too
-  const handleRemove = useCallback(async (index: number) => {
+  // Remove item: if it's already saved to the DB order, delete it there with reason
+  const handleRemove = useCallback(async (index: number, reason?: string) => {
     const item = cart[index];
     if (currentOrderId && index < syncedItemCount && item.orderItemId) {
       try {
-        await ipc(window.electronAPI.orders.removeItem(currentOrderId, item.orderItemId));
+        await ipc(window.electronAPI.orders.removeItem(currentOrderId, item.orderItemId, reason));
       } catch {
         // DB removal failed — still remove from local cart to stay consistent
       }
@@ -215,6 +223,14 @@ const CartPanel: React.FC<CartPanelProps> = ({
     removeFromCart(index);
     onItemRemoved?.();
   }, [cart, currentOrderId, syncedItemCount, removeFromCart, clearCart, onItemRemoved]);
+
+  const handleConfirmVoid = useCallback(async (reason: string) => {
+    if (!pendingVoid) return;
+    for (const idx of [...pendingVoid.indices].sort((a, b) => b - a)) {
+      await handleRemove(idx, reason);
+    }
+    setPendingVoid(null);
+  }, [pendingVoid, handleRemove]);
 
   if (cart.length === 0) {
     return (
@@ -339,8 +355,14 @@ const CartPanel: React.FC<CartPanelProps> = ({
                           const newQty = targetItem.quantity - 1;
                           const minQty = targetIdx < syncedItemCount ? (syncedQuantities[targetIdx] ?? 1) : 1;
                           if (newQty < minQty) {
-                            if (minQty > 1) {
-                              alert(t('cart.itemSentToKitchen'));
+                            const isSyncedRow = currentOrderId && targetIdx < syncedItemCount && targetItem?.orderItemId;
+                            if (isSyncedRow) {
+                              setPendingVoid({
+                                indices: [targetIdx],
+                                name: getName(targetItem.menuItem),
+                                quantity: 1,
+                                amount: targetItem.unitPrice,
+                              });
                             } else {
                               handleRemove(targetIdx);
                             }
@@ -399,10 +421,18 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       <Tooltip text={t('cart.removeItem')} position="top" delay={false}>
                         <button
                           onClick={async () => {
-                            // Remove the merged group: walk the underlying rows in
-                            // reverse so indices stay valid as rows shift up.
-                            for (const idx of [...group.indices].sort((a, b) => b - a)) {
-                              await handleRemove(idx);
+                            const hasSyncedItem = currentOrderId && group.indices.some((idx) => idx < syncedItemCount && cart[idx]?.orderItemId);
+                            if (hasSyncedItem) {
+                              setPendingVoid({
+                                indices: group.indices,
+                                name: getName(item.menuItem),
+                                quantity: group.totalQuantity,
+                                amount: group.totalAmount,
+                              });
+                            } else {
+                              for (const idx of [...group.indices].sort((a, b) => b - a)) {
+                                await handleRemove(idx);
+                              }
                             }
                           }}
                           className="p-0.5 text-gray-400 hover:text-red-600 rounded transition-colors
@@ -646,6 +676,22 @@ const CartPanel: React.FC<CartPanelProps> = ({
           </div>
         </Modal>
       )}
+
+      {/* Void Reason Picker Modal */}
+      <VoidReasonModal
+        isOpen={!!pendingVoid}
+        onClose={() => setPendingVoid(null)}
+        onConfirm={handleConfirmVoid}
+        itemInfo={
+          pendingVoid
+            ? {
+                name: pendingVoid.name,
+                quantity: pendingVoid.quantity,
+                amount: pendingVoid.amount,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 };

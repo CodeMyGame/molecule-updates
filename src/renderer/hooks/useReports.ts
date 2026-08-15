@@ -9,6 +9,7 @@ import type {
   GSTReport,
   BusyHoursReport,
   DateRangeFilter,
+  VoidReportSummary,
 } from '../../shared/types/report.types';
 
 export interface StaffPerformanceReport {
@@ -73,6 +74,7 @@ interface UseReportsReturn {
   staffPerformance: StaffPerformanceReport[];
   inventoryConsumption: InventoryConsumptionReport[];
   busyHours: BusyHoursReport | null;
+  voidReport: VoidReportSummary | null;
   // Fetch functions
   fetchDailySales: () => Promise<void>;
   fetchItemSales: () => Promise<void>;
@@ -83,6 +85,7 @@ interface UseReportsReturn {
   fetchStaffPerformance: () => Promise<void>;
   fetchInventoryConsumption: () => Promise<void>;
   fetchBusyHours: () => Promise<void>;
+  fetchVoidReport: () => Promise<void>;
 }
 
 export function useReports(): UseReportsReturn {
@@ -100,6 +103,7 @@ export function useReports(): UseReportsReturn {
   const [staffPerformance, setStaffPerformance] = useState<StaffPerformanceReport[]>([]);
   const [inventoryConsumption, setInventoryConsumption] = useState<InventoryConsumptionReport[]>([]);
   const [busyHours, setBusyHours] = useState<BusyHoursReport | null>(null);
+  const [voidReport, setVoidReport] = useState<VoidReportSummary | null>(null);
 
   const setDatePreset = useCallback((preset: DatePreset) => {
     setDatePresetState(preset);
@@ -243,6 +247,21 @@ export function useReports(): UseReportsReturn {
     }
   }, [dateRange]);
 
+  const fetchVoidReport = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await ipc<VoidReportSummary>(
+        window.electronAPI.reports.voidReport(dateRange)
+      );
+      setVoidReport(data ?? null);
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to fetch void report');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange]);
+
   return {
     datePreset,
     dateRange,
@@ -259,6 +278,7 @@ export function useReports(): UseReportsReturn {
     staffPerformance,
     inventoryConsumption,
     busyHours,
+    voidReport,
     fetchDailySales,
     fetchItemSales,
     fetchCategorySales,
@@ -268,5 +288,6 @@ export function useReports(): UseReportsReturn {
     fetchStaffPerformance,
     fetchInventoryConsumption,
     fetchBusyHours,
+    fetchVoidReport,
   };
 }

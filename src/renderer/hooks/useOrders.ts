@@ -51,7 +51,7 @@ interface UseOrdersReturn {
   fetchActiveOrders: () => Promise<void>;
   createOrder: () => Promise<Order>;
   holdOrder: () => Promise<void>;
-  cancelOrder: (orderId: number) => Promise<void>;
+  cancelOrder: (orderId: number, reason?: string) => Promise<void>;
   completePayment: (data: PaymentData) => Promise<void>;
   printKot: (orderId?: number, shouldPrint?: boolean) => Promise<void>;
 }
@@ -153,9 +153,9 @@ export function useOrders(): UseOrdersReturn {
   }, [billingStore, createOrder, fetchActiveOrders]);
 
   const cancelOrder = useCallback(
-    async (orderId: number) => {
+    async (orderId: number, reason?: string) => {
       try {
-        await ipc(window.electronAPI.orders.updateStatus(orderId, 'cancelled'));
+        await ipc(window.electronAPI.orders.updateStatus(orderId, 'cancelled', reason, currentUser?.id));
         billingStore.clearCart();
         await fetchActiveOrders();
       } catch (err: any) {
@@ -163,7 +163,7 @@ export function useOrders(): UseOrdersReturn {
         throw err;
       }
     },
-    [billingStore, fetchActiveOrders]
+    [billingStore, fetchActiveOrders, currentUser?.id]
   );
 
   const completePayment = useCallback(

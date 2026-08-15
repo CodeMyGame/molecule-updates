@@ -1,5 +1,5 @@
 import { getDb } from '../db/connection';
-import type { DateRangeFilter, DailySalesReport, ItemSalesReport, CategorySalesReport, PaymentSummaryReport, CashFlowReport, GSTReport, BusyBucket, BusyHoursReport } from '../../shared/types/report.types';
+import type { DateRangeFilter, DailySalesReport, ItemSalesReport, CategorySalesReport, PaymentSummaryReport, CashFlowReport, GSTReport, BusyBucket, BusyHoursReport, VoidReportSummary, VoidItemReport } from '../../shared/types/report.types';
 import type { PaymentMode } from '../../shared/enums';
 
 /** Normalize date range so endDate includes the full day (appends 23:59:59) */
@@ -534,3 +534,83 @@ export function staffPerformance(dateRange: DateRangeFilter): {
       : 0,
   }));
 }
+
+export function voidReport(dateRange: DateRangeFilter): VoidReportSummary {
+  const db = getDb();
+  const { startDate, endDate } = normalizeDateRange(dateRange);
+
+  // Ensure table exists safely
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS void_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        order_id INTEGER,
+        order_number TEXT,
+        table_name TEXT,
+        menu_item_id INTEGER,
+        item_name TEXT NOT NULL,
+        variation_name TEXT,
+        quantity INTEGER NOT NULL,
+        unit_price INTEGER NOT NULL,
+        total_amount INTEGER NOT NULL,
+        reason TEXT NOT NULL,
+        staff_id INTEGER,
+        staff_name TEXT,
+        voided_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+    `);
+  } catch {}
+
+  const rows = db.prepare(`
+    SELECT *
+    FROM void_items
+    WHERE voided_at >= ? AND voided_at <= ?
+    ORDER BY voided_at DESC
+  `).all(startDate, endDate) as any[];
+
+  const items: VoidItemReport[] = rows.map((r) => ({
+    id: r.id,
+    orderId: r.order_id,
+    orderNumber: r.order_number || `#${r.order_id}`,
+    tableName: r.table_name || 'Counter',
+    menuItemId: r.menu_item_id,
+    itemName: r.item_name,
+    variationName: r.variation_name,
+    quantity: r.quantity,
+    unitPrice: r.unit_price,
+    totalAmount: r.total_amount,
+    reason: r.reason,
+    staffId: r.staff_id,
+    staffName: r.staff_name,
+    voidedAt: r.voided_at,
+  }));
+
+  const totalVoidCount = items.reduce((sum, i) => sum + i.quantity, 0);
+  const totalVoidAmount = items.reduce((sum, i) => sum + i.totalAmount, 0);
+
+  // Reason breakdown
+  const reasonMap = new Map<string, { count: number; totalAmount: number }>();
+  for (const item of items) {
+    const r = item.reason || 'Unspecified';
+    const curr = reasonMap.get(r) || { count: 0, totalAmount: 0 };
+    curr.count += item.quantity;
+    curr.totalAmount += item.totalAmount;
+    reasonMap.set(r, curr);
+  }
+
+  const reasonBreakdown = Array.from(reasonMap.entries())
+    .map(([reason, data]) => ({
+      reason,
+      count: data.count,
+      totalAmount: data.totalAmount,
+    }))
+    .sort((a, b) => b.totalAmount - a.totalAmount);
+
+  return {
+    totalVoidCount,
+    totalVoidAmount,
+    reasonBreakdown,
+    items,
+  };
+}
+

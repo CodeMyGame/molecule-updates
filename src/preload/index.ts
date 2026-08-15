@@ -45,9 +45,9 @@ const api = {
     getById: (id: number) => ipcRenderer.invoke('orders:getById', id),
     getByTable: (tableId: number) => ipcRenderer.invoke('orders:getByTable', tableId),
     getAll: (filters?: any) => ipcRenderer.invoke('orders:getAll', filters),
-    updateStatus: (id: number, status: string) => ipcRenderer.invoke('orders:updateStatus', id, status),
+    updateStatus: (id: number, status: string, reason?: string, staffId?: number) => ipcRenderer.invoke('orders:updateStatus', id, status, reason, staffId),
     addItems: (orderId: number, items: any[]) => ipcRenderer.invoke('orders:addItems', orderId, items),
-    removeItem: (orderId: number, itemId: number) => ipcRenderer.invoke('orders:removeItem', orderId, itemId),
+    removeItem: (orderId: number, itemId: number, reason?: string, staffId?: number) => ipcRenderer.invoke('orders:removeItem', orderId, itemId, reason, staffId),
     applyDiscount: (orderId: number, discount: any) => ipcRenderer.invoke('orders:applyDiscount', orderId, discount),
     splitBill: (orderId: number, itemIds: number[], targetTableId?: number) => ipcRenderer.invoke('orders:splitBill', orderId, itemIds, targetTableId),
     mergeBills: (sourceOrderId: number, targetOrderId: number) => ipcRenderer.invoke('orders:mergeBills', sourceOrderId, targetOrderId),
@@ -166,6 +166,7 @@ const api = {
     kitchenPrepTime: (filters?: any) => ipcRenderer.invoke('reports:kitchenPrepTime', filters),
     shiftHandover: (staffId: number, filters?: any) => ipcRenderer.invoke('reports:shiftHandover', staffId, filters),
     busyHours: (filters?: any) => ipcRenderer.invoke('reports:busyHours', filters),
+    voidReport: (filters?: any) => ipcRenderer.invoke('reports:voidReport', filters),
   },
 
   settings: {

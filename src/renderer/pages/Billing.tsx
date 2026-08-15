@@ -42,6 +42,7 @@ import PaymentModal from '../components/billing/PaymentModal';
 import DiscountModal from '../components/billing/DiscountModal';
 import BillPreview from '../components/billing/BillPreview';
 import ShortcutsModal from '../components/billing/ShortcutsModal';
+import VoidReasonModal from '../components/billing/VoidReasonModal';
 import TableCard from '../components/tables/TableCard';
 import Tooltip from '../components/common/Tooltip';
 import { useTranslation } from 'react-i18next';
@@ -139,6 +140,7 @@ const Billing: React.FC = () => {
   const [menuViewMode, setMenuViewMode] = useState<'grid' | 'list'>('grid');
   const [showTempItemModal, setShowTempItemModal] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showCancelOrderModal, setShowCancelOrderModal] = useState(false);
   const [tempItemName, setTempItemName] = useState('');
   const [tempItemPrice, setTempItemPrice] = useState('');
 
@@ -1062,18 +1064,27 @@ const Billing: React.FC = () => {
 
   const handleCancelOrder = useCallback(async () => {
     if (currentOrderId) {
-      try {
-        await cancelOrder(currentOrderId);
-        toast.success(t('toast.orderCancelled'));
-        refreshTables();
-      } catch {
-        toast.error(t('toast.cancelOrderFailed'));
-      }
+      setShowCancelOrderModal(true);
     } else {
       clearCart();
       toast.success(t('toast.cartCleared'));
     }
-  }, [currentOrderId, cancelOrder, clearCart, refreshTables, t]);
+  }, [currentOrderId, clearCart, t]);
+
+  const handleConfirmCancelOrder = useCallback(
+    async (reason: string) => {
+      if (!currentOrderId) return;
+      try {
+        await cancelOrder(currentOrderId, reason);
+        toast.success(t('toast.orderCancelled'));
+        setShowCancelOrderModal(false);
+        refreshTables();
+      } catch {
+        toast.error(t('toast.cancelOrderFailed'));
+      }
+    },
+    [currentOrderId, cancelOrder, refreshTables, t]
+  );
 
   const handlePaymentComplete = useCallback(
     async (
@@ -2221,6 +2232,14 @@ const Billing: React.FC = () => {
 
       {/* Keyboard Shortcuts Cheat Sheet Modal */}
       <ShortcutsModal isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
+
+      {/* Cancel Order Void Reason Modal */}
+      <VoidReasonModal
+        isOpen={showCancelOrderModal}
+        onClose={() => setShowCancelOrderModal(false)}
+        onConfirm={handleConfirmCancelOrder}
+        title={t('voidModal.cancelOrderTitle', 'Cancel Order — Audit Reason')}
+      />
     </div>
   );
 };

@@ -163,6 +163,7 @@ export const REPORTS = {
   kitchenPrepTime: 'reports:kitchenPrepTime',
   shiftHandover: 'reports:shiftHandover',
   busyHours: 'reports:busyHours',
+  voidReport: 'reports:voidReport',
 } as const;
 
 export const SETTINGS = {

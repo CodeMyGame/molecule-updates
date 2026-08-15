@@ -63,7 +63,8 @@ type ReportTab =
   | 'inventory'
   | 'kitchen_prep'
   | 'table_wise'
-  | 'busy_hours';
+  | 'busy_hours'
+  | 'void_audit';
 
 const TABS: { key: ReportTab; icon: React.ReactNode }[] = [
   { key: 'order_history', icon: <ClipboardList size={16} /> },
@@ -78,6 +79,7 @@ const TABS: { key: ReportTab; icon: React.ReactNode }[] = [
   { key: 'kitchen_prep', icon: <ShoppingCart size={16} /> },
   { key: 'table_wise', icon: <LayoutGrid size={16} /> },
   { key: 'busy_hours', icon: <Clock size={16} /> },
+  { key: 'void_audit', icon: <Trash2 size={16} /> },
 ];
 
 const DATE_PRESETS: { key: DatePreset }[] = [
@@ -255,6 +257,8 @@ const Reports: React.FC = () => {
   const [tableSortDir, setTableSortDir] = useState<'asc' | 'desc'>('desc');
   const [itemFilterCategory, setItemFilterCategory] = useState('');
   const [busyHoursView, setBusyHoursView] = useState<'day' | 'week' | 'month' | 'year'>('day');
+  const [voidFilterReason, setVoidFilterReason] = useState('');
+  const [voidSearch, setVoidSearch] = useState('');
 
   const toggleOrderExpand = async (orderId: number) => {
     if (expandedOrderId === orderId) {
@@ -467,6 +471,9 @@ const Reports: React.FC = () => {
       case 'busy_hours':
         reports.fetchBusyHours();
         break;
+      case 'void_audit':
+        reports.fetchVoidReport();
+        break;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, reports.dateRange]);
@@ -489,6 +496,7 @@ const Reports: React.FC = () => {
       case 'kitchen_prep': return t('reports.kitchenPrep');
       case 'table_wise': return t('reports.tableWise', 'Table-wise');
       case 'busy_hours': return t('reports.busyHours', 'Busy Hours');
+      case 'void_audit': return t('reports.voidAudit', 'Void / Cancelled Items Audit');
     }
   };
 
@@ -1354,9 +1362,16 @@ const Reports: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-3 py-2.5">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${statusColor(order.status)}`}>
-                      {order.status}
-                    </span>
+                    <div className="flex flex-col gap-0.5">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize w-fit ${statusColor(order.status)}`}>
+                        {order.status}
+                      </span>
+                      {order.cancellation_reason && (
+                        <span className="text-[10px] text-red-600 font-medium truncate max-w-[140px]" title={order.cancellation_reason}>
+                          {order.cancellation_reason}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-3 py-2.5 text-right">{formatCurrency(order.subtotal)}</td>
                   <td className="px-3 py-2.5 text-right text-red-600">{order.discountAmount ? `-${formatCurrency(order.discountAmount)}` : '-'}</td>
@@ -1391,6 +1406,12 @@ const Reports: React.FC = () => {
                 {expandedOrderId === order.id && (
                   <tr className="border-b border-gray-100 bg-blue-50/50">
                     <td colSpan={13} className="px-6 py-3">
+                      {order.cancellation_reason && (
+                        <div className="mb-2.5 px-3 py-1.5 rounded-lg bg-red-100/70 border border-red-200 text-xs text-red-800 font-medium flex items-center gap-2">
+                          <Trash2 size={13} className="text-red-600 shrink-0" />
+                          <span><strong>{t('reports.cancellationReason', 'Cancellation Reason')}:</strong> {order.cancellation_reason}</span>
+                        </div>
+                      )}
                       {expandedOrderLoading ? (
                         <div className="flex items-center gap-2 text-sm text-gray-400">
                           <Loader2 size={14} className="animate-spin" /> {t('reports.loadingItems')}
@@ -1791,6 +1812,234 @@ const Reports: React.FC = () => {
     );
   };
 
+  const renderVoidAudit = () => {
+    const data = reports.voidReport;
+    const items = data?.items ?? [];
+    const totalCount = data?.totalVoidCount ?? 0;
+    const totalAmount = data?.totalVoidAmount ?? 0;
+    const reasonBreakdown = data?.reasonBreakdown ?? [];
+
+    const filteredItems = items.filter((item) => {
+      if (voidFilterReason && item.reason !== voidFilterReason) return false;
+      if (voidSearch.trim()) {
+        const q = voidSearch.toLowerCase();
+        const matchName = item.itemName.toLowerCase().includes(q);
+        const matchOrder = item.orderNumber.toLowerCase().includes(q);
+        const matchTable = item.tableName.toLowerCase().includes(q);
+        const matchReason = item.reason.toLowerCase().includes(q);
+        const matchStaff = (item.staffName || '').toLowerCase().includes(q);
+        if (!matchName && !matchOrder && !matchTable && !matchReason && !matchStaff) return false;
+      }
+      return true;
+    });
+
+    const columns = [
+      {
+        key: 'voidedAt',
+        header: t('reports.date', 'Date & Time'),
+        sortable: true,
+        render: (item: any) => (
+          <span className="text-xs text-gray-700 font-medium">
+            {formatDateTime(item.voidedAt)}
+          </span>
+        ),
+      },
+      {
+        key: 'orderNumber',
+        header: t('reports.orderNo', 'Order #'),
+        sortable: true,
+        render: (item: any) => (
+          <span className="text-xs font-bold text-gray-900">
+            {item.orderNumber}
+          </span>
+        ),
+      },
+      {
+        key: 'tableName',
+        header: t('reports.tableOrMode', 'Table / Mode'),
+        sortable: true,
+        render: (item: any) => (
+          <span className="text-xs text-gray-600 font-medium bg-gray-100 px-2 py-0.5 rounded">
+            {item.tableName}
+          </span>
+        ),
+      },
+      {
+        key: 'itemName',
+        header: t('reports.item', 'Item Name'),
+        sortable: true,
+        render: (item: any) => (
+          <div>
+            <p className="text-xs font-semibold text-gray-900">{item.itemName}</p>
+            {item.variationName && (
+              <p className="text-[10px] text-gray-500">{item.variationName}</p>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'quantity',
+        header: t('reports.qty', 'Qty'),
+        sortable: true,
+        render: (item: any) => (
+          <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+            {item.quantity}
+          </span>
+        ),
+      },
+      {
+        key: 'totalAmount',
+        header: t('reports.amount', 'Void Amount'),
+        sortable: true,
+        render: (item: any) => (
+          <span className="text-xs font-bold text-gray-900">
+            {formatCurrency(item.totalAmount)}
+          </span>
+        ),
+      },
+      {
+        key: 'reason',
+        header: t('reports.cancellationReason', 'Cancellation Reason'),
+        sortable: true,
+        render: (item: any) => (
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
+            <Trash2 size={10} className="text-red-500" />
+            {item.reason}
+          </span>
+        ),
+      },
+      {
+        key: 'staffName',
+        header: t('reports.staff', 'Staff / Cashier'),
+        sortable: true,
+        render: (item: any) => (
+          <span className="text-xs text-gray-600">
+            {item.staffName || '—'}
+          </span>
+        ),
+      },
+    ];
+
+    return (
+      <div className="space-y-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SummaryCard
+            title={t('reports.totalVoidItems', 'Total Items Voided')}
+            value={String(totalCount)}
+            icon={<Trash2 size={24} className="text-red-600" />}
+          />
+          <SummaryCard
+            title={t('reports.totalVoidValue', 'Total Voided Value')}
+            value={formatCurrency(totalAmount)}
+            icon={<CurrencyIcon size={24} className="text-red-600" />}
+          />
+          <SummaryCard
+            title={t('reports.topVoidReason', 'Top Void Reason')}
+            value={reasonBreakdown[0] ? `${reasonBreakdown[0].reason} (${reasonBreakdown[0].count})` : 'None'}
+            icon={<AlertCircle size={24} className="text-amber-600" />}
+          />
+        </div>
+
+        {/* Reason Breakdown Pills */}
+        {reasonBreakdown.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+              {t('reports.reasonBreakdown', 'Void Breakdown by Reason')}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {reasonBreakdown.map((r, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setVoidFilterReason((prev) => (prev === r.reason ? '' : r.reason))}
+                  className={`px-3 py-1.5 rounded-lg border text-xs transition-all flex items-center gap-2 ${
+                    voidFilterReason === r.reason
+                      ? 'bg-red-600 text-white border-red-700 shadow-xs'
+                      : 'bg-gray-50 hover:bg-gray-100 text-gray-700 border-gray-200'
+                  }`}
+                >
+                  <span className="font-semibold">{r.reason}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${voidFilterReason === r.reason ? 'bg-red-800 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                    {r.count} ({formatCurrency(r.totalAmount)})
+                  </span>
+                </button>
+              ))}
+              {voidFilterReason && (
+                <button
+                  onClick={() => setVoidFilterReason('')}
+                  className="px-2.5 py-1.5 rounded-lg text-xs text-gray-500 hover:text-gray-700 font-medium underline"
+                >
+                  {t('common.clearFilter', 'Show All')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Filter & Search Bar */}
+        <div className="bg-white rounded-xl border border-gray-200 p-3.5 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+            <input
+              type="text"
+              value={voidSearch}
+              onChange={(e) => setVoidSearch(e.target.value)}
+              placeholder={t('reports.searchVoidAudit', 'Search by item, order #, table, reason, staff...')}
+              className="w-full text-xs px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300"
+            />
+            {voidSearch && (
+              <button
+                onClick={() => setVoidSearch('')}
+                className="text-xs text-gray-400 hover:text-gray-600 px-1"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">
+              {t('reports.showingEntries', 'Showing {{count}} void entries', { count: filteredItems.length })}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Download size={14} />}
+              onClick={() =>
+                exportToCSV(
+                  ['Date & Time', 'Order #', 'Table / Mode', 'Item Name', 'Variation', 'Qty', 'Unit Price', 'Total Amount', 'Cancellation Reason', 'Staff'],
+                  filteredItems.map((i) => [
+                    formatDateTime(i.voidedAt),
+                    i.orderNumber,
+                    i.tableName,
+                    i.itemName,
+                    i.variationName || '',
+                    String(i.quantity),
+                    formatCurrency(i.unitPrice),
+                    formatCurrency(i.totalAmount),
+                    i.reason,
+                    i.staffName || '',
+                  ]),
+                  `void-audit-report-${reports.dateRange.startDate}-to-${reports.dateRange.endDate}`
+                )
+              }
+              disabled={filteredItems.length === 0}
+            >
+              {t('reports.exportCsv')}
+            </Button>
+          </div>
+        </div>
+
+        {/* Void Audit Data Table */}
+        <DataTable
+          columns={columns}
+          data={filteredItems}
+          loading={reports.loading}
+          emptyMessage={t('reports.noVoidRecords', 'No voided or cancelled items recorded for this period.')}
+        />
+      </div>
+    );
+  };
+
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'order_history': return renderOrderHistory();
@@ -1805,6 +2054,7 @@ const Reports: React.FC = () => {
       case 'kitchen_prep': return renderKitchenPrepTime();
       case 'table_wise': return renderTableWise();
       case 'busy_hours': return renderBusyHours();
+      case 'void_audit': return renderVoidAudit();
       default: return null;
     }
   };

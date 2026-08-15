@@ -215,7 +215,12 @@ export function getAll(filters?: {
   }));
 }
 
-export function updateStatus(id: number, status: OrderStatus): Order | undefined {
+export function updateStatus(
+  id: number,
+  status: OrderStatus,
+  reason?: string,
+  staffId?: number
+): Order | undefined {
   const db = getDb();
   const updates: string[] = ["status = ?", "updated_at = datetime('now')"];
   const params: unknown[] = [status];
@@ -224,8 +229,64 @@ export function updateStatus(id: number, status: OrderStatus): Order | undefined
     updates.push("completed_at = datetime('now')");
   }
 
+  if (status === OrderStatus.CANCELLED) {
+    if (reason) {
+      updates.push("cancellation_reason = ?");
+      params.push(reason);
+    }
+  }
+
   params.push(id);
   db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+
+  // When order is cancelled, log all its items to void_items audit log
+  if (status === OrderStatus.CANCELLED) {
+    try {
+      const order = db.prepare(`
+        SELECT o.*, t.name as table_name, s.name as staff_name
+        FROM orders o
+        LEFT JOIN tables t ON t.id = o.table_id
+        LEFT JOIN staff s ON s.id = ?
+        WHERE o.id = ?
+      `).get(staffId ?? null, id) as any;
+
+      if (order) {
+        const tableName = order.table_name_snapshot || order.table_name || 'Counter';
+        const voidReason = reason || 'Order Cancelled';
+        const items = db.prepare(`
+          SELECT oi.*, v.name as variation_name
+          FROM order_items oi
+          LEFT JOIN item_variations v ON v.id = oi.variation_id
+          WHERE oi.order_id = ?
+        `).all(id) as any[];
+
+        for (const item of items) {
+          db.prepare(`
+            INSERT INTO void_items (
+              order_id, order_number, table_name, menu_item_id, item_name,
+              variation_name, quantity, unit_price, total_amount, reason,
+              staff_id, staff_name, voided_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+          `).run(
+            order.id,
+            order.order_number,
+            tableName,
+            item.menu_item_id,
+            item.name,
+            item.variation_name ?? null,
+            item.quantity,
+            item.unit_price,
+            item.total,
+            voidReason,
+            staffId ?? order.staff_id ?? null,
+            order.staff_name ?? null
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Failed to log void items for cancelled order:', err);
+    }
+  }
 
   // Free up table and clear KOTs if order completed or cancelled
   if (status === OrderStatus.COMPLETED || status === OrderStatus.CANCELLED) {
@@ -329,12 +390,54 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
   return getById(orderId);
 }
 
-export function removeItem(orderItemId: number): void {
+export function removeItem(
+  orderItemId: number,
+  reason?: string,
+  staffId?: number
+): void {
   const db = getDb();
 
   const removeInTransaction = db.transaction(() => {
-    const item = db.prepare('SELECT order_id FROM order_items WHERE id = ?').get(orderItemId) as any;
+    const item = db.prepare(`
+      SELECT oi.*, o.order_number, o.table_name_snapshot, o.staff_id as order_staff_id,
+             t.name as table_name, s.name as staff_name, v.name as variation_name
+      FROM order_items oi
+      JOIN orders o ON o.id = oi.order_id
+      LEFT JOIN tables t ON t.id = o.table_id
+      LEFT JOIN staff s ON s.id = ?
+      LEFT JOIN item_variations v ON v.id = oi.variation_id
+      WHERE oi.id = ?
+    `).get(staffId ?? null, orderItemId) as any;
+
     if (!item) return;
+
+    // Log to void_items audit
+    try {
+      const tableName = item.table_name_snapshot || item.table_name || 'Counter';
+      const voidReason = reason || 'Item Removed / Cancelled';
+      db.prepare(`
+        INSERT INTO void_items (
+          order_id, order_number, table_name, menu_item_id, item_name,
+          variation_name, quantity, unit_price, total_amount, reason,
+          staff_id, staff_name, voided_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+      `).run(
+        item.order_id,
+        item.order_number,
+        tableName,
+        item.menu_item_id,
+        item.name,
+        item.variation_name ?? null,
+        item.quantity,
+        item.unit_price,
+        item.total,
+        voidReason,
+        staffId ?? item.order_staff_id ?? null,
+        item.staff_name ?? null
+      );
+    } catch (err) {
+      console.error('Failed to log void item on removeItem:', err);
+    }
 
     db.prepare('DELETE FROM kot_items WHERE order_item_id = ?').run(orderItemId);
     db.prepare('DELETE FROM order_item_addons WHERE order_item_id = ?').run(orderItemId);

@@ -153,9 +153,9 @@ export function registerAllHandlers(): void {
   handle(ORDERS.getById, (id: number) => orderRepo.getById(id));
   handle(ORDERS.getByTable, (tableId: number) => orderRepo.getByTable(tableId));
   handle(ORDERS.getAll, (filters) => orderRepo.getAll(filters));
-  handle(ORDERS.updateStatus, (id: number, status) => { const r = orderRepo.updateStatus(id, status); cloudSync.scheduleSync(); return r; });
+  handle(ORDERS.updateStatus, (id: number, status, reason?: string, staffId?: number) => { const r = orderRepo.updateStatus(id, status, reason, staffId); cloudSync.scheduleSync(); return r; });
   handle(ORDERS.addItems, (orderId: number, items) => { const r = orderRepo.addItems(orderId, items); cloudSync.scheduleSync(); return r; });
-  handle(ORDERS.removeItem, (_orderId: number, orderItemId: number) => { const r = orderRepo.removeItem(orderItemId); cloudSync.scheduleSync(); return r; });
+  handle(ORDERS.removeItem, (_orderId: number, orderItemId: number, reason?: string, staffId?: number) => { const r = orderRepo.removeItem(orderItemId, reason, staffId); cloudSync.scheduleSync(); return r; });
   handle(ORDERS.applyDiscount, (orderId: number, discount: any) => {
     if (discount == null) {
       return orderRepo.clearDiscount(orderId);
@@ -798,6 +798,7 @@ export function registerAllHandlers(): void {
   handle(REPORTS.kitchenPrepTime, (dateRange) => reportsService.kitchenPrepTime(dateRange));
   handle(REPORTS.shiftHandover, (staffId: number, dateRange) => reportsService.shiftHandover(staffId, dateRange));
   handle(REPORTS.busyHours, (dateRange) => reportsService.busyHours(dateRange));
+  handle(REPORTS.voidReport, (dateRange) => reportsService.voidReport(dateRange));
 
   // ---- Settings ----
   handle(SETTINGS.get, (key: string) => settingsRepo.get(key));

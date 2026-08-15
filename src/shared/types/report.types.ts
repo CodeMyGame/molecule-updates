@@ -78,3 +78,28 @@ export interface BusyHoursReport {
   byMonth: BusyBucket[];    // month of year, 1-12 ("Month" view)
   byYear: BusyBucket[];     // calendar year ("Year" view)
 }
+
+export interface VoidItemReport {
+  id: number;
+  orderId: number;
+  orderNumber: string;
+  tableName: string;
+  menuItemId?: number;
+  itemName: string;
+  variationName?: string;
+  quantity: number;
+  unitPrice: number;
+  totalAmount: number;
+  reason: string;
+  staffId?: number;
+  staffName?: string;
+  voidedAt: string;
+}
+
+export interface VoidReportSummary {
+  totalVoidCount: number;
+  totalVoidAmount: number;
+  reasonBreakdown: { reason: string; count: number; totalAmount: number }[];
+  items: VoidItemReport[];
+}
+
