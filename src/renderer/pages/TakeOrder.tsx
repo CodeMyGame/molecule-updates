@@ -477,7 +477,7 @@ const TakeOrder: React.FC = () => {
       )}
 
       {/* Category bar */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 overflow-x-auto">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 overflow-x-auto no-scrollbar">
         <div className="flex gap-2 p-2 min-w-max">
           {favoriteIds.length > 0 && (
             <button

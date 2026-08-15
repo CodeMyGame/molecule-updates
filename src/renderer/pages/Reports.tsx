@@ -2117,7 +2117,7 @@ const Reports: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 overflow-x-auto">
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 overflow-x-auto no-scrollbar">
         <div className="flex gap-1">
           {TABS.map((tab) => (
             <button

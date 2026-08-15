@@ -607,7 +607,7 @@ const StaffPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 bg-gray-50/80 border-b border-gray-200 px-3 py-1 overflow-x-auto">
+      <div className="flex-shrink-0 bg-gray-50/80 border-b border-gray-200 px-3 py-1 overflow-x-auto no-scrollbar">
         <div className="flex gap-1">
           {[
             { key: 'list' as StaffTab, label: t('staff.staffList'), icon: <Users size={13} /> },

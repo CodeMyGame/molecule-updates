@@ -108,18 +108,13 @@
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
-
-  /* Make all interactive buttons (except menu cards, table cards, keypad digits, and split segments) rounded left and right */
-  button:not(.menu-item-card):not(.table-cell):not([data-card="true"]):not(.table-card):not(.numpad-btn):not(.numpad-btn-primary):not(.rounded-none):not(.rounded-l):not(.rounded-r):not(.rounded-t):not(.rounded-b):not(.rounded-tl):not(.rounded-tr):not(.rounded-bl):not(.rounded-br):not(.rounded-l-lg):not(.rounded-r-lg):not(.rounded-l-full):not(.rounded-r-full):not(.rounded-l-md):not(.rounded-r-md):not(.rounded-l-sm):not(.rounded-r-sm) {
-    border-radius: 9999px !important;
-  }
 }
 
-/* Custom scrollbar styles: Auto-hiding, floating capsule pill with curved rounded ends */
+/* Custom scrollbar styles: Ultra-sleek, minimal auto-hiding scrollbars */
 @layer base {
   ::-webkit-scrollbar {
-    width: 7px;
-    height: 7px;
+    width: 5px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track,
@@ -129,43 +124,41 @@
     box-shadow: none !important;
   }
 
-  /* Hidden by default when idle / no action */
+  /* Sleek, soft floating capsule */
   ::-webkit-scrollbar-thumb {
     background-color: transparent;
-    border: 1.5px solid transparent;
-    background-clip: padding-box;
     border-radius: 9999px !important;
-    min-height: 32px;
-    min-width: 32px;
-    transition: background-color 0.25s ease-in-out;
+    min-height: 28px;
+    min-width: 28px;
+    transition: background-color 0.2s ease-in-out;
   }
 
-  /* Appears when hovering over the scrollable container or interacting */
+  /* Soft appearance on container hover */
   *:hover::-webkit-scrollbar-thumb,
   *:focus-within::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1;
+    background-color: rgba(148, 163, 184, 0.4);
   }
 
   .dark *:hover::-webkit-scrollbar-thumb,
   .dark *:focus-within::-webkit-scrollbar-thumb {
-    background-color: #4b5563;
+    background-color: rgba(156, 163, 175, 0.4);
   }
 
-  /* Active / direct hover on thumb */
+  /* Direct hover or active drag */
   ::-webkit-scrollbar-thumb:hover {
-    background-color: #94a3b8 !important;
+    background-color: rgba(100, 116, 139, 0.7) !important;
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
-    background-color: #6b7280 !important;
+    background-color: rgba(209, 213, 219, 0.7) !important;
   }
 
   ::-webkit-scrollbar-thumb:active {
-    background-color: #64748b !important;
+    background-color: rgba(71, 85, 105, 0.9) !important;
   }
 
   .dark ::-webkit-scrollbar-thumb:active {
-    background-color: #9ca3af !important;
+    background-color: rgba(243, 244, 246, 0.9) !important;
   }
 
   ::-webkit-scrollbar-button {
@@ -178,7 +171,7 @@
     background: transparent;
   }
 
-  /* Firefox auto-hiding support */
+  /* Firefox */
   * {
     scrollbar-width: thin;
     scrollbar-color: transparent transparent;
@@ -186,13 +179,22 @@
 
   *:hover,
   *:focus-within {
-    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
   }
 
   .dark *:hover,
   .dark *:focus-within {
-    scrollbar-color: #4b5563 transparent;
+    scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
   }
+}
+
+/* Utility to completely hide scrollbars where appropriate (e.g. horizontal tab strips) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 /* POS-specific utility classes */

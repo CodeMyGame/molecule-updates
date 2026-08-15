@@ -481,7 +481,7 @@ const Tables: React.FC = () => {
 
       {/* Floor tabs */}
       {floors.length > 0 && (
-        <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200 overflow-x-auto">
+        <div className="flex items-center gap-1 px-3 py-1 bg-gray-50/80 border-b border-gray-200 overflow-x-auto no-scrollbar">
           {floors.map((floor) => (
             <button
               key={floor.id}
