@@ -110,52 +110,63 @@
   }
 }
 
-/* Custom scrollbar styles: Auto-hiding, ultra-thin (4px), appears on hover/action */
+/* Custom scrollbar styles: Auto-hiding, floating capsule pill with curved rounded ends */
 @layer base {
   ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 7px;
+    height: 7px;
   }
 
-  ::-webkit-scrollbar-track {
-    background: transparent;
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-track-piece {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   /* Hidden by default when idle / no action */
   ::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 999px;
-    min-height: 28px;
-    min-width: 28px;
+    background-color: transparent;
+    border: 1.5px solid transparent;
+    background-clip: padding-box;
+    border-radius: 9999px !important;
+    min-height: 32px;
+    min-width: 32px;
     transition: background-color 0.25s ease-in-out;
   }
 
   /* Appears when hovering over the scrollable container or interacting */
   *:hover::-webkit-scrollbar-thumb,
   *:focus-within::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background-color: #cbd5e1;
   }
 
   .dark *:hover::-webkit-scrollbar-thumb,
   .dark *:focus-within::-webkit-scrollbar-thumb {
-    background: #4b5563;
+    background-color: #4b5563;
   }
 
   /* Active / direct hover on thumb */
   ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8 !important;
+    background-color: #94a3b8 !important;
   }
 
   .dark ::-webkit-scrollbar-thumb:hover {
-    background: #6b7280 !important;
+    background-color: #6b7280 !important;
   }
 
   ::-webkit-scrollbar-thumb:active {
-    background: #64748b !important;
+    background-color: #64748b !important;
   }
 
   .dark ::-webkit-scrollbar-thumb:active {
-    background: #9ca3af !important;
+    background-color: #9ca3af !important;
+  }
+
+  ::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   ::-webkit-scrollbar-corner {
@@ -197,10 +208,10 @@
 
   /* POS header */
   .pos-header {
-    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-2.5 flex items-center justify-between;
-    height: 26px;
-    min-height: 26px;
-    max-height: 26px;
+    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 flex items-center justify-between;
+    height: 30px;
+    min-height: 30px;
+    max-height: 30px;
   }
 
   /* Card component */
@@ -280,6 +291,23 @@
 
 /* Animations */
 @layer utilities {
+  /* Bell chime / ring animation */
+  @keyframes bell-ring {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(16deg); }
+    20%, 40% { transform: rotate(-16deg); }
+    50%      { transform: rotate(10deg); }
+    60%      { transform: rotate(-10deg); }
+    70%      { transform: rotate(4deg); }
+    80%      { transform: rotate(0deg); }
+  }
+
+  .animate-bell-ring {
+    display: inline-block;
+    transform-origin: top center;
+    animation: bell-ring 2.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+  }
+
   .animate-fade-in {
     animation: fadeIn 200ms ease-out;
   }

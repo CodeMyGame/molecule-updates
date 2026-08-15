@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, type MouseEvent as ReactMouseEvent } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import {
@@ -22,6 +22,9 @@ import {
   Edit2,
   Trash2,
   Pin,
+  ArrowUpDown,
+  ArrowDownAZ,
+  ArrowUpZA,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBillingStore } from '../stores/billing.store';
@@ -130,10 +133,21 @@ const Billing: React.FC = () => {
   const [billCustomerPhone, setBillCustomerPhone] = useState<string | undefined>();
   const [billCoinInfo, setBillCoinInfo] = useState<{ earned: number; redeemed: number } | undefined>();
   const [vegFilter, setVegFilter] = useState<'all' | 'veg' | 'nonveg'>('all');
+  const [nameSort, setNameSort] = useState<'none' | 'asc' | 'desc'>('none');
   const [menuViewMode, setMenuViewMode] = useState<'grid' | 'list'>('grid');
   const [showTempItemModal, setShowTempItemModal] = useState(false);
   const [tempItemName, setTempItemName] = useState('');
   const [tempItemPrice, setTempItemPrice] = useState('');
+
+  const sortedItems = useMemo(() => {
+    if (nameSort === 'none') return filteredItems;
+    return [...filteredItems].sort((a, b) => {
+      const nameA = (a.name || '').toLowerCase();
+      const nameB = (b.name || '').toLowerCase();
+      if (nameSort === 'asc') return nameA.localeCompare(nameB);
+      return nameB.localeCompare(nameA);
+    });
+  }, [filteredItems, nameSort]);
 
   // --- Resizable panel state ---
   const [cartWidth, setCartWidth] = useState(310);
@@ -1146,12 +1160,39 @@ const Billing: React.FC = () => {
             ))}
           </div>
 
-          {orderType === 'dine_in' && selectedTable && (
-            <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-700 font-semibold">
-              <LayoutGrid size={12} />
-              {selectedTable.name}
-            </div>
-          )}
+          {/* Menu Items Name Sorting (A-Z / Z-A) */}
+          <Tooltip
+            text={
+              nameSort === 'asc'
+                ? 'Sorted A to Z (Click for Z to A)'
+                : nameSort === 'desc'
+                ? 'Sorted Z to A (Click to reset)'
+                : 'Sort items by name A-Z'
+            }
+            position="bottom"
+          >
+            <button
+              onClick={() => {
+                setNameSort((prev) => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors select-none ${
+                nameSort !== 'none'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
+                  : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+              }`}
+            >
+              {nameSort === 'asc' ? (
+                <ArrowDownAZ size={13} className="text-blue-600" />
+              ) : nameSort === 'desc' ? (
+                <ArrowUpZA size={13} className="text-blue-600" />
+              ) : (
+                <ArrowUpDown size={12} className="text-gray-500" />
+              )}
+              <span>
+                {nameSort === 'asc' ? 'A → Z' : nameSort === 'desc' ? 'Z → A' : 'Sort'}
+              </span>
+            </button>
+          </Tooltip>
 
           {/* Veg / Non-veg filter */}
           <div className="flex items-center gap-1">
@@ -1307,7 +1348,7 @@ const Billing: React.FC = () => {
           <div style={{ flex: `${menuHeightPercent} 0 0%` }} className="min-h-0">
             <MenuGrid
               categories={categories}
-              items={filteredItems}
+              items={sortedItems}
               selectedCategoryId={selectedCategoryId}
               searchQuery={searchQuery}
               onCategorySelect={setSelectedCategoryId}
