@@ -896,12 +896,20 @@ const MenuManagement: React.FC = () => {
               {selectedItemIds.size > 0 && (
                 <div className="flex items-center gap-1.5 ml-auto pl-2 border-l border-gray-200">
                   <span className="text-xs text-gray-500 font-medium">{t('menuMgmt.selectedCount', { count: selectedItemIds.size })}</span>
-                  <Button size="sm" variant="success" onClick={() => handleBulkToggle(true)}>
+                  <button
+                    type="button"
+                    onClick={() => handleBulkToggle(true)}
+                    className="inline-flex items-center justify-center h-7 px-3 text-xs font-medium rounded-md bg-green-600 hover:bg-green-700 active:bg-green-800 text-white shadow-xs transition-colors cursor-pointer"
+                  >
                     {t('menuMgmt.enable')}
-                  </Button>
-                  <Button size="sm" variant="danger" onClick={() => handleBulkToggle(false)}>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleBulkToggle(false)}
+                    className="inline-flex items-center justify-center h-7 px-3 text-xs font-medium rounded-md bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-xs transition-colors cursor-pointer"
+                  >
                     {t('menuMgmt.disable')}
-                  </Button>
+                  </button>
                 </div>
               )}
             </div>
