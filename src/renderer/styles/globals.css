@@ -158,69 +158,9 @@
 
   /* POS header */
   .pos-header {
-    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 py-1 flex items-center justify-between shadow-sm;
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-  }
-  .pos-header::before,
-  .pos-header::after {
-    content: '';
-    position: absolute;
-    top: -100%;
-    bottom: -100%;
-    width: 40%;
-    z-index: -2;
-    pointer-events: none;
-    border-radius: 9999px;
-    filter: blur(30px);
-    opacity: 0.6;
-  }
-  .pos-header::before {
-    left: -40%;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.7) 0%, rgba(139, 92, 246, 0.55) 40%, transparent 70%);
-    animation: pos-header-run 6s linear infinite;
-  }
-  .pos-header::after {
-    left: -40%;
-    background: radial-gradient(circle, rgba(52, 211, 153, 0.65) 0%, rgba(236, 72, 153, 0.55) 40%, rgba(251, 146, 60, 0.55) 70%, transparent 80%);
-    animation: pos-header-run 9s linear infinite;
-    animation-delay: -3s;
-  }
-
-  .pos-header-float-text {
-    display: inline-flex;
-    gap: 0;
-    line-height: 1;
-  }
-  .pos-header-float-char {
-    display: inline-block;
-    white-space: pre;
-    background: linear-gradient(90deg, #1e3a8a, #6d28d9, #be185d, #ea580c, #047857, #1e3a8a);
-    background-size: 600% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: pos-header-char-wave 2.6s ease-in-out infinite,
-               pos-header-name-hue 8s linear infinite;
-    will-change: transform, filter;
-    transform-origin: center bottom;
-  }
-
-  .pos-header-pattern {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.45;
-    mix-blend-mode: overlay;
-    background-repeat: repeat;
-    animation: pos-header-pattern-cycle 24s steps(1) infinite,
-               pos-header-pattern-scroll 8s linear infinite;
-  }
-  .pos-header > * {
-    position: relative;
-    z-index: 1;
+    @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 flex items-center justify-between;
+    height: 32px;
+    min-height: 32px;
   }
 
   /* Card component */

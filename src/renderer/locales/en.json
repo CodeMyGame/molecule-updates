@@ -30,7 +30,19 @@
     "ordersByType": "Orders by Type",
     "discardOrder": "You have items in the current order. Discard and start a new order?",
     "appName": "Molecule",
-    "currentUserFallback": "Staff"
+    "currentUserFallback": "Staff",
+    "dailyHeadsUp": "Daily Heads-Up",
+    "yesterdayRecap": "Yesterday",
+    "todayLive": "Today",
+    "yesterdayRevenue": "Yesterday's Revenue",
+    "yesterdayOrders": "Yesterday's Orders",
+    "avgTicket": "Avg Ticket",
+    "topSeller": "Top Seller",
+    "paymentMix": "Payment Mix",
+    "viewDetailedReports": "View Detailed Reports",
+    "lowStockAlert": "Low stock items detected",
+    "noOrdersYesterday": "No orders recorded yesterday",
+    "todayRevenue": "Today's Revenue"
   },
   "billing": {
     "dineIn": "Dine In",

@@ -1,7 +1,6 @@
 import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import ProtectedRoute from './components/layout/ProtectedRoute';
-import UpdateNotification from './components/common/UpdateNotification';
 import { useLicenseStore } from './stores/license.store';
 import { useAuthStore } from './stores/auth.store';
 import { isBrowserMode } from './lib/kitchenApi';
@@ -120,12 +119,7 @@ const App: React.FC = () => {
   if (isBrowserMode()) {
     return browserRole() === 'take-order' ? <TakeOrderOnlyApp /> : <KitchenOnlyApp />;
   }
-  return (
-    <>
-      <ElectronApp />
-      <UpdateNotification />
-    </>
-  );
+  return <ElectronApp />;
 };
 
 export default App;
