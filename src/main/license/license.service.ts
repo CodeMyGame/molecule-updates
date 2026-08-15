@@ -5,11 +5,14 @@ import { base32Encode, base32Decode } from './base32';
 import type { LicenseStatus } from '../../shared/types/license.types';
 import { FIREBASE_CONFIG, isFirebaseConfigured } from '../services/firebase-config';
 
-// ─── IMPORTANT ────────────────────────────────────────────────────────────────
-// Keep HMAC_SECRET private. Use the SAME value in scripts/keygen.ts.
-// Never commit the real secret to a public repository.
+// ─── Cryptographic Secret & Constants ─────────────────────────────────────────
+// Reads from build-time environment variable (GitHub Secrets or local .env.local).
+export const HMAC_SECRET =
+  (typeof import.meta !== 'undefined' && (import.meta as any).env && (import.meta as any).env.MAIN_VITE_HMAC_SECRET) ||
+  process.env.MAIN_VITE_HMAC_SECRET ||
+  process.env.HMAC_SECRET ||
+  'R3s7aUr4nt-P0S-L1c3ns3-S3cr3t-K3y-2024';
 // ──────────────────────────────────────────────────────────────────────────────
-export const HMAC_SECRET = 'R3s7aUr4nt-P0S-L1c3ns3-S3cr3t-K3y-2024';
 
 // TEST MODE: Set to true to use minutes instead of days (for testing 5-minute expiry)
 const TEST_MODE = false;
@@ -17,8 +20,8 @@ const TIME_UNIT_MS = TEST_MODE ? 60_000 : 86_400_000; // 1 minute vs 1 day
 
 const SETTINGS_LICENSE_KEY = 'license_key';
 const SETTINGS_MAX_DAY_KEY = 'license_max_day';
-const GRACE_DAYS = TEST_MODE ? 1 : 7; // 1 minute grace in test mode
-const WARN_DAYS = TEST_MODE ? 2 : 30; // 2 minutes warning in test mode
+const GRACE_DAYS = TEST_MODE ? 1 : 1; // 1 minute grace in test mode, 1 day in production
+const WARN_DAYS = TEST_MODE ? 2 : 10; // 2 minutes warning in test mode, 10 days in production
 
 // ─── Dynamic Firebase Initialization ──────────────────────────────────────────
 let firebaseLoaded = false;

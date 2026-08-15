@@ -13,6 +13,7 @@
     "package:mac": "electron-vite build && electron-builder --mac",
     "package:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27",
     "release:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27 --publish always",
+    "keygen": "node scripts/keygen.js",
     "rebuild": "electron-rebuild -f -w better-sqlite3,@grandchef/node-printer"
   },
   "dependencies": {

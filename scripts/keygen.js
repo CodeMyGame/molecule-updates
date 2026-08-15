@@ -1,25 +1,21 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 /**
  * License Key Generator — DEVELOPER TOOL ONLY
- * This script is NOT bundled into the app.
- *
+ * 
  * Usage:
- *   KEYGEN_SECRET=<your-secret> npx ts-node scripts/keygen.ts --tier 12
- *   KEYGEN_SECRET=<your-secret> npx ts-node scripts/keygen.ts --tier 6
- *   KEYGEN_SECRET=<your-secret> npx ts-node scripts/keygen.ts --tier 3
- *
- * IMPORTANT: KEYGEN_SECRET must match the HMAC_SECRET in
- *            src/main/license/license.service.ts
- *            Keep this secret private — never commit it to a public repo.
+ *   node scripts/keygen.js --tier 12
+ *   node scripts/keygen.js --tier 6
+ *   node scripts/keygen.js --tier 3
+ *   node scripts/keygen.js --tier 3 --test (3 minutes test)
  */
 
-import { createHmac } from 'crypto';
-import * as fs from 'fs';
-import * as path from 'path';
+const { createHmac } = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 // Inline Base32 encode (RFC 4648) — no external deps
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-function base32Encode(buf: Buffer): string {
+function base32Encode(buf) {
   let result = '';
   let bits = 0;
   let value = 0;
@@ -33,7 +29,7 @@ function base32Encode(buf: Buffer): string {
 }
 
 // Helper to load key-value pairs from .env / .env.local without external dependencies
-function loadEnvFile(filePath: string) {
+function loadEnvFile(filePath) {
   try {
     if (!fs.existsSync(filePath)) return;
     const content = fs.readFileSync(filePath, 'utf8');
@@ -60,22 +56,22 @@ const SECRET = process.env.KEYGEN_SECRET || process.env.MAIN_VITE_HMAC_SECRET ||
 if (!SECRET) {
   console.error('\n  Error: KEYGEN_SECRET (or MAIN_VITE_HMAC_SECRET in .env.local) is required.\n');
   console.error('  Example 1: Add MAIN_VITE_HMAC_SECRET=your-secret to .env.local');
-  console.error('  Example 2: KEYGEN_SECRET=your-secret npx ts-node scripts/keygen.ts --tier 12\n');
+  console.error('  Example 2: KEYGEN_SECRET=your-secret node scripts/keygen.js --tier 12\n');
   process.exit(1);
 }
 
 // ── Parse --tier and --test arguments ──────────────────────────────────────
 const tierIndex = process.argv.indexOf('--tier');
 const tierArg = tierIndex !== -1 ? process.argv[tierIndex + 1] : undefined;
-const tier = parseInt(tierArg ?? '', 10) as 1 | 2 | 3 | 6 | 12;
+const tier = parseInt(tierArg ?? '', 10);
 
 const testMode = process.argv.includes('--test');
 const timeUnitMs = testMode ? 60_000 : 86_400_000; // 1 minute vs 1 day
 
 if (![1, 2, 3, 6, 12].includes(tier)) {
   console.error('\n  Error: --tier must be 1, 2, 3, 6, or 12\n');
-  console.error('  Example: npx ts-node scripts/keygen.ts --tier 12\n');
-  console.error('  For testing: npx ts-node scripts/keygen.ts --tier 3 --test (expires in 3 minutes)\n');
+  console.error('  Example: node scripts/keygen.js --tier 12\n');
+  console.error('  For testing: node scripts/keygen.js --tier 3 --test (expires in 3 minutes)\n');
   process.exit(1);
 }
 
