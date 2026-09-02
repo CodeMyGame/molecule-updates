@@ -221,8 +221,12 @@ const Tables: React.FC = () => {
             unitPrice: oi.unitPrice ?? oi.unit_price,
             total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
             notes: oi.notes,
+            orderItemId: oi.id,
+            kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+            kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+            createdAt: oi.createdAt ?? oi.created_at ?? undefined,
           }));
-          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length);
+          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? []);
           navigate('/billing');
           return;
         }
@@ -282,8 +286,12 @@ const Tables: React.FC = () => {
           unitPrice: oi.unitPrice ?? oi.unit_price,
           total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
           notes: oi.notes,
+          orderItemId: oi.id,
+          kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+          kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+          createdAt: oi.createdAt ?? oi.created_at ?? undefined,
         }));
-        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length);
+        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? []);
       }
     } catch {
       billingStore.setOrderType('dine_in');

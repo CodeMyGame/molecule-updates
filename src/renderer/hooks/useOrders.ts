@@ -253,6 +253,49 @@ export function useOrders(): UseOrdersReturn {
           throw new Error('No new items to send to kitchen');
         }
 
+        // Reload order items so that each cart item has its DB orderItemId, kotNumber, and kotStatus
+        try {
+          const fullOrder = await ipc<any>(window.electronAPI.orders.getById(id));
+          if (fullOrder?.items) {
+            const updatedCartItems = fullOrder.items.map((oi: any) => ({
+              menuItem: {
+                id: oi.menuItemId ?? oi.menu_item_id ?? 0,
+                name: (oi.name ?? '').split(' (')[0],
+                basePrice: oi.unitPrice ?? oi.unit_price,
+                categoryId: 0,
+                taxRate: oi.taxRate ?? oi.tax_rate ?? 0,
+                isVeg: false,
+              },
+              variation: oi.variationId
+                ? { id: oi.variationId, name: (oi.name ?? '').match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
+                : undefined,
+              addons: (oi.addons ?? []).map((a: any) => ({
+                id: a.addonId ?? a.addon_id ?? a.id,
+                name: a.name,
+                price: a.price,
+              })),
+              quantity: oi.quantity,
+              unitPrice: oi.unitPrice ?? oi.unit_price,
+              total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
+              notes: oi.notes,
+              orderItemId: oi.id,
+              kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+              kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+              createdAt: oi.createdAt ?? oi.created_at ?? undefined,
+            }));
+            billingStore.loadOrderIntoCart(
+              id,
+              fullOrder.tableId ?? fullOrder.table_id ?? billingStore.selectedTableId,
+              updatedCartItems,
+              updatedCartItems.length,
+              fullOrder.orderType ?? fullOrder.order_type ?? billingStore.orderType,
+              billingStore.discount,
+              fullOrder.notes ?? billingStore.notes,
+              fullOrder.kots ?? []
+            );
+          }
+        } catch { /* ignore fallback */ }
+
         // Thermal print if requested and KOT was created
         // kotResult is the first KOT created; all KOTs for this order share the same orderId
         if (shouldPrint && kotResult.id) {

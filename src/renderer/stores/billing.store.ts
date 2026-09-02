@@ -21,7 +21,7 @@ interface Addon {
   price: number; // in paise
 }
 
-interface CartItem {
+export interface CartItem {
   menuItem: MenuItem;
   variation?: Variation;
   addons: Addon[];
@@ -30,6 +30,18 @@ interface CartItem {
   unitPrice: number; // in paise (variation price or item price + addons)
   total: number; // unitPrice * quantity, in paise
   orderItemId?: number; // DB id of order_items row, set when item was loaded from an existing order
+  kotNumber?: string;
+  kotStatus?: string;
+  createdAt?: string;
+}
+
+export interface KotSummary {
+  id: number;
+  kotNumber: string;
+  station?: string;
+  status?: string;
+  printedAt?: string;
+  createdAt?: string;
 }
 
 type OrderType = 'dine_in' | 'takeaway' | 'delivery';
@@ -53,6 +65,7 @@ interface BillingState {
   currentOrderId: number | null;
   syncedItemCount: number; // how many cart items have been saved to the DB order
   syncedQuantities: number[]; // quantity of each synced item at the time of last sync
+  kots: KotSummary[];
   orderType: OrderType;
   selectedTableId: number | null;
   selectedCustomerId: number | null;
@@ -68,7 +81,8 @@ interface BillingState {
   updateItemNotes: (index: number, notes: string) => void;
   setOrderType: (type: OrderType) => void;
   setTable: (tableId: number | null) => void;
-  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string) => void;
+  setKots: (kots: KotSummary[]) => void;
+  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string, kots?: KotSummary[]) => void;
   resetForNewTable: (tableId: number) => void;
   setCustomer: (customerId: number | null) => void;
   applyDiscount: (discount: DiscountInfo | null) => void;
@@ -97,6 +111,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   currentOrderId: null,
   syncedItemCount: 0,
   syncedQuantities: [],
+  kots: [],
   orderType: 'dine_in',
   selectedTableId: null,
   selectedCustomerId: null,
@@ -108,8 +123,10 @@ export const useBillingStore = create<BillingState>((set, get) => ({
     const addonList = addons ?? [];
 
     set((state) => {
-      // Check if an identical item already exists in the cart (same item, variation, addons)
-      const existingIndex = state.cart.findIndex((c) => {
+      // Check if an identical item already exists in the unsent/pending batch
+      const existingIndex = state.cart.findIndex((c, idx) => {
+        // Do NOT merge into items that belong to a sent KOT or are already synced
+        if (c.kotNumber || idx < state.syncedItemCount) return false;
         if (c.menuItem.id !== item.id) return false;
         if ((c.variation?.id ?? null) !== (variation?.id ?? null)) return false;
         if (c.addons.length !== addonList.length) return false;
@@ -205,12 +222,15 @@ export const useBillingStore = create<BillingState>((set, get) => ({
 
   setTable: (tableId: number | null) => set({ selectedTableId: tableId }),
 
-  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string) =>
+  setKots: (kots: KotSummary[]) => set({ kots }),
+
+  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string, kots?: KotSummary[]) =>
     set({
       cart: items,
       currentOrderId: orderId,
       syncedItemCount: syncedCount,
       syncedQuantities: items.slice(0, syncedCount).map((i) => i.quantity),
+      kots: kots ?? [],
       selectedTableId: tableId,
       orderType: orderType ?? 'dine_in',
       discount: discount ?? null,
@@ -223,6 +243,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       currentOrderId: null,
       syncedItemCount: 0,
       syncedQuantities: [],
+      kots: [],
       selectedTableId: tableId,
       orderType: 'dine_in',
       selectedCustomerId: null,
@@ -272,6 +293,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       currentOrderId: null,
       syncedItemCount: 0,
       syncedQuantities: [],
+      kots: [],
       orderType: 'dine_in',
       selectedTableId: null,
       selectedCustomerId: null,

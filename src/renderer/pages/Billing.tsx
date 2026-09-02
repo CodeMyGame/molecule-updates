@@ -571,11 +571,14 @@ const Billing: React.FC = () => {
           total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
           notes: oi.notes,
           orderItemId: oi.id,
+          kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+          kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+          createdAt: oi.createdAt ?? oi.created_at ?? undefined,
         }));
         const orderDiscount = order.discountType
           ? { type: order.discountType === 'percentage' ? 'percent' : order.discountType, value: order.discountValue ?? 0, reason: order.discountReason }
           : null;
-        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes);
+        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? []);
       } else {
         resetForNewTable(tableId);
       }
@@ -902,13 +905,17 @@ const Billing: React.FC = () => {
           unitPrice: oi.unitPrice ?? oi.unit_price,
           total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
           notes: oi.notes,
+          orderItemId: oi.id,
+          kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+          kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+          createdAt: oi.createdAt ?? oi.created_at ?? undefined,
         }));
         const tableId = fullOrder.tableId ?? fullOrder.table_id ?? null;
         // Restore discount and notes from the loaded order
         const orderDiscount = fullOrder.discountType
           ? { type: fullOrder.discountType === 'percentage' ? 'percent' : fullOrder.discountType, value: fullOrder.discountValue ?? 0, reason: fullOrder.discountReason }
           : null;
-        loadOrderIntoCart(orderId, tableId, cartItems, cartItems.length, fullOrder.orderType ?? fullOrder.order_type, orderDiscount, fullOrder.notes);
+        loadOrderIntoCart(orderId, tableId, cartItems, cartItems.length, fullOrder.orderType ?? fullOrder.order_type, orderDiscount, fullOrder.notes, fullOrder.kots ?? []);
       }
     } catch {
       toast.error(t('toast.loadOrderFailed'));
@@ -1433,11 +1440,17 @@ const Billing: React.FC = () => {
           {/* Table picker — dine-in only */}
           {orderType === 'dine_in' && (
             <>
-            {/* Vertical resize handle (menu ↔ tables) */}
+            {/* Horizontal resize handle (VS Code style sash) */}
             <div
-              className="flex-shrink-0 h-[2px] bg-gray-200 hover:bg-blue-400 cursor-row-resize transition-colors"
+              className="group relative flex-shrink-0 h-1.5 -my-[3px] cursor-row-resize z-20 flex items-center justify-center select-none"
               onMouseDown={onMenuTableHandleDown}
+              title={t('billing.resizeMenuTable', 'Drag to resize')}
             >
+              {/* Sash hairline */}
+              <div className="h-[1px] w-full bg-gray-200 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
+
+              {/* VS Code micro grip indicator */}
+              <div className="absolute left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:w-8 transition-all" />
             </div>
             <div style={{ flex: `${100 - menuHeightPercent} 0 0%` }} className="min-h-0 bg-white flex flex-row" data-table-picker>
               {/* Floor tabs — vertical sidebar */}
@@ -1469,13 +1482,19 @@ const Billing: React.FC = () => {
                 </div>
               )}
 
-              {/* Floor sidebar resize handle */}
+              {/* Floor sidebar resize handle (VS Code style sash) */}
               {floors.length > 0 && (
                 <div
-                  className="flex-shrink-0 w-[2px] bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors"
+                  className="group relative flex-shrink-0 w-1.5 -mx-[3px] cursor-col-resize z-10 flex items-center justify-center select-none"
                   onMouseDown={onFloorHandleDown}
+                  title={t('billing.resizeFloorSidebar', 'Drag to resize')}
                 >
-                    </div>
+                  {/* Sash hairline */}
+                  <div className="w-[1px] h-full bg-gray-200 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
+
+                  {/* VS Code micro grip indicator */}
+                  <div className="absolute top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:h-8 transition-all" />
+                </div>
               )}
 
               {/* Table grid */}
@@ -1520,12 +1539,17 @@ const Billing: React.FC = () => {
           )}
         </div>
 
-        {/* Cart resize handle */}
+        {/* Cart resize handle (VS Code style sash) */}
         <div
-          className="flex-shrink-0 w-[2px] bg-gray-200 hover:bg-blue-400 cursor-col-resize transition-colors"
+          className="group relative flex-shrink-0 w-1.5 -mx-[3px] cursor-col-resize z-20 flex items-center justify-center select-none"
           onMouseDown={onCartHandleDown}
+          title={t('billing.resizeCart', 'Drag to resize')}
         >
-          <div className="h-8 w-0.5 bg-gray-400 rounded-full" />
+          {/* Sash hairline */}
+          <div className="w-[1px] h-full bg-gray-200 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
+
+          {/* VS Code micro grip indicator */}
+          <div className="absolute top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:h-8 transition-all" />
         </div>
 
         {/* Right: Cart panel */}

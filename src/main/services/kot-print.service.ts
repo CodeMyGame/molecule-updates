@@ -2,7 +2,14 @@ import { BrowserWindow } from 'electron';
 import * as settingsRepo from '../db/repositories/settings.repo';
 import { createPrinter, sendRawToPrinter } from './escpos-print.service';
 import { mergeLayout, KOT_FIELD_DEFS } from '../../shared/receipt-layout';
-import { renderKotText, KotModel, DEFAULT_KOT_LABELS } from '../../shared/receipt-render';
+import {
+  renderKotText,
+  KotModel,
+  DEFAULT_KOT_LABELS,
+  formatKotItemLines,
+  formatKotItemLine,
+  wrapText,
+} from '../../shared/receipt-render';
 
 interface KOTPrintData {
   kotNumber: string;
@@ -31,29 +38,6 @@ function formatDateTime(isoStr: string): string {
     });
   } catch {
     return isoStr;
-  }
-}
-
-function formatKotItemLine(
-  name: string, quantity: number, index: number, style: ItemStyle, width: number
-): string {
-  const maxName = width - 5;
-  const truncName = name.length > maxName ? name.substring(0, maxName) : name;
-  switch (style) {
-    case 'qty_x_name':
-      return `${quantity} x ${name}`.substring(0, width);
-    case 'qty_name':
-      return `${String(quantity).padStart(3)}  ${name}`.substring(0, width);
-    case 'sno_name_qty': {
-      const prefix = `${index + 1}. `;
-      const snoName = (prefix + name).length > maxName
-        ? (prefix + name).substring(0, maxName)
-        : (prefix + name);
-      return `${snoName.padEnd(width - 3)}${String(quantity).padStart(3)}`;
-    }
-    case 'name_qty':
-    default:
-      return `${truncName.padEnd(width - 3)}${String(quantity).padStart(3)}`;
   }
 }
 
@@ -157,14 +141,14 @@ function buildKotEscPos(data: KOTPrintData, style: ItemStyle, fontSize: FontSize
   // Item lines
   applyFontSize(p, fontSize);
   data.items.forEach((item, idx) => {
-    p.println(formatKotItemLine(item.name, item.quantity, idx, style, effectiveWidth));
+    formatKotItemLines(item.name, item.quantity, idx, style, effectiveWidth).forEach((l) => p.println(l));
     if (item.addons?.length) {
       for (const addon of item.addons) {
-        p.println(`  + ${addon.name}`.substring(0, effectiveWidth));
+        wrapText(`  + ${addon.name}`, effectiveWidth).forEach((l) => p.println(l));
       }
     }
     if (item.notes) {
-      p.println(`  * ${item.notes}`.substring(0, effectiveWidth));
+      wrapText(`  * ${item.notes}`, effectiveWidth).forEach((l) => p.println(l));
     }
   });
 
@@ -242,12 +226,14 @@ function generateKotHtml(data: KOTPrintData, style: ItemStyle, fontSize: FontSiz
 
   const itemsHtml = data.items
     .map((item, idx) => {
-      const line = formatKotItemLine(item.name, item.quantity, idx, style, W);
+      const itemLines = formatKotItemLines(item.name, item.quantity, idx, style, W);
       const addonLines = item.addons?.length
-        ? item.addons.map((a) => `  + ${a.name}`).join('\n')
+        ? item.addons.flatMap((a) => wrapText(`  + ${a.name}`, W)).join('\n')
         : '';
-      const noteHtml = item.notes ? `\n  * ${item.notes}` : '';
-      return line + (addonLines ? '\n' + addonLines : '') + noteHtml;
+      const noteHtml = item.notes
+        ? '\n' + wrapText(`  * ${item.notes}`, W).join('\n')
+        : '';
+      return itemLines.join('\n') + (addonLines ? '\n' + addonLines : '') + noteHtml;
     })
     .join('\n');
 

@@ -19,9 +19,19 @@ export interface Order {
   grandTotal: number;
   notes?: string;
   mergedIntoOrderId?: number;
+  kots?: OrderKotSummary[];
   createdAt: string;
   updatedAt: string;
   completedAt?: string;
+}
+
+export interface OrderKotSummary {
+  id: number;
+  kotNumber: string;
+  station?: string;
+  status: string;
+  printedAt: string;
+  createdAt: string;
 }
 
 export interface OrderItem {

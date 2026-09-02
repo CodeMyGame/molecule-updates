@@ -86,12 +86,13 @@ function divider(char: string, width: number): string {
   return char.repeat(width);
 }
 
-function wrapText(text: string, width: number): string[] {
+export function wrapText(text: string, width: number): string[] {
+  const safeWidth = Math.max(1, width);
   const lines: string[] = [];
   let remaining = text;
-  while (remaining.length > width) {
-    let cut = remaining.lastIndexOf(' ', width);
-    if (cut <= 0) cut = width;
+  while (remaining.length > safeWidth) {
+    let cut = remaining.lastIndexOf(' ', safeWidth);
+    if (cut <= 0) cut = safeWidth;
     lines.push(remaining.substring(0, cut));
     remaining = remaining.substring(cut).trimStart();
   }
@@ -99,28 +100,66 @@ function wrapText(text: string, width: number): string[] {
   return lines;
 }
 
-/** Item line formatter shared with KOT (mirrors kot-print.service thermal logic). */
-function formatKotItemLine(
+/** Item line formatter shared with KOT — wraps long names to new lines across all styles. */
+export function formatKotItemLines(
   name: string, quantity: number, index: number, style: ReceiptItemStyle, width: number
-): string {
-  const maxName = width - 5;
-  const truncName = name.length > maxName ? name.substring(0, maxName) : name;
+): string[] {
+  const qtyStr = String(quantity).padStart(3);
+  const maxNameOnQtyLine = Math.max(1, width - 4); // allows 1 space + 3-char qty
+
   switch (style) {
-    case 'qty_x_name':
-      return `${quantity} x ${name}`.substring(0, width);
-    case 'qty_name':
-      return `${String(quantity).padStart(3)}  ${name}`.substring(0, width);
+    case 'qty_x_name': {
+      const prefix = `${quantity} x `;
+      const full = `${prefix}${name}`;
+      if (full.length <= width) return [full];
+      const nameWidth = Math.max(1, width - prefix.length);
+      const wrapped = wrapText(name, nameWidth);
+      const first = `${prefix}${wrapped[0]}`;
+      const indent = ' '.repeat(Math.min(prefix.length, 6));
+      const rest = wrapped.slice(1).map((l) => `${indent}${l}`.substring(0, width));
+      return [first, ...rest];
+    }
+    case 'qty_name': {
+      const prefix = `${qtyStr}  `;
+      const full = `${prefix}${name}`;
+      if (full.length <= width) return [full];
+      const nameWidth = Math.max(1, width - prefix.length);
+      const wrapped = wrapText(name, nameWidth);
+      const first = `${prefix}${wrapped[0]}`;
+      const indent = ' '.repeat(prefix.length);
+      const rest = wrapped.slice(1).map((l) => `${indent}${l}`.substring(0, width));
+      return [first, ...rest];
+    }
     case 'sno_name_qty': {
       const prefix = `${index + 1}. `;
-      const snoName = (prefix + name).length > maxName
-        ? (prefix + name).substring(0, maxName)
-        : (prefix + name);
-      return `${snoName.padEnd(width - 3)}${String(quantity).padStart(3)}`;
+      const full = `${prefix}${name}`;
+      if (full.length <= maxNameOnQtyLine) {
+        return [`${full.padEnd(width - 3)}${qtyStr}`];
+      }
+      const nameWidth = Math.max(1, maxNameOnQtyLine - prefix.length);
+      const wrapped = wrapText(name, nameWidth);
+      const first = `${prefix}${wrapped[0]}`.padEnd(width - 3) + qtyStr;
+      const indent = ' '.repeat(Math.min(prefix.length, 6));
+      const rest = wrapped.slice(1).map((l) => `${indent}${l}`.substring(0, width));
+      return [first, ...rest];
     }
     case 'name_qty':
-    default:
-      return `${truncName.padEnd(width - 3)}${String(quantity).padStart(3)}`;
+    default: {
+      if (name.length <= maxNameOnQtyLine) {
+        return [`${name.padEnd(width - 3)}${qtyStr}`];
+      }
+      const wrapped = wrapText(name, maxNameOnQtyLine);
+      const first = `${wrapped[0]}`.padEnd(width - 3) + qtyStr;
+      const rest = wrapped.slice(1).map((l) => `  ${l}`.substring(0, width));
+      return [first, ...rest];
+    }
   }
+}
+
+export function formatKotItemLine(
+  name: string, quantity: number, index: number, style: ReceiptItemStyle, width: number
+): string {
+  return formatKotItemLines(name, quantity, index, style, width)[0];
 }
 
 function labelFor(cfg: ReceiptFieldConfig, labels: Record<string, string>): string {
@@ -379,10 +418,14 @@ function renderKotItems(model: KotModel, W: number, showNotes: boolean): string[
   out.push(header);
   out.push(divider('-', W));
   model.items.forEach((item, idx) => {
-    out.push(formatKotItemLine(item.name, item.qty, idx, model.itemStyle, W));
+    formatKotItemLines(item.name, item.qty, idx, model.itemStyle, W).forEach((l) => out.push(l));
     if (showNotes) {
-      for (const addon of item.addons) out.push(`  + ${addon}`.substring(0, W));
-      if (item.note) out.push(`  * ${item.note}`.substring(0, W));
+      for (const addon of item.addons) {
+        wrapText(`  + ${addon}`, W).forEach((l) => out.push(l));
+      }
+      if (item.note) {
+        wrapText(`  * ${item.note}`, W).forEach((l) => out.push(l));
+      }
     }
   });
   return out;

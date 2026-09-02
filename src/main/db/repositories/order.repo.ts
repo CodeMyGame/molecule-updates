@@ -1,6 +1,6 @@
 import { getDb } from '../connection';
 import { format } from 'date-fns';
-import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem } from '../../../shared/types/order.types';
+import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem, OrderKotSummary } from '../../../shared/types/order.types';
 import { OrderStatus, KOTStatus } from '../../../shared/enums';
 
 export function create(data: CreateOrderDTO): Order {
@@ -118,28 +118,30 @@ export function create(data: CreateOrderDTO): Order {
   return getById(orderId)!;
 }
 
-export function getById(id: number): (Order & { items: OrderItem[] }) | undefined {
+export function getById(id: number): (Order & { items: OrderItem[]; kots: OrderKotSummary[] }) | undefined {
   const db = getDb();
   const row = db.prepare('SELECT * FROM orders WHERE id = ?').get(id) as any;
   if (!row) return undefined;
 
   const order = mapOrder(row);
   const items = getOrderItems(id);
+  const kots = getOrderKots(id);
 
-  return { ...order, items };
+  return { ...order, items, kots };
 }
 
-export function getActive(): (Order & { items: OrderItem[] })[] {
+export function getActive(): (Order & { items: OrderItem[]; kots: OrderKotSummary[] })[] {
   const db = getDb();
   const rows = db.prepare("SELECT * FROM orders WHERE status IN (?, ?) ORDER BY created_at DESC").all(OrderStatus.ACTIVE, OrderStatus.HOLD) as any[];
   return rows.map((row) => {
     const order = mapOrder(row);
     const items = getOrderItems(order.id);
-    return { ...order, items };
+    const kots = getOrderKots(order.id);
+    return { ...order, items, kots };
   });
 }
 
-export function getByTable(tableId: number): (Order & { items: OrderItem[] }) | undefined {
+export function getByTable(tableId: number): (Order & { items: OrderItem[]; kots: OrderKotSummary[] }) | undefined {
   const db = getDb();
   const row = db.prepare(
     "SELECT * FROM orders WHERE table_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1"
@@ -147,7 +149,8 @@ export function getByTable(tableId: number): (Order & { items: OrderItem[] }) | 
   if (!row) return undefined;
   const order = mapOrder(row);
   const items = getOrderItems(order.id);
-  return { ...order, items };
+  const kots = getOrderKots(order.id);
+  return { ...order, items, kots };
 }
 
 export function getAll(filters?: {
@@ -711,7 +714,7 @@ export function recalculateOrderTotals(orderId: number): void {
 
 function getOrderItems(orderId: number): OrderItem[] {
   const db = getDb();
-  const rows = db.prepare('SELECT * FROM order_items WHERE order_id = ? ORDER BY created_at').all(orderId) as any[];
+  const rows = db.prepare('SELECT * FROM order_items WHERE order_id = ? ORDER BY id ASC').all(orderId) as any[];
 
   return rows.map((row) => {
     const addons = db.prepare('SELECT * FROM order_item_addons WHERE order_item_id = ?').all(row.id) as any[];
@@ -735,6 +738,25 @@ function getOrderItems(orderId: number): OrderItem[] {
       addons: addons.map(mapOrderItemAddon),
     };
   });
+}
+
+function getOrderKots(orderId: number): OrderKotSummary[] {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT id, kot_number, station, status, printed_at, created_at
+    FROM kots
+    WHERE order_id = ?
+    ORDER BY id ASC
+  `).all(orderId) as any[];
+
+  return rows.map((r) => ({
+    id: r.id,
+    kotNumber: r.kot_number,
+    station: r.station ?? undefined,
+    status: r.status,
+    printedAt: r.printed_at,
+    createdAt: r.created_at ?? r.printed_at,
+  }));
 }
 
 function mapOrder(row: any): Order {
