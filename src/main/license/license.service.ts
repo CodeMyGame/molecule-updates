@@ -4,6 +4,7 @@ import * as settingsRepo from '../db/repositories/settings.repo';
 import { base32Encode, base32Decode } from './base32';
 import type { LicenseStatus } from '../../shared/types/license.types';
 import { FIREBASE_CONFIG, isFirebaseConfigured } from '../services/firebase-config';
+import { logger } from '../utils/logger';
 
 // ─── Cryptographic Secret & Constants ─────────────────────────────────────────
 // Reads from build-time environment variable (GitHub Secrets or local .env.local).
@@ -92,7 +93,7 @@ async function syncLicenseWithServer(key: string): Promise<void> {
       updatedAt: new Date().toISOString()
     });
   } catch (err: any) {
-    console.error('[License] Server sync failed:', err?.message || err);
+    logger.error('[License] Server sync failed:', err);
     if (err?.message?.includes('already been used')) {
       throw err;
     }

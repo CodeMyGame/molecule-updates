@@ -46,6 +46,33 @@ export const logger = {
   error(message: string, ...args: unknown[]): void {
     console.error(`[ERROR] ${message}`, ...args);
     writeToFile('ERROR', message, ...args);
+
+    try {
+      let stack: string | undefined;
+      const context: Record<string, unknown> = {};
+
+      args.forEach((arg, idx) => {
+        if (arg instanceof Error) {
+          if (!stack) stack = arg.stack;
+          context[`error_${idx}`] = { message: arg.message, name: arg.name };
+        } else if (typeof arg === 'object' && arg !== null) {
+          context[`arg_${idx}`] = arg as Record<string, unknown>;
+        } else if (arg !== undefined) {
+          context[`arg_${idx}`] = arg;
+        }
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { recordError } = require('../services/error-logger.service');
+      recordError({
+        source: 'main',
+        message,
+        stack,
+        context: Object.keys(context).length > 0 ? context : undefined,
+      });
+    } catch {
+      // Never throw from logger
+    }
   },
 
   debug(message: string, ...args: unknown[]): void {

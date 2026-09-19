@@ -31,7 +31,27 @@ import * as whatsappService from './services/whatsapp.service';
 import * as supabaseBackupService from './services/supabase-backup.service';
 import * as cloudSync from './services/cloud-sync.service';
 import * as kitchenServer from './services/kitchen-server.service';
+import * as errorLogger from './services/error-logger.service';
 import { WHATSAPP_FEATURE_ENABLED } from '../shared/featureFlags';
+
+// Global process error handlers
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception:', err);
+  errorLogger.recordError({
+    source: 'process',
+    message: err?.message || 'Uncaught Exception',
+    stack: err?.stack,
+  });
+});
+
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled Promise Rejection:', reason);
+  errorLogger.recordError({
+    source: 'process',
+    message: reason instanceof Error ? reason.message : String(reason),
+    stack: reason instanceof Error ? reason.stack : undefined,
+  });
+});
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -69,8 +89,15 @@ function createWindow(): void {
     logger.error(`MainWindow did-fail-load: ${errorCode} ${errorDescription} url: ${validatedURL}`);
   });
 
-  mainWindow.webContents.on('console-message', (_event, _level, message, line, sourceId) => {
+  mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
     logger.info(`[Renderer] ${message} (${sourceId}:${line})`);
+    if (level === 3) {
+      errorLogger.recordError({
+        source: 'renderer',
+        message: `Console error: ${message}`,
+        context: { sourceId, line },
+      });
+    }
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -88,34 +115,39 @@ function createWindow(): void {
 }
 
 function initializeDatabase(): void {
-  logger.info('Initializing database...');
-  const db = getDb();
+  try {
+    logger.info('Initializing database...');
+    const db = getDb();
 
-  // Run migrations
-  runMigrations(db, [
-    initialMigration,
-    addStationToMenuItems,
-    addCreatedAtToKots,
-    uniqueKotNumber,
-    addOffersTable,
-    dropTranslationTables,
-    moveItemsToAddons,
-    addonVariationPrices,
-    addFavoritesTable,
-    syncVariationBasePrices,
-    addPerfIndexes,
-    addTableNameSnapshot,
-    addPinToItemsAndTables,
-    addVoidItemsTable,
-    cleanupMergedOrders,
-    addSourceTableToOrderItems,
-    addSplitFromOrderId,
-  ]);
+    // Run migrations
+    runMigrations(db, [
+      initialMigration,
+      addStationToMenuItems,
+      addCreatedAtToKots,
+      uniqueKotNumber,
+      addOffersTable,
+      dropTranslationTables,
+      moveItemsToAddons,
+      addonVariationPrices,
+      addFavoritesTable,
+      syncVariationBasePrices,
+      addPerfIndexes,
+      addTableNameSnapshot,
+      addPinToItemsAndTables,
+      addVoidItemsTable,
+      cleanupMergedOrders,
+      addSourceTableToOrderItems,
+      addSplitFromOrderId,
+    ]);
 
-  // Seed default data
-  seedDatabase(db);
+    // Seed default data
+    seedDatabase(db);
 
-  logger.info('Database initialized successfully');
+    logger.info('Database initialized successfully');
+  } catch (err: any) {
+    logger.error('Database initialization/migration failed:', err);
+    throw err;
+  }
 }
 
 // ── Auto-backup ───────────────────────────────────────────────────────────────
@@ -312,6 +344,14 @@ app.whenReady().then(async () => {
     logger.error('Kitchen network auto-start failed:', err);
   });
 
+  // Prune local error logs older than 14 days
+  errorLogger.pruneOldErrorLogs();
+
+  // Automatically flush pending error logs whenever cloud sync runs
+  cloudSync.onCloudSync(() => {
+    errorLogger.pushPendingErrorLogs().catch(() => {});
+  });
+
   // Restore cloud-sync session from stored credentials (non-blocking).
   // No-op when Firebase isn't configured or no owner has connected yet.
   cloudSync
@@ -324,6 +364,8 @@ app.whenReady().then(async () => {
       runSupabaseBackupIfDue().catch((err) => {
         logger.error('Startup Supabase backup failed:', err);
       });
+      // Push any pending daily error logs to Firebase
+      errorLogger.pushPendingErrorLogs().catch(() => {});
     });
 
   // Initialize WhatsApp if feature is on and setting enabled (non-blocking)

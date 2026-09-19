@@ -102,6 +102,13 @@ export async function performDatabaseBackupAndUpload(): Promise<{ fileName: stri
     const nowIso = new Date().toISOString();
     settingsRepo.set('last_supabase_backup', nowIso, 'general');
     return { ...result, timestamp: nowIso };
+  } catch (err: any) {
+    logger.error('Supabase backup operation failed:', err, {
+      folder: getCustomerFolder(),
+      bucket: supabaseBucket,
+      errorDetail: err?.message || String(err),
+    });
+    throw err;
   } finally {
     try {
       if (fs.existsSync(tempBackupPath)) {

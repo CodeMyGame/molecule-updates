@@ -1,5 +1,6 @@
 import { getDb } from '../connection';
 import { format } from 'date-fns';
+import { logger } from '../../utils/logger';
 import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem, OrderKotSummary } from '../../../shared/types/order.types';
 import { OrderStatus, KOTStatus } from '../../../shared/enums';
 
@@ -302,7 +303,7 @@ export function updateStatus(
         }
       }
     } catch (err) {
-      console.error('Failed to log void items for cancelled order:', err);
+      logger.error('Failed to log void items for cancelled order:', err, { orderId: id });
     }
   }
 
@@ -464,7 +465,7 @@ export function removeItem(
         item.staff_name ?? null
       );
     } catch (err) {
-      console.error('Failed to log void item on removeItem:', err);
+      logger.error('Failed to log void item on removeItem:', err, { orderId, orderItemId });
     }
 
     db.prepare('DELETE FROM kot_items WHERE order_item_id = ?').run(orderItemId);

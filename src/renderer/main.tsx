@@ -6,6 +6,52 @@ import './lib/i18n';
 import App from './App';
 import './styles/globals.css';
 
+// Global error handlers to forward UI errors to the daily error logger
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    try {
+      if (window.electronAPI?.logger?.logError) {
+        window.electronAPI.logger.logError({
+          message: event.message || 'Uncaught window error',
+          stack: event.error?.stack,
+          context: {
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno,
+          },
+        }).catch(() => {});
+      }
+    } catch {
+      // Ignore
+    }
+  });
+
+  window.addEventListener('unhandledrejection', (event) => {
+    try {
+      if (window.electronAPI?.logger?.logError) {
+        const reason = event.reason;
+        const message =
+          reason instanceof Error
+            ? reason.message
+            : typeof reason === 'string'
+              ? reason
+              : 'Unhandled promise rejection';
+        const stack = reason instanceof Error ? reason.stack : undefined;
+
+        window.electronAPI.logger.logError({
+          message,
+          stack,
+          context: {
+            type: 'unhandledrejection',
+          },
+        }).catch(() => {});
+      }
+    } catch {
+      // Ignore
+    }
+  });
+}
+
 const container = document.getElementById('root')!;
 
 createRoot(container).render(

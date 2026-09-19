@@ -232,3 +232,9 @@ export const WAITER_NETWORK = {
   setEnabled: 'waiterNetwork:setEnabled',
   regenerateToken: 'waiterNetwork:regenerateToken',
 } as const;
+
+export const LOGGER = {
+  logError: 'logger:logError',
+  getDailyErrors: 'logger:getDailyErrors',
+} as const;
+

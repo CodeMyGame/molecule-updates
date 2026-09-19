@@ -23,7 +23,9 @@ import {
   FAVORITES,
   KITCHEN_NETWORK,
   WAITER_NETWORK,
+  LOGGER,
 } from '../../shared/ipc-channels';
+import * as errorLogger from '../services/error-logger.service';
 import { registerLicenseHandlers } from '../license/license.ipc';
 
 import * as menuRepo from '../db/repositories/menu.repo';
@@ -91,7 +93,7 @@ function handle<T>(channel: string, handler: (...args: any[]) => T): void {
       const data = await handler(...args);
       return { success: true, data };
     } catch (err: any) {
-      console.error(`IPC error [${channel}]:`, err);
+      logger.error(`IPC error [${channel}]:`, err);
       return { success: false, error: err.message || 'Unknown error' };
     }
   });
@@ -363,7 +365,7 @@ export function registerAllHandlers(): void {
             }
           }
         } catch (err) {
-          console.error('Customer handling failed:', err);
+          logger.error('Customer handling failed:', err);
         }
       }
 
@@ -504,6 +506,7 @@ export function registerAllHandlers(): void {
       });
       return { success: true, data: { printed: true } };
     } catch (err: any) {
+      logger.error('KOT print failed:', err, { kotId });
       return { success: false, error: err.message || 'Print failed' };
     }
   });
@@ -773,6 +776,7 @@ export function registerAllHandlers(): void {
       await runBillPrint(receiptText);
       return { success: true, data: { printed: true } };
     } catch (err: any) {
+      logger.error('Bill receipt print failed:', err);
       return { success: false, error: err.message || 'Print failed' };
     }
   });
@@ -782,6 +786,7 @@ export function registerAllHandlers(): void {
       await runBillPrint(buildSampleBillText());
       return { success: true, data: { printed: true } };
     } catch (err: any) {
+      logger.error('Bill test print failed:', err);
       return { success: false, error: err.message || 'Print failed' };
     }
   });
@@ -1079,7 +1084,7 @@ export function registerAllHandlers(): void {
 
       return { success: true, data: { savedTo: filePath } };
     } catch (err: any) {
-      console.error('IPC error [backup:create]:', err);
+      logger.error('IPC error [backup:create]:', err);
       return { success: false, error: err.message || 'Backup failed' };
     }
   });
@@ -1123,7 +1128,7 @@ export function registerAllHandlers(): void {
 
       return { success: true, data: undefined };
     } catch (err: any) {
-      console.error('IPC error [backup:restore]:', err);
+      logger.error('IPC error [backup:restore]:', err);
       return { success: false, error: err.message || 'Restore failed' };
     }
   });
@@ -1175,7 +1180,7 @@ export function registerAllHandlers(): void {
 
       return { success: true, data: { savedTo: filePath, ordersArchived, ordersDeleted } };
     } catch (err: any) {
-      console.error('IPC error [backup:archiveOldOrders]:', err);
+      logger.error('IPC error [backup:archiveOldOrders]:', err);
       return { success: false, error: err.message || 'Archive failed' };
     }
   });
@@ -1207,7 +1212,7 @@ export function registerAllHandlers(): void {
 
       return { success: true, data: undefined };
     } catch (err: any) {
-      console.error('IPC error [backup:reset]:', err);
+      logger.error('IPC error [backup:reset]:', err);
       return { success: false, error: err.message || 'Reset failed' };
     }
   });
@@ -1367,5 +1372,32 @@ export function registerAllHandlers(): void {
     }
   });
 
+  // ── Logger IPC Handlers ──────────────────────────────────────────────────
+  ipcMain.handle(
+    LOGGER.logError,
+    async (_event, data: { message: string; stack?: string; context?: Record<string, unknown> }) => {
+      try {
+        errorLogger.recordError({
+          source: 'renderer',
+          message: data?.message || 'Unknown renderer error',
+          stack: data?.stack,
+          context: data?.context,
+        });
+        return { success: true };
+      } catch (err: any) {
+        return { success: false, error: err?.message };
+      }
+    },
+  );
+
+  ipcMain.handle(LOGGER.getDailyErrors, async () => {
+    try {
+      const data = errorLogger.getTodayErrors();
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err?.message };
+    }
+  });
 
 }
+

@@ -380,6 +380,8 @@ export async function pushNow(): Promise<void> {
       settingsRepo.set('history_synced_to_cloud', 'true', 'general');
       syncHistory().catch((e) => logger.error('Cloud: history sync failed', e));
     }
+
+    triggerSyncHooks();
   } catch (err: any) {
     lastError = err?.message ?? 'Sync failed';
     logger.error('Cloud: push failed', err);
@@ -467,4 +469,41 @@ export async function restoreSession(): Promise<void> {
 
 export function getUid(): string | null {
   return currentUser?.uid ?? null;
+}
+
+type SyncHook = () => void | Promise<void>;
+const syncHooks: SyncHook[] = [];
+
+export function onCloudSync(hook: SyncHook): void {
+  syncHooks.push(hook);
+}
+
+export function triggerSyncHooks(): void {
+  for (const hook of syncHooks) {
+    try {
+      const res = hook();
+      if (res && typeof (res as Promise<void>).catch === 'function') {
+        (res as Promise<void>).catch(() => {});
+      }
+    } catch {
+      // Ignore hook failure
+    }
+  }
+}
+
+export function getFirebaseContext(): {
+  firestore: Firestore;
+  uid: string;
+  doc: typeof doc;
+  setDoc: typeof setDoc;
+  serverTimestamp: typeof serverTimestamp;
+} | null {
+  if (!currentUser || !firestore) return null;
+  return {
+    firestore,
+    uid: currentUser.uid,
+    doc,
+    setDoc,
+    serverTimestamp,
+  };
 }

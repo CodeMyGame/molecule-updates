@@ -274,6 +274,12 @@ const api = {
       ipcRenderer.invoke('whatsapp:sendBill', data),
   },
 
+  logger: {
+    logError: (data: { message: string; stack?: string; context?: Record<string, unknown> }) =>
+      ipcRenderer.invoke('logger:logError', data),
+    getDailyErrors: () => ipcRenderer.invoke('logger:getDailyErrors'),
+  },
+
   // Event listeners for push events from main process
   on: (channel: string, callback: (...args: any[]) => void) => {
     const subscription = (_event: IpcRendererEvent, ...args: any[]) => callback(...args);

@@ -3,6 +3,7 @@ import * as tableRepo from '../db/repositories/table.repo';
 import * as inventoryService from './inventory.service';
 import { format } from 'date-fns';
 import { getDb } from '../db/connection';
+import { logger } from '../utils/logger';
 import type { CreateOrderDTO, Order, OrderItem, CartItem } from '../../shared/types/order.types';
 import { OrderStatus, TableStatus, KOTStatus } from '../../shared/enums';
 
@@ -36,7 +37,7 @@ export function createOrder(data: CreateOrderDTO): Order & { items: OrderItem[] 
   try {
     inventoryService.deductForOrder(order.id);
   } catch (err) {
-    console.error('Inventory deduction failed for order', order.id, err);
+    logger.error('Inventory deduction failed for order:', err, { orderId: order.id });
   }
 
   return orderRepo.getById(order.id)!;

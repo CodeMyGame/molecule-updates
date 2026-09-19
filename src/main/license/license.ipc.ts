@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { LICENSE } from '../../shared/ipc-channels';
 import * as licenseService from './license.service';
+import { logger } from '../utils/logger';
 
 type IpcResult<T = unknown> =
   | { success: true; data: T }
@@ -12,7 +13,7 @@ function handle<T>(channel: string, handler: (...args: any[]) => Promise<T> | T)
       const data = await handler(...args);
       return { success: true, data };
     } catch (err: any) {
-      console.error(`IPC error [${channel}]:`, err);
+      logger.error(`IPC error [${channel}]:`, err);
       return { success: false, error: err.message || 'Unknown error' };
     }
   });

@@ -66,7 +66,20 @@ export async function ipc<T>(promise: Promise<IPCResult<T> | T>): Promise<T> {
   ) {
     const ipcResult = result as IPCResult<T>;
     if (!ipcResult.success) {
-      throw new Error(friendlyError(ipcResult.error ?? 'An unknown error occurred'));
+      const rawError = ipcResult.error ?? 'An unknown error occurred';
+      try {
+        if (typeof window !== 'undefined' && window.electronAPI?.logger?.logError) {
+          window.electronAPI.logger
+            .logError({
+              message: `UI IPC Error: ${rawError}`,
+              context: { rawError },
+            })
+            .catch(() => {});
+        }
+      } catch {
+        // Ignore
+      }
+      throw new Error(friendlyError(rawError));
     }
     return ipcResult.data as T;
   }
