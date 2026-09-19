@@ -154,11 +154,12 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
     const addonKey = [...item.addons.map((a) => a.id)].sort((a, b) => a - b).join(',');
     const noteKey = (item.notes ?? '').trim();
     const variationKey = item.variation?.id ?? 'none';
+    const sourceKey = (item.sourceTableName ?? '').trim();
     const itemKey = item.menuItem.id === 0 ? `temp:${item.menuItem.name}:${item.unitPrice}` : String(item.menuItem.id);
-    const key = `${itemKey}|${variationKey}|${addonKey}|${noteKey}`;
+    const key = `${itemKey}|${variationKey}|${addonKey}|${noteKey}|${sourceKey}`;
     const existing = billGroups.find((g) => {
       const gItemKey = g.item.menuItem.id === 0 ? `temp:${g.item.menuItem.name}:${g.item.unitPrice}` : String(g.item.menuItem.id);
-      return `${gItemKey}|${g.item.variation?.id ?? 'none'}|${[...g.item.addons.map((a) => a.id)].sort((a, b) => a - b).join(',')}|${(g.item.notes ?? '').trim()}` === key;
+      return `${gItemKey}|${g.item.variation?.id ?? 'none'}|${[...g.item.addons.map((a) => a.id)].sort((a, b) => a - b).join(',')}|${(g.item.notes ?? '').trim()}|${(g.item.sourceTableName ?? '').trim()}` === key;
     });
     if (existing) { existing.quantity += item.quantity; existing.total += item.total; }
     else billGroups.push({ item, quantity: item.quantity, total: item.total });
@@ -201,8 +202,11 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
     items: billGroups.map((g) => {
       const translatedName = getName(g.item.menuItem);
       const name = g.item.variation ? `${translatedName} (${g.item.variation.name})` : translatedName;
+      const displayName = g.item.sourceTableName && tableDisplay && g.item.sourceTableName !== tableDisplay
+        ? `${name} [${g.item.sourceTableName}]`
+        : name;
       return {
-        name,
+        name: displayName,
         qty: g.quantity,
         totalStr: formatRupees(g.total),
         addons: g.item.addons.map((a) => a.name),

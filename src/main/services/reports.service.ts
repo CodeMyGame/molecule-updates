@@ -20,7 +20,7 @@ function getCoinTotals(startDate: string, endDate: string): { coinsRedeemed: num
       COALESCE(SUM(CASE WHEN lt.points > 0 THEN lt.points ELSE 0 END), 0) AS coins_earned
     FROM loyalty_transactions lt
     JOIN orders o ON lt.order_id = o.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status != 'cancelled'
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
   `).get(startDate, endDate) as any;
   return { coinsRedeemed: row?.coins_redeemed ?? 0, coinsEarned: row?.coins_earned ?? 0 };
 }
@@ -34,7 +34,7 @@ function getCoinTotalsForDate(date: string): { coinsRedeemed: number; coinsEarne
       COALESCE(SUM(CASE WHEN lt.points > 0 THEN lt.points ELSE 0 END), 0) AS coins_earned
     FROM loyalty_transactions lt
     JOIN orders o ON lt.order_id = o.id
-    WHERE DATE(o.created_at) = ? AND o.status != 'cancelled'
+    WHERE DATE(o.created_at) = ? AND o.status NOT IN ('cancelled', 'merged')
   `).get(date) as any;
   return { coinsRedeemed: row?.coins_redeemed ?? 0, coinsEarned: row?.coins_earned ?? 0 };
 }
@@ -46,11 +46,11 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
   const rows = db.prepare(`
     SELECT
       DATE(created_at) AS date,
-      COUNT(CASE WHEN status != 'cancelled' THEN 1 END) AS total_orders,
-      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN grand_total ELSE 0 END), 0) AS total_revenue,
-      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN discount_amount ELSE 0 END), 0) AS total_discount,
-      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN tax_amount ELSE 0 END), 0) AS total_tax,
-      COALESCE(SUM(CASE WHEN status != 'cancelled' THEN (subtotal - discount_amount) ELSE 0 END), 0) AS net_revenue,
+      COUNT(CASE WHEN status NOT IN ('cancelled', 'merged') THEN 1 END) AS total_orders,
+      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN grand_total ELSE 0 END), 0) AS total_revenue,
+      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN discount_amount ELSE 0 END), 0) AS total_discount,
+      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN tax_amount ELSE 0 END), 0) AS total_tax,
+      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN (subtotal - discount_amount) ELSE 0 END), 0) AS net_revenue,
       COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled_orders,
       COALESCE(SUM(CASE WHEN status = 'cancelled' THEN grand_total ELSE 0 END), 0) AS cancelled_revenue
     FROM orders
@@ -66,7 +66,7 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
         COUNT(*) AS count,
         COALESCE(SUM(grand_total), 0) AS revenue
       FROM orders
-      WHERE DATE(created_at) = ? AND status != 'cancelled'
+      WHERE DATE(created_at) = ? AND status NOT IN ('cancelled', 'merged')
       GROUP BY order_type
     `).all(row.date) as any[];
 
@@ -110,7 +110,7 @@ export function itemWiseSales(dateRange: DateRangeFilter): ItemSalesReport[] {
     JOIN orders o ON oi.order_id = o.id
     LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id
     LEFT JOIN menu_categories mc ON mi.category_id = mc.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status != 'cancelled'
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
     GROUP BY oi.menu_item_id, oi.name
     ORDER BY total_revenue DESC
   `).all(startDate, endDate) as any[];
@@ -140,7 +140,7 @@ export function categoryWiseSales(dateRange: DateRangeFilter): CategorySalesRepo
     JOIN orders o ON oi.order_id = o.id
     JOIN menu_items mi ON oi.menu_item_id = mi.id
     JOIN menu_categories mc ON mi.category_id = mc.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status != 'cancelled'
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
     GROUP BY mc.id, mc.name
     ORDER BY total_revenue DESC
   `).all(startDate, endDate) as any[];
@@ -166,7 +166,7 @@ export function paymentSummary(dateRange: DateRangeFilter): PaymentSummaryReport
       SUM(p.tip_amount) AS tip_amount
     FROM payments p
     JOIN orders o ON p.order_id = o.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status != 'cancelled'
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
     GROUP BY p.payment_mode
     ORDER BY total_amount DESC
   `).all(startDate, endDate) as any[];
@@ -197,7 +197,7 @@ export function cashFlow(dateRange: DateRangeFilter): CashFlowReport {
     JOIN orders o ON p.order_id = o.id
     WHERE p.payment_mode = 'cash'
       AND o.created_at >= ? AND o.created_at <= ?
-      AND o.status != 'cancelled'
+      AND o.status NOT IN ('cancelled', 'merged')
   `).get(startDate, endDate) as any;
 
   const coins = getCoinTotals(startDate, endDate);
@@ -481,7 +481,7 @@ export function busyHours(dateRange: DateRangeFilter): BusyHoursReport {
         COUNT(*) AS orders,
         COALESCE(SUM(grand_total), 0) AS revenue
       FROM orders
-      WHERE created_at >= ? AND created_at <= ? AND status != 'cancelled'
+      WHERE created_at >= ? AND created_at <= ? AND status NOT IN ('cancelled', 'merged')
       GROUP BY bucket
       ORDER BY bucket
     `;
@@ -518,7 +518,7 @@ export function staffPerformance(dateRange: DateRangeFilter): {
     FROM staff s
     LEFT JOIN orders o ON s.id = o.staff_id
       AND o.created_at >= ? AND o.created_at <= ?
-      AND o.status != 'cancelled'
+      AND o.status NOT IN ('cancelled', 'merged')
     WHERE s.is_active = 1
     GROUP BY s.id, s.name
     ORDER BY total_revenue DESC

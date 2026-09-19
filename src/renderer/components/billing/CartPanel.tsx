@@ -715,9 +715,16 @@ const CartPanel: React.FC<CartPanelProps> = ({
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-1.5">
                                   <div className="min-w-0">
-                                    <p className="text-xs font-medium text-gray-900 truncate">
-                                      {getName(item.menuItem)}
-                                    </p>
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <p className="text-xs font-medium text-gray-900 truncate">
+                                        {getName(item.menuItem)}
+                                      </p>
+                                      {item.sourceTableName && (
+                                        <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                          {item.sourceTableName}
+                                        </span>
+                                      )}
+                                    </div>
                                     {item.variation && (
                                       <p className="text-[10px] text-gray-500">{item.variation.name}</p>
                                     )}
@@ -846,9 +853,16 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-1.5">
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-gray-900 truncate">
-                            {getName(item.menuItem)}
-                          </p>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="text-xs font-medium text-gray-900 truncate">
+                              {getName(item.menuItem)}
+                            </p>
+                            {item.sourceTableName && (
+                              <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                {item.sourceTableName}
+                              </span>
+                            )}
+                          </div>
                           {item.variation && (
                             <p className="text-[10px] text-gray-500">{item.variation.name}</p>
                           )}

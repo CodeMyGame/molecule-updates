@@ -30,6 +30,7 @@ export interface CartItem {
   unitPrice: number; // in paise (variation price or item price + addons)
   total: number; // unitPrice * quantity, in paise
   orderItemId?: number; // DB id of order_items row, set when item was loaded from an existing order
+  sourceTableName?: string;
   kotNumber?: string;
   kotStatus?: string;
   createdAt?: string;

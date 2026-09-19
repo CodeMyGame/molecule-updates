@@ -13,8 +13,8 @@ export function create(data: CreateOrderDTO): Order {
   const getTableName = db.prepare('SELECT name FROM tables WHERE id = ?');
 
   const insertOrderItem = db.prepare(`
-    INSERT INTO order_items (order_id, menu_item_id, combo_id, variation_id, name, quantity, unit_price, tax_rate, tax_amount, total, notes, kot_status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO order_items (order_id, menu_item_id, combo_id, variation_id, name, quantity, unit_price, tax_rate, tax_amount, total, notes, source_table_name, kot_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const insertOrderItemAddon = db.prepare(`
@@ -83,6 +83,7 @@ export function create(data: CreateOrderDTO): Order {
         itemTax,
         itemTotal + itemTax,
         item.notes ?? null,
+        item.sourceTableName ?? tableNameSnapshot ?? null,
         KOTStatus.PENDING,
       );
 
@@ -122,7 +123,15 @@ export function create(data: CreateOrderDTO): Order {
 
 export function getById(id: number): (Order & { items: OrderItem[]; kots: OrderKotSummary[] }) | undefined {
   const db = getDb();
-  const row = db.prepare('SELECT * FROM orders WHERE id = ?').get(id) as any;
+  const row = db.prepare(`
+    SELECT o.*,
+      mo.order_number AS merged_into_order_number,
+      sfo.order_number AS split_from_order_number
+    FROM orders o
+    LEFT JOIN orders mo ON o.merged_into_order_id = mo.id
+    LEFT JOIN orders sfo ON o.split_from_order_id = sfo.id
+    WHERE o.id = ?
+  `).get(id) as any;
   if (!row) return undefined;
 
   const order = mapOrder(row);
@@ -197,6 +206,8 @@ export function getAll(filters?: {
       s.name AS staff_name,
       c.name AS customer_name,
       c.phone AS customer_phone,
+      mo.order_number AS merged_into_order_number,
+      sfo.order_number AS split_from_order_number,
       (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.id) AS item_count,
       (SELECT GROUP_CONCAT(oi2.name, ', ') FROM order_items oi2 WHERE oi2.order_id = o.id LIMIT 5) AS item_names,
       COALESCE((SELECT SUM(ABS(lt.points)) * 100 FROM loyalty_transactions lt WHERE lt.order_id = o.id AND lt.points < 0), 0) AS coins_redeemed
@@ -204,6 +215,8 @@ export function getAll(filters?: {
     LEFT JOIN tables t ON o.table_id = t.id
     LEFT JOIN staff s ON o.staff_id = s.id
     LEFT JOIN customers c ON o.customer_id = c.id
+    LEFT JOIN orders mo ON o.merged_into_order_id = mo.id
+    LEFT JOIN orders sfo ON o.split_from_order_id = sfo.id
     ${where}
     ORDER BY o.created_at DESC
     LIMIT ? OFFSET ?
@@ -326,8 +339,8 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
   const db = getDb();
 
   const insertOrderItem = db.prepare(`
-    INSERT INTO order_items (order_id, menu_item_id, combo_id, variation_id, name, quantity, unit_price, tax_rate, tax_amount, total, notes, kot_status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO order_items (order_id, menu_item_id, combo_id, variation_id, name, quantity, unit_price, tax_rate, tax_amount, total, notes, source_table_name, kot_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const insertOrderItemAddon = db.prepare(`
@@ -340,10 +353,19 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
   const getAddonVarPrice = db.prepare(
     'SELECT price FROM addon_variation_prices WHERE addon_id = ? AND variation_name = ?'
   );
+  const getOrderTable = db.prepare(`
+    SELECT o.table_name_snapshot, t.name as current_table_name
+    FROM orders o
+    LEFT JOIN tables t ON o.table_id = t.id
+    WHERE o.id = ?
+  `);
 
   const addInTransaction = db.transaction(() => {
     let additionalSubtotal = 0;
     let additionalTax = 0;
+
+    const orderInfo = getOrderTable.get(orderId) as any;
+    const tableSnapshot = orderInfo?.table_name_snapshot || orderInfo?.current_table_name || null;
 
     for (const item of items) {
       const itemTotal = item.unitPrice * item.quantity;
@@ -363,6 +385,7 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
         itemTax,
         itemTotal + itemTax,
         item.notes ?? null,
+        item.sourceTableName ?? tableSnapshot,
         KOTStatus.PENDING,
       );
 
@@ -733,6 +756,7 @@ function getOrderItems(orderId: number): OrderItem[] {
       taxAmount: row.tax_amount,
       total: row.total,
       notes: row.notes ?? undefined,
+      sourceTableName: row.source_table_name ?? undefined,
       kotStatus: row.kot_status as KOTStatus,
       kotNumber: row.kot_number ?? undefined,
       station: row.station ?? undefined,
@@ -781,6 +805,9 @@ function mapOrder(row: any): Order {
     grandTotal: row.grand_total,
     notes: row.notes ?? undefined,
     mergedIntoOrderId: row.merged_into_order_id ?? undefined,
+    mergedIntoOrderNumber: row.merged_into_order_number ?? undefined,
+    splitFromOrderId: row.split_from_order_id ?? undefined,
+    splitFromOrderNumber: row.split_from_order_number ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     completedAt: row.completed_at ?? undefined,

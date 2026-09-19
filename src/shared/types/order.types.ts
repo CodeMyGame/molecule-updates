@@ -19,6 +19,9 @@ export interface Order {
   grandTotal: number;
   notes?: string;
   mergedIntoOrderId?: number;
+  mergedIntoOrderNumber?: string;
+  splitFromOrderId?: number;
+  splitFromOrderNumber?: string;
   kots?: OrderKotSummary[];
   createdAt: string;
   updatedAt: string;
@@ -47,6 +50,7 @@ export interface OrderItem {
   taxAmount: number;
   total: number;
   notes?: string;
+  sourceTableName?: string;
   kotStatus: KOTStatus;
   kotNumber?: string;
   station?: string;
@@ -80,6 +84,7 @@ export interface CartItem {
   unitPrice: number;
   taxRate: number;
   notes?: string;
+  sourceTableName?: string;
   addonIds?: number[];
 }
 

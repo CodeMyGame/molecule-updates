@@ -100,31 +100,50 @@ export function splitBill(
       ? (targetTableId ?? originalOrder.tableId ?? null)
       : null;
 
+    const targetTableNameSnapshot = newTableId
+      ? ((db.prepare('SELECT name FROM tables WHERE id = ?').get(newTableId) as any)?.name ?? null)
+      : null;
+
+    const sourceTableName = originalOrder.tableName || (originalOrder.tableId ? `Table #${originalOrder.tableId}` : originalOrder.orderNumber);
+
     // Create new order with split items (placeholder totals — recalculated below)
     const newOrderNumber = generateOrderNumber();
 
     const result = db.prepare(`
-      INSERT INTO orders (order_number, order_type, table_id, customer_id, staff_id, status, subtotal, tax_amount, grand_total, round_off, notes)
-      VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?)
+      INSERT INTO orders (order_number, order_type, table_id, table_name_snapshot, customer_id, staff_id, status, subtotal, tax_amount, grand_total, round_off, notes, split_from_order_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?, ?)
     `).run(
       newOrderNumber,
       originalOrder.orderType,
       newTableId,
+      targetTableNameSnapshot,
       originalOrder.customerId ?? null,
       originalOrder.staffId,
       OrderStatus.ACTIVE,
       `Split from ${originalOrder.orderNumber}`,
+      originalOrder.id,
     );
 
     const newOrderId = result.lastInsertRowid as number;
 
-    // Move items to new order.
-    // order_item_addons reference order_items.id (not order_id), so they follow automatically.
-    const moveItem = db.prepare('UPDATE order_items SET order_id = ? WHERE id = ?');
+    // Move items to new order and preserve/stamp source table name
+    const moveItem = db.prepare('UPDATE order_items SET order_id = ?, source_table_name = COALESCE(source_table_name, ?) WHERE id = ?');
 
     for (const item of itemsToSplit) {
-      moveItem.run(newOrderId, item.id);
+      moveItem.run(newOrderId, sourceTableName, item.id);
     }
+
+    // Update original order notes to track the split
+    const splitNote = `Split into ${newOrderNumber}`;
+    db.prepare(`
+      UPDATE orders
+      SET notes = CASE
+        WHEN notes IS NULL OR notes = '' THEN ?
+        ELSE notes || ' | ' || ?
+      END,
+      updated_at = datetime('now')
+      WHERE id = ?
+    `).run(splitNote, splitNote, originalOrder.id);
 
     // Mark target table as occupied
     if (newTableId && newTableId !== (originalOrder.tableId ?? null)) {
@@ -153,15 +172,40 @@ export function mergeBills(
     const target = orderRepo.getById(targetOrderId);
     if (!source || !target) throw new Error('Order not found');
 
-    // Move all items from source to target
-    db.prepare('UPDATE order_items SET order_id = ? WHERE order_id = ?').run(targetOrderId, sourceOrderId);
+    const sourceTableName = source.tableName || (source.tableId ? `Table #${source.tableId}` : source.orderNumber);
+    const targetTableName = target.tableName || (target.tableId ? `Table #${target.tableId}` : target.orderNumber);
 
-    // Mark source as merged
+    // Ensure existing target items have their table stamped if not already set
+    db.prepare("UPDATE order_items SET source_table_name = ? WHERE order_id = ? AND (source_table_name IS NULL OR source_table_name = '')")
+      .run(targetTableName, targetOrderId);
+
+    // Move all items from source to target and preserve/stamp source table name
+    db.prepare("UPDATE order_items SET order_id = ?, source_table_name = COALESCE(source_table_name, ?) WHERE order_id = ?")
+      .run(targetOrderId, sourceTableName, sourceOrderId);
+
+    // Move all KOTs from source to target
+    db.prepare('UPDATE kots SET order_id = ? WHERE order_id = ?').run(targetOrderId, sourceOrderId);
+
+    // Mark source as merged and zero out its financial totals
+    const mergeNote = `Merged into ${target.orderNumber}`;
     db.prepare(`
       UPDATE orders
-      SET status = ?, merged_into_order_id = ?, updated_at = datetime('now')
+      SET status = ?,
+          merged_into_order_id = ?,
+          subtotal = 0,
+          discount_amount = 0,
+          discount_value = 0,
+          discount_type = NULL,
+          tax_amount = 0,
+          grand_total = 0,
+          round_off = 0,
+          notes = CASE
+            WHEN notes IS NULL OR notes = '' THEN ?
+            ELSE notes || ' | ' || ?
+          END,
+          updated_at = datetime('now')
       WHERE id = ?
-    `).run(OrderStatus.MERGED, targetOrderId, sourceOrderId);
+    `).run(OrderStatus.MERGED, targetOrderId, mergeNote, mergeNote, sourceOrderId);
 
     // Free source table if no other active orders on it
     if (source.tableId) {

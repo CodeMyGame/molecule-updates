@@ -1341,7 +1341,26 @@ const Reports: React.FC = () => {
                       }}
                     />
                   </td>
-                  <td className="px-3 py-2.5 font-medium text-gray-900 whitespace-nowrap">{order.orderNumber}</td>
+                  <td className="px-3 py-2.5 font-medium text-gray-900 whitespace-nowrap">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span>{order.orderNumber}</span>
+                      {order.splitFromOrderNumber && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200" title={`Created by splitting from ${order.splitFromOrderNumber}`}>
+                          {t('reports.splitFrom', { order: order.splitFromOrderNumber, defaultValue: `Split from ${order.splitFromOrderNumber}` })}
+                        </span>
+                      )}
+                      {!order.splitFromOrderNumber && order.notes?.includes('Split from') && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                          {order.notes.split('|').find((n: string) => n.trim().startsWith('Split from'))?.trim() || 'Split order'}
+                        </span>
+                      )}
+                      {order.notes?.includes('Split into') && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
+                          {order.notes.split('|').find((n: string) => n.trim().startsWith('Split into'))?.trim() || 'Split into'}
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{formatDateTime(order.createdAt)}</td>
                   <td className="px-3 py-2.5">
                     <span className="capitalize">{order.orderType?.replace('_', ' ')}</span>
@@ -1372,11 +1391,18 @@ const Reports: React.FC = () => {
                   <td className="px-3 py-2.5">
                     <div className="flex flex-col gap-0.5">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize w-fit ${statusColor(order.status)}`}>
-                        {order.status}
+                        {order.status === 'merged' && order.mergedIntoOrderNumber
+                          ? t('reports.mergedInto', { target: order.mergedIntoOrderNumber, defaultValue: `Merged → ${order.mergedIntoOrderNumber}` })
+                          : order.status}
                       </span>
                       {order.cancellation_reason && (
                         <span className="text-[10px] text-red-600 font-medium truncate max-w-[140px]" title={order.cancellation_reason}>
                           {order.cancellation_reason}
+                        </span>
+                      )}
+                      {order.status === 'merged' && !order.mergedIntoOrderNumber && order.notes && (
+                        <span className="text-[10px] text-purple-700 font-medium truncate max-w-[140px]" title={order.notes}>
+                          {order.notes}
                         </span>
                       )}
                     </div>
@@ -1420,12 +1446,56 @@ const Reports: React.FC = () => {
                           <span><strong>{t('reports.cancellationReason', 'Cancellation Reason')}:</strong> {order.cancellation_reason}</span>
                         </div>
                       )}
+                      {order.status === 'merged' && (
+                        <div className="mb-2.5 px-3 py-2 rounded-lg bg-purple-100/80 border border-purple-200 text-xs text-purple-900 font-medium flex items-center gap-2">
+                          <CheckCircle size={14} className="text-purple-600 shrink-0" />
+                          <span>
+                            {t('reports.mergedOrderInfo', {
+                              target: order.mergedIntoOrderNumber || (order.notes?.includes('Merged into') ? order.notes : 'another order'),
+                              defaultValue: 'This order was merged into {{target}}. All items and value were transferred to that order.',
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {order.splitFromOrderNumber && (
+                        <div className="mb-2.5 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 font-medium flex items-center gap-2">
+                          <ClipboardList size={14} className="text-amber-600 shrink-0" />
+                          <span>
+                            {t('reports.splitFromOrderInfo', {
+                              order: order.splitFromOrderNumber,
+                              defaultValue: `This order was created by splitting items from ${order.splitFromOrderNumber}.`,
+                            })}
+                          </span>
+                        </div>
+                      )}
+                      {!order.splitFromOrderNumber && order.notes?.includes('Split from') && (
+                        <div className="mb-2.5 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 font-medium flex items-center gap-2">
+                          <ClipboardList size={14} className="text-amber-600 shrink-0" />
+                          <span>
+                            {order.notes.split('|').find((n: string) => n.trim().startsWith('Split from'))?.trim()}
+                          </span>
+                        </div>
+                      )}
+                      {order.notes?.includes('Split into') && (
+                        <div className="mb-2.5 px-3 py-2 rounded-lg bg-sky-50 border border-sky-200 text-xs text-sky-900 font-medium flex items-center gap-2">
+                          <ClipboardList size={14} className="text-sky-600 shrink-0" />
+                          <span>
+                            {order.notes.split('|').find((n: string) => n.trim().startsWith('Split into'))?.trim()}
+                          </span>
+                        </div>
+                      )}
                       {expandedOrderLoading ? (
                         <div className="flex items-center gap-2 text-sm text-gray-400">
                           <Loader2 size={14} className="animate-spin" /> {t('reports.loadingItems')}
                         </div>
                       ) : expandedOrderItems.length === 0 ? (
-                        <p className="text-sm text-gray-400">{t('reports.noItems')}</p>
+                        order.status === 'merged' ? (
+                          <p className="text-xs text-purple-700 italic">
+                            {t('reports.mergedNoItems', 'All items were transferred to the merged target order.')}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-gray-400">{t('reports.noItems')}</p>
+                        )
                       ) : (
                         <table className="w-full text-xs">
                           <thead>
@@ -1442,7 +1512,14 @@ const Reports: React.FC = () => {
                               <tr key={item.id} className="border-b border-gray-100 last:border-0">
                                 <td className="py-1.5 text-gray-400">{idx + 1}</td>
                                 <td className="py-1.5 text-gray-800 font-medium">
-                                  {item.name}
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span>{item.name}</span>
+                                    {item.sourceTableName && (
+                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                                        {item.sourceTableName}
+                                      </span>
+                                    )}
+                                  </div>
                                   {item.addons?.length > 0 && (
                                     <span className="block text-[10px] text-gray-400 font-normal">
                                       + {item.addons.map((a: any) => a.name).join(', ')}

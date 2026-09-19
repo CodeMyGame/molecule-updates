@@ -20,6 +20,9 @@ import { addPerfIndexes } from './db/migrations/013_add_perf_indexes';
 import { addTableNameSnapshot } from './db/migrations/014_table_name_snapshot';
 import { addPinToItemsAndTables } from './db/migrations/015_pin_items_and_tables';
 import { addVoidItemsTable } from './db/migrations/016_void_items';
+import { cleanupMergedOrders } from './db/migrations/017_cleanup_merged_orders';
+import { addSourceTableToOrderItems } from './db/migrations/018_add_source_table_to_order_items';
+import { addSplitFromOrderId } from './db/migrations/019_add_split_from_order_id';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -104,6 +107,9 @@ function initializeDatabase(): void {
     addTableNameSnapshot,
     addPinToItemsAndTables,
     addVoidItemsTable,
+    cleanupMergedOrders,
+    addSourceTableToOrderItems,
+    addSplitFromOrderId,
   ]);
 
   // Seed default data
