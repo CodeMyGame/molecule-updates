@@ -80,17 +80,25 @@ export function useOrders(): UseOrdersReturn {
 
   const createOrder = useCallback(async (): Promise<Order> => {
     const { cart, orderType, selectedCustomerId, discount, notes } = billingStore;
-    let tableId = billingStore.selectedTableId;
+    let tableId: number | null = null;
 
-    if (orderType === 'dine_in' && !tableId) {
-      const tables = await ipc<any[]>(window.electronAPI.tables.getAll());
-      const freeTables = tables.filter((t) => t.status === 'free');
-      if (freeTables.length === 0) {
-        throw new Error(t('toast.noFreeTables', 'No empty tables available for Dine-In. Please free a table first.'));
+    if (orderType === 'dine_in') {
+      tableId = billingStore.selectedTableId;
+      if (!tableId) {
+        const tables = await ipc<any[]>(window.electronAPI.tables.getAll());
+        const freeTables = tables.filter((t) => t.status === 'free');
+        if (freeTables.length === 0) {
+          throw new Error(t('toast.noFreeTables', 'No empty tables available for Dine-In. Please free a table first.'));
+        }
+        const selectedFreeTable = freeTables[0];
+        tableId = selectedFreeTable.id;
+        billingStore.setTable(selectedFreeTable.id);
       }
-      const selectedFreeTable = freeTables[0];
-      tableId = selectedFreeTable.id;
-      billingStore.setTable(selectedFreeTable.id);
+    } else {
+      tableId = null;
+      if (billingStore.selectedTableId !== null) {
+        billingStore.setTable(null);
+      }
     }
 
     const orderData = {

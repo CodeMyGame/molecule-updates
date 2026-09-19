@@ -189,6 +189,7 @@ export const BACKUP = {
   restore: 'backup:restore',
   reset: 'backup:reset',
   archiveOldOrders: 'backup:archiveOldOrders',
+  cloudBackup: 'backup:cloudBackup',
 } as const;
 
 export const LICENSE = {

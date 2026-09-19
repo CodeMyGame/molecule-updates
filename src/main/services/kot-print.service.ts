@@ -102,7 +102,7 @@ function buildKotEscPos(data: KOTPrintData, style: ItemStyle, fontSize: FontSize
   const [nL, nH] = PAPER_PRINT_DOTS[paper] ?? [0x40, 0x02];
   p.add(Buffer.from([0x1d, 0x57, nL, nH]));
 
-  const location = data.tableName
+  const location = data.orderType === 'dine_in' && data.tableName
     ? `Table: ${data.tableName}`
     : `Type: ${data.orderType.replace('_', ' ')}`;
 
@@ -170,7 +170,7 @@ const FONT_SIZE_MAP: Record<FontSize, string> = { small: '12px', regular: '14px'
 function buildKotModel(data: KOTPrintData, style: ItemStyle): KotModel {
   return {
     title: 'KOT',
-    location: data.tableName
+    location: data.orderType === 'dine_in' && data.tableName
       ? `Table: ${data.tableName}`
       : `Type: ${data.orderType.replace('_', ' ')}`,
     kotCount: data.kotCount != null ? String(data.kotCount) : undefined,
@@ -220,7 +220,7 @@ function generateKotHtml(data: KOTPrintData, style: ItemStyle, fontSize: FontSiz
 </html>`.replace('{{FONT_SIZE}}', FONT_SIZE_MAP[fontSize]);
   }
 
-  const location = data.tableName
+  const location = data.orderType === 'dine_in' && data.tableName
     ? `Table: ${data.tableName}`
     : `Type: ${data.orderType.replace('_', ' ')}`;
 

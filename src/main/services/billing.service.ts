@@ -96,7 +96,9 @@ export function splitBill(
 
     if (itemsToSplit.length === 0) throw new Error('No items selected for split');
 
-    const newTableId = targetTableId ?? originalOrder.tableId ?? null;
+    const newTableId = originalOrder.orderType === 'dine_in'
+      ? (targetTableId ?? originalOrder.tableId ?? null)
+      : null;
 
     // Create new order with split items (placeholder totals — recalculated below)
     const newOrderNumber = generateOrderNumber();

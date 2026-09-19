@@ -45,13 +45,15 @@ export function create(data: CreateOrderDTO): Order {
     const grandTotal = subtotal + taxAmount;
     const roundOff = Math.round(grandTotal / 100) * 100 - grandTotal;
 
-    const tableNameSnapshot = data.tableId
-      ? ((getTableName.get(data.tableId) as { name?: string } | undefined)?.name ?? null)
+    const isDineIn = data.orderType === 'dine_in';
+    const effectiveTableId = isDineIn ? (data.tableId ?? null) : null;
+    const tableNameSnapshot = (isDineIn && effectiveTableId)
+      ? ((getTableName.get(effectiveTableId) as { name?: string } | undefined)?.name ?? null)
       : null;
     const result = insertOrder.run(
       orderNumber,
       data.orderType,
-      data.tableId ?? null,
+      effectiveTableId,
       tableNameSnapshot,
       data.customerId ?? null,
       data.staffId,
@@ -107,8 +109,8 @@ export function create(data: CreateOrderDTO): Order {
     }
 
     // Update table status if dine-in
-    if (data.tableId) {
-      db.prepare("UPDATE tables SET status = 'occupied' WHERE id = ?").run(data.tableId);
+    if (isDineIn && effectiveTableId) {
+      db.prepare("UPDATE tables SET status = 'occupied' WHERE id = ?").run(effectiveTableId);
     }
 
     return orderId;

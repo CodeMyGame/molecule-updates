@@ -1570,9 +1570,34 @@ const Settings: React.FC = () => {
   const [resetLoading, setResetLoading] = useState(false);
   const [backupMsg, setBackupMsg] = useState('');
   const [backupMsgIsError, setBackupMsgIsError] = useState(false);
+  const [cloudBackupLoading, setCloudBackupLoading] = useState(false);
+  const [cloudBackupMsg, setCloudBackupMsg] = useState('');
+  const [cloudBackupMsgIsError, setCloudBackupMsgIsError] = useState(false);
   const [archiveLoading, setArchiveLoading] = useState(false);
   const [archiveMsg, setArchiveMsg] = useState('');
   const [archiveMsgIsError, setArchiveMsgIsError] = useState(false);
+
+  const handleCloudBackup = async () => {
+    setCloudBackupLoading(true);
+    setCloudBackupMsg('');
+    setCloudBackupMsgIsError(false);
+    try {
+      const result = await ipc<{ folder: string }>(window.electronAPI.backup.cloudBackup());
+      await fetchSettings(SETTING_KEYS);
+      setCloudBackupMsgIsError(false);
+      setCloudBackupMsg(
+        t('settingsPage.cloudBackupSuccess', {
+          folder: result?.folder ?? '',
+          defaultValue: 'Database successfully backed up to cloud folder: {{folder}}',
+        }),
+      );
+    } catch (err: any) {
+      setCloudBackupMsgIsError(true);
+      setCloudBackupMsg(err?.message ?? t('settingsPage.cloudBackupFailed', 'Cloud backup failed'));
+    } finally {
+      setCloudBackupLoading(false);
+    }
+  };
 
   const handleArchiveOldOrders = async () => {
     setArchiveLoading(true);
@@ -2379,6 +2404,47 @@ const Settings: React.FC = () => {
           {backupMsg && (
             <p className={`mt-2 text-xs ${backupMsgIsError ? 'text-red-500' : 'text-green-600'}`}>
               {backupMsg}
+            </p>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg border border-sky-200 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <Cloud size={18} className="text-sky-600" />
+            <h3 className="text-sm font-semibold text-gray-800">
+              {t('settingsPage.cloudBackupTitle', 'Cloud Backup (Supabase)')}
+            </h3>
+          </div>
+          <p className="text-xs text-gray-500 mb-3">
+            {t(
+              'settingsPage.cloudBackupDesc',
+              'Securely backup your database to Supabase cloud storage. Backups are isolated per customer license.',
+            )}
+          </p>
+          <div className="flex items-center gap-4 flex-wrap">
+            <Button
+              variant="primary"
+              icon={<Cloud size={16} />}
+              loading={cloudBackupLoading}
+              onClick={handleCloudBackup}
+            >
+              {t('settingsPage.cloudBackupButton', 'Backup to Cloud Now')}
+            </Button>
+            {settings.last_supabase_backup && (
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                <Clock size={13} />
+                <span>
+                  {t('settingsPage.lastCloudBackup', {
+                    defaultValue: 'Last cloud backup: {{time}}',
+                    time: formatDateTime(settings.last_supabase_backup),
+                  })}
+                </span>
+              </div>
+            )}
+          </div>
+          {cloudBackupMsg && (
+            <p className={`mt-2 text-xs ${cloudBackupMsgIsError ? 'text-red-500' : 'text-green-600'}`}>
+              {cloudBackupMsg}
             </p>
           )}
         </div>

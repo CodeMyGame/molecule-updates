@@ -101,16 +101,17 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`pos-sidebar transition-all duration-200 ${
+      className={`pos-sidebar transition-all duration-200 z-30 relative ${
         sidebarCollapsed ? 'w-14' : 'w-36'
       }`}
     >
       {/* Restaurant name + toggle */}
       <div className="px-3 py-2.5 border-b border-gray-700 flex items-center justify-between">
         {sidebarCollapsed ? (
-          <Tooltip text={t('nav.expandSidebar')} position="right">
+          <Tooltip text={t('nav.expandSidebar')} position="right" className="w-full">
             <button
               onClick={toggleSidebar}
+              title={t('nav.expandSidebar')}
               className="w-full flex items-center justify-center text-gray-400 hover:text-white transition-colors"
             >
               <Menu size={16} />
@@ -122,6 +123,7 @@ const Sidebar: React.FC = () => {
             <Tooltip text={t('nav.collapseSidebar')} position="bottom">
               <button
                 onClick={toggleSidebar}
+                title={t('nav.collapseSidebar')}
                 className="p-0.5 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-gray-800"
               >
                 <Menu size={16} />
@@ -135,9 +137,10 @@ const Sidebar: React.FC = () => {
       <nav className="flex-1 py-1 overflow-y-auto">
         {NAV_KEYS.map((item) => (
           sidebarCollapsed ? (
-            <Tooltip key={item.path} text={t(`nav.${item.key}`)} position="right">
+            <Tooltip key={item.path} text={t(`nav.${item.key}`)} position="right" className="w-full block">
               <NavLink
                 to={item.path}
+                title={t(`nav.${item.key}`)}
                 className={({ isActive }) =>
                   `flex items-center gap-2 py-2 mx-1.5 my-px rounded-xl transition-colors duration-150 tap-target justify-center px-1.5 ${
                     isActive
@@ -176,17 +179,19 @@ const Sidebar: React.FC = () => {
       <div className="border-t border-gray-700 px-1.5 py-1.5 flex flex-col gap-1">
         {sidebarCollapsed ? (
           <>
-            <Tooltip text={t('header.newOrder')} position="right">
+            <Tooltip text={t('header.newOrder')} position="right" className="w-full">
               <button
                 onClick={handleNewOrder}
+                title={t('header.newOrder')}
                 className="flex items-center justify-center w-full py-1.5 rounded-xl text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
               >
                 <Plus size={14} />
               </button>
             </Tooltip>
-            <Tooltip text={isDayOpen ? t('header.closeDay') : t('header.openDay')} position="right">
+            <Tooltip text={isDayOpen ? t('header.closeDay') : t('header.openDay')} position="right" className="w-full">
               <button
                 onClick={handleDayToggle}
+                title={isDayOpen ? t('header.closeDay') : t('header.openDay')}
                 className={`flex items-center justify-center w-full py-1.5 rounded-xl transition-colors
                   ${isDayOpen
                     ? 'text-red-400 hover:bg-red-900/30'
@@ -224,9 +229,10 @@ const Sidebar: React.FC = () => {
       {/* Current user */}
       <div className="border-t border-gray-700 px-3 py-2">
         {sidebarCollapsed ? (
-          <Tooltip text={t('nav.logout')} position="right">
+          <Tooltip text={t('nav.logout')} position="right" className="w-full">
             <button
               onClick={handleLogout}
+              title={t('nav.logout')}
               className="flex items-center justify-center w-full tap-target text-gray-400 hover:text-red-400 transition-colors"
             >
               <LogOut size={16} />
@@ -245,6 +251,7 @@ const Sidebar: React.FC = () => {
             <Tooltip text={t('nav.logout')} position="top">
               <button
                 onClick={handleLogout}
+                title={t('nav.logout')}
                 className="p-1.5 text-gray-400 hover:text-red-400 transition-colors rounded-xl hover:bg-gray-800"
               >
                 <LogOut size={14} />

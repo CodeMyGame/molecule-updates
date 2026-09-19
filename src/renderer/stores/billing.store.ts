@@ -218,7 +218,11 @@ export const useBillingStore = create<BillingState>((set, get) => ({
     }));
   },
 
-  setOrderType: (type: OrderType) => set({ orderType: type }),
+  setOrderType: (type: OrderType) =>
+    set({
+      orderType: type,
+      ...(type !== 'dine_in' ? { selectedTableId: null } : {}),
+    }),
 
   setTable: (tableId: number | null) => set({ selectedTableId: tableId }),
 
@@ -231,7 +235,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       syncedItemCount: syncedCount,
       syncedQuantities: items.slice(0, syncedCount).map((i) => i.quantity),
       kots: kots ?? [],
-      selectedTableId: tableId,
+      selectedTableId: (orderType && orderType !== 'dine_in') ? null : tableId,
       orderType: orderType ?? 'dine_in',
       discount: discount ?? null,
       notes: notes ?? '',

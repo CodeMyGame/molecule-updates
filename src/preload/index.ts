@@ -199,6 +199,7 @@ const api = {
     reset: () => ipcRenderer.invoke('backup:reset'),
     archiveOldOrders: (olderThanDays: number) =>
       ipcRenderer.invoke('backup:archiveOldOrders', olderThanDays),
+    cloudBackup: () => ipcRenderer.invoke('backup:cloudBackup'),
   },
 
   offers: {

@@ -999,7 +999,15 @@ const Billing: React.FC = () => {
 
       // Order Type Switchers (Alt+1 = Dine In, Alt+2 = Takeaway, Alt+3 = Delivery)
       if (e.altKey && !e.ctrlKey && !e.metaKey) {
-        if (e.key === '1') { e.preventDefault(); setOrderType('dine_in'); return; }
+        if (e.key === '1') {
+          e.preventDefault();
+          setOrderType('dine_in');
+          if (!useBillingStore.getState().selectedTableId) {
+            const firstFree = tables.find((tb) => tb.status === 'free');
+            if (firstFree) setTable(firstFree.id);
+          }
+          return;
+        }
         if (e.key === '2') { e.preventDefault(); setOrderType('takeaway'); return; }
         if (e.key === '3') { e.preventDefault(); setOrderType('delivery'); return; }
       }
@@ -1203,7 +1211,13 @@ const Billing: React.FC = () => {
             {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => (
               <Tooltip key={key} text={t(tKey)} position="bottom">
                 <button
-                  onClick={() => setOrderType(key)}
+                  onClick={() => {
+                    setOrderType(key);
+                    if (key === 'dine_in' && !useBillingStore.getState().selectedTableId) {
+                      const firstFree = tables.find((tb) => tb.status === 'free');
+                      if (firstFree) setTable(firstFree.id);
+                    }
+                  }}
                   className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold
                     transition-colors select-none
                     ${

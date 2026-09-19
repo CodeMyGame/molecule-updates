@@ -33,7 +33,7 @@ function getInitialTheme(): Theme {
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
-  sidebarCollapsed: false,
+  sidebarCollapsed: true,
   activeModal: null,
   modalData: null,
   notifications: [],

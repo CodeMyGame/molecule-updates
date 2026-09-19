@@ -159,6 +159,11 @@ async function runAutoBackupIfDue(): Promise<void> {
 
     logger.info(`Auto-backup saved to ${backupPath}`);
 
+    // Trigger Supabase cloud backup as part of the daily cycle
+    runSupabaseBackupIfDue().catch((err) => {
+      logger.error('Supabase backup in auto-backup cycle failed:', err);
+    });
+
   } catch (err) {
     logger.error('Auto-backup failed:', err);
   }
@@ -166,39 +171,26 @@ async function runAutoBackupIfDue(): Promise<void> {
 
 async function runSupabaseBackupIfDue(): Promise<void> {
   try {
-    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
     const lastSupabaseBackup = settingsRepo.get('last_supabase_backup');
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
 
-    if (lastSupabaseBackup === currentMonth) {
-      return; // Already backed up this month
+    if (lastSupabaseBackup) {
+      const lastTime = new Date(lastSupabaseBackup).getTime();
+      if (!isNaN(lastTime)) {
+        const elapsed = now - lastTime;
+        if (elapsed < oneDayMs) {
+          return; // Backed up within the last 24 hours
+        }
+      }
     }
 
-    logger.info('Supabase Monthly Backup: Checking backup due...');
-
-    const backupDir = join(app.getPath('userData'), 'backups');
-    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
-
-    // Use a temp file for the upload so we don't interfere with the daily backup file
-    const tempBackupPath = join(backupDir, `supabase-backup-temp-${Date.now()}.db`);
-
-    const db = getDb();
-    await db.backup(tempBackupPath);
-
-    logger.info(`Supabase Monthly Backup: Local backup cloned to ${tempBackupPath}, uploading to Supabase...`);
-
-    await supabaseBackupService.uploadBackup(tempBackupPath);
-    settingsRepo.set('last_supabase_backup', currentMonth, 'general');
-
-    // Clean up the temporary local file
-    try {
-      if (fs.existsSync(tempBackupPath)) {
-        fs.unlinkSync(tempBackupPath);
-      }
-    } catch { /* ignore */ }
-
-    logger.info('Supabase Monthly Backup: Done.');
+    logger.info('Supabase Backup: Checking backup due...');
+    await supabaseBackupService.performDatabaseBackupAndUpload();
+    settingsRepo.set('last_supabase_backup', new Date().toISOString(), 'general');
+    logger.info('Supabase Backup: Completed successfully.');
   } catch (err) {
-    logger.error('Supabase Monthly Backup: Failed:', err);
+    logger.error('Supabase Backup: Failed:', err);
   }
 }
 
@@ -305,9 +297,6 @@ app.whenReady().then(async () => {
   // Run auto-backup if due (non-blocking)
   runAutoBackupIfDue();
 
-  // Run Supabase monthly backup if due (non-blocking)
-  runSupabaseBackupIfDue();
-
   // Run VACUUM if it's been > 30 days (non-blocking; deferred so it doesn't
   // race startup window creation).
   setTimeout(() => { runVacuumIfDue().catch(() => {}); }, 60_000);
@@ -319,9 +308,17 @@ app.whenReady().then(async () => {
 
   // Restore cloud-sync session from stored credentials (non-blocking).
   // No-op when Firebase isn't configured or no owner has connected yet.
-  cloudSync.restoreSession().catch((err) => {
-    logger.error('Cloud sync restore failed:', err);
-  });
+  cloudSync
+    .restoreSession()
+    .catch((err) => {
+      logger.error('Cloud sync restore failed:', err);
+    })
+    .finally(() => {
+      // Run Supabase backup if due after session is restored (so customer identity is known)
+      runSupabaseBackupIfDue().catch((err) => {
+        logger.error('Startup Supabase backup failed:', err);
+      });
+    });
 
   // Initialize WhatsApp if feature is on and setting enabled (non-blocking)
   if (WHATSAPP_FEATURE_ENABLED) {

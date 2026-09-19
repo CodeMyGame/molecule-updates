@@ -49,6 +49,7 @@ import { createPrinter, sendRawToPrinter, VIRTUAL_PRINTER_NAME } from '../servic
 import * as whatsappService from '../services/whatsapp.service';
 import * as cloudSync from '../services/cloud-sync.service';
 import * as kitchenServer from '../services/kitchen-server.service';
+import * as supabaseBackupService from '../services/supabase-backup.service';
 import { logger } from '../utils/logger';
 
 type IpcResult<T = unknown> =
@@ -487,7 +488,7 @@ export function registerAllHandlers(): void {
       await kotPrintService.printKotReceipt({
         kotNumber: kot.kot_number,
         orderNumber: kot.order_number ?? '',
-        tableName: kot.table_name ?? undefined,
+        tableName: kot.order_type === 'dine_in' ? (kot.table_name ?? undefined) : undefined,
         orderType: kot.order_type ?? 'dine_in',
         items: items.map((i: any) => {
           const addons = i.order_item_id ? (getAddons.all(i.order_item_id) as { name: string }[]) : [];
@@ -1208,6 +1209,17 @@ export function registerAllHandlers(): void {
     } catch (err: any) {
       console.error('IPC error [backup:reset]:', err);
       return { success: false, error: err.message || 'Reset failed' };
+    }
+  });
+
+  ipcMain.handle(BACKUP.cloudBackup, async (): Promise<IpcResult<{ folder: string }>> => {
+    try {
+      const result = await supabaseBackupService.performDatabaseBackupAndUpload();
+      settingsRepo.set('last_supabase_backup', new Date().toISOString(), 'general');
+      return { success: true, data: result };
+    } catch (err: any) {
+      logger.error('IPC error [backup:cloudBackup]:', err);
+      return { success: false, error: err.message || 'Cloud backup failed' };
     }
   });
 

@@ -131,8 +131,8 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
     }).catch(() => {});
   }, [isOpen, orderType, selectedTableId]);
 
-  // Display value for the table field: prefer the table's name, fall back to its id.
-  const tableDisplay = tableName ?? (selectedTableId != null ? `#${selectedTableId}` : null);
+  // Display value for the table field: only for dine_in, prefer table name, fall back to id.
+  const tableDisplay = orderType === 'dine_in' ? (tableName ?? (selectedTableId != null ? `#${selectedTableId}` : null)) : null;
 
   const subtotal = getSubtotal();
   const discountAmount = getDiscountAmount();
