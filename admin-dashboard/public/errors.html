@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POS System — Restaurant Error Logs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-2: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.1);
+      --success: #10b981;
+      --accent: #38bdf8;
+      --radius: 12px;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 1.5rem;
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      background: var(--border);
+      color: #fff;
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .restaurant-badge {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #818cf8;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .date-input {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .date-input:focus {
+      border-color: var(--primary);
+    }
+    .date-btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .date-btn:hover, .date-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Auth Banner */
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      max-width: 440px;
+      margin: 4rem auto;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+    }
+    .auth-card h2 { margin-bottom: 0.5rem; font-size: 1.4rem; }
+    .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1rem; text-align: left; }
+    .form-group label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.35rem; color: var(--text-muted); }
+    .form-group input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      color: white;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .form-group input:focus { border-color: var(--primary); }
+    .auth-btn {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    .auth-btn:hover { background: var(--primary-hover); }
+    .auth-error {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    /* Stats Bar */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    .stat-icon.total { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+    .stat-icon.main { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .stat-icon.renderer { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .stat-icon.ipc { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .stat-info .num { font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
+    .stat-info .label { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Filters Bar */
+    .filters-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1.25rem;
+    }
+    .source-tabs {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .source-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      padding: 0.4rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .source-tab:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .source-tab.active {
+      background: var(--surface-2);
+      border-color: var(--border);
+      color: #fff;
+    }
+    .search-wrap {
+      position: relative;
+      min-width: 260px;
+    }
+    .search-input {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.45rem 0.75rem 0.45rem 2.2rem;
+      color: white;
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--primary); }
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    /* Logs Container */
+    .logs-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .empty-state {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 3.5rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+    .empty-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    /* Error Log Card */
+    .log-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--danger);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: background 0.15s;
+    }
+    .log-item.source-renderer { border-left-color: var(--warning); }
+    .log-item.source-ipc { border-left-color: var(--accent); }
+    .log-item.source-process { border-left-color: #a855f7; }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .log-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .badge-source {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+    .badge-source.renderer { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .badge-source.ipc { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .badge-source.process { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+
+    .log-time {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .log-context {
+      font-size: 0.75rem;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+    .log-message {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #f1f5f9;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .stack-toggle {
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .stack-toggle:hover { text-decoration: underline; }
+    .stack-trace {
+      background: #080c14;
+      border: 1px solid #1e293b;
+      border-radius: 6px;
+      padding: 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: #94a3b8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-top: 0.35rem;
+      display: none;
+    }
+    .stack-trace.show { display: block; }
+
+    /* Restaurant select dropdown for switcher */
+    .restaurant-picker {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      max-width: 250px;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      doc, 
+      onSnapshot,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+    let firebaseConfig = null;
+    try {
+      const response = await fetch('/firebase-config.json');
+      if (response.ok) {
+        firebaseConfig = await response.json();
+      }
+    } catch(e) {}
+
+    if (!firebaseConfig) {
+      firebaseConfig = {
+        apiKey: "AIzaSyDummyConfigReplaceIfDirectHost",
+        authDomain: "inventory-and-pos-3f268.firebaseapp.com",
+        projectId: "inventory-and-pos-3f268",
+        storageBucket: "inventory-and-pos-3f268.appspot.com",
+        messagingSenderId: "338902888806",
+        appId: "1:338902888806:web:65134701e6ce4362b9a103"
+      };
+    }
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // State
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentUid = urlParams.get('uid') || '';
+    let currentRestaurantName = urlParams.get('name') || 'Select Restaurant';
+    let selectedDate = getTodayString();
+    let currentLogs = [];
+    let currentFilterSource = 'ALL';
+    let currentSearchTerm = '';
+    let unsubscribeErrors = null;
+
+    function getTodayString() {
+      return new Date().toISOString().split('T')[0];
+    }
+    function getYesterdayString() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      return d.toISOString().split('T')[0];
+    }
+
+    // UI elements
+    const authSection = document.getElementById('auth-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const loginForm = document.getElementById('login-form');
+    const authError = document.getElementById('auth-error');
+    const btnLogout = document.getElementById('btn-logout');
+    const logsContainer = document.getElementById('logs-container');
+    const restaurantNameEl = document.getElementById('restaurant-name');
+    const restaurantPicker = document.getElementById('restaurant-picker');
+    const datePicker = document.getElementById('date-picker');
+    const btnToday = document.getElementById('btn-today');
+    const btnYesterday = document.getElementById('btn-yesterday');
+    const searchInput = document.getElementById('search-input');
+    const sourceTabs = document.querySelectorAll('.source-tab');
+
+    // Stat counters
+    const countTotal = document.getElementById('count-total');
+    const countMain = document.getElementById('count-main');
+    const countRenderer = document.getElementById('count-renderer');
+    const countIpc = document.getElementById('count-ipc');
+
+    // Date init
+    datePicker.value = selectedDate;
+
+    // Load available restaurants for quick-switching
+    async function loadRestaurantsDropdown() {
+      try {
+        const snap = await getDocs(collection(db, 'restaurants'));
+        restaurantPicker.innerHTML = '<option value="">-- Switch Restaurant --</option>';
+        snap.forEach(docSnap => {
+          const data = docSnap.data();
+          const opt = document.createElement('option');
+          opt.value = docSnap.id;
+          opt.textContent = data.name || docSnap.id;
+          if (docSnap.id === currentUid) {
+            opt.selected = true;
+            if (data.name) {
+              currentRestaurantName = data.name;
+              restaurantNameEl.textContent = data.name;
+            }
+          }
+          restaurantPicker.appendChild(opt);
+        });
+      } catch (err) {
+        console.warn("Could not populate restaurant picker:", err);
+      }
+    }
+
+    restaurantPicker.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (val) {
+        const selectedOpt = e.target.options[e.target.selectedIndex];
+        currentUid = val;
+        currentRestaurantName = selectedOpt.textContent;
+        restaurantNameEl.textContent = currentRestaurantName;
+        // Update URL
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('uid', currentUid);
+        newUrl.searchParams.set('name', currentRestaurantName);
+        window.history.pushState({}, '', newUrl);
+        listenToLogs();
+      }
+    });
+
+    // Auth state observer
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        authSection.style.display = 'none';
+        dashboardSection.style.display = 'flex';
+        btnLogout.style.display = 'block';
+        if (currentRestaurantName) {
+          restaurantNameEl.textContent = currentRestaurantName;
+        }
+        loadRestaurantsDropdown();
+        listenToLogs();
+      } else {
+        if (unsubscribeErrors) unsubscribeErrors();
+        authSection.style.display = 'block';
+        dashboardSection.style.display = 'none';
+        btnLogout.style.display = 'none';
+      }
+    });
+
+    // Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      authError.style.display = 'none';
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        authError.textContent = err.message || 'Login failed';
+        authError.style.display = 'block';
+      }
+    });
+
+    // Logout
+    btnLogout.addEventListener('click', () => signOut(auth));
+
+    // Date controls
+    btnToday.addEventListener('click', () => {
+      selectedDate = getTodayString();
+      datePicker.value = selectedDate;
+      btnToday.classList.add('active');
+      btnYesterday.classList.remove('active');
+      listenToLogs();
+    });
+
+    btnYesterday.addEventListener('click', () => {
+      selectedDate = getYesterdayString();
+      datePicker.value = selectedDate;
+      btnYesterday.classList.add('active');
+      btnToday.classList.remove('active');
+      listenToLogs();
+    });
+
+    datePicker.addEventListener('change', (e) => {
+      selectedDate = e.target.value;
+      btnToday.classList.toggle('active', selectedDate === getTodayString());
+      btnYesterday.classList.toggle('active', selectedDate === getYesterdayString());
+      listenToLogs();
+    });
+
+    // Filter by Source
+    sourceTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        sourceTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilterSource = tab.dataset.source;
+        renderLogs();
+      });
+    });
+
+    // Search
+    searchInput.addEventListener('input', (e) => {
+      currentSearchTerm = e.target.value.toLowerCase();
+      renderLogs();
+    });
+
+    // Firestore listener for target restaurant
+    function listenToLogs() {
+      if (unsubscribeErrors) unsubscribeErrors();
+
+      if (!currentUid) {
+        logsContainer.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">🏢</span>
+            <div class="empty-title">No Restaurant Selected</div>
+            <p>Please select a restaurant from the dropdown above or navigate from the Master Dashboard.</p>
+          </div>
+        `;
+        updateStats([]);
+        return;
+      }
+
+      logsContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-title">Loading Logs...</div>
+          <p>Connecting to diagnostic log stream for ${currentRestaurantName}...</p>
+        </div>
+      `;
+
+      // Path: restaurants/{currentUid}/error_logs/{selectedDate}
+      const logDocRef = doc(db, 'restaurants', currentUid, 'error_logs', selectedDate);
+      
+      unsubscribeErrors = onSnapshot(logDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          currentLogs = (data.logs || []).slice().reverse(); // Show latest first
+        } else {
+          currentLogs = [];
+        }
+        updateStats(currentLogs);
+        renderLogs();
+      }, (err) => {
+        console.error("Error reading error logs:", err);
+        logsContainer.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">⚠️</span>
+            <div class="empty-title">Failed to Load Logs</div>
+            <p>${err.message || 'Permission denied or network failure.'}</p>
+          </div>
+        `;
+      });
+    }
+
+    function updateStats(logs) {
+      countTotal.textContent = logs.length;
+      countMain.textContent = logs.filter(l => (l.source || '').toLowerCase() === 'main').length;
+      countRenderer.textContent = logs.filter(l => (l.source || '').toLowerCase() === 'renderer').length;
+      countIpc.textContent = logs.filter(l => (l.source || '').toLowerCase() === 'ipc').length;
+    }
+
+    function renderLogs() {
+      const filtered = currentLogs.filter(log => {
+        const matchesSource = currentFilterSource === 'ALL' || 
+          (log.source || '').toUpperCase() === currentFilterSource;
+        
+        const term = currentSearchTerm.trim();
+        const matchesSearch = !term || 
+          (log.message || '').toLowerCase().includes(term) ||
+          (log.stack || '').toLowerCase().includes(term) ||
+          (log.context || '').toLowerCase().includes(term);
+
+        return matchesSource && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        logsContainer.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-icon">✨</span>
+            <div class="empty-title">No Errors Found</div>
+            <p>${currentLogs.length === 0 ? `Zero error logs recorded on ${selectedDate} for this restaurant.` : 'No errors match your active filter / search.'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      logsContainer.innerHTML = filtered.map((log, index) => {
+        const src = (log.source || 'main').toLowerCase();
+        const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : 'Unknown';
+        const hasStack = Boolean(log.stack && log.stack.trim());
+        const stackId = `stack-${index}`;
+
+        return `
+          <div class="log-item source-${src}">
+            <div class="log-header">
+              <div class="log-meta">
+                <span class="badge-source ${src}">${log.source || 'MAIN'}</span>
+                <span class="log-time">${dateStr}</span>
+                ${log.context ? `<span class="log-context">${escapeHtml(log.context)}</span>` : ''}
+              </div>
+            </div>
+            <div class="log-message">${escapeHtml(log.message || 'Unknown error occurred')}</div>
+            ${hasStack ? `
+              <div>
+                <button class="stack-toggle" onclick="toggleStack('${stackId}')">
+                  ▶ View Stack Trace
+                </button>
+                <div class="stack-trace" id="${stackId}">${escapeHtml(log.stack)}</div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    window.toggleStack = function(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.toggle('show');
+        const btn = el.previousElementSibling;
+        if (btn) {
+          btn.textContent = el.classList.contains('show') ? '▼ Hide Stack Trace' : '▶ View Stack Trace';
+        }
+      }
+    };
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div class="brand-section">
+        <a href="index.html" class="back-btn">
+          ← Back to All Restaurants
+        </a>
+        <div class="brand-title">
+          Error Logs:
+          <span class="restaurant-badge" id="restaurant-name">Loading...</span>
+        </div>
+        <select id="restaurant-picker" class="restaurant-picker" title="Switch Restaurant">
+          <option value="">Switch Restaurant...</option>
+        </select>
+      </div>
+      <div class="header-controls">
+        <button class="date-btn active" id="btn-today">Today</button>
+        <button class="date-btn" id="btn-yesterday">Yesterday</button>
+        <input type="date" class="date-input" id="date-picker" />
+        <button id="btn-logout" class="date-btn" style="display: none;">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login Form -->
+  <div id="auth-section" class="auth-card" style="display: none;">
+    <h2>Admin Sign In</h2>
+    <p>Sign in with your master admin credentials to view restaurant error logs</p>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">Admin Email</label>
+        <input type="email" id="email" required placeholder="admin@example.com" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required placeholder="••••••••" />
+      </div>
+      <button type="submit" class="auth-btn">Sign In</button>
+      <div id="auth-error" class="auth-error"></div>
+    </form>
+  </div>
+
+  <!-- Dashboard Main Content -->
+  <main id="dashboard-section" style="display: none;">
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon total">⚠️</div>
+        <div class="stat-info">
+          <div class="num" id="count-total">0</div>
+          <div class="label">Total Errors Logged</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon main">⚙️</div>
+        <div class="stat-info">
+          <div class="num" id="count-main">0</div>
+          <div class="label">Main Process Errors</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon renderer">🖥️</div>
+        <div class="stat-info">
+          <div class="num" id="count-renderer">0</div>
+          <div class="label">Renderer / UI Errors</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon ipc">🔄</div>
+        <div class="stat-info">
+          <div class="num" id="count-ipc">0</div>
+          <div class="label">IPC / Bridge Errors</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+      <div class="source-tabs">
+        <button class="source-tab active" data-source="ALL">All Sources</button>
+        <button class="source-tab" data-source="MAIN">Main</button>
+        <button class="source-tab" data-source="RENDERER">Renderer</button>
+        <button class="source-tab" data-source="IPC">IPC</button>
+        <button class="source-tab" data-source="PROCESS">Process</button>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" placeholder="Search error messages or traces..." />
+      </div>
+    </div>
+
+    <!-- Error Logs List -->
+    <div class="logs-container" id="logs-container">
+      <div class="empty-state">
+        <div class="empty-title">Loading Logs...</div>
+        <p>Connecting to diagnostic log stream...</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

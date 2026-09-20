@@ -12,13 +12,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Everything for a restaurant lives under restaurants/{rid} where rid == uid.
-    match /restaurants/{rid}/{document=**} {
-      // Only the owning account can read its dashboard...
-      allow read:  if request.auth != null && request.auth.uid == rid;
-      // ...and only the owning account (the POS app, signed in as the same
-      // user) can write. The phone/web dashboard only reads in practice.
+    // Everything for a restaurant lives under restaurants/{rid}.
+    // Authenticated users (master dashboard and owner) can read restaurants data.
+    // Only the owning account (the POS app matching uid) can write.
+    match /restaurants/{rid} {
+      allow read:  if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == rid;
+
+      match /{document=**} {
+        allow read:  if request.auth != null;
+        allow write: if request.auth != null && request.auth.uid == rid;
+      }
     }
 
     // Licenses collection: allows clients to check key validity and mark them as used.

@@ -282,6 +282,8 @@ async function buildMeta(): Promise<Record<string, unknown>> {
 
   return {
     restaurantName: restaurant?.name ?? '',
+    restaurantAddress: restaurant?.address ?? '',
+    restaurantPhone: restaurant?.phone ?? '',
     currency: restaurant?.currency ?? '',
     dayOpen: !!session,
     dayOpenedAt: session?.opened_at ?? null,
@@ -364,11 +366,30 @@ export async function pushNow(): Promise<void> {
     const payload = { ...snapshot, updatedAt: serverTimestamp() };
 
     const meta = await buildMeta();
+    const restaurant = settingsRepo.getRestaurant();
+    const licenseStatus = await licenseService.getLicenseStatus();
+    const rootSummary = {
+      uid,
+      name: restaurant?.name ?? '',
+      address: restaurant?.address ?? '',
+      phone: restaurant?.phone ?? '',
+      currency: restaurant?.currency ?? '₹',
+      todayRevenue: Number(snapshot.revenue) || 0,
+      todayOrders: Number(snapshot.orders) || 0,
+      amountsInMinorUnits: true,
+      dayOpen: !!meta.dayOpen,
+      appVersion: app.getVersion(),
+      licenseExpiryDate: licenseStatus.expiryDate ?? null,
+      licenseState: licenseStatus.state ?? null,
+      updatedAt: serverTimestamp(),
+    };
+
     const base = `restaurants/${uid}`;
     await Promise.all([
       setDoc(doc(firestore, `${base}/live/today`), payload),
       setDoc(doc(firestore, `${base}/meta/status`), meta, { merge: true }),
       setDoc(doc(firestore, `${base}/daily/${today}`), payload, { merge: true }),
+      setDoc(doc(firestore, base), rootSummary, { merge: true }),
     ]);
 
     const now = new Date().toISOString();
@@ -426,8 +447,16 @@ export async function pushDailySnapshot(): Promise<void> {
   if (!currentUser || !firestore) return;
   const uid = currentUser.uid;
   const today = localDateStr();
-  const payload = { ...buildSnapshot(today), updatedAt: serverTimestamp() };
-  await setDoc(doc(firestore, `restaurants/${uid}/daily/${today}`), payload, { merge: true });
+  const snapshot = buildSnapshot(today);
+  const payload = { ...snapshot, updatedAt: serverTimestamp() };
+  await Promise.all([
+    setDoc(doc(firestore, `restaurants/${uid}/daily/${today}`), payload, { merge: true }),
+    setDoc(doc(firestore, `restaurants/${uid}`), {
+      todayRevenue: Number(snapshot.revenue) || 0,
+      todayOrders: Number(snapshot.orders) || 0,
+      updatedAt: serverTimestamp(),
+    }, { merge: true }),
+  ]);
 }
 
 /** Debounced push for event-driven triggers (payment completed, day open/close). */

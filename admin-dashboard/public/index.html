@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Molecule — Master Admin Dashboard</title>
+  <meta name="theme-color" content="#0a0a0a">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            netflix: { red: '#E50914', dark: '#0a0a0a' }
+          }
+        },
+      },
+    };
+  </script>
+
+  <style>
+    body { background-color: #0a0a0a; color: #ffffff; }
+    .glass {
+      background: rgba(20, 20, 20, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(28, 28, 28, 0.85) 0%, rgba(18, 18, 18, 0.9) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(229, 9, 20, 0.4);
+      box-shadow: 0 16px 36px -10px rgba(229, 9, 20, 0.15), 0 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .live-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+  </style>
+</head>
+<body class="antialiased min-h-screen selection:bg-netflix-red selection:text-white pb-20">
+
+  <!-- Initial Loading Screen -->
+  <div id="initialLoader" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-netflix-dark">
+    <div class="w-12 h-12 rounded-full border-4 border-zinc-800 border-t-netflix-red animate-spin mb-4"></div>
+    <p class="text-zinc-500 font-medium tracking-wide">Connecting to Master Console...</p>
+  </div>
+
+  <!-- Login Modal / View -->
+  <div id="loginView" class="hidden min-h-screen flex items-center justify-center p-4 bg-netflix-dark relative overflow-hidden">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-netflix-red/10 rounded-full blur-[120px] pointer-events-none"></div>
+    
+    <div class="glass w-full max-w-md rounded-2xl p-8 relative z-10 border border-white/10 shadow-2xl">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-netflix-dark border border-zinc-800 shadow-[0_0_35px_rgba(229,9,20,0.35)] mb-4">
+          <svg class="w-8 h-8 text-netflix-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">Molecule Master Console</h1>
+        <p class="text-zinc-400 text-sm mt-2">Sign in to monitor all restaurants</p>
+      </div>
+      
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Admin Email</label>
+          <input type="email" id="email" required class="w-full bg-zinc-900/70 border border-zinc-700/60 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red transition-colors" placeholder="admin@restaurant.com">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Password</label>
+          <input type="password" id="password" required class="w-full bg-zinc-900/70 border border-zinc-700/60 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red transition-colors" placeholder="••••••••">
+        </div>
+        <div id="loginError" class="hidden text-netflix-red text-sm font-medium text-center bg-red-950/40 py-2.5 rounded-xl border border-red-900/50"></div>
+        <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-red-700 to-netflix-red hover:from-red-600 hover:to-red-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_25px_rgba(229,9,20,0.4)]">Sign in to Console</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Main View -->
+  <div id="dashView" class="hidden min-h-screen">
+    
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-40 bg-netflix-dark/85 backdrop-blur-2xl border-b border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-18 py-3.5 flex items-center justify-between">
+        
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 to-netflix-red flex items-center justify-center shadow-[0_0_20px_rgba(229,9,20,0.5)]">
+            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-white font-bold text-lg leading-tight tracking-tight">Molecule</h1>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-netflix-red text-white uppercase tracking-wider">Master Admin</span>
+            </div>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 live-dot"></span>
+              <span id="connectionText" class="text-xs text-zinc-400">Live Multi-Tenant Sync</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex flex-col text-right">
+            <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Today's Total Network Sales</span>
+            <span id="navTotalRevenue" class="text-emerald-400 font-bold font-mono text-sm">₹0.00</span>
+          </div>
+          <button id="refreshBtn" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition" title="Refresh">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </button>
+          <button id="signOutBtn" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-red-400 hover:bg-red-950/40 transition" title="Sign Out">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-6">
+
+      <!-- Master KPI Metrics Bar -->
+      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Total Combined Revenue -->
+        <div class="glass rounded-2xl p-5 border-l-4 border-emerald-500">
+          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Today's Total Revenue</p>
+          <p id="kpiTotalRevenue" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">₹0.00</p>
+          <p id="kpiTotalOrders" class="text-[11px] text-zinc-500 mt-2">0 orders across network</p>
+        </div>
+
+        <!-- Total Restaurants -->
+        <div class="glass rounded-2xl p-5 border-l-4 border-blue-500">
+          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Total Restaurants</p>
+          <p id="kpiTotalRestaurants" class="text-2xl sm:text-3xl font-extrabold text-white">0</p>
+          <p id="kpiActiveRestaurants" class="text-[11px] text-emerald-400 mt-2">0 active today</p>
+        </div>
+
+        <!-- License Health -->
+        <div class="glass rounded-2xl p-5 border-l-4 border-amber-500">
+          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">License Expiries</p>
+          <p id="kpiExpiringCount" class="text-2xl sm:text-3xl font-extrabold text-white">0</p>
+          <p id="kpiExpiringSub" class="text-[11px] text-zinc-500 mt-2">Expiring within 30 days</p>
+        </div>
+
+        <!-- System Error Tracking -->
+        <div class="glass rounded-2xl p-5 border-l-4 border-netflix-red">
+          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Error Diagnostics</p>
+          <p class="text-lg font-bold text-white mt-1">Per-Restaurant Logs</p>
+          <p class="text-[11px] text-zinc-400 mt-2">Click card button for logs</p>
+        </div>
+
+      </section>
+
+      <!-- Filter, Search & Sort Bar -->
+      <section class="glass rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+        
+        <!-- Search -->
+        <div class="relative w-full md:w-80">
+          <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" id="searchInput" placeholder="Search by restaurant name or address..." class="w-full bg-zinc-900/80 border border-zinc-700/60 rounded-xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-netflix-red placeholder:text-zinc-500">
+        </div>
+
+        <!-- Filter Chips & Sort -->
+        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          
+          <div class="flex items-center gap-1.5 overflow-x-auto">
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 text-white transition" data-filter="all">All</button>
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition" data-filter="active">Active Today</button>
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition" data-filter="expiring">Expiring Soon</button>
+            <button class="filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition" data-filter="expired">Expired</button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-zinc-500 hidden sm:inline">Sort:</span>
+            <select id="sortSelect" class="bg-zinc-900 border border-zinc-700/60 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-netflix-red">
+              <option value="revenue-desc">Highest Revenue</option>
+              <option value="revenue-asc">Lowest Revenue</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="expiry-asc">License Expiry</option>
+            </select>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- Restaurant Cards Grid -->
+      <section id="restaurantGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Dynamically rendered restaurant cards -->
+      </section>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden glass rounded-3xl py-16 px-4 text-center">
+        <div class="w-16 h-16 mx-auto bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center mb-4 text-zinc-600">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-1">No Restaurants Found</h3>
+        <p class="text-xs text-zinc-400 max-w-sm mx-auto">No restaurants match your active search or filter criteria.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+    import {
+      getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+      browserLocalPersistence, setPersistence,
+    } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+    import {
+      getFirestore, collection, onSnapshot, getDocs,
+    } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: 'AIzaSyDEsgbZY1q50Y4NTmkbYrFmeB3_3-7v2Lw',
+      authDomain: 'molecule-e2e95.firebaseapp.com',
+      projectId: 'molecule-e2e95',
+      storageBucket: 'molecule-e2e95.firebasestorage.app',
+      messagingSenderId: '297835941121',
+      appId: '1:297835941121:web:da4ca719e39fde27ad9f00',
+      measurementId: 'G-XVD2WKKNEK',
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const $ = (id) => document.getElementById(id);
+
+    let restaurants = [];
+    let unsubSnapshot = null;
+    let activeFilter = 'all';
+    let searchQuery = '';
+    let sortOption = 'revenue-desc';
+
+    // ── Authentication ─────────────────────────────────────────────────────────
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+
+    onAuthStateChanged(auth, (user) => {
+      $('initialLoader').classList.add('hidden');
+      if (user) {
+        $('loginView').classList.add('hidden');
+        $('dashView').classList.remove('hidden');
+        startRealtimeListener();
+      } else {
+        if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
+        $('dashView').classList.add('hidden');
+        $('loginView').classList.remove('hidden');
+      }
+    });
+
+    $('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = $('email').value.trim();
+      const password = $('password').value;
+      const btn = $('loginBtn');
+      const errEl = $('loginError');
+      btn.disabled = true;
+      btn.textContent = 'Authenticating...';
+      errEl.classList.add('hidden');
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        errEl.textContent = err.message || 'Authentication failed. Please check credentials.';
+        errEl.classList.remove('hidden');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign in to Console';
+      }
+    });
+
+    $('signOutBtn').addEventListener('click', () => {
+      if (confirm('Sign out of Master Admin Dashboard?')) {
+        signOut(auth);
+      }
+    });
+
+    $('refreshBtn').addEventListener('click', () => {
+      startRealtimeListener();
+    });
+
+    // ── Real-Time Listener on restaurants Collection ───────────────────────────
+    function startRealtimeListener() {
+      if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
+      $('connectionText').textContent = 'Syncing restaurants...';
+
+      const colRef = collection(db, 'restaurants');
+      unsubSnapshot = onSnapshot(colRef, (snapshot) => {
+        $('connectionText').textContent = `Live Sync (${snapshot.docs.length} restaurants)`;
+        restaurants = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            uid: doc.id,
+            ...data,
+          };
+        });
+
+        updateKPIMetrics();
+        renderGrid();
+      }, (err) => {
+        console.error('Firestore listen error:', err);
+        $('connectionText').textContent = 'Sync error: ' + (err.message || 'Access denied');
+      });
+    }
+
+    // ── Metrics Calculation ───────────────────────────────────────────────────
+    function updateKPIMetrics() {
+      let totalRevMinor = 0;
+      let totalOrders = 0;
+      let activeCount = 0;
+      let expiringCount = 0;
+
+      const now = new Date();
+      const thirtyDaysAhead = new Date();
+      thirtyDaysAhead.setDate(now.getDate() + 30);
+
+      restaurants.forEach((r) => {
+        const rev = Number(r.todayRevenue) || 0;
+        totalRevMinor += rev;
+        totalOrders += Number(r.todayOrders) || 0;
+
+        if (r.dayOpen) activeCount++;
+
+        if (r.licenseExpiryDate) {
+          const exp = new Date(r.licenseExpiryDate);
+          if (!isNaN(exp.getTime())) {
+            if (exp <= thirtyDaysAhead) {
+              expiringCount++;
+            }
+          }
+        }
+      });
+
+      const formattedRev = formatCurrency(totalRevMinor / 100);
+      $('navTotalRevenue').textContent = formattedRev;
+      $('kpiTotalRevenue').textContent = formattedRev;
+      $('kpiTotalOrders').textContent = `${totalOrders} total orders today`;
+
+      $('kpiTotalRestaurants').textContent = restaurants.length;
+      $('kpiActiveRestaurants').textContent = `${activeCount} online / open today`;
+
+      $('kpiExpiringCount').textContent = expiringCount;
+      $('kpiExpiringSub').textContent = expiringCount === 1 ? '1 license requires attention' : `${expiringCount} licenses require attention`;
+    }
+
+    // ── Search & Filter Listeners ──────────────────────────────────────────────
+    $('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      renderGrid();
+    });
+
+    $('sortSelect').addEventListener('change', (e) => {
+      sortOption = e.target.value;
+      renderGrid();
+    });
+
+    document.querySelectorAll('.filter-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach((b) => {
+          b.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition';
+        });
+        btn.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 text-white transition';
+        activeFilter = btn.dataset.filter;
+        renderGrid();
+      });
+    });
+
+    // ── Render Restaurant Grid ─────────────────────────────────────────────────
+    function renderGrid() {
+      const grid = $('restaurantGrid');
+      const empty = $('emptyState');
+
+      const now = new Date();
+      const fifteenDaysAhead = new Date();
+      fifteenDaysAhead.setDate(now.getDate() + 15);
+
+      let list = restaurants.filter((r) => {
+        // Search filter
+        if (searchQuery) {
+          const name = (r.name || '').toLowerCase();
+          const addr = (r.address || '').toLowerCase();
+          const phone = (r.phone || '').toLowerCase();
+          if (!name.includes(searchQuery) && !addr.includes(searchQuery) && !phone.includes(searchQuery)) {
+            return false;
+          }
+        }
+
+        // Status chip filter
+        if (activeFilter === 'active') {
+          return !!r.dayOpen;
+        }
+        if (activeFilter === 'expiring') {
+          if (!r.licenseExpiryDate) return false;
+          const exp = new Date(r.licenseExpiryDate);
+          return !isNaN(exp.getTime()) && exp > now && exp <= fifteenDaysAhead;
+        }
+        if (activeFilter === 'expired') {
+          if (!r.licenseExpiryDate) return false;
+          const exp = new Date(r.licenseExpiryDate);
+          return !isNaN(exp.getTime()) && exp < now;
+        }
+
+        return true;
+      });
+
+      // Sorting
+      list.sort((a, b) => {
+        const revA = Number(a.todayRevenue) || 0;
+        const revB = Number(b.todayRevenue) || 0;
+        if (sortOption === 'revenue-desc') return revB - revA;
+        if (sortOption === 'revenue-asc') return revA - revB;
+        if (sortOption === 'name-asc') return (a.name || '').localeCompare(b.name || '');
+        if (sortOption === 'expiry-asc') {
+          const dateA = a.licenseExpiryDate ? new Date(a.licenseExpiryDate).getTime() : Infinity;
+          const dateB = b.licenseExpiryDate ? new Date(b.licenseExpiryDate).getTime() : Infinity;
+          return dateA - dateB;
+        }
+        return 0;
+      });
+
+      if (list.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      grid.innerHTML = list.map((r) => {
+        const revPaise = Number(r.todayRevenue) || 0;
+        const revRupees = revPaise / 100;
+        const orders = Number(r.todayOrders) || 0;
+        const name = r.name || 'Unnamed Restaurant';
+        const address = r.address || 'Address not specified';
+        const phone = r.phone || null;
+        const appVer = r.appVersion ? `v${r.licenseState ? r.appVersion : r.appVersion}` : 'POS';
+        const isOpen = !!r.dayOpen;
+
+        const licenseInfo = getLicenseBadge(r.licenseExpiryDate);
+
+        return `
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
+            
+            <!-- Top Row: Name & Open Status -->
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <h3 class="text-base font-bold text-white leading-snug truncate" title="${escapeHtml(name)}">
+                  ${escapeHtml(name)}
+                </h3>
+                <span class="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold ${isOpen ? 'bg-emerald-950/70 text-emerald-400 border border-emerald-800/60' : 'bg-zinc-800 text-zinc-400'}">
+                  ${isOpen ? '● Open' : 'Closed'}
+                </span>
+              </div>
+
+              <!-- Address -->
+              <div class="flex items-start gap-1.5 text-xs text-zinc-400 mb-2">
+                <svg class="w-3.5 h-3.5 text-zinc-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="line-clamp-2" title="${escapeHtml(address)}">${escapeHtml(address)}</span>
+              </div>
+
+              ${phone ? `
+                <div class="flex items-center gap-1.5 text-[11px] text-zinc-500 mb-3">
+                  <svg class="w-3 h-3 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                  <span>${escapeHtml(phone)}</span>
+                </div>
+              ` : ''}
+
+              <!-- Revenue Block -->
+              <div class="my-4 p-3 rounded-xl bg-zinc-900/90 border border-zinc-800/80">
+                <span class="text-[10px] uppercase font-semibold text-zinc-400 tracking-wider">Today's Revenue</span>
+                <div class="flex items-baseline justify-between mt-1">
+                  <span class="text-2xl font-extrabold text-white font-mono tracking-tight">${formatCurrency(revRupees)}</span>
+                  <span class="text-xs font-medium text-zinc-400">${orders} order${orders === 1 ? '' : 's'}</span>
+                </div>
+              </div>
+
+              <!-- License Status Pill -->
+              <div class="flex items-center justify-between text-xs pt-1 mb-4">
+                <span class="text-zinc-500 text-[11px]">License:</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-semibold ${licenseInfo.badgeClass}">
+                  ${licenseInfo.label}
+                </span>
+              </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="pt-3 border-t border-white/5 flex items-center justify-between gap-2">
+              <span class="text-[10px] text-zinc-600 font-mono">${escapeHtml(appVer)}</span>
+              
+              <!-- Link to Error Logs -->
+              <a href="/errors.html?uid=${encodeURIComponent(r.uid)}&name=${encodeURIComponent(name)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/40 hover:bg-red-900/60 border border-red-800/40 text-xs font-semibold text-red-300 hover:text-white transition shadow-sm">
+                <svg class="w-3.5 h-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <span>Error Logs</span>
+                <svg class="w-3 h-3 text-red-400/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getLicenseBadge(dateStr) {
+      if (!dateStr) {
+        return { label: 'Unlicensed', badgeClass: 'bg-zinc-800 text-zinc-400' };
+      }
+      const exp = new Date(dateStr);
+      if (isNaN(exp.getTime())) {
+        return { label: 'Unknown', badgeClass: 'bg-zinc-800 text-zinc-400' };
+      }
+
+      const now = new Date();
+      const diffMs = exp.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        return { label: `Expired (${dateStr})`, badgeClass: 'bg-red-950/80 text-red-400 border border-red-800/60' };
+      }
+      if (diffDays <= 15) {
+        return { label: `Expires in ${diffDays}d`, badgeClass: 'bg-amber-950/80 text-amber-400 border border-amber-800/60' };
+      }
+      return { label: `Exp: ${dateStr}`, badgeClass: 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/50' };
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(amount || 0);
+    }
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+  </script>
+</body>
+</html>
