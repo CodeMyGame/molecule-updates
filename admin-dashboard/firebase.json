@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "molecule-admin",
     "public": "public",
     "ignore": [
       "firebase.json",

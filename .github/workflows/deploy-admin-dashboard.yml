@@ -1,12 +1,12 @@
 name: Molecule Admin Dashboard Deploy
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'admin-dashboard/**'
   workflow_dispatch:
-    inputs:
-      target:
-        description: 'Firebase Hosting separate site name (e.g. molecule-admin)'
-        required: true
-        default: 'molecule-admin'
 
 jobs:
   build_and_deploy:
@@ -24,4 +24,4 @@ jobs:
           channelId: live
           projectId: molecule-e2e95
           entryPoint: admin-dashboard
-          target: ${{ inputs.target }}
+          target: molecule-admin
