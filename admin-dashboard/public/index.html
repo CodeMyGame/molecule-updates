@@ -257,11 +257,32 @@
     }
 
     // ── Authentication ──
-    setPersistence(auth, browserLocalPersistence).catch(() => {});
+    // ── Master Admin Authorization Whitelist ──
+    const AUTHORIZED_ADMIN_EMAILS = [
+      'admin@moleculepos.com',
+    ];
 
-    onAuthStateChanged(auth, (user) => {
+    function isAuthorizedAdmin(email) {
+      if (!email) return false;
+      const lower = email.toLowerCase().trim();
+      if (AUTHORIZED_ADMIN_EMAILS.includes(lower)) return true;
+      if (lower.endsWith('@moleculepos.com')) return true;
+      return false;
+    }
+
+    onAuthStateChanged(auth, async (user) => {
       $('initialLoader').classList.add('hidden');
       if (user) {
+        if (!isAuthorizedAdmin(user.email)) {
+          console.warn('Unauthorized access attempt by non-admin:', user.email);
+          await signOut(auth);
+          showLogin();
+          const errEl = $('loginError');
+          errEl.textContent = `Access Denied: ${user.email} is an individual restaurant account. Only Master Admin accounts can access this console.`;
+          errEl.classList.remove('hidden');
+          return;
+        }
+
         $('userEmailBadge').textContent = user.email || 'Admin';
         $('currentAccountText').textContent = user.email || 'Unknown';
         showDash();

@@ -529,9 +529,33 @@
       }
     });
 
+    // ── Master Admin Authorization Whitelist ──
+    const AUTHORIZED_ADMIN_EMAILS = [
+      'admin@moleculepos.com',
+    ];
+
+    function isAuthorizedAdmin(email) {
+      if (!email) return false;
+      const lower = email.toLowerCase().trim();
+      if (AUTHORIZED_ADMIN_EMAILS.includes(lower)) return true;
+      if (lower.endsWith('@moleculepos.com')) return true;
+      return false;
+    }
+
     // Auth state observer
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
+        if (!isAuthorizedAdmin(user.email)) {
+          console.warn('Unauthorized access attempt by non-admin:', user.email);
+          await signOut(auth);
+          authSection.style.display = 'block';
+          dashboardSection.style.display = 'none';
+          btnLogout.style.display = 'none';
+          authError.textContent = `Access Denied: ${user.email} is not a Master Admin.`;
+          authError.style.display = 'block';
+          return;
+        }
+
         authSection.style.display = 'none';
         dashboardSection.style.display = 'flex';
         btnLogout.style.display = 'block';
