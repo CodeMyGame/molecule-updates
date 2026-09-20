@@ -59,32 +59,32 @@
     <p class="text-zinc-500 font-medium tracking-wide">Connecting to Master Console...</p>
   </div>
 
-  <!-- Login Modal / View -->
+  <!-- Login View -->
   <div id="loginView" class="hidden min-h-screen flex items-center justify-center p-4 bg-netflix-dark relative overflow-hidden">
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-netflix-red/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-netflix-red/10 rounded-full blur-[100px] pointer-events-none"></div>
     
     <div class="glass w-full max-w-md rounded-2xl p-8 relative z-10 border border-white/10 shadow-2xl">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-netflix-dark border border-zinc-800 shadow-[0_0_35px_rgba(229,9,20,0.35)] mb-4">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-netflix-dark border border-zinc-800 shadow-[0_0_30px_rgba(229,9,20,0.3)] mb-4">
           <svg class="w-8 h-8 text-netflix-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-white tracking-tight">Molecule Master Console</h1>
-        <p class="text-zinc-400 text-sm mt-2">Sign in to monitor all restaurants</p>
+        <h1 class="text-2xl font-bold text-white tracking-tight">Welcome Back</h1>
+        <p class="text-zinc-400 text-sm mt-2">Sign in to Master Admin Dashboard</p>
       </div>
       
       <form id="loginForm" class="space-y-5">
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Admin Email</label>
-          <input type="email" id="email" required class="w-full bg-zinc-900/70 border border-zinc-700/60 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red transition-colors" placeholder="admin@restaurant.com">
+          <input type="email" id="email" required class="w-full bg-zinc-900/70 border border-zinc-700/60 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red transition-colors" placeholder="name@restaurant.com">
         </div>
         <div>
           <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1.5">Password</label>
           <input type="password" id="password" required class="w-full bg-zinc-900/70 border border-zinc-700/60 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-netflix-red focus:ring-1 focus:ring-netflix-red transition-colors" placeholder="••••••••">
         </div>
         <div id="loginError" class="hidden text-netflix-red text-sm font-medium text-center bg-red-950/40 py-2.5 rounded-xl border border-red-900/50"></div>
-        <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-red-700 to-netflix-red hover:from-red-600 hover:to-red-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_25px_rgba(229,9,20,0.4)]">Sign in to Console</button>
+        <button type="submit" id="loginBtn" class="w-full bg-gradient-to-r from-red-700 to-netflix-red hover:from-red-600 hover:to-red-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_25px_rgba(229,9,20,0.4)]">Sign in</button>
       </form>
     </div>
   </div>
@@ -115,11 +115,16 @@
         </div>
 
         <div class="flex items-center gap-3">
+          <div class="hidden md:flex flex-col text-right">
+            <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Signed in as</span>
+            <span id="userEmailBadge" class="text-xs font-semibold text-zinc-200">admin</span>
+          </div>
           <button id="refreshBtn" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition" title="Refresh">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           </button>
-          <button id="signOutBtn" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-red-400 hover:bg-red-950/40 transition" title="Sign Out">
+          <button id="signOutBtn" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-netflix-red hover:bg-red-950/40 transition text-xs font-semibold" title="Sign Out">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            <span>Sign Out</span>
           </button>
         </div>
 
@@ -131,13 +136,26 @@
 
       <!-- Permission Warning Banner (Hidden by default, shown if rules error occurs) -->
       <div id="permissionWarning" class="hidden glass border-l-4 border-amber-500 rounded-2xl p-5 bg-amber-950/30">
-        <div class="flex items-start gap-3">
-          <svg class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
-          <div>
-            <h3 class="text-sm font-bold text-amber-200">Firestore Permission Update Required</h3>
-            <p class="text-xs text-amber-300/80 mt-1">Firestore returned <code>Missing or insufficient permissions</code>. In your <strong>Firebase Console &rarr; Firestore Database &rarr; Rules</strong>, update your rules to allow authenticated reads on restaurants, then click <strong>Publish</strong>.</p>
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+              <h3 class="text-sm font-bold text-amber-200">Firestore Permission Update Required</h3>
+              <p class="text-xs text-amber-300/80 mt-1">
+                Currently signed in as: <strong id="currentAccountText" class="text-white"></strong>.<br>
+                Firestore returned <code>Missing or insufficient permissions</code> because your Firebase Console rules have not yet allowed authenticated reads on <code>restaurants/{rid}</code>.
+              </p>
+              <div class="flex items-center gap-3 mt-3">
+                <button id="switchAccountBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs transition shadow-sm">
+                  Switch / Sign In with Another Account
+                </button>
+                <button id="retrySyncBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold text-xs transition border border-white/5">
+                  Retry Sync
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -225,19 +243,31 @@
     let searchQuery = '';
     let sortOption = 'revenue-desc';
 
-    // ── Authentication ─────────────────────────────────────────────────────────
+    // ── View switching ──
+    function showLogin() {
+      $('loginView').classList.remove('hidden');
+      $('loginView').classList.add('flex');
+      $('dashView').classList.add('hidden');
+    }
+    function showDash() {
+      $('loginView').classList.add('hidden');
+      $('loginView').classList.remove('flex');
+      $('dashView').classList.remove('hidden');
+    }
+
+    // ── Authentication ──
     setPersistence(auth, browserLocalPersistence).catch(() => {});
 
     onAuthStateChanged(auth, (user) => {
       $('initialLoader').classList.add('hidden');
       if (user) {
-        $('loginView').classList.add('hidden');
-        $('dashView').classList.remove('hidden');
+        $('userEmailBadge').textContent = user.email || 'Admin';
+        $('currentAccountText').textContent = user.email || 'Unknown';
+        showDash();
         startRealtimeListener();
       } else {
         if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
-        $('dashView').classList.add('hidden');
-        $('loginView').classList.remove('hidden');
+        showLogin();
       }
     });
 
@@ -248,24 +278,40 @@
       const btn = $('loginBtn');
       const errEl = $('loginError');
       btn.disabled = true;
-      btn.textContent = 'Authenticating...';
+      btn.textContent = 'Signing in…';
       errEl.classList.add('hidden');
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        errEl.textContent = err.message || 'Authentication failed. Please check credentials.';
+      } catch (ex) {
+        const map = {
+          'auth/invalid-credential': 'Incorrect email or password.',
+          'auth/wrong-password': 'Incorrect email or password.',
+          'auth/user-not-found': 'No account found for this email.',
+          'auth/invalid-email': 'Please enter a valid email.',
+          'auth/too-many-requests': 'Too many attempts. Try again later.',
+          'auth/network-request-failed': 'Network error. Check your connection.',
+        };
+        errEl.textContent = map[ex.code] || ex.message || 'Sign-in failed. Please try again.';
         errEl.classList.remove('hidden');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Sign in to Console';
+        btn.textContent = 'Sign in';
       }
     });
 
-    $('signOutBtn').addEventListener('click', () => {
+    $('signOutBtn').addEventListener('click', async () => {
       if (confirm('Sign out of Master Admin Dashboard?')) {
-        signOut(auth);
+        await signOut(auth);
       }
+    });
+
+    $('switchAccountBtn')?.addEventListener('click', async () => {
+      await signOut(auth);
+    });
+
+    $('retrySyncBtn')?.addEventListener('click', () => {
+      startRealtimeListener();
     });
 
     $('refreshBtn').addEventListener('click', () => {
