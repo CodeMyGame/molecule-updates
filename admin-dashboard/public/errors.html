@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>POS System — Restaurant Error Logs</title>
+  <title>Molecule — Restaurant Error Logs</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -16,13 +16,11 @@
       --border: #334155;
       --text: #f8fafc;
       --text-muted: #94a3b8;
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
+      --primary: #e50914;
+      --primary-hover: #b80710;
       --danger: #ef4444;
       --danger-bg: rgba(239, 68, 68, 0.1);
       --warning: #f59e0b;
-      --warning-bg: rgba(245, 158, 11, 0.1);
-      --success: #10b981;
       --accent: #38bdf8;
       --radius: 12px;
       --font-mono: 'JetBrains Mono', monospace;
@@ -85,14 +83,14 @@
       gap: 0.5rem;
     }
     .restaurant-badge {
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.35);
-      color: #818cf8;
-      padding: 0.2rem 0.6rem;
+      background: rgba(229, 9, 20, 0.15);
+      border: 1px solid rgba(229, 9, 20, 0.35);
+      color: #f87171;
+      padding: 0.2rem 0.65rem;
       border-radius: 6px;
       font-size: 0.85rem;
       font-weight: 600;
-      max-width: 250px;
+      max-width: 320px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -193,99 +191,6 @@
       display: none;
     }
 
-    /* Stats Bar */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.15rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    .stat-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-    }
-    .stat-icon.total { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-    .stat-icon.main { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-    .stat-icon.renderer { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-    .stat-icon.ipc { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
-    .stat-info .num { font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
-    .stat-info .label { font-size: 0.8rem; color: var(--text-muted); }
-
-    /* Filters Bar */
-    .filters-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 0.85rem 1.25rem;
-    }
-    .source-tabs {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-    }
-    .source-tab {
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      padding: 0.4rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .source-tab:hover {
-      background: var(--surface-2);
-      color: var(--text);
-    }
-    .source-tab.active {
-      background: var(--surface-2);
-      border-color: var(--border);
-      color: #fff;
-    }
-    .search-wrap {
-      position: relative;
-      min-width: 260px;
-    }
-    .search-input {
-      width: 100%;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.45rem 0.75rem 0.45rem 2.2rem;
-      color: white;
-      font-size: 0.85rem;
-      outline: none;
-    }
-    .search-input:focus { border-color: var(--primary); }
-    .search-icon {
-      position: absolute;
-      left: 0.75rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      pointer-events: none;
-    }
-
     /* Logs Container */
     .logs-container {
       display: flex;
@@ -366,6 +271,10 @@
       padding: 0.15rem 0.45rem;
       border-radius: 4px;
       font-family: var(--font-mono);
+      max-width: 500px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .log-message {
       font-size: 0.95rem;
@@ -377,7 +286,7 @@
     .stack-toggle {
       background: transparent;
       border: none;
-      color: var(--primary);
+      color: #38bdf8;
       font-size: 0.8rem;
       cursor: pointer;
       text-align: left;
@@ -403,27 +312,13 @@
       display: none;
     }
     .stack-trace.show { display: block; }
-
-    /* Restaurant select dropdown for switcher */
-    .restaurant-picker {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.45rem 0.75rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      outline: none;
-      max-width: 250px;
-    }
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { 
       getFirestore, 
       doc, 
-      onSnapshot,
-      collection,
-      getDocs
+      onSnapshot 
     } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
     import { 
       getAuth, 
@@ -449,11 +344,9 @@
     // State
     const urlParams = new URLSearchParams(window.location.search);
     let currentUid = urlParams.get('uid') || '';
-    let currentRestaurantName = urlParams.get('name') || 'Select Restaurant';
+    let currentRestaurantName = urlParams.get('name') || 'Restaurant';
     let selectedDate = getTodayString();
     let currentLogs = [];
-    let currentFilterSource = 'ALL';
-    let currentSearchTerm = '';
     let unsubscribeErrors = null;
 
     function getTodayString() {
@@ -473,61 +366,12 @@
     const btnLogout = document.getElementById('btn-logout');
     const logsContainer = document.getElementById('logs-container');
     const restaurantNameEl = document.getElementById('restaurant-name');
-    const restaurantPicker = document.getElementById('restaurant-picker');
     const datePicker = document.getElementById('date-picker');
     const btnToday = document.getElementById('btn-today');
     const btnYesterday = document.getElementById('btn-yesterday');
-    const searchInput = document.getElementById('search-input');
-    const sourceTabs = document.querySelectorAll('.source-tab');
-
-    // Stat counters
-    const countTotal = document.getElementById('count-total');
-    const countMain = document.getElementById('count-main');
-    const countRenderer = document.getElementById('count-renderer');
-    const countIpc = document.getElementById('count-ipc');
 
     // Date init
     datePicker.value = selectedDate;
-
-    // Load available restaurants for quick-switching
-    async function loadRestaurantsDropdown() {
-      try {
-        const snap = await getDocs(collection(db, 'restaurants'));
-        restaurantPicker.innerHTML = '<option value="">-- Switch Restaurant --</option>';
-        snap.forEach(docSnap => {
-          const data = docSnap.data();
-          const opt = document.createElement('option');
-          opt.value = docSnap.id;
-          opt.textContent = data.name || docSnap.id;
-          if (docSnap.id === currentUid) {
-            opt.selected = true;
-            if (data.name) {
-              currentRestaurantName = data.name;
-              restaurantNameEl.textContent = data.name;
-            }
-          }
-          restaurantPicker.appendChild(opt);
-        });
-      } catch (err) {
-        console.warn("Could not populate restaurant picker:", err);
-      }
-    }
-
-    restaurantPicker.addEventListener('change', (e) => {
-      const val = e.target.value;
-      if (val) {
-        const selectedOpt = e.target.options[e.target.selectedIndex];
-        currentUid = val;
-        currentRestaurantName = selectedOpt.textContent;
-        restaurantNameEl.textContent = currentRestaurantName;
-        // Update URL
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('uid', currentUid);
-        newUrl.searchParams.set('name', currentRestaurantName);
-        window.history.pushState({}, '', newUrl);
-        listenToLogs();
-      }
-    });
 
     // ── Master Admin Authorization Whitelist ──
     const AUTHORIZED_ADMIN_EMAILS = [
@@ -562,7 +406,6 @@
         if (currentRestaurantName) {
           restaurantNameEl.textContent = currentRestaurantName;
         }
-        loadRestaurantsDropdown();
         listenToLogs();
       } else {
         if (unsubscribeErrors) unsubscribeErrors();
@@ -613,22 +456,6 @@
       listenToLogs();
     });
 
-    // Filter by Source
-    sourceTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        sourceTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        currentFilterSource = tab.dataset.source;
-        renderLogs();
-      });
-    });
-
-    // Search
-    searchInput.addEventListener('input', (e) => {
-      currentSearchTerm = e.target.value.toLowerCase();
-      renderLogs();
-    });
-
     // Firestore listener for target restaurant
     function listenToLogs() {
       if (unsubscribeErrors) unsubscribeErrors();
@@ -637,18 +464,17 @@
         logsContainer.innerHTML = `
           <div class="empty-state">
             <span class="empty-icon">🏢</span>
-            <div class="empty-title">No Restaurant Selected</div>
-            <p>Please select a restaurant from the dropdown above or navigate from the Master Dashboard.</p>
+            <div class="empty-title">No Restaurant Specified</div>
+            <p>Please navigate here by clicking "Error Logs" on a restaurant card in the Master Admin Dashboard.</p>
           </div>
         `;
-        updateStats([]);
         return;
       }
 
       logsContainer.innerHTML = `
         <div class="empty-state">
           <div class="empty-title">Loading Logs...</div>
-          <p>Connecting to diagnostic log stream for ${currentRestaurantName}...</p>
+          <p>Connecting to diagnostic log stream for ${escapeHtml(currentRestaurantName)}...</p>
         </div>
       `;
 
@@ -658,11 +484,12 @@
       unsubscribeErrors = onSnapshot(logDocRef, (docSnap) => {
         if (docSnap.exists()) {
           const data = docSnap.data();
-          currentLogs = (data.logs || []).slice().reverse(); // Show latest first
+          // Support both 'errors' (standard from error-logger) and 'logs'
+          const rawList = (data && (data.errors || data.logs)) || [];
+          currentLogs = rawList.slice().reverse(); // Show latest first
         } else {
           currentLogs = [];
         }
-        updateStats(currentLogs);
         renderLogs();
       }, (err) => {
         console.error("Error reading error logs:", err);
@@ -676,51 +503,47 @@
       });
     }
 
-    function updateStats(logs) {
-      countTotal.textContent = logs.length;
-      countMain.textContent = logs.filter(l => (l.source || '').toLowerCase() === 'main').length;
-      countRenderer.textContent = logs.filter(l => (l.source || '').toLowerCase() === 'renderer').length;
-      countIpc.textContent = logs.filter(l => (l.source || '').toLowerCase() === 'ipc').length;
-    }
-
     function renderLogs() {
-      const filtered = currentLogs.filter(log => {
-        const matchesSource = currentFilterSource === 'ALL' || 
-          (log.source || '').toUpperCase() === currentFilterSource;
-        
-        const term = currentSearchTerm.trim();
-        const matchesSearch = !term || 
-          (log.message || '').toLowerCase().includes(term) ||
-          (log.stack || '').toLowerCase().includes(term) ||
-          (log.context || '').toLowerCase().includes(term);
-
-        return matchesSource && matchesSearch;
-      });
-
-      if (filtered.length === 0) {
+      if (currentLogs.length === 0) {
         logsContainer.innerHTML = `
           <div class="empty-state">
             <span class="empty-icon">✨</span>
             <div class="empty-title">No Errors Found</div>
-            <p>${currentLogs.length === 0 ? `Zero error logs recorded on ${selectedDate} for this restaurant.` : 'No errors match your active filter / search.'}</p>
+            <p>Zero error logs recorded on ${selectedDate} for this restaurant.</p>
           </div>
         `;
         return;
       }
 
-      logsContainer.innerHTML = filtered.map((log, index) => {
+      logsContainer.innerHTML = currentLogs.map((log, index) => {
         const src = (log.source || 'main').toLowerCase();
-        const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : 'Unknown';
+        let dateStr = 'Unknown';
+        if (log.timestamp) {
+          try {
+            const d = new Date(log.timestamp);
+            dateStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + d.toLocaleDateString();
+          } catch {
+            dateStr = String(log.timestamp);
+          }
+        }
         const hasStack = Boolean(log.stack && log.stack.trim());
         const stackId = `stack-${index}`;
+        let ctxStr = '';
+        if (log.context) {
+          try {
+            ctxStr = typeof log.context === 'string' ? log.context : JSON.stringify(log.context);
+          } catch {
+            ctxStr = '';
+          }
+        }
 
         return `
           <div class="log-item source-${src}">
             <div class="log-header">
               <div class="log-meta">
-                <span class="badge-source ${src}">${log.source || 'MAIN'}</span>
-                <span class="log-time">${dateStr}</span>
-                ${log.context ? `<span class="log-context">${escapeHtml(log.context)}</span>` : ''}
+                <span class="badge-source ${src}">${escapeHtml(log.source || 'MAIN')}</span>
+                <span class="log-time">${escapeHtml(dateStr)}</span>
+                ${ctxStr ? `<span class="log-context" title="${escapeHtml(ctxStr)}">${escapeHtml(ctxStr)}</span>` : ''}
               </div>
             </div>
             <div class="log-message">${escapeHtml(log.message || 'Unknown error occurred')}</div>
@@ -769,9 +592,6 @@
           Error Logs:
           <span class="restaurant-badge" id="restaurant-name">Loading...</span>
         </div>
-        <select id="restaurant-picker" class="restaurant-picker" title="Switch Restaurant">
-          <option value="">Switch Restaurant...</option>
-        </select>
       </div>
       <div class="header-controls">
         <button class="date-btn active" id="btn-today">Today</button>
@@ -789,7 +609,7 @@
     <form id="login-form">
       <div class="form-group">
         <label for="email">Admin Email</label>
-        <input type="email" id="email" required placeholder="admin@example.com" />
+        <input type="email" id="email" required placeholder="admin@moleculepos.com" />
       </div>
       <div class="form-group">
         <label for="password">Password</label>
@@ -802,53 +622,6 @@
 
   <!-- Dashboard Main Content -->
   <main id="dashboard-section" style="display: none;">
-    <!-- Stats Row -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon total">⚠️</div>
-        <div class="stat-info">
-          <div class="num" id="count-total">0</div>
-          <div class="label">Total Errors Logged</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon main">⚙️</div>
-        <div class="stat-info">
-          <div class="num" id="count-main">0</div>
-          <div class="label">Main Process Errors</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon renderer">🖥️</div>
-        <div class="stat-info">
-          <div class="num" id="count-renderer">0</div>
-          <div class="label">Renderer / UI Errors</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon ipc">🔄</div>
-        <div class="stat-info">
-          <div class="num" id="count-ipc">0</div>
-          <div class="label">IPC / Bridge Errors</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filters Bar -->
-    <div class="filters-bar">
-      <div class="source-tabs">
-        <button class="source-tab active" data-source="ALL">All Sources</button>
-        <button class="source-tab" data-source="MAIN">Main</button>
-        <button class="source-tab" data-source="RENDERER">Renderer</button>
-        <button class="source-tab" data-source="IPC">IPC</button>
-        <button class="source-tab" data-source="PROCESS">Process</button>
-      </div>
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-input" id="search-input" placeholder="Search error messages or traces..." />
-      </div>
-    </div>
-
     <!-- Error Logs List -->
     <div class="logs-container" id="logs-container">
       <div class="empty-state">
