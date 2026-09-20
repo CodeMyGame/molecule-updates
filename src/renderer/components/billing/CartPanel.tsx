@@ -719,11 +719,6 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                       <p className="text-xs font-medium text-gray-900 truncate">
                                         {getName(item.menuItem)}
                                       </p>
-                                      {item.sourceTableName && (
-                                        <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                          {item.sourceTableName}
-                                        </span>
-                                      )}
                                     </div>
                                     {item.variation && (
                                       <p className="text-[10px] text-gray-500">{item.variation.name}</p>
@@ -857,11 +852,6 @@ const CartPanel: React.FC<CartPanelProps> = ({
                             <p className="text-xs font-medium text-gray-900 truncate">
                               {getName(item.menuItem)}
                             </p>
-                            {item.sourceTableName && (
-                              <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                                {item.sourceTableName}
-                              </span>
-                            )}
                           </div>
                           {item.variation && (
                             <p className="text-[10px] text-gray-500">{item.variation.name}</p>

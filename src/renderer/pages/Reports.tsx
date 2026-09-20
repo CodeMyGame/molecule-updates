@@ -1496,47 +1496,104 @@ const Reports: React.FC = () => {
                         ) : (
                           <p className="text-sm text-gray-400">{t('reports.noItems')}</p>
                         )
-                      ) : (
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="text-gray-400 border-b border-gray-200">
-                              <th className="text-left pb-1.5 font-medium w-8">#</th>
-                              <th className="text-left pb-1.5 font-medium">{t('reports.item')}</th>
-                              <th className="text-center pb-1.5 font-medium w-16">{t('common.qty')}</th>
-                              <th className="text-right pb-1.5 font-medium w-24">{t('reports.unitPrice')}</th>
-                              <th className="text-right pb-1.5 font-medium w-24">{t('reports.total')}</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {expandedOrderItems.map((item: any, idx: number) => (
-                              <tr key={item.id} className="border-b border-gray-100 last:border-0">
-                                <td className="py-1.5 text-gray-400">{idx + 1}</td>
-                                <td className="py-1.5 text-gray-800 font-medium">
-                                  <div className="flex items-center gap-1.5 flex-wrap">
-                                    <span>{item.name}</span>
-                                    {item.sourceTableName && (
-                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
-                                        {item.sourceTableName}
-                                      </span>
-                                    )}
-                                  </div>
-                                  {item.addons?.length > 0 && (
-                                    <span className="block text-[10px] text-gray-400 font-normal">
-                                      + {item.addons.map((a: any) => a.name).join(', ')}
-                                    </span>
-                                  )}
-                                  {item.notes && (
-                                    <span className="block text-[10px] text-yellow-600 font-normal">* {item.notes}</span>
-                                  )}
-                                </td>
-                                <td className="py-1.5 text-center text-gray-600">{item.quantity}</td>
-                                <td className="py-1.5 text-right text-gray-600">{formatCurrency(item.unitPrice ?? item.unit_price)}</td>
-                                <td className="py-1.5 text-right font-semibold text-gray-800">{formatCurrency((item.unitPrice ?? item.unit_price) * item.quantity)}</td>
+                      ) : (() => {
+                        const defaultTable = order.tableName || (order.tableId ? `Table #${order.tableId}` : null);
+                        const distinctTables = Array.from(
+                          new Set(
+                            expandedOrderItems
+                              .map((it: any) => (it.sourceTableName || defaultTable || '').trim())
+                              .filter(Boolean)
+                          )
+                        );
+                        const hasMultipleTables = distinctTables.length > 1;
+
+                        const tableGroups: { tableName: string; items: any[] }[] = [];
+                        if (hasMultipleTables) {
+                          const map: Record<string, any[]> = {};
+                          expandedOrderItems.forEach((it: any) => {
+                            const tbl = (it.sourceTableName || defaultTable || t('reports.mainOrder', 'Main Order')).trim();
+                            if (!map[tbl]) {
+                              map[tbl] = [];
+                              tableGroups.push({ tableName: tbl, items: map[tbl] });
+                            }
+                            map[tbl].push(it);
+                          });
+                        }
+
+                        return (
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="text-gray-400 border-b border-gray-200">
+                                <th className="text-left pb-1.5 font-medium w-8">#</th>
+                                <th className="text-left pb-1.5 font-medium">{t('reports.item')}</th>
+                                <th className="text-center pb-1.5 font-medium w-16">{t('common.qty')}</th>
+                                <th className="text-right pb-1.5 font-medium w-24">{t('reports.unitPrice')}</th>
+                                <th className="text-right pb-1.5 font-medium w-24">{t('reports.total')}</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
+                            </thead>
+                            <tbody>
+                              {hasMultipleTables ? (
+                                tableGroups.map((grp) => (
+                                  <React.Fragment key={grp.tableName}>
+                                    <tr className="bg-indigo-50/80 border-y border-indigo-100/80">
+                                      <td colSpan={5} className="py-1 px-2.5">
+                                        <div className="flex items-center justify-between">
+                                          <span className="font-semibold text-indigo-900 flex items-center gap-1.5 text-[11px]">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                            {grp.tableName}
+                                          </span>
+                                          <span className="text-[10px] text-indigo-600 font-medium">
+                                            {grp.items.length} {grp.items.length === 1 ? t('common.item', 'item') : t('common.items', 'items')}
+                                          </span>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                    {grp.items.map((item: any, idx: number) => (
+                                      <tr key={item.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
+                                        <td className="py-1.5 text-gray-400">{idx + 1}</td>
+                                        <td className="py-1.5 text-gray-800 font-medium">
+                                          <span>{item.name}</span>
+                                          {item.addons?.length > 0 && (
+                                            <span className="block text-[10px] text-gray-400 font-normal">
+                                              + {item.addons.map((a: any) => a.name).join(', ')}
+                                            </span>
+                                          )}
+                                          {item.notes && (
+                                            <span className="block text-[10px] text-yellow-600 font-normal">* {item.notes}</span>
+                                          )}
+                                        </td>
+                                        <td className="py-1.5 text-center text-gray-600">{item.quantity}</td>
+                                        <td className="py-1.5 text-right text-gray-600">{formatCurrency(item.unitPrice ?? item.unit_price)}</td>
+                                        <td className="py-1.5 text-right font-semibold text-gray-800">{formatCurrency((item.unitPrice ?? item.unit_price) * item.quantity)}</td>
+                                      </tr>
+                                    ))}
+                                  </React.Fragment>
+                                ))
+                              ) : (
+                                expandedOrderItems.map((item: any, idx: number) => (
+                                  <tr key={item.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
+                                    <td className="py-1.5 text-gray-400">{idx + 1}</td>
+                                    <td className="py-1.5 text-gray-800 font-medium">
+                                      <span>{item.name}</span>
+                                      {item.addons?.length > 0 && (
+                                        <span className="block text-[10px] text-gray-400 font-normal">
+                                          + {item.addons.map((a: any) => a.name).join(', ')}
+                                        </span>
+                                      )}
+                                      {item.notes && (
+                                        <span className="block text-[10px] text-yellow-600 font-normal">* {item.notes}</span>
+                                      )}
+                                    </td>
+                                    <td className="py-1.5 text-center text-gray-600">{item.quantity}</td>
+                                    <td className="py-1.5 text-right text-gray-600">{formatCurrency(item.unitPrice ?? item.unit_price)}</td>
+                                    <td className="py-1.5 text-right font-semibold text-gray-800">{formatCurrency((item.unitPrice ?? item.unit_price) * item.quantity)}</td>
+                                  </tr>
+                                ))
+                              )}
+                            </tbody>
+                          </table>
+                        );
+                      })()}
                     </td>
                   </tr>
                 )}
