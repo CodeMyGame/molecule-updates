@@ -432,24 +432,15 @@
       onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-    let firebaseConfig = null;
-    try {
-      const response = await fetch('/firebase-config.json');
-      if (response.ok) {
-        firebaseConfig = await response.json();
-      }
-    } catch(e) {}
-
-    if (!firebaseConfig) {
-      firebaseConfig = {
-        apiKey: "AIzaSyDummyConfigReplaceIfDirectHost",
-        authDomain: "inventory-and-pos-3f268.firebaseapp.com",
-        projectId: "inventory-and-pos-3f268",
-        storageBucket: "inventory-and-pos-3f268.appspot.com",
-        messagingSenderId: "338902888806",
-        appId: "1:338902888806:web:65134701e6ce4362b9a103"
-      };
-    }
+    const firebaseConfig = {
+      apiKey: 'AIzaSyDEsgbZY1q50Y4NTmkbYrFmeB3_3-7v2Lw',
+      authDomain: 'molecule-e2e95.firebaseapp.com',
+      projectId: 'molecule-e2e95',
+      storageBucket: 'molecule-e2e95.firebasestorage.app',
+      messagingSenderId: '297835941121',
+      appId: '1:297835941121:web:da4ca719e39fde27ad9f00',
+      measurementId: 'G-XVD2WKKNEK',
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);

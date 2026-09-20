@@ -115,10 +115,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <div class="hidden sm:flex flex-col text-right">
-            <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">Today's Total Network Sales</span>
-            <span id="navTotalRevenue" class="text-emerald-400 font-bold font-mono text-sm">₹0.00</span>
-          </div>
           <button id="refreshBtn" class="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition" title="Refresh">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
           </button>
@@ -133,38 +129,18 @@
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-8 space-y-6">
 
-      <!-- Master KPI Metrics Bar -->
-      <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        <!-- Total Combined Revenue -->
-        <div class="glass rounded-2xl p-5 border-l-4 border-emerald-500">
-          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Today's Total Revenue</p>
-          <p id="kpiTotalRevenue" class="text-2xl sm:text-3xl font-extrabold text-white font-mono">₹0.00</p>
-          <p id="kpiTotalOrders" class="text-[11px] text-zinc-500 mt-2">0 orders across network</p>
+      <!-- Permission Warning Banner (Hidden by default, shown if rules error occurs) -->
+      <div id="permissionWarning" class="hidden glass border-l-4 border-amber-500 rounded-2xl p-5 bg-amber-950/30">
+        <div class="flex items-start gap-3">
+          <svg class="w-6 h-6 text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <h3 class="text-sm font-bold text-amber-200">Firestore Permission Update Required</h3>
+            <p class="text-xs text-amber-300/80 mt-1">Firestore returned <code>Missing or insufficient permissions</code>. In your <strong>Firebase Console &rarr; Firestore Database &rarr; Rules</strong>, update your rules to allow authenticated reads on restaurants, then click <strong>Publish</strong>.</p>
+          </div>
         </div>
-
-        <!-- Total Restaurants -->
-        <div class="glass rounded-2xl p-5 border-l-4 border-blue-500">
-          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Total Restaurants</p>
-          <p id="kpiTotalRestaurants" class="text-2xl sm:text-3xl font-extrabold text-white">0</p>
-          <p id="kpiActiveRestaurants" class="text-[11px] text-emerald-400 mt-2">0 active today</p>
-        </div>
-
-        <!-- License Health -->
-        <div class="glass rounded-2xl p-5 border-l-4 border-amber-500">
-          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">License Expiries</p>
-          <p id="kpiExpiringCount" class="text-2xl sm:text-3xl font-extrabold text-white">0</p>
-          <p id="kpiExpiringSub" class="text-[11px] text-zinc-500 mt-2">Expiring within 30 days</p>
-        </div>
-
-        <!-- System Error Tracking -->
-        <div class="glass rounded-2xl p-5 border-l-4 border-netflix-red">
-          <p class="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1">Error Diagnostics</p>
-          <p class="text-lg font-bold text-white mt-1">Per-Restaurant Logs</p>
-          <p class="text-[11px] text-zinc-400 mt-2">Click card button for logs</p>
-        </div>
-
-      </section>
+      </div>
 
       <!-- Filter, Search & Sort Bar -->
       <section class="glass rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -303,7 +279,8 @@
 
       const colRef = collection(db, 'restaurants');
       unsubSnapshot = onSnapshot(colRef, (snapshot) => {
-        $('connectionText').textContent = `Live Sync (${snapshot.docs.length} restaurants)`;
+        $('permissionWarning').classList.add('hidden');
+        $('connectionText').textContent = `Live Sync (${snapshot.docs.length} restaurant${snapshot.docs.length === 1 ? '' : 's'})`;
         restaurants = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -312,52 +289,14 @@
           };
         });
 
-        updateKPIMetrics();
         renderGrid();
       }, (err) => {
         console.error('Firestore listen error:', err);
         $('connectionText').textContent = 'Sync error: ' + (err.message || 'Access denied');
-      });
-    }
-
-    // ── Metrics Calculation ───────────────────────────────────────────────────
-    function updateKPIMetrics() {
-      let totalRevMinor = 0;
-      let totalOrders = 0;
-      let activeCount = 0;
-      let expiringCount = 0;
-
-      const now = new Date();
-      const thirtyDaysAhead = new Date();
-      thirtyDaysAhead.setDate(now.getDate() + 30);
-
-      restaurants.forEach((r) => {
-        const rev = Number(r.todayRevenue) || 0;
-        totalRevMinor += rev;
-        totalOrders += Number(r.todayOrders) || 0;
-
-        if (r.dayOpen) activeCount++;
-
-        if (r.licenseExpiryDate) {
-          const exp = new Date(r.licenseExpiryDate);
-          if (!isNaN(exp.getTime())) {
-            if (exp <= thirtyDaysAhead) {
-              expiringCount++;
-            }
-          }
+        if (err.code === 'permission-denied' || (err.message && err.message.toLowerCase().includes('permission'))) {
+          $('permissionWarning').classList.remove('hidden');
         }
       });
-
-      const formattedRev = formatCurrency(totalRevMinor / 100);
-      $('navTotalRevenue').textContent = formattedRev;
-      $('kpiTotalRevenue').textContent = formattedRev;
-      $('kpiTotalOrders').textContent = `${totalOrders} total orders today`;
-
-      $('kpiTotalRestaurants').textContent = restaurants.length;
-      $('kpiActiveRestaurants').textContent = `${activeCount} online / open today`;
-
-      $('kpiExpiringCount').textContent = expiringCount;
-      $('kpiExpiringSub').textContent = expiringCount === 1 ? '1 license requires attention' : `${expiringCount} licenses require attention`;
     }
 
     // ── Search & Filter Listeners ──────────────────────────────────────────────
