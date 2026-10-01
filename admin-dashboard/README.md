@@ -12,7 +12,7 @@ Multi-tenant administration dashboard for Molecule POS.
   - POS App Version and Heartbeat timestamp
 - **Restaurant Error Logs**: Click "Error Logs" on any restaurant card to open the dedicated error inspector for that restaurant.
 - **Search & Sort**: Filter by restaurant name, address, or license status. Sort by revenue, name, or expiry date.
-- **Zero Build Step**: Standalone static HTML/JS + Tailwind CSS CDN + Firebase Web SDK.
+- **Zero Build Step**: Standalone static HTML/JS + a shared plain-CSS design system (`public/liquid-glass.css`, Apple HIG / "Liquid Glass" styling with automatic light & dark mode) + Firebase Web SDK.
 
 ### Deploy to Firebase Hosting
 

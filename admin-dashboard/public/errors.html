@@ -4,315 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Molecule — Restaurant Error Logs</title>
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0b0f19;
-      --surface: #111827;
-      --surface-2: #1e293b;
-      --border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #e50914;
-      --primary-hover: #b80710;
-      --danger: #ef4444;
-      --danger-bg: rgba(239, 68, 68, 0.1);
-      --warning: #f59e0b;
-      --accent: #38bdf8;
-      --radius: 12px;
-      --font-mono: 'JetBrains Mono', monospace;
-    }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background: rgba(17, 24, 39, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 1rem 1.5rem;
-    }
-    .header-inner {
-      max-width: 1400px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .brand-section {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 0.45rem 0.85rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    .back-btn:hover {
-      background: var(--border);
-      color: #fff;
-    }
-    .brand-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .restaurant-badge {
-      background: rgba(229, 9, 20, 0.15);
-      border: 1px solid rgba(229, 9, 20, 0.35);
-      color: #f87171;
-      padding: 0.2rem 0.65rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      max-width: 320px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .header-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    .date-input {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.45rem 0.75rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      outline: none;
-      cursor: pointer;
-    }
-    .date-input:focus {
-      border-color: var(--primary);
-    }
-    .date-btn {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 0.45rem 0.75rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .date-btn:hover, .date-btn.active {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-    }
-
-    main {
-      flex: 1;
-      max-width: 1400px;
-      margin: 0 auto;
-      width: 100%;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    /* Auth Banner */
-    .auth-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2.5rem;
-      max-width: 440px;
-      margin: 4rem auto;
-      text-align: center;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
-    }
-    .auth-card h2 { margin-bottom: 0.5rem; font-size: 1.4rem; }
-    .auth-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
-    .form-group { margin-bottom: 1rem; text-align: left; }
-    .form-group label { display: block; font-size: 0.8rem; font-weight: 500; margin-bottom: 0.35rem; color: var(--text-muted); }
-    .form-group input {
-      width: 100%;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.65rem 0.85rem;
-      color: white;
-      font-size: 0.9rem;
-      outline: none;
-    }
-    .form-group input:focus { border-color: var(--primary); }
-    .auth-btn {
-      width: 100%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 0.75rem;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 0.5rem;
-      transition: background 0.2s;
-    }
-    .auth-btn:hover { background: var(--primary-hover); }
-    .auth-error {
-      background: var(--danger-bg);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-      padding: 0.6rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      margin-top: 1rem;
-      display: none;
-    }
-
-    /* Logs Container */
-    .logs-container {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    .empty-state {
-      background: var(--surface);
-      border: 1px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 3.5rem 1.5rem;
-      text-align: center;
-      color: var(--text-muted);
-    }
-    .empty-icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.75rem;
-      display: block;
-    }
-    .empty-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 0.25rem;
-    }
-
-    /* Error Log Card */
-    .log-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 4px solid var(--danger);
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      transition: background 0.15s;
-    }
-    .log-item.source-renderer { border-left-color: var(--warning); }
-    .log-item.source-ipc { border-left-color: var(--accent); }
-    .log-item.source-process { border-left-color: #a855f7; }
-
-    .log-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .log-meta {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .badge-source {
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-    }
-    .badge-source.renderer { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-    .badge-source.ipc { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
-    .badge-source.process { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
-
-    .log-time {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-    }
-    .log-context {
-      font-size: 0.75rem;
-      background: var(--surface-2);
-      color: var(--text-muted);
-      padding: 0.15rem 0.45rem;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      max-width: 500px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .log-message {
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #f1f5f9;
-      line-height: 1.4;
-      word-break: break-word;
-    }
-    .stack-toggle {
-      background: transparent;
-      border: none;
-      color: #38bdf8;
-      font-size: 0.8rem;
-      cursor: pointer;
-      text-align: left;
-      padding: 0;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-    .stack-toggle:hover { text-decoration: underline; }
-    .stack-trace {
-      background: #080c14;
-      border: 1px solid #1e293b;
-      border-radius: 6px;
-      padding: 0.85rem;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: #94a3b8;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-      margin-top: 0.35rem;
-      display: none;
-    }
-    .stack-trace.show { display: block; }
-  </style>
+  <!-- Inter is only a fallback for non-Apple platforms; Apple devices use SF Pro via the system font stack. -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/liquid-glass.css?v=1" />
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { 
@@ -581,49 +280,58 @@
     }
   </script>
 </head>
-<body>
-  <header>
-    <div class="header-inner">
+<body class="lg page-errors">
+  <div class="lg-backdrop" aria-hidden="true"></div>
+
+  <header class="navbar">
+    <div class="navbar-inner header-inner">
       <div class="brand-section">
-        <a href="index.html" class="back-btn">
-          ← Back to All Restaurants
+        <a href="index.html" class="back-btn btn btn-glass">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 19l-7-7 7-7"/></svg>
+          <span>All Restaurants</span>
         </a>
-        <div class="brand-title">
-          Error Logs:
+        <h1 class="brand-title">
+          Error Logs
           <span class="restaurant-badge" id="restaurant-name">Loading...</span>
-        </div>
+        </h1>
       </div>
       <div class="header-controls">
-        <button class="date-btn active" id="btn-today">Today</button>
-        <button class="date-btn" id="btn-yesterday">Yesterday</button>
+        <div class="segmented" role="group" aria-label="Quick date">
+          <button class="date-btn active" id="btn-today">Today</button>
+          <button class="date-btn" id="btn-yesterday">Yesterday</button>
+        </div>
+        <label for="date-picker" class="sr-only">Log date</label>
         <input type="date" class="date-input" id="date-picker" />
-        <button id="btn-logout" class="date-btn" style="display: none;">Logout</button>
+        <button id="btn-logout" class="date-btn logout-btn btn btn-glass" style="display: none;">Logout</button>
       </div>
     </div>
   </header>
 
   <!-- Login Form -->
-  <div id="auth-section" class="auth-card" style="display: none;">
-    <h2>Admin Sign In</h2>
-    <p>Sign in with your master admin credentials to view restaurant error logs</p>
-    <form id="login-form">
+  <div id="auth-section" class="auth-card auth-panel glass sheen" style="display: none;">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h2 class="auth-title">Admin Sign In</h2>
+    <p class="auth-sub">Sign in with your master admin credentials to view restaurant error logs</p>
+    <form id="login-form" class="auth-form">
       <div class="form-group">
         <label for="email">Admin Email</label>
-        <input type="email" id="email" required placeholder="admin@moleculepos.com" />
+        <input type="email" id="email" class="field" required autocomplete="username" placeholder="admin@moleculepos.com" />
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" required placeholder="••••••••" />
+        <input type="password" id="password" class="field" required autocomplete="current-password" placeholder="••••••••" />
       </div>
-      <button type="submit" class="auth-btn">Sign In</button>
-      <div id="auth-error" class="auth-error"></div>
+      <button type="submit" class="auth-btn btn btn-primary btn-lg btn-block">Sign In</button>
+      <div id="auth-error" class="auth-error alert" role="alert"></div>
     </form>
   </div>
 
   <!-- Dashboard Main Content -->
-  <main id="dashboard-section" style="display: none;">
+  <main id="dashboard-section" class="page" style="display: none;">
     <!-- Error Logs List -->
-    <div class="logs-container" id="logs-container">
+    <div class="logs-container" id="logs-container" aria-live="polite">
       <div class="empty-state">
         <div class="empty-title">Loading Logs...</div>
         <p>Connecting to diagnostic log stream...</p>
