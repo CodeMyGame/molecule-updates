@@ -13,6 +13,35 @@
   <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
+
+  <script>
+    // Early capture of beforeinstallprompt so it is NEVER missed
+    window.deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e) {
+      e.preventDefault();
+      window.deferredPrompt = e;
+      console.log('[PWA] beforeinstallprompt captured!');
+      window.dispatchEvent(new CustomEvent('pwa-prompt-ready'));
+    });
+
+    window.addEventListener('appinstalled', function() {
+      window.deferredPrompt = null;
+      console.log('[PWA] Molecule installed to home screen!');
+      window.dispatchEvent(new CustomEvent('pwa-installed'));
+    });
+
+    // Register Service Worker early
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+        .then(function(reg) {
+          console.log('[PWA] Service Worker registered:', reg.scope);
+        })
+        .catch(function(err) {
+          console.error('[PWA] Service Worker registration failed:', err);
+        });
+    }
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
@@ -472,116 +501,20 @@
   </div>
 </div>
 
-<!-- Install Instructions Modal -->
-<div id="installModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md fade-up">
-  <div class="glass w-full max-w-md rounded-3xl p-6 border border-zinc-800 shadow-2xl relative">
-    
-    <!-- Close button -->
-    <button id="closeInstallModalBtn" type="button" class="absolute top-4 right-4 p-2 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+<!-- iOS Safari Add-to-Home-Screen Pointer (only shown on iOS where Apple restricts programmatic install) -->
+<div id="iosInstallPrompt" class="hidden fixed bottom-6 inset-x-4 max-w-sm mx-auto z-50 fade-up">
+  <div class="glass border border-sky-500/40 bg-zinc-950/95 shadow-2xl rounded-2xl p-4 text-center relative">
+    <button id="closeIosPromptBtn" type="button" class="absolute top-2.5 right-2.5 p-1 text-zinc-400 hover:text-white">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
     </button>
-
-    <!-- Modal Header -->
-    <div class="flex items-center gap-3.5 mb-5">
-      <img src="/icon-192.png" alt="Molecule" class="w-14 h-14 rounded-2xl shadow-lg border border-white/10 shrink-0">
-      <div>
-        <h3 class="text-lg font-bold text-white leading-tight">Molecule Dashboard</h3>
-        <p class="text-xs text-zinc-400 mt-0.5">Add to Home Screen for 1-tap instant access</p>
-      </div>
+    <div class="flex items-center justify-center gap-2 mb-2">
+      <img src="/icon-192.png" alt="Molecule" class="w-7 h-7 rounded-lg shadow shrink-0">
+      <span class="text-sm font-bold text-white">Add Molecule to iPhone</span>
     </div>
-
-    <!-- Standalone Status Notice -->
-    <div id="alreadyInstalledNotice" class="hidden mb-4 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2">
-      <svg class="w-4 h-4 shrink-0 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-      <span>Molecule is already installed and running on your home screen!</span>
-    </div>
-
-    <!-- Platform Selector Tabs -->
-    <div class="flex bg-zinc-900/90 p-1 rounded-xl mb-5 border border-zinc-800">
-      <button id="tabIosBtn" type="button" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all text-white bg-zinc-800 shadow">
-        🍎 iPhone / iPad
-      </button>
-      <button id="tabAndroidBtn" type="button" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all text-zinc-400 hover:text-white">
-        🤖 Android
-      </button>
-    </div>
-
-    <!-- iOS Step by Step Instructions -->
-    <div id="iosInstallSteps" class="space-y-3.5 text-xs text-zinc-300">
-      <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/80">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-netflix-red/20 text-netflix-red font-bold text-xs shrink-0 mt-0.5">1</span>
-        <div class="flex-1">
-          <p class="font-medium text-white">Tap the <span class="font-bold text-sky-400">Share</span> button</p>
-          <p class="text-zinc-400 text-[11px] mt-0.5">Located at the bottom of Safari (or top on iPad):</p>
-          <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-800 text-sky-400 font-semibold text-[11px]">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-            <span>Share</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/80">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-netflix-red/20 text-netflix-red font-bold text-xs shrink-0 mt-0.5">2</span>
-        <div class="flex-1">
-          <p class="font-medium text-white">Scroll down and tap <span class="font-bold text-white">"Add to Home Screen"</span></p>
-          <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-800 text-zinc-200 font-semibold text-[11px]">
-            <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span>Add to Home Screen</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/80">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-netflix-red/20 text-netflix-red font-bold text-xs shrink-0 mt-0.5">3</span>
-        <div class="flex-1">
-          <p class="font-medium text-white">Tap <span class="font-bold text-netflix-red">Add</span> in the top-right</p>
-          <p class="text-zinc-400 text-[11px] mt-0.5">The Molecule App icon will appear on your phone home screen.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Android Instructions / 1-Click Button -->
-    <div id="androidInstallSteps" class="hidden space-y-3.5 text-xs text-zinc-300">
-      <div id="androidNativePromptSection" class="p-4 rounded-xl bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 text-center">
-        <p class="text-zinc-300 text-xs mb-3">Install Molecule directly as an Android application with 1 tap:</p>
-        <button id="androidNativePromptBtn" type="button" class="w-full bg-gradient-to-r from-red-700 to-netflix-red hover:from-red-600 hover:to-red-500 text-white font-bold py-2.5 px-4 rounded-xl transition shadow-lg shadow-red-900/40 flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span>Install Molecule App</span>
-        </button>
-      </div>
-
-      <div class="text-[11px] text-zinc-500 text-center uppercase tracking-wider font-semibold">Or manual steps</div>
-
-      <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/80">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-netflix-red/20 text-netflix-red font-bold text-xs shrink-0 mt-0.5">1</span>
-        <div class="flex-1">
-          <p class="font-medium text-white">Tap Chrome's Menu <span class="font-bold text-zinc-200">Three Dots (⋮)</span></p>
-          <p class="text-zinc-400 text-[11px] mt-0.5">Usually found in the top-right corner of Chrome.</p>
-        </div>
-      </div>
-
-      <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/80">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-netflix-red/20 text-netflix-red font-bold text-xs shrink-0 mt-0.5">2</span>
-        <div class="flex-1">
-          <p class="font-medium text-white">Tap <span class="font-bold text-white">"Install app"</span> or <span class="font-bold text-white">"Add to Home screen"</span></p>
-        </div>
-      </div>
-
-      <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/50 border border-zinc-800/80">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-netflix-red/20 text-netflix-red font-bold text-xs shrink-0 mt-0.5">3</span>
-        <div class="flex-1">
-          <p class="font-medium text-white">Tap <span class="font-bold text-netflix-red">Install</span></p>
-          <p class="text-zinc-400 text-[11px] mt-0.5">The Molecule App icon will appear on your phone home screen.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer Note -->
-    <div class="mt-5 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-[11px] text-zinc-400">
-      <span>✨ Fullscreen App • Fast Access</span>
-      <button id="dismissInstallModalBtn" type="button" class="text-zinc-300 hover:text-white font-medium">Done</button>
-    </div>
-
+    <p class="text-xs text-zinc-300 mb-2">
+      Tap the <span class="inline-flex items-center text-sky-400 font-bold px-1.5 py-0.5 bg-zinc-800 rounded"><svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Share</span> icon below in Safari, then tap <strong class="text-white">"Add to Home Screen"</strong>.
+    </p>
+    <div class="text-center text-sky-400 animate-bounce text-lg leading-none">↓</div>
   </div>
 </div>
 
@@ -2229,113 +2162,64 @@ _Sent from Molecule Owner Dashboard_`;
     }
 
     // ── PWA Add to Home Screen / Mobile App Installation ──
-    let deferredPrompt = null;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      const nativePrompt = $('androidNativePromptSection');
-      if (nativePrompt) nativePrompt.classList.remove('hidden');
-    });
-
-    window.addEventListener('appinstalled', () => {
-      deferredPrompt = null;
-      closeInstallModal();
-      const banner = $('floatingInstallBanner');
-      if (banner) banner.classList.add('hidden');
-    });
-
-    function openInstallModal() {
-      const modal = $('installModal');
-      if (!modal) return;
-      modal.classList.remove('hidden');
-
-      const alreadyNotice = $('alreadyInstalledNotice');
-      if (alreadyNotice) {
-        if (isStandalone) {
-          alreadyNotice.classList.remove('hidden');
-        } else {
-          alreadyNotice.classList.add('hidden');
-        }
-      }
-
-      if (isIOS) {
-        switchInstallTab('ios');
-      } else {
-        switchInstallTab('android');
-      }
-    }
-
-    function closeInstallModal() {
-      const modal = $('installModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function switchInstallTab(platform) {
-      const tabIosBtn = $('tabIosBtn');
-      const tabAndroidBtn = $('tabAndroidBtn');
-      const iosSteps = $('iosInstallSteps');
-      const androidSteps = $('androidInstallSteps');
-
-      if (platform === 'ios') {
-        tabIosBtn?.classList.add('bg-zinc-800', 'text-white', 'shadow');
-        tabIosBtn?.classList.remove('text-zinc-400');
-        tabAndroidBtn?.classList.remove('bg-zinc-800', 'text-white', 'shadow');
-        tabAndroidBtn?.classList.add('text-zinc-400');
-
-        iosSteps?.classList.remove('hidden');
-        androidSteps?.classList.add('hidden');
-      } else {
-        tabAndroidBtn?.classList.add('bg-zinc-800', 'text-white', 'shadow');
-        tabAndroidBtn?.classList.remove('text-zinc-400');
-        tabIosBtn?.classList.remove('bg-zinc-800', 'text-white', 'shadow');
-        tabIosBtn?.classList.add('text-zinc-400');
-
-        androidSteps?.classList.remove('hidden');
-        iosSteps?.classList.add('hidden');
-      }
+    async function getPrompt() {
+      if (window.deferredPrompt) return window.deferredPrompt;
+      return new Promise((resolve) => {
+        const onReady = () => resolve(window.deferredPrompt);
+        window.addEventListener('pwa-prompt-ready', onReady, { once: true });
+        setTimeout(() => resolve(window.deferredPrompt), 1200);
+      });
     }
 
     async function handleInstallTrigger() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          deferredPrompt = null;
-          closeInstallModal();
-        }
+      if (isStandalone) {
+        alert('Molecule is already installed on your home screen! 🎉');
         return;
       }
-      openInstallModal();
+
+      if (isIOS) {
+        // Apple does not allow programmatic install in Safari. Show quick bottom pointer.
+        const iosPrompt = $('iosInstallPrompt');
+        if (iosPrompt) iosPrompt.classList.remove('hidden');
+        return;
+      }
+
+      // Android & Desktop Chrome: Trigger the native installation prompt directly
+      const installPrompt = await getPrompt();
+      if (installPrompt) {
+        try {
+          await installPrompt.prompt();
+          const choice = await installPrompt.userChoice;
+          if (choice && choice.outcome === 'accepted') {
+            window.deferredPrompt = null;
+            const banner = $('floatingInstallBanner');
+            if (banner) banner.classList.add('hidden');
+          }
+        } catch (err) {
+          console.error('[PWA] Prompt error:', err);
+        }
+      } else {
+        alert('To install Molecule on this device:\nTap the browser menu (⋮) and tap "Install app" or "Add to Home screen".');
+      }
     }
 
     $('installAppBtn')?.addEventListener('click', handleInstallTrigger);
     $('loginInstallBtn')?.addEventListener('click', handleInstallTrigger);
     $('floatingInstallBtn')?.addEventListener('click', handleInstallTrigger);
-    $('androidNativePromptBtn')?.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          deferredPrompt = null;
-          closeInstallModal();
-        }
-      } else {
-        alert('To install manually on Android:\n1. Tap the three dots (⋮) in Chrome.\n2. Tap "Install app" or "Add to Home screen".');
-      }
+    $('closeIosPromptBtn')?.addEventListener('click', () => {
+      $('iosInstallPrompt')?.classList.add('hidden');
     });
 
-    $('tabIosBtn')?.addEventListener('click', () => switchInstallTab('ios'));
-    $('tabAndroidBtn')?.addEventListener('click', () => switchInstallTab('android'));
-    $('closeInstallModalBtn')?.addEventListener('click', closeInstallModal);
-    $('dismissInstallModalBtn')?.addEventListener('click', closeInstallModal);
-    $('installModal')?.addEventListener('click', (e) => {
-      if (e.target === $('installModal')) closeInstallModal();
+    window.addEventListener('pwa-installed', () => {
+      const banner = $('floatingInstallBanner');
+      if (banner) banner.classList.add('hidden');
+      $('iosInstallPrompt')?.classList.add('hidden');
     });
 
-    // Floating banner visibility check
+    // Floating banner visibility
     const bannerEl = $('floatingInstallBanner');
     if (bannerEl) {
       const dismissed = sessionStorage.getItem('dismissInstallBanner') === 'true';
