@@ -1,3 +1,18 @@
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
+});
+
+// Pass-through fetch handler required for Chrome PWA installability prompt
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    fetch(event.request).catch(() => caches.match(event.request))
+  );
+});
+
 self.addEventListener('push', (event) => {
   let data = {};
   if (event.data) {
@@ -20,7 +35,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Optional: handle clicking the notification (open the dashboard)
+// Handle clicking the notification (open the dashboard)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(
