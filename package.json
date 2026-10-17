@@ -102,8 +102,7 @@
       ],
       "icon": "resources/icon.png",
       "category": "public.app-category.food-and-drink",
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false
+      "identity": null
     },
     "dmg": {
       "title": "Molecule",

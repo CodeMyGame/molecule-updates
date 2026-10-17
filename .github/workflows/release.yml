@@ -76,12 +76,13 @@ jobs:
     name: Build & Publish macOS DMG Release
     runs-on: macos-latest
     needs: release
-    if: always() && (needs.release.result == 'success')
+    if: needs.release.result == 'success'
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -101,6 +102,7 @@ jobs:
       - name: Build & Publish macOS Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
           MAIN_VITE_HMAC_SECRET: ${{ secrets.MAIN_VITE_HMAC_SECRET }}
           MAIN_VITE_SUPABASE_URL: ${{ secrets.MAIN_VITE_SUPABASE_URL }}
           MAIN_VITE_SUPABASE_KEY: ${{ secrets.MAIN_VITE_SUPABASE_KEY }}
