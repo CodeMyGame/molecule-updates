@@ -448,8 +448,57 @@ const Tables: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col h-full bg-white">
+        {/* Header shimmer */}
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white">
+          <div className="flex items-center gap-1.5">
+            <LayoutGrid size={15} className="text-gray-300 shrink-0" />
+            <div className="shimmer h-4 w-24 rounded" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="shimmer h-7 w-20 rounded-full" />
+            <div className="shimmer h-7 w-24 rounded-full" />
+            <div className="shimmer h-7 w-24 rounded-full" />
+          </div>
+        </div>
+
+        {/* Floor tabs shimmer */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50/80 border-b border-gray-200">
+          <div className="shimmer h-7 w-24 rounded-full" />
+          <div className="shimmer h-7 w-20 rounded-full" />
+          <div className="shimmer h-7 w-28 rounded-full" />
+        </div>
+
+        {/* Stats bar shimmer */}
+        <div className="flex items-center gap-4 px-3 py-1.5 bg-white border-b border-gray-200 flex-wrap text-xs">
+          <div className="shimmer h-4 w-24 rounded" />
+          <div className="shimmer h-4 w-24 rounded" />
+          <div className="shimmer h-4 w-20 rounded" />
+          <div className="ml-auto flex items-center gap-3">
+            <div className="shimmer h-3.5 w-14 rounded" />
+            <div className="shimmer h-3.5 w-14 rounded" />
+            <div className="shimmer h-3.5 w-14 rounded" />
+          </div>
+        </div>
+
+        {/* Tables grid shimmer */}
+        <div className="flex-1 bg-gray-50/50 overflow-auto p-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+            {Array.from({ length: 16 }).map((_, i) => (
+              <div
+                key={i}
+                className="table-card relative flex flex-col items-center justify-center rounded-lg w-full border border-gray-200 bg-white min-h-[72px] p-1.5 shadow-xs"
+              >
+                {/* Corner badge shimmer */}
+                <div className="shimmer absolute -top-1 -right-1 h-3.5 w-9 rounded-full" />
+                {/* Table name shimmer */}
+                <div className="shimmer h-3.5 w-14 mb-1" />
+                {/* Capacity shimmer */}
+                <div className="shimmer h-3 w-8" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -692,8 +741,27 @@ const Tables: React.FC = () => {
               <div className="space-y-3">
                 {/* Order details */}
                 {orderLoading ? (
-                  <div className="flex items-center justify-center py-6">
-                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                    {/* Order header shimmer */}
+                    <div className="flex items-center justify-between px-3 py-2 bg-gray-100 border-b border-gray-200">
+                      <div className="shimmer h-4 w-16" />
+                      <div className="shimmer h-4 w-14" />
+                    </div>
+                    {/* Order items shimmer */}
+                    <div className="px-3 py-2 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div className="shimmer h-3.5 w-28" />
+                        <div className="shimmer h-3.5 w-12" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="shimmer h-3.5 w-20" />
+                        <div className="shimmer h-3.5 w-10" />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="shimmer h-3.5 w-24" />
+                        <div className="shimmer h-3.5 w-14" />
+                      </div>
+                    </div>
                   </div>
                 ) : tableOrder ? (
                   <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">

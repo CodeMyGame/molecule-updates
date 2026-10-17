@@ -516,8 +516,19 @@ const TakeOrder: React.FC = () => {
       {/* Items grid */}
       <main className="flex-1 overflow-y-auto p-3">
         {loadingMenu ? (
-          <div className="flex items-center justify-center h-40 text-gray-400">
-            <Loader2 size={28} className="animate-spin" />
+          <div className="grid grid-cols-2 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white border border-gray-200 rounded-lg p-3 flex flex-col justify-between min-h-[76px]"
+              >
+                <div>
+                  <div className="shimmer h-3.5 w-[75%]" />
+                  <div className="shimmer h-3.5 w-[45%] mt-1" />
+                </div>
+                <div className="shimmer h-4 w-12 mt-2" />
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -554,7 +565,18 @@ const TakeOrder: React.FC = () => {
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {pickerLoading ? (
-                <Loader2 size={28} className="animate-spin text-blue-600 mx-auto" />
+                <div className="space-y-3 py-2">
+                  <div className="shimmer h-3 w-20" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="shimmer h-9 rounded-lg" />
+                    <div className="shimmer h-9 rounded-lg" />
+                  </div>
+                  <div className="shimmer h-3 w-16 mt-2" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="shimmer h-9 rounded-lg" />
+                    <div className="shimmer h-9 rounded-lg" />
+                  </div>
+                </div>
               ) : (
                 <>
                   {pickerVariations.length > 0 && (

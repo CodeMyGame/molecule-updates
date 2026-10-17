@@ -10,7 +10,12 @@
     "preview": "electron-vite preview",
     "postinstall": "electron-builder install-app-deps",
     "package": "electron-builder",
-    "package:mac": "electron-vite build && electron-builder --mac",
+    "package:mac": "electron-vite build && electron-builder --mac --dmg",
+    "package:dmg": "electron-vite build && electron-builder --mac --dmg",
+    "package:mac:arm64": "electron-vite build && electron-builder --mac --dmg --arm64",
+    "package:mac:x64": "electron-vite build && electron-builder --mac --dmg --x64",
+    "package:mac:universal": "electron-vite build && electron-builder --mac --dmg --universal",
+    "release:mac": "electron-vite build && electron-builder --mac --dmg --publish always",
     "package:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27",
     "release:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27 --publish always",
     "keygen": "node scripts/keygen.js",
@@ -74,7 +79,7 @@
           ]
         }
       ],
-      "icon": "resources/icon.ico"
+      "icon": "resources/icon.png"
     },
     "nsis": {
       "oneClick": false,
@@ -95,11 +100,26 @@
           ]
         }
       ],
-      "icon": "resources/icon.icns",
-      "category": "public.app-category.food-and-drink"
+      "icon": "resources/icon.png",
+      "category": "public.app-category.food-and-drink",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
     },
     "dmg": {
       "title": "Molecule",
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
       "window": {
         "width": 540,
         "height": 380

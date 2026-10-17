@@ -223,6 +223,7 @@ const Billing: React.FC = () => {
   // Tables
   const [tables, setTables] = useState<Table[]>([]);
   const [floors, setFloors] = useState<Floor[]>([]);
+  const [tablesLoading, setTablesLoading] = useState(true);
   const [billingFloorId, setBillingFloorId] = useState<number | null>(null);
   const [tableOrdersMap, setTableOrdersMap] = useState<Map<number, { grandTotal: number; itemCount: number; createdAt: string }>>(new Map());
   const [showAddFloorDialog, setShowAddFloorDialog] = useState(false);
@@ -392,7 +393,10 @@ const Billing: React.FC = () => {
           }
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        setTablesLoading(false);
+      });
   }, []);
 
   // Fetch active orders on mount + poll every 5s so kitchen status changes
@@ -1350,12 +1354,19 @@ const Billing: React.FC = () => {
       </div>
 
       {/* Active orders — portaled into header center slot */}
-      {headerSlot && activeOrders.length > 0 && createPortal(
+      {headerSlot && (activeOrders.length > 0 || ordersLoading) && createPortal(
         <>
           <span className="text-xs font-medium text-gray-500 flex-shrink-0">
             {t('billing.ordersBarLabel')}
           </span>
-          {activeOrders.map((order) => {
+          {ordersLoading && activeOrders.length === 0 ? (
+            <div className="flex items-center gap-1.5">
+              <div className="shimmer h-6 w-20 rounded-md" />
+              <div className="shimmer h-6 w-24 rounded-md" />
+              <div className="shimmer h-6 w-16 rounded-md" />
+            </div>
+          ) : (
+            activeOrders.map((order) => {
             const isCurrentOrder = currentOrderId === order.id;
             const isHeld = order.status === 'hold';
             const oType = (order as any).orderType ?? order.order_type;
@@ -1423,7 +1434,8 @@ const Billing: React.FC = () => {
                 )}
               </button>
             );
-          })}
+          })
+          )}
         </>,
         headerSlot
       )}
@@ -1469,87 +1481,114 @@ const Billing: React.FC = () => {
               <div className="absolute left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:w-8 transition-all" />
             </div>
             <div style={{ flex: `${100 - menuHeightPercent} 0 0%` }} className="min-h-0 bg-white flex flex-row" data-table-picker>
-              {/* Floor tabs — vertical sidebar */}
-              {floors.length > 0 && (
-                <div className="flex flex-col gap-1 px-1.5 py-2 bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0 scrollbar-thin" style={{ width: floorSidebarWidth }}>
-                  {floors.map((floor) => (
-                    <button
-                      key={floor.id}
-                      onClick={() => setBillingFloorId(floor.id)}
-                      onContextMenu={(e) => { e.preventDefault(); setFloorContextMenu({ x: e.clientX, y: e.clientY, floor }); }}
-                      className={`w-full flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors select-none text-left
-                        ${billingFloorId === floor.id
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-gray-600 hover:bg-gray-200'
-                        }`}
-                    >
-                      <Layers size={12} className="flex-shrink-0" />
-                      <span className="truncate">{floor.name}</span>
-                    </button>
-                  ))}
-                  {/* Add Floor button */}
-                  <button
-                    onClick={() => setShowAddFloorDialog(true)}
-                    className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-colors mt-1"
-                  >
-                    <Plus size={12} />
-                    {t('common.add')}
-                  </button>
-                </div>
-              )}
-
-              {/* Floor sidebar resize handle (VS Code style sash) */}
-              {floors.length > 0 && (
-                <div
-                  className="group relative flex-shrink-0 w-1.5 -mx-[3px] cursor-col-resize z-10 flex items-center justify-center select-none"
-                  onMouseDown={onFloorHandleDown}
-                  title={t('billing.resizeFloorSidebar', 'Drag to resize')}
-                >
-                  {/* Sash hairline */}
-                  <div className="w-[1px] h-full bg-gray-200 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
-
-                  {/* VS Code micro grip indicator */}
-                  <div className="absolute top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:h-8 transition-all" />
-                </div>
-              )}
-
-              {/* Table grid */}
-              <div className="flex-1 overflow-y-auto p-2 min-w-0">
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-                  {tables
-                    .filter((t) => t.floorId === billingFloorId)
-                    .map((table) => (
-                      <div
-                        key={table.id}
-                        className="relative"
-                        onContextMenu={(e) => handleTableContextMenu(e, table)}
+              {tablesLoading ? (
+                <>
+                  {/* Floor sidebar shimmer */}
+                  <div className="flex flex-col gap-1 px-1.5 py-2 bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0" style={{ width: floorSidebarWidth }}>
+                    <div className="shimmer h-7 w-full rounded-lg" />
+                    <div className="shimmer h-7 w-full rounded-lg" />
+                  </div>
+                  {/* Table grid shimmer */}
+                  <div className="flex-1 overflow-y-auto p-2 min-w-0">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                      {Array.from({ length: 8 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="table-card relative flex flex-col items-center justify-center rounded-lg w-full border border-gray-200 bg-white min-h-[68px] p-1.5 shadow-xs"
+                        >
+                          <div className="shimmer absolute -top-1 -right-1 h-3 w-5 rounded-full" />
+                          <div className="shimmer h-3 w-12 mb-1" />
+                          <div className="shimmer h-2.5 w-8" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Floor tabs — vertical sidebar */}
+                  {floors.length > 0 && (
+                    <div className="flex flex-col gap-1 px-1.5 py-2 bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0 scrollbar-thin" style={{ width: floorSidebarWidth }}>
+                      {floors.map((floor) => (
+                        <button
+                          key={floor.id}
+                          onClick={() => setBillingFloorId(floor.id)}
+                          onContextMenu={(e) => { e.preventDefault(); setFloorContextMenu({ x: e.clientX, y: e.clientY, floor }); }}
+                          className={`w-full flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors select-none text-left
+                            ${billingFloorId === floor.id
+                              ? 'bg-blue-600 text-white shadow-sm'
+                              : 'text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                          <Layers size={12} className="flex-shrink-0" />
+                          <span className="truncate">{floor.name}</span>
+                        </button>
+                      ))}
+                      {/* Add Floor button */}
+                      <button
+                        onClick={() => setShowAddFloorDialog(true)}
+                        className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-colors mt-1"
                       >
-                        <TableCard
-                          table={table as any}
-                          onClick={(t) => handleTableSwitch(t.id)}
-                          isEditMode={false}
-                          isSelected={selectedTableId === table.id}
-                          compact
-                          orderTotal={tableOrdersMap.get(table.id)?.grandTotal}
-                          orderItemCount={tableOrdersMap.get(table.id)?.itemCount}
-                          orderStartedAt={tableOrdersMap.get(table.id)?.createdAt}
-                        />
-                      </div>
-                    ))}
-                  {/* Add Table card */}
-                  {billingFloorId !== null && (
-                    <button
-                      onClick={() => setShowAddTableDialog(true)}
-                      className="table-card group min-h-[68px] flex flex-col items-center justify-center bg-white border-2 border-dashed border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-colors"
-                    >
-                      <Plus size={20} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-                      <span className="text-[10px] text-gray-300 group-hover:text-blue-400 transition-colors font-medium mt-0.5">
-                        {t('billingPage.addTable')}
-                      </span>
-                    </button>
+                        <Plus size={12} />
+                        {t('common.add')}
+                      </button>
+                    </div>
                   )}
-                </div>
-              </div>
+
+                  {/* Floor sidebar resize handle (VS Code style sash) */}
+                  {floors.length > 0 && (
+                    <div
+                      className="group relative flex-shrink-0 w-1.5 -mx-[3px] cursor-col-resize z-10 flex items-center justify-center select-none"
+                      onMouseDown={onFloorHandleDown}
+                      title={t('billing.resizeFloorSidebar', 'Drag to resize')}
+                    >
+                      {/* Sash hairline */}
+                      <div className="w-[1px] h-full bg-gray-200 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
+
+                      {/* VS Code micro grip indicator */}
+                      <div className="absolute top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:h-8 transition-all" />
+                    </div>
+                  )}
+
+                  {/* Table grid */}
+                  <div className="flex-1 overflow-y-auto p-2 min-w-0">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                      {tables
+                        .filter((t) => t.floorId === billingFloorId)
+                        .map((table) => (
+                          <div
+                            key={table.id}
+                            className="relative"
+                            onContextMenu={(e) => handleTableContextMenu(e, table)}
+                          >
+                            <TableCard
+                              table={table as any}
+                              onClick={(t) => handleTableSwitch(t.id)}
+                              isEditMode={false}
+                              isSelected={selectedTableId === table.id}
+                              compact
+                              orderTotal={tableOrdersMap.get(table.id)?.grandTotal}
+                              orderItemCount={tableOrdersMap.get(table.id)?.itemCount}
+                              orderStartedAt={tableOrdersMap.get(table.id)?.createdAt}
+                            />
+                          </div>
+                        ))}
+                      {/* Add Table card */}
+                      {billingFloorId !== null && (
+                        <button
+                          onClick={() => setShowAddTableDialog(true)}
+                          className="table-card group min-h-[68px] flex flex-col items-center justify-center bg-white border-2 border-dashed border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-colors"
+                        >
+                          <Plus size={20} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
+                          <span className="text-[10px] text-gray-300 group-hover:text-blue-400 transition-colors font-medium mt-0.5">
+                            {t('billingPage.addTable')}
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             </>
           )}

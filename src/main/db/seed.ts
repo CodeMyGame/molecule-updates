@@ -357,6 +357,13 @@ export function seedDatabase(db: Database.Database): void {
     insertSetting.run('bill_prefix', 'ORD', 'billing');
     insertSetting.run('kot_prefix', 'KOT', 'billing');
     insertSetting.run('currency', 'INR', 'general');
+    insertSetting.run('print_mode', 'raster', 'billing');
+    insertSetting.run('paper_width', '80mm', 'billing');
+    insertSetting.run('kot_item_style', 'qty_x_name', 'billing');
+    insertSetting.run('bill_font_size', 'medium', 'billing');
+    insertSetting.run('kot_font_size', 'medium', 'billing');
+    insertSetting.run('bill_center_print', 'true', 'billing');
+    insertSetting.run('kot_count_mode', 'daily', 'billing');
   });
 
   seed();

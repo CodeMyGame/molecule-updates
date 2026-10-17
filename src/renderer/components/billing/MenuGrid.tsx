@@ -517,6 +517,21 @@ const MenuGrid: React.FC<MenuGridProps> = ({
       <div className={`flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto scrollbar-thin
         ${compact ? 'w-28 py-1' : 'w-36 py-2'}`}>
         <div className="flex flex-col gap-1 px-1.5">
+          {loading ? (
+            <>
+              {/* "All" button shimmer */}
+              <div className={`shimmer rounded-lg ${compact ? 'h-8' : 'h-9'} w-full`} />
+              {/* Category shimmer bars */}
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`shimmer rounded-lg ${compact ? 'h-8' : 'h-9'}`}
+                  style={{ width: `${65 + ((i * 17) % 35)}%` }}
+                />
+              ))}
+            </>
+          ) : (
+          <>
           <button
             onClick={() => { setShowTopSelling(false); setShowFavorites(false); onCategorySelect(null); }}
             className={`w-full text-left rounded-lg font-medium transition-colors
@@ -585,6 +600,8 @@ const MenuGrid: React.FC<MenuGridProps> = ({
             <Plus size={compact ? 12 : 14} />
             {t('common.add')}
           </button>
+          </>
+          )}
         </div>
       </div>
 
@@ -654,8 +671,29 @@ const MenuGrid: React.FC<MenuGridProps> = ({
 
           if (loading) {
             return (
-              <div className="flex items-center justify-center h-40">
-                <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+              <div className={`grid ${compact ? 'grid-cols-[repeat(auto-fill,minmax(108px,1fr))] gap-1.5' : 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2'}`}>
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`relative flex flex-col items-start bg-white border border-gray-100 rounded-lg select-none
+                      ${compact ? 'p-2 min-h-[68px]' : 'p-2.5 min-h-[80px]'}`}
+                  >
+                    {/* Veg/non-veg indicator placeholder */}
+                    <div className={`absolute ${compact ? 'top-1 right-1' : 'top-1.5 right-1.5'}`}>
+                      <div className={`shimmer rounded-sm ${compact ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} />
+                    </div>
+
+                    {/* Name placeholder — two lines */}
+                    <div className={`shimmer ${compact ? 'h-3 w-[70%]' : 'h-3.5 w-[75%]'}`} />
+                    <div className={`shimmer mt-1 ${compact ? 'h-3 w-[50%]' : 'h-3.5 w-[45%]'}`} />
+
+                    {/* Price + star placeholder */}
+                    <div className={`mt-auto flex items-center justify-between w-full ${compact ? 'pt-1' : 'pt-1.5'}`}>
+                      <div className={`shimmer ${compact ? 'h-3 w-10' : 'h-3.5 w-12'}`} />
+                      <div className={`shimmer rounded-full ${compact ? 'h-2.5 w-2.5' : 'h-3 w-3'}`} />
+                    </div>
+                  </div>
+                ))}
               </div>
             );
           }
