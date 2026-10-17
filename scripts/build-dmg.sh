@@ -49,16 +49,16 @@ npm run build
 echo "💿 Packaging macOS DMG..."
 case "$TARGET_ARCH" in
   arm64)
-    npx electron-builder --mac --dmg --arm64
+    npx electron-builder --mac --arm64
     ;;
   x64)
-    npx electron-builder --mac --dmg --x64
+    npx electron-builder --mac --x64
     ;;
   universal)
-    npx electron-builder --mac --dmg --universal
+    npx electron-builder --mac --universal
     ;;
   all)
-    npx electron-builder --mac --dmg
+    npx electron-builder --mac
     ;;
   *)
     echo "❌ Unknown architecture: '$TARGET_ARCH'"
