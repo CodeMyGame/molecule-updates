@@ -4,7 +4,12 @@ import { writeFileSync } from 'fs';
 import { BrowserWindow } from 'electron';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const nativePrinter = require('@grandchef/node-printer');
+let nativePrinter: any = null;
+try {
+  nativePrinter = require('@grandchef/node-printer');
+} catch (err) {
+  console.warn('[Printer] @grandchef/node-printer native module not available:', err);
+}
 
 // Re-export node-thermal-printer for direct use by KOT and bill printers
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -39,6 +44,9 @@ export function sendRawToPrinter(printerName: string, data: Buffer): Promise<voi
   }
 
   return new Promise((resolve, reject) => {
+    if (!nativePrinter) {
+      return reject(new Error('Native printer module is not available on this platform.'));
+    }
     nativePrinter.printDirect({
       data,
       printer: printerName,
