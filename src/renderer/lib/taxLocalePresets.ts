@@ -138,8 +138,11 @@ export function resolveTaxRateForCartLine(
   settingsDefaultTaxRate: string | number | undefined | null,
   langCode: string
 ): number {
-  const region = getTaxRegionForLanguage(langCode);
   const s = parseSettingsTaxPercent(settingsDefaultTaxRate, langCode);
+  if (s === 0) {
+    return 0;
+  }
+  const region = getTaxRegionForLanguage(langCode);
   const preset = getTaxLocalePresetForLanguage(langCode);
   const canonicalDefault = parseFloat(preset.defaultRate);
 
@@ -157,20 +160,13 @@ export function resolveTaxRateForCartLine(
   return Number.isFinite(pd) ? Math.min(preset.maxRate, pd) : menuItemTaxRate;
 }
 
-/** When loading order rows with no tax column, use settings / locale instead of a hardcoded 5. */
+/** When loading order rows with no tax column or existing orders, use settings / locale. */
 export function resolveOrderItemTaxRateFallback(
   rawTax: unknown,
   settingsDefaultTaxRate: string | number | undefined | null,
   langCode: string
 ): number {
   const n = typeof rawTax === 'number' ? rawTax : parseFloat(String(rawTax ?? '').trim());
-  if (Number.isFinite(n) && n >= 0) {
-    const maxRate = getTaxLocalePresetForLanguage(langCode).maxRate;
-    return Math.min(maxRate, n);
-  }
-  const s = parseSettingsTaxPercent(settingsDefaultTaxRate, langCode);
-  if (s !== null) return s;
-  const preset = getTaxLocalePresetForLanguage(langCode);
-  const pd = parseFloat(preset.defaultRate);
-  return Number.isFinite(pd) ? Math.min(preset.maxRate, pd) : 0;
+  const baseRate = Number.isFinite(n) && n >= 0 ? n : 5;
+  return resolveTaxRateForCartLine(baseRate, settingsDefaultTaxRate, langCode);
 }

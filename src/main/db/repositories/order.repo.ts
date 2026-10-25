@@ -1,8 +1,23 @@
 import { getDb } from '../connection';
 import { format } from 'date-fns';
 import { logger } from '../../utils/logger';
+import * as settingsRepo from './settings.repo';
 import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem, OrderKotSummary } from '../../../shared/types/order.types';
 import { OrderStatus, KOTStatus } from '../../../shared/enums';
+
+function resolveItemTaxRate(itemRate?: number | null): number {
+  const raw = settingsRepo.get('default_tax_rate');
+  const parsed = raw !== undefined && raw !== null ? parseFloat(String(raw).trim()) : NaN;
+  const configuredDefault = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  const rate = typeof itemRate === 'number' && Number.isFinite(itemRate) ? itemRate : 5.0;
+
+  if (configuredDefault !== null) {
+    if (configuredDefault === 0 || Math.abs(rate - 5.0) < 1e-6) {
+      return configuredDefault;
+    }
+  }
+  return rate;
+}
 
 export function create(data: CreateOrderDTO): Order {
   const db = getDb();
@@ -37,6 +52,7 @@ export function create(data: CreateOrderDTO): Order {
 
     // Calculate totals
     for (const item of data.items) {
+      item.taxRate = resolveItemTaxRate(item.taxRate);
       const itemTotal = item.unitPrice * item.quantity;
       const itemTax = Math.round(itemTotal * item.taxRate / 100);
       subtotal += itemTotal;
@@ -69,6 +85,7 @@ export function create(data: CreateOrderDTO): Order {
     const orderId = result.lastInsertRowid as number;
 
     for (const item of data.items) {
+      item.taxRate = resolveItemTaxRate(item.taxRate);
       const itemTotal = item.unitPrice * item.quantity;
       const itemTax = Math.round(itemTotal * item.taxRate / 100);
 
@@ -369,6 +386,7 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
     const tableSnapshot = orderInfo?.table_name_snapshot || orderInfo?.current_table_name || null;
 
     for (const item of items) {
+      item.taxRate = resolveItemTaxRate(item.taxRate);
       const itemTotal = item.unitPrice * item.quantity;
       const itemTax = Math.round(itemTotal * item.taxRate / 100);
       additionalSubtotal += itemTotal;

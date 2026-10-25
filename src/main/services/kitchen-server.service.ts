@@ -306,6 +306,20 @@ async function handleKitchenApi(
   return false;
 }
 
+function getEffectiveTaxRate(itemTaxRate?: number | null): number {
+  const raw = settingsRepo.get('default_tax_rate');
+  const parsed = raw !== undefined && raw !== null ? parseFloat(String(raw).trim()) : NaN;
+  const configuredDefault = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+  const itemRate = typeof itemTaxRate === 'number' && Number.isFinite(itemTaxRate) ? itemTaxRate : 5.0;
+
+  if (configuredDefault !== null) {
+    if (configuredDefault === 0 || Math.abs(itemRate - 5.0) < 1e-6) {
+      return configuredDefault;
+    }
+  }
+  return itemRate;
+}
+
 async function handleWaiterApi(
   pathname: string,
   req: IncomingMessage,
@@ -322,7 +336,11 @@ async function handleWaiterApi(
   if (req.method === 'GET' && pathname === '/api/menu/items') {
     const cat = reqUrl.searchParams.get('categoryId');
     const categoryId = cat ? Number(cat) : undefined;
-    sendJson(res, 200, menuRepo.getItems(categoryId));
+    const items = menuRepo.getItems(categoryId).map((item) => ({
+      ...item,
+      taxRate: getEffectiveTaxRate(item.taxRate),
+    }));
+    sendJson(res, 200, items);
     return true;
   }
 
@@ -446,6 +464,12 @@ async function handleWaiterApi(
       }
     }
     try {
+      if (Array.isArray(body?.items)) {
+        body.items = body.items.map((it: any) => ({
+          ...it,
+          taxRate: getEffectiveTaxRate(it.taxRate),
+        }));
+      }
       const order = billingService.createOrder(body);
       autoSendKot(order.id);
       // Claim ownership of this table for the waiter who just placed the order.
@@ -470,7 +494,7 @@ async function handleWaiterApi(
       sendStatus(res, 400, 'Invalid JSON');
       return true;
     }
-    const items = body?.items;
+    let items = body?.items;
     if (!Array.isArray(items) || items.length === 0) {
       sendStatus(res, 400, 'Items required');
       return true;
@@ -489,6 +513,10 @@ async function handleWaiterApi(
       }
     }
     try {
+      items = items.map((it: any) => ({
+        ...it,
+        taxRate: getEffectiveTaxRate(it.taxRate),
+      }));
       orderRepo.addItems(orderId, items);
       autoSendKot(orderId);
       sendJson(res, 200, orderRepo.getById(orderId));
