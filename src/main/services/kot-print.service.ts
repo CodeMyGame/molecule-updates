@@ -20,6 +20,7 @@ interface KOTPrintData {
   printedAt: string;
   /** Ordinal position of this KOT among all KOTs for the same order (1-based). */
   kotCount?: number;
+  station?: string;
 }
 
 type ItemStyle = 'name_qty' | 'qty_x_name' | 'qty_name' | 'sno_name_qty';
@@ -111,6 +112,12 @@ function buildKotEscPos(data: KOTPrintData, style: ItemStyle, fontSize: FontSize
   p.bold(true);
   p.setTextDoubleHeight();
   p.println('KOT');
+  if (data.station) {
+    p.setTextNormal();
+    p.bold(true);
+    const stationLabel = data.station.replace(/_/g, ' ').toUpperCase();
+    p.println(`[ ${stationLabel} ]`);
+  }
   p.setTextNormal();
   p.bold(true);
   p.drawLine('=');
@@ -243,12 +250,13 @@ function generateKotHtml(data: KOTPrintData, style: ItemStyle, fontSize: FontSiz
     ? 'Item'.padEnd(W - 3) + 'Qty'
     : 'Items';
 
+  const stationLine = data.station ? `Station: ${data.station.replace(/_/g, ' ').toUpperCase()}\n` : '';
   const kotCountLine = data.kotCount != null ? `KOT Count: ${data.kotCount}\n` : '';
   const receipt = `
            KOT
 -------------------------
 ${location}
-${kotCountLine}Date: ${formatDateTime(data.printedAt)}
+${stationLine}${kotCountLine}Date: ${formatDateTime(data.printedAt)}
 ---------
 ${header}
 ---------
@@ -331,8 +339,29 @@ function printViaHtml(html: string, printerName: string | null): Promise<void> {
   });
 }
 
+export function resolveKotPrinter(station?: string): string | null {
+  const multiStationEnabled = settingsRepo.get('multi_station_kot_printing') === 'true';
+  const defaultKotPrinter = settingsRepo.get('printer_kot') || null;
+
+  if (multiStationEnabled && station) {
+    try {
+      const stationPrintersRaw = settingsRepo.get('station_printers');
+      if (stationPrintersRaw) {
+        const mapping = JSON.parse(stationPrintersRaw);
+        if (mapping && typeof mapping === 'object' && mapping[station]) {
+          return mapping[station];
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to parse station_printers setting:', err);
+    }
+  }
+
+  return defaultKotPrinter;
+}
+
 export async function printKotReceipt(data: KOTPrintData): Promise<void> {
-  const savedPrinterName = settingsRepo.get('printer_kot');
+  const savedPrinterName = resolveKotPrinter(data.station);
   const style = (settingsRepo.get('kot_item_style') ?? 'name_qty') as ItemStyle;
   const fontSize = (settingsRepo.get('kot_font_size') ?? 'medium') as FontSize;
   const printMode = settingsRepo.get('print_mode') ?? 'thermal';

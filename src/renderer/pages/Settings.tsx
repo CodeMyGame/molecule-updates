@@ -57,6 +57,10 @@ import {
   Maximize2,
   Activity,
   Flame,
+  ChefHat,
+  Wine,
+  Cake,
+  GitFork,
   ArrowUpRight,
   CheckCheck,
 } from 'lucide-react';
@@ -153,6 +157,8 @@ const SETTING_KEYS = [
   'bill_center_print',
   'printer_bill',
   'printer_kot',
+  'multi_station_kot_printing',
+  'station_printers',
   'paper_width',
   'kot_item_style',
   'kot_count_mode',
@@ -1123,6 +1129,117 @@ const Settings: React.FC = () => {
             <p className="text-xs text-amber-600 mt-1">
               {t('settingsPage.printerNotFoundWarn', { name: settings.printer_kot })}
             </p>
+          )}
+        </div>
+
+        {/* Multi-Station KOT Printing Toggle & Configuration */}
+        <div className="lg:col-span-2 pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="pr-4">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-gray-800">
+                  {t('settingsPage.multiStationKotPrinting', 'Multi-Station KOT Printing')}
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                  Routing
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {t('settingsPage.multiStationKotPrintingDesc', 'Route KOT receipts to separate physical printers based on kitchen station (Main Kitchen, Bar, Tandoor, Dessert).')}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={settings.multi_station_kot_printing === 'true'}
+              onClick={() => {
+                const nextVal = settings.multi_station_kot_printing === 'true' ? 'false' : 'true';
+                handleUpdateSetting('multi_station_kot_printing', nextVal);
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                settings.multi_station_kot_printing === 'true' ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.multi_station_kot_printing === 'true' ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {settings.multi_station_kot_printing === 'true' && (
+            <div className="mt-4 p-4 rounded-xl bg-blue-50/40 border border-blue-100 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h5 className="text-xs font-bold text-gray-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <GitFork size={14} className="text-blue-600" />
+                    {t('settingsPage.stationPrintersTitle', 'Station Printer Routing')}
+                  </h5>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    {t('settingsPage.stationPrintersDesc', 'Assign a dedicated printer for each kitchen station. Unassigned stations will use the Default KOT Printer.')}
+                  </p>
+                </div>
+              </div>
+
+              {(() => {
+                let stationMap = {};
+                try {
+                  stationMap = JSON.parse(settings.station_printers || '{}');
+                } catch {
+                  stationMap = {};
+                }
+
+                const stations = [
+                  { key: 'main_kitchen', label: t('kitchen.stationMainKitchen', 'Main Kitchen'), icon: <ChefHat size={16} className="text-orange-500" /> },
+                  { key: 'tandoor', label: t('kitchen.stationTandoor', 'Tandoor / Grill'), icon: <Flame size={16} className="text-red-500" /> },
+                  { key: 'bar', label: t('kitchen.stationBar', 'Bar & Beverages'), icon: <Wine size={16} className="text-purple-500" /> },
+                  { key: 'dessert', label: t('kitchen.stationDessert', 'Dessert & Bakery'), icon: <Cake size={16} className="text-pink-500" /> },
+                ];
+
+                const handleStationChange = (stationKey, val) => {
+                  const nextMap = { ...stationMap };
+                  if (val) {
+                    nextMap[stationKey] = val;
+                  } else {
+                    delete nextMap[stationKey];
+                  }
+                  handleUpdateSetting('station_printers', JSON.stringify(nextMap));
+                };
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {stations.map((st) => {
+                      const selectedPrinter = stationMap[st.key] ?? '';
+                      return (
+                        <div key={st.key} className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                          <label className="flex items-center gap-2 text-xs font-semibold text-gray-800 mb-1.5">
+                            {st.icon}
+                            <span>{st.label}</span>
+                          </label>
+                          <select
+                            value={selectedPrinter}
+                            onChange={(e) => handleStationChange(st.key, e.target.value)}
+                            className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-300 focus:border-blue-500 outline-none bg-white text-gray-700"
+                          >
+                            <option value="">
+                              {settings.printer_kot
+                                ? `${t('settingsPage.stationUseDefault', '— Use Default KOT Printer —')} (${settings.printer_kot})`
+                                : t('settingsPage.stationUseDefault', '— Use Default KOT Printer —')}
+                            </option>
+                            {printerList.map((p) => (
+                              <option key={p.name} value={p.name}>
+                                {p.displayName}{p.isDefault ? t('settingsPage.printerDefaultSuffix') : ''}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
           )}
         </div>
 

@@ -415,7 +415,8 @@ export function registerAllHandlers(): void {
     // Group items by station (null station → one group keyed by '__none__')
     const groups = new Map<string, { orderItemId: number; quantity: number }[]>();
     for (const oi of orderItems) {
-      const key = oi.station ?? '__none__';
+      const multiStationEnabled = settingsRepo.get('multi_station_kot_printing') === 'true';
+      const key = multiStationEnabled ? (oi.station ?? '__none__') : '__all__';
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push({ orderItemId: oi.id, quantity: oi.quantity });
     }
@@ -423,10 +424,14 @@ export function registerAllHandlers(): void {
     // Create one KOT per station group; return the first (or only) KOT
     const kots: any[] = [];
     for (const [key, items] of groups) {
-      const station = key === '__none__' ? undefined : key;
+      const station = (key === '__none__' || key === '__all__') ? undefined : key;
       kots.push(kotRepo.create(orderId, items, station));
     }
-    return kots[0];
+    const firstKot = kots[0];
+    if (firstKot) {
+      (firstKot as any).kotIds = kots.map((k) => k.id);
+    }
+    return firstKot;
   });
   handle(KOT.getActive, () => kotRepo.getActive());
   handle(KOT.updateStatus, (id: number, status) => kotRepo.updateStatus(id, status));
@@ -503,6 +508,7 @@ export function registerAllHandlers(): void {
         }),
         printedAt: kot.printed_at,
         kotCount,
+        station: kot.station ?? undefined,
       });
       return { success: true, data: { printed: true } };
     } catch (err: any) {

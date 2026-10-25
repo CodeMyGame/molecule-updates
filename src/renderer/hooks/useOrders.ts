@@ -306,9 +306,14 @@ export function useOrders(): UseOrdersReturn {
 
         // Thermal print if requested and KOT was created
         // kotResult is the first KOT created; all KOTs for this order share the same orderId
-        if (shouldPrint && kotResult.id) {
+        if (shouldPrint && kotResult?.id) {
+          const kotIdsToPrint: number[] = Array.isArray(kotResult.kotIds) && kotResult.kotIds.length > 0
+            ? kotResult.kotIds
+            : [kotResult.id];
           try {
-            await ipc(window.electronAPI.kot.printReceipt(kotResult.id));
+            for (const kid of kotIdsToPrint) {
+              await ipc(window.electronAPI.kot.printReceipt(kid));
+            }
           } catch (printErr: any) {
             // KOT was created successfully — only print failed. Bubble up as a soft warning.
             const printWarning = new Error(printErr.message ?? 'Printer not available');
