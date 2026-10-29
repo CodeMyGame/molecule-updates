@@ -478,7 +478,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
 
   if (cart.length === 0) {
     return (
-      <div className="flex flex-col h-full bg-white">
+      <div data-tour="cart-panel" className="flex flex-col h-full bg-white">
         {/* Header */}
         <div className="px-3 py-1.5 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -1073,7 +1073,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
       </div>
 
       {/* Action buttons */}
-      <div className="px-3 py-1.5 border-t border-gray-200 flex-shrink-0">
+      <div data-tour="cart-actions" className="px-3 py-1.5 border-t border-gray-200 flex-shrink-0">
         <div className="grid grid-cols-3 gap-1.5 mb-1.5">
           <Button
             variant="secondary"

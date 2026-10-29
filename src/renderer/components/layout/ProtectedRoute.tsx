@@ -7,11 +7,29 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import LicenseExpiryBanner from '../license/LicenseExpiryBanner';
 import TaxRegionSettingsSync from '../tax/TaxRegionSettingsSync';
+import QuickTourModal from '../tour/QuickTourModal';
+import { useTourStore } from '../../stores/tour.store';
 
 const HARD_LOCKOUT_STATES = ['unlicensed', 'invalid', 'expired_hard'];
 
 const ProtectedRoute: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
+  const openTour = useTourStore((s) => s.openTour);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    try {
+      const seen = localStorage.getItem('molecule_pos_tour_seen');
+      if (!seen) {
+        const timer = setTimeout(() => {
+          openTour(0);
+        }, 800);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [isAuthenticated, openTour]);
   const { status, isLoading, fetch: fetchLicense } = useLicenseStore();
   // Re-render layout when country changes so amounts and icons update everywhere.
   useCountryStore((s) => s.countryId);
@@ -44,6 +62,7 @@ const ProtectedRoute: React.FC = () => {
   return (
     <div className="flex h-screen overflow-hidden">
       <TaxRegionSettingsSync />
+      <QuickTourModal />
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         {/* License expiry warning banner */}

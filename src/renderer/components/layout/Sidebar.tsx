@@ -134,7 +134,7 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 py-1 overflow-y-auto">
+      <nav data-tour="sidebar-nav" className="flex-1 py-1 overflow-y-auto">
         {NAV_KEYS.map((item) => (
           sidebarCollapsed ? (
             <Tooltip key={item.path} text={t(`nav.${item.key}`)} position="right" className="w-full block">
@@ -176,7 +176,7 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Action buttons */}
-      <div className="border-t border-gray-700 px-1.5 py-1.5 flex flex-col gap-1">
+      <div data-tour="day-session-toggle" className="border-t border-gray-700 px-1.5 py-1.5 flex flex-col gap-1">
         {sidebarCollapsed ? (
           <>
             <Tooltip text={t('header.newOrder')} position="right" className="w-full">

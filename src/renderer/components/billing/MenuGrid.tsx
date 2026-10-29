@@ -608,7 +608,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
       {/* Right content area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Search bar */}
-        <div className={compact ? 'px-3 pt-2 pb-1' : 'px-4 pt-4 pb-2'}>
+        <div data-tour="menu-search" className={compact ? 'px-3 pt-2 pb-1' : 'px-4 pt-4 pb-2'}>
           <div className="relative">
             <Search
               size={compact ? 14 : 18}

@@ -69,6 +69,7 @@ import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import { formatCurrency, formatDateTime } from '../lib/formatters';
 import { useSettings } from '../hooks/useSettings';
+import { useTourStore } from '../stores/tour.store';
 import { ipc } from '../lib/ipc';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -206,6 +207,7 @@ const ReceiptFieldLabelInput: React.FC<{
 };
 
 const Settings: React.FC = () => {
+  const openTour = useTourStore((s) => s.openTour);
   const licenseStatus = useLicenseStore((s) => s.status);
   const { t, i18n } = useTranslation();
   const CurrencyIcon = useLocaleCurrencyIcon();
@@ -639,6 +641,21 @@ const Settings: React.FC = () => {
 
   const renderRestaurantProfile = () => (
     <div className="space-y-6">
+      <div className="bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-200/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-xs flex-shrink-0">
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-gray-900">Need a Quick Tour of Molecule POS?</h3>
+            <p className="text-xs text-gray-600">Revisit the interactive guide to understand tables, fast billing, KDS, inventory recipes, and printer settings.</p>
+          </div>
+        </div>
+        <Button variant="primary" icon={<Sparkles size={14} />} onClick={() => openTour(0)}>
+          Take Quick Tour
+        </Button>
+      </div>
+
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('settingsPage.restaurantProfile')}</h2>
         <p className="text-sm text-gray-500">{t('settingsPage.restaurantProfileDesc')}</p>

@@ -28,6 +28,7 @@ import toast from 'react-hot-toast';
 import { useBillingStore } from '../../stores/billing.store';
 import { useDaySessionStore } from '../../stores/daySession.store';
 import { useSettings } from '../../hooks/useSettings';
+import { useTourStore } from '../../stores/tour.store';
 import { ipc } from '../../lib/ipc';
 import { formatCurrency } from '../../lib/formatters';
 import Modal from '../common/Modal';
@@ -45,6 +46,7 @@ const Header: React.FC = () => {
   const currentSession = useDaySessionStore((s) => s.currentSession);
   const fetchDaySession = useDaySessionStore((s) => s.fetch);
   const { restaurant, fetchRestaurant } = useSettings();
+  const openTour = useTourStore((s) => s.openTour);
   useEffect(() => { void fetchRestaurant(); }, [fetchRestaurant]);
   const restaurantName = restaurant?.name?.trim() || t('header.appName');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -228,6 +230,22 @@ const Header: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-1.5">
+        {/* Quick Tour Button */}
+        <button
+          data-tour="quick-tour-btn"
+          onClick={() => {
+            if (location.pathname !== '/billing') {
+              navigate('/billing');
+            }
+            openTour(0);
+          }}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-blue-700 bg-blue-50/90 hover:bg-blue-100 hover:text-blue-800 border border-blue-200/80 transition-all shadow-xs active:scale-95"
+          title={t('header.quickTour', 'Quick Tour & Feature Guide')}
+        >
+          <Sparkles size={13} className="text-blue-600 animate-pulse" />
+          <span className="hidden md:inline">{t('header.quickTour', 'Quick Tour')}</span>
+        </button>
+
         {/* Daily Heads-Up & Notification Menu */}
         <div className="relative flex items-center">
           <button

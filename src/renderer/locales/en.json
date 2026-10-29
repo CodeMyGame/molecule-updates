@@ -31,6 +31,7 @@
     "discardOrder": "You have items in the current order. Discard and start a new order?",
     "appName": "Molecule",
     "currentUserFallback": "Staff",
+    "quickTour": "Quick Tour",
     "dailyHeadsUp": "Daily Heads-Up",
     "yesterdayRecap": "Yesterday",
     "todayLive": "Today",
