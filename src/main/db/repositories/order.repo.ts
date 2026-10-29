@@ -337,17 +337,19 @@ export function updateStatus(
       }
     }
 
-    // Mark all active KOTs for this order as served
+    const targetKotStatus = status === OrderStatus.CANCELLED ? 'cancelled' : 'served';
+
+    // Mark all active KOTs for this order as cancelled or served
     db.prepare(`
-      UPDATE kots SET status = 'served'
+      UPDATE kots SET status = ?
       WHERE order_id = ? AND status IN ('pending', 'sent', 'preparing', 'ready')
-    `).run(id);
+    `).run(targetKotStatus, id);
 
     // Also update order_items kot_status
     db.prepare(`
-      UPDATE order_items SET kot_status = 'served'
+      UPDATE order_items SET kot_status = ?
       WHERE order_id = ? AND kot_status != 'served'
-    `).run(id);
+    `).run(targetKotStatus, id);
   }
 
   return getById(id);

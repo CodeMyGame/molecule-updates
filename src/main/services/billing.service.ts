@@ -234,7 +234,7 @@ export function moveTable(orderId: number, newTableId: number): Order & { items:
     if (!order) throw new Error('Order not found');
 
     // Verify target table exists and is not occupied by another order
-    const targetTable = db.prepare('SELECT id, status FROM tables WHERE id = ?').get(newTableId) as any;
+    const targetTable = db.prepare('SELECT id, name, status FROM tables WHERE id = ?').get(newTableId) as any;
     if (!targetTable) throw new Error('Target table does not exist');
     if (targetTable.status === TableStatus.OCCUPIED) {
       const activeOnTarget = db.prepare(

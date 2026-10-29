@@ -848,11 +848,13 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
   };
 
   const selectedItem = items.find((i) => i.id === selectedMenuItemId);
-  const itemRecipes = recipes.filter((r) => r.menuItemId === selectedMenuItemId);
+  const itemRecipes = recipes.filter((r) => (r.menuItemId ?? (r as any).menu_item_id) === selectedMenuItemId);
 
   const totalCost = itemRecipes.reduce((sum, r) => {
-    const inv = inventoryItems.find((i) => i.id === r.inventoryItemId);
-    return sum + (inv ? inv.costPrice * r.quantity : 0);
+    const inv = inventoryItems.find((i) => i.id === (r.inventoryItemId ?? (r as any).inventory_item_id));
+    const qty = r.quantityUsed ?? (r as any).quantity_used ?? (r as any).quantity ?? 0;
+    const unitCost = inv ? (inv.costPerUnit ?? (inv as any).cost_per_unit ?? (inv as any).costPrice ?? 0) : 0;
+    return sum + unitCost * qty;
   }, 0);
 
   const profitMargin =
@@ -959,18 +961,21 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
                 },
                 {
                   header: t('inventory.quantity'),
-                  accessor: 'quantity',
+                  accessor: 'quantityUsed',
                   render: (r: Recipe) => {
-                    const inv = getInvItem(r.inventoryItemId);
-                    return `${r.quantity} ${inv?.unit ?? ''}`;
+                    const inv = getInvItem(r.inventoryItemId ?? (r as any).inventory_item_id);
+                    const qty = r.quantityUsed ?? (r as any).quantity_used ?? (r as any).quantity ?? 0;
+                    return `${qty} ${r.unit || inv?.unit || ''}`;
                   },
                 },
                 {
                   header: t('inventory.cost'),
                   accessor: 'cost',
                   render: (r: Recipe) => {
-                    const inv = getInvItem(r.inventoryItemId);
-                    return formatCurrency(inv ? inv.costPrice * r.quantity : 0);
+                    const inv = getInvItem(r.inventoryItemId ?? (r as any).inventory_item_id);
+                    const qty = r.quantityUsed ?? (r as any).quantity_used ?? (r as any).quantity ?? 0;
+                    const unitCost = inv ? (inv.costPerUnit ?? (inv as any).cost_per_unit ?? (inv as any).costPrice ?? 0) : 0;
+                    return formatCurrency(unitCost * qty);
                   },
                 },
                 {
@@ -980,7 +985,7 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
                   width: '60px',
                   render: (r: Recipe) => (
                     <button
-                      onClick={() => onDeleteRecipe(r)}
+                      onClick={() => onDeleteRecipe(r.id)}
                       className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                       title={t('common.delete')}
                     >

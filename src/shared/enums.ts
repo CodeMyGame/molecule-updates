@@ -33,6 +33,7 @@ export enum KOTStatus {
   PREPARING = 'preparing',
   READY = 'ready',
   SERVED = 'served',
+  CANCELLED = 'cancelled',
 }
 
 export enum StaffRole {

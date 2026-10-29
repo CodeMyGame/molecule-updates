@@ -124,10 +124,8 @@ const StaffPage: React.FC = () => {
   const [editPermissions, setEditPermissions] = useState<string[]>([]);
 
   useEffect(() => {
-    if (activeTab === 'attendance') {
-      fetchAttendance(undefined, attendanceDate);
-    }
-  }, [activeTab, attendanceDate, fetchAttendance]);
+    fetchAttendance(undefined, attendanceDate);
+  }, [attendanceDate, fetchAttendance]);
 
   const handleOpenAdd = () => {
     setFormData({ ...emptyForm, roleId: roles[0]?.id ?? 0 });

@@ -112,14 +112,22 @@ export function clockIn(staffId: number): Attendance {
 
 export function clockOut(staffId: number): Attendance | undefined {
   const db = getDb();
-  const date = new Date().toISOString().split('T')[0];
   const clockOutTime = new Date().toISOString();
 
-  db.prepare(`
-    UPDATE attendance SET clock_out = ?
-    WHERE staff_id = ? AND date = ? AND clock_out IS NULL
-  `).run(clockOutTime, staffId, date);
+  // Find the open session (most recent without clock_out) for this staff member
+  const openSession = db.prepare(`
+    SELECT * FROM attendance
+    WHERE staff_id = ? AND clock_out IS NULL
+    ORDER BY clock_in DESC, id DESC LIMIT 1
+  `).get(staffId) as any;
 
+  if (openSession) {
+    db.prepare('UPDATE attendance SET clock_out = ? WHERE id = ?').run(clockOutTime, openSession.id);
+    const updated = db.prepare('SELECT * FROM attendance WHERE id = ?').get(openSession.id) as any;
+    return updated ? mapAttendance(updated) : undefined;
+  }
+
+  const date = new Date().toISOString().split('T')[0];
   const row = db.prepare(
     'SELECT * FROM attendance WHERE staff_id = ? AND date = ? ORDER BY id DESC LIMIT 1'
   ).get(staffId, date) as any;

@@ -20,7 +20,7 @@ function getCoinTotals(startDate: string, endDate: string): { coinsRedeemed: num
       COALESCE(SUM(CASE WHEN lt.points > 0 THEN lt.points ELSE 0 END), 0) AS coins_earned
     FROM loyalty_transactions lt
     JOIN orders o ON lt.order_id = o.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE lt.created_at >= ? AND lt.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
   `).get(startDate, endDate) as any;
   return { coinsRedeemed: row?.coins_redeemed ?? 0, coinsEarned: row?.coins_earned ?? 0 };
 }
@@ -34,7 +34,7 @@ function getCoinTotalsForDate(date: string): { coinsRedeemed: number; coinsEarne
       COALESCE(SUM(CASE WHEN lt.points > 0 THEN lt.points ELSE 0 END), 0) AS coins_earned
     FROM loyalty_transactions lt
     JOIN orders o ON lt.order_id = o.id
-    WHERE DATE(o.created_at) = ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE DATE(lt.created_at) = ? AND o.status NOT IN ('cancelled', 'merged')
   `).get(date) as any;
   return { coinsRedeemed: row?.coins_redeemed ?? 0, coinsEarned: row?.coins_earned ?? 0 };
 }
