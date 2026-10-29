@@ -79,7 +79,7 @@ const defaultItemForm: ItemFormData = {
   shortCode: '',
   categoryId: null,
   basePrice: '',
-  taxRate: '5',
+  taxRate: '0',
   isVeg: true,
   isAvailable: true,
   imagePath: '',

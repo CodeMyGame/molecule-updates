@@ -310,10 +310,10 @@ function getEffectiveTaxRate(itemTaxRate?: number | null): number {
   const raw = settingsRepo.get('default_tax_rate');
   const parsed = raw !== undefined && raw !== null ? parseFloat(String(raw).trim()) : NaN;
   const configuredDefault = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
-  const itemRate = typeof itemTaxRate === 'number' && Number.isFinite(itemTaxRate) ? itemTaxRate : 5.0;
+  const itemRate = typeof itemTaxRate === 'number' && Number.isFinite(itemTaxRate) ? itemTaxRate : 0.0;
 
   if (configuredDefault !== null) {
-    if (configuredDefault === 0 || Math.abs(itemRate - 5.0) < 1e-6) {
+    if (configuredDefault === 0 || Math.abs(itemRate - 0.0) < 1e-6 || Math.abs(itemRate - 5.0) < 1e-6) {
       return configuredDefault;
     }
   }

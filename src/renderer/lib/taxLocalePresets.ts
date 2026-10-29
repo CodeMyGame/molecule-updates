@@ -63,9 +63,9 @@ export function getTaxRegionForLanguage(langCode: string): TaxRegion {
 export const TAX_LOCALE_PRESETS: Record<TaxRegion, TaxLocalePreset> = {
   in: {
     region: 'in',
-    defaultRate: '5',
+    defaultRate: '0',
     defaultTaxInclusive: false,
-    slabs: ['5', '12', '18', '28'],
+    slabs: ['0', '5', '12', '18', '28'],
     maxRate: 28,
     footnoteKey: 'taxLocale.footnotes.in',
   },
@@ -167,6 +167,6 @@ export function resolveOrderItemTaxRateFallback(
   langCode: string
 ): number {
   const n = typeof rawTax === 'number' ? rawTax : parseFloat(String(rawTax ?? '').trim());
-  const baseRate = Number.isFinite(n) && n >= 0 ? n : 5;
+  const baseRate = Number.isFinite(n) && n >= 0 ? n : 0;
   return resolveTaxRateForCartLine(baseRate, settingsDefaultTaxRate, langCode);
 }

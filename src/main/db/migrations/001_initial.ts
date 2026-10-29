@@ -69,7 +69,7 @@ export const initialMigration: Migration = {
         short_code TEXT,
         category_id INTEGER NOT NULL REFERENCES menu_categories(id),
         base_price INTEGER NOT NULL,
-        tax_rate REAL DEFAULT 5.0,
+        tax_rate REAL DEFAULT 0.0,
         is_veg INTEGER DEFAULT 1,
         is_available INTEGER DEFAULT 1,
         image_path TEXT,
@@ -111,7 +111,7 @@ export const initialMigration: Migration = {
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         price INTEGER NOT NULL,
-        tax_rate REAL DEFAULT 5.0,
+        tax_rate REAL DEFAULT 0.0,
         is_active INTEGER DEFAULT 1
       );
 

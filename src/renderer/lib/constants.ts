@@ -27,7 +27,7 @@ export const KOT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   cancelled: { bg: 'bg-red-100', text: 'text-red-800' },
 };
 
-export const TAX_RATE_OPTIONS = [5, 12, 18, 28] as const;
+export const TAX_RATE_OPTIONS = [0, 5, 12, 18, 28] as const;
 
 export const ORDER_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   active: { bg: 'bg-blue-100', text: 'text-blue-800' },

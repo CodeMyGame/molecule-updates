@@ -507,7 +507,7 @@ export function createCombo(data: { name: string; price: number; taxRate?: numbe
   const db = getDb();
   const result = db.prepare(
     'INSERT INTO combos (name, price, tax_rate, is_active) VALUES (?, ?, ?, ?)'
-  ).run(data.name, data.price, data.taxRate ?? 5.0, data.isActive !== false ? 1 : 0);
+  ).run(data.name, data.price, data.taxRate ?? 0.0, data.isActive !== false ? 1 : 0);
   const comboId = result.lastInsertRowid as number;
 
   if (data.items && data.items.length > 0) {
@@ -663,7 +663,7 @@ export function replaceMenu(data: { categories: any[]; items: any[]; addonGroups
           item.shortCode ?? item.short_code ?? null,
           item.categoryId ?? item.category_id,
           item.basePrice ?? item.base_price,
-          item.taxRate ?? item.tax_rate ?? 5.0,
+          item.taxRate ?? item.tax_rate ?? 0.0,
           item.isVeg !== false && item.is_veg !== 0 ? 1 : 0,
           item.isAvailable !== false && item.is_available !== 0 ? 1 : 0,
           item.sortOrder ?? item.sort_order ?? 0,
