@@ -1,6 +1,5 @@
 import './fetch-polyfill';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
-import { autoUpdater } from 'electron-updater';
 import { join, dirname } from 'path';
 import fs from 'fs';
 import { is } from '@electron-toolkit/utils';
@@ -253,6 +252,21 @@ async function runVacuumIfDue(): Promise<void> {
   }
 }
 
+let updaterInstance: any = null;
+
+function getAutoUpdater(): any {
+  if (updaterInstance) return updaterInstance;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { autoUpdater } = require('electron-updater');
+    updaterInstance = autoUpdater;
+    return updaterInstance;
+  } catch (err: any) {
+    logger.error('Failed to load electron-updater module:', err);
+    return null;
+  }
+}
+
 function setupAutoUpdater(): void {
   ipcMain.handle('updater:get-version', () => {
     return app.getVersion();
@@ -262,8 +276,12 @@ function setupAutoUpdater(): void {
     if (is.dev) {
       return { success: true, data: { isDev: true, version: app.getVersion() } };
     }
+    const updater = getAutoUpdater();
+    if (!updater) {
+      return { success: false, error: 'Auto-updater is not available on this system.' };
+    }
     try {
-      const result = await autoUpdater.checkForUpdates();
+      const result = await updater.checkForUpdates();
       return {
         success: true,
         data: result ? { updateInfo: result.updateInfo } : null
@@ -278,8 +296,12 @@ function setupAutoUpdater(): void {
     if (is.dev) {
       return { success: true };
     }
+    const updater = getAutoUpdater();
+    if (!updater) {
+      return { success: false, error: 'Auto-updater is not available.' };
+    }
     try {
-      await autoUpdater.downloadUpdate();
+      await updater.downloadUpdate();
       return { success: true };
     } catch (err: any) {
       logger.error('Failed to start update download:', err);
@@ -289,40 +311,41 @@ function setupAutoUpdater(): void {
 
   if (is.dev) return; // skip in dev
 
-  autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
+  const updater = getAutoUpdater();
+  if (!updater) return;
 
-  autoUpdater.on('update-available', (info) => {
+  updater.autoDownload = false;
+  updater.autoInstallOnAppQuit = true;
+
+  updater.on('update-available', (info: any) => {
     mainWindow?.webContents.send('updater:update-available', info);
   });
 
-  autoUpdater.on('update-not-available', (info) => {
+  updater.on('update-not-available', (info: any) => {
     mainWindow?.webContents.send('updater:update-not-available', info);
   });
 
-  autoUpdater.on('download-progress', (progress) => {
+  updater.on('download-progress', (progress: any) => {
     mainWindow?.webContents.send('updater:download-progress', progress);
   });
 
-  autoUpdater.on('update-downloaded', (info) => {
+  updater.on('update-downloaded', (info: any) => {
     mainWindow?.webContents.send('updater:update-downloaded', info);
   });
 
-  autoUpdater.on('error', (err) => {
+  updater.on('error', (err: any) => {
     logger.error('Auto-updater error:', err);
-    mainWindow?.webContents.send('updater:error', err.message);
+    mainWindow?.webContents.send('updater:error', err?.message ?? String(err));
   });
 
   ipcMain.on('updater:install-now', () => {
-    autoUpdater.quitAndInstall();
+    updater.quitAndInstall();
   });
 
   // Automatically check for updates on app startup (in production)
-  if (!is.dev) {
-    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-      logger.error('Background auto-update check failed:', err);
-    });
-  }
+  updater.checkForUpdatesAndNotify().catch((err: any) => {
+    logger.error('Background auto-update check failed:', err);
+  });
 }
 
 app.whenReady().then(async () => {

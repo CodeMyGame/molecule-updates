@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   XCircle,
   ChevronRight,
+  UtensilsCrossed,
 } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
@@ -267,13 +268,15 @@ const Inventory: React.FC = () => {
 
         {activeTab === 'recipes' && (
           <RecipesTab
+            items={menu.items}
             menuItems={menu.items}
             inventoryItems={inv.items}
             selectedMenuItemId={selectedMenuItemId}
             recipes={recipes}
             onSelectMenuItem={handleSelectMenuItem}
             onAddRecipe={() => setShowAddRecipe(true)}
-            onDeleteRecipe={async (id) => {
+            onDeleteRecipe={async (r) => {
+              const id = typeof r === 'number' ? r : r.id;
               await inv.deleteRecipe(id);
               if (selectedMenuItemId) handleSelectMenuItem(selectedMenuItemId);
             }}
@@ -798,24 +801,51 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
 // ---------- Recipes ----------
 
 interface RecipesTabProps {
-  items: MenuItem[];
+  items?: MenuItem[];
+  menuItems?: MenuItem[];
   inventoryItems: InventoryItem[];
+  selectedMenuItemId?: number | null;
   recipes: Recipe[];
+  onSelectMenuItem?: (itemId: number) => Promise<void> | void;
   onAddRecipe: () => void;
-  onDeleteRecipe: (recipe: Recipe) => void;
+  onDeleteRecipe: (recipe: any) => Promise<void> | void;
 }
 
 const RecipesTab: React.FC<RecipesTabProps> = ({
-  items,
+  items: propItems,
+  menuItems,
   inventoryItems,
+  selectedMenuItemId: propSelectedMenuItemId,
   recipes,
+  onSelectMenuItem,
   onAddRecipe,
   onDeleteRecipe,
 }) => {
+  const items = propItems ?? menuItems ?? [];
   const { t } = useTranslation();
-  const [selectedMenuItemId, setSelectedMenuItemId] = useState<number | null>(
-    items[0]?.id ?? null
-  );
+  const [internalSelectedId, setInternalSelectedId] = useState<number | null>(null);
+
+  const selectedMenuItemId = propSelectedMenuItemId !== undefined ? propSelectedMenuItemId : internalSelectedId;
+
+  // Auto-select first item on mount or when items change if none selected
+  useEffect(() => {
+    if (selectedMenuItemId === null && items.length > 0) {
+      const firstId = items[0].id;
+      if (onSelectMenuItem) {
+        onSelectMenuItem(firstId);
+      } else {
+        setInternalSelectedId(firstId);
+      }
+    }
+  }, [items, selectedMenuItemId, onSelectMenuItem]);
+
+  const handleItemSelect = (id: number) => {
+    if (onSelectMenuItem) {
+      onSelectMenuItem(id);
+    } else {
+      setInternalSelectedId(id);
+    }
+  };
 
   const selectedItem = items.find((i) => i.id === selectedMenuItemId);
   const itemRecipes = recipes.filter((r) => r.menuItemId === selectedMenuItemId);
@@ -848,7 +878,7 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
             return (
               <button
                 key={item.id}
-                onClick={() => setSelectedMenuItemId(item.id)}
+                onClick={() => handleItemSelect(item.id)}
                 className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors ${
                   selectedMenuItemId === item.id
                     ? 'bg-blue-50 text-blue-700 font-semibold'
