@@ -68,7 +68,8 @@
     "addTempItem": "カスタム商品を追加",
     "resizeMenuTable": "ドラッグしてサイズ変更",
     "resizeFloorSidebar": "ドラッグしてサイズ変更",
-    "resizeCart": "ドラッグしてサイズ変更"
+    "resizeCart": "ドラッグしてサイズ変更",
+    "customItemTooltip": "メニュー外の商品やカスタム価格を追加 (Ctrl+T)"
   },
   "cart": {
     "empty": "カートは空です",

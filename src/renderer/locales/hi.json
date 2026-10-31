@@ -68,7 +68,8 @@
     "addTempItem": "कस्टम आइटम जोड़ें",
     "resizeMenuTable": "आकार बदलने के लिए खींचें",
     "resizeFloorSidebar": "आकार बदलने के लिए खींचें",
-    "resizeCart": "आकार बदलने के लिए खींचें"
+    "resizeCart": "आकार बदलने के लिए खींचें",
+    "customItemTooltip": "मेनू से बाहर का आइटम या कस्टम कीमत जोड़ें (Ctrl+T)"
   },
   "cart": {
     "empty": "कार्ट खाली है",

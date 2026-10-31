@@ -68,7 +68,8 @@
     "addTempItem": "कस्टम आयटम जोडा",
     "resizeMenuTable": "आकार बदलण्यासाठी ड्रॅग करा",
     "resizeFloorSidebar": "आकार बदलण्यासाठी ड्रॅग करा",
-    "resizeCart": "आकार बदलण्यासाठी ड्रॅग करा"
+    "resizeCart": "आकार बदलण्यासाठी ड्रॅग करा",
+    "customItemTooltip": "मेनूबाहेरील डिश किंवा कस्टम किंमत जोडा (Ctrl+T)"
   },
   "cart": {
     "empty": "कार्ट रिकामी आहे",

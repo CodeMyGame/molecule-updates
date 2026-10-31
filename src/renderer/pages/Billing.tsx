@@ -1419,7 +1419,7 @@ const Billing: React.FC = () => {
           </div>
 
           {/* Custom item button */}
-          <Tooltip text={t('billing.addTempItem', 'Add Custom Item')} position="bottom">
+          <Tooltip text={t('billing.customItemTooltip', 'Add an unlisted dish or custom price (Ctrl+T)')} position="bottom">
             <button
               onClick={() => setShowTempItemModal(true)}
               className="flex items-center gap-1.5 px-3 py-1 text-xs text-orange-600 bg-orange-50

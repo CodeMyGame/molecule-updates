@@ -68,7 +68,8 @@
     "addTempItem": "কাস্টম আইটেম যোগ করুন",
     "resizeMenuTable": "আকার পরিবর্তন করতে টানুন",
     "resizeFloorSidebar": "আকার পরিবর্তন করতে টানুন",
-    "resizeCart": "আকার পরিবর্তন করতে টানুন"
+    "resizeCart": "আকার পরিবর্তন করতে টানুন",
+    "customItemTooltip": "মেনুতে নেই এমন আইটেম বা কাস্টম মূল্য যোগ করুন (Ctrl+T)"
   },
   "cart": {
     "empty": "কার্ট খালি",

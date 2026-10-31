@@ -68,7 +68,8 @@
     "addTempItem": "ਕਸਟਮ ਆਈਟਮ ਸ਼ਾਮਲ ਕਰੋ",
     "resizeMenuTable": "ਆਕਾਰ ਬਦਲਣ ਲਈ ਖਿੱਚੋ",
     "resizeFloorSidebar": "ਆਕਾਰ ਬਦਲਣ ਲਈ ਖਿੱਚੋ",
-    "resizeCart": "ਆਕਾਰ ਬਦਲਣ ਲਈ ਖਿੱਚੋ"
+    "resizeCart": "ਆਕਾਰ ਬਦਲਣ ਲਈ ਖਿੱਚੋ",
+    "customItemTooltip": "ਮੈਨਿਊ ਵਿੱਚ ਨਾ ਹੋਣ ਵਾਲੀ ਆਈਟਮ ਜਾਂ ਕਸਟਮ ਕੀਮਤ ਸ਼ਾਮਲ ਕਰੋ (Ctrl+T)"
   },
   "cart": {
     "empty": "ਕਾਰਟ ਖਾਲੀ ਹੈ",

@@ -68,7 +68,8 @@
     "addTempItem": "إضافة صنف مخصص",
     "resizeMenuTable": "اسحب لإعادة الحجم",
     "resizeFloorSidebar": "اسحب لإعادة الحجم",
-    "resizeCart": "اسحب لإعادة الحجم"
+    "resizeCart": "اسحب لإعادة الحجم",
+    "customItemTooltip": "إضافة صنف غير مدرج أو سعر مخصص (Ctrl+T)"
   },
   "cart": {
     "empty": "السلة فارغة",

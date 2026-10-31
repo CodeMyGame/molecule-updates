@@ -68,7 +68,8 @@
     "addTempItem": "Añadir artículo personalizado",
     "resizeMenuTable": "Arrastra para redimensionar",
     "resizeFloorSidebar": "Arrastra para redimensionar",
-    "resizeCart": "Arrastra para redimensionar"
+    "resizeCart": "Arrastra para redimensionar",
+    "customItemTooltip": "Añadir plato fuera de carta o precio personalizado (Ctrl+T)"
   },
   "cart": {
     "empty": "El carrito está vacío",
