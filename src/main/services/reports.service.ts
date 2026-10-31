@@ -166,7 +166,7 @@ export function paymentSummary(dateRange: DateRangeFilter): PaymentSummaryReport
       SUM(p.tip_amount) AS tip_amount
     FROM payments p
     JOIN orders o ON p.order_id = o.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE p.created_at >= ? AND p.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
     GROUP BY p.payment_mode
     ORDER BY total_amount DESC
   `).all(startDate, endDate) as any[];
@@ -187,7 +187,7 @@ export function cashFlow(dateRange: DateRangeFilter): CashFlowReport {
   const session = db.prepare(`
     SELECT opening_cash, closing_cash, expected_cash
     FROM day_sessions
-    WHERE opened_at >= ? AND (closed_at <= ? OR closed_at IS NULL)
+    WHERE opened_at >= ? AND opened_at <= ?
     ORDER BY opened_at DESC LIMIT 1
   `).get(startDate, endDate) as any;
 
@@ -196,7 +196,7 @@ export function cashFlow(dateRange: DateRangeFilter): CashFlowReport {
     FROM payments p
     JOIN orders o ON p.order_id = o.id
     WHERE p.payment_mode = 'cash'
-      AND o.created_at >= ? AND o.created_at <= ?
+      AND p.created_at >= ? AND p.created_at <= ?
       AND o.status NOT IN ('cancelled', 'merged')
   `).get(startDate, endDate) as any;
 
@@ -324,7 +324,7 @@ export function dayEndSummary(dateRange: DateRangeFilter): {
     SELECT p.payment_mode AS mode, COALESCE(SUM(p.amount), 0) AS total, COUNT(*) AS count
     FROM payments p
     JOIN orders o ON p.order_id = o.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status = 'completed'
+    WHERE p.created_at >= ? AND p.created_at <= ? AND o.status = 'completed'
     GROUP BY p.payment_mode
   `).all(startDate, endDate) as any[];
 
@@ -349,12 +349,12 @@ export function dayEndSummary(dateRange: DateRangeFilter): {
     SELECT COALESCE(SUM(p.amount), 0) AS total
     FROM payments p
     JOIN orders o ON p.order_id = o.id
-    WHERE p.payment_mode = 'cash' AND o.created_at >= ? AND o.created_at <= ? AND o.status = 'completed'
+    WHERE p.payment_mode = 'cash' AND p.created_at >= ? AND p.created_at <= ? AND o.status = 'completed'
   `).get(startDate, endDate) as any;
 
   const session = db.prepare(`
     SELECT opening_cash FROM day_sessions
-    WHERE opened_at >= ? AND (closed_at <= ? OR closed_at IS NULL)
+    WHERE opened_at >= ? AND opened_at <= ?
     ORDER BY opened_at DESC LIMIT 1
   `).get(startDate, endDate) as any;
 
@@ -429,14 +429,14 @@ export function shiftHandover(staffId: number, dateRange: DateRangeFilter): {
   const orders = db.prepare(`
     SELECT COUNT(*) AS total_orders, COALESCE(SUM(grand_total), 0) AS total_revenue
     FROM orders
-    WHERE staff_id = ? AND created_at >= ? AND created_at <= ? AND status = 'completed'
+    WHERE staff_id = ? AND COALESCE(completed_at, created_at) >= ? AND COALESCE(completed_at, created_at) <= ? AND status = 'completed'
   `).get(staffId, startDate, endDate) as any;
 
   const payments = db.prepare(`
     SELECT p.payment_mode, COALESCE(SUM(p.amount), 0) AS total
     FROM payments p
     JOIN orders o ON p.order_id = o.id
-    WHERE o.staff_id = ? AND o.created_at >= ? AND o.created_at <= ? AND o.status = 'completed'
+    WHERE o.staff_id = ? AND p.created_at >= ? AND p.created_at <= ? AND o.status = 'completed'
     GROUP BY p.payment_mode
   `).all(staffId, startDate, endDate) as any[];
 
@@ -445,7 +445,7 @@ export function shiftHandover(staffId: number, dateRange: DateRangeFilter): {
   const ordersByType = db.prepare(`
     SELECT order_type AS type, COUNT(*) AS count
     FROM orders
-    WHERE staff_id = ? AND created_at >= ? AND created_at <= ? AND status = 'completed'
+    WHERE staff_id = ? AND COALESCE(completed_at, created_at) >= ? AND COALESCE(completed_at, created_at) <= ? AND status = 'completed'
     GROUP BY order_type
   `).all(staffId, startDate, endDate) as any[];
 
