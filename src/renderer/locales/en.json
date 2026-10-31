@@ -69,7 +69,7 @@
     "resizeMenuTable": "Drag to resize",
     "resizeFloorSidebar": "Drag to resize",
     "resizeCart": "Drag to resize",
-    "customItemTooltip": "Add an unlisted dish or custom price (Ctrl+T)"
+    "customItemTooltip": "Add an unlisted dish in order (Ctrl+T)"
   },
   "cart": {
     "empty": "Cart is empty",
