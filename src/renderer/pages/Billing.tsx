@@ -60,11 +60,12 @@ interface Table {
   floorId: number;
   name: string;
   floor_name?: string;
-  status: string;
+  status: any;
   capacity: number;
   posX: number;
   posY: number;
   shape: string;
+  isPinned?: boolean;
 }
 
 interface Floor {

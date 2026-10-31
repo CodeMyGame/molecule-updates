@@ -1200,7 +1200,7 @@ const Settings: React.FC = () => {
               </div>
 
               {(() => {
-                let stationMap = {};
+                let stationMap: Record<string, string> = {};
                 try {
                   stationMap = JSON.parse(settings.station_printers || '{}');
                 } catch {
@@ -1214,7 +1214,7 @@ const Settings: React.FC = () => {
                   { key: 'dessert', label: t('kitchen.stationDessert', 'Dessert & Bakery'), icon: <Cake size={16} className="text-pink-500" /> },
                 ];
 
-                const handleStationChange = (stationKey, val) => {
+                const handleStationChange = (stationKey: string, val: string) => {
                   const nextMap = { ...stationMap };
                   if (val) {
                     nextMap[stationKey] = val;

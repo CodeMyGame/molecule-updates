@@ -626,7 +626,7 @@ export function removeItem(
         item.staff_name ?? null
       );
     } catch (err) {
-      logger.error('Failed to log void item on removeItem:', err, { orderId, orderItemId });
+      logger.error('Failed to log void item on removeItem:', err, { orderId: item.order_id, orderItemId });
     }
 
     db.prepare('DELETE FROM kot_items WHERE order_item_id = ?').run(orderItemId);

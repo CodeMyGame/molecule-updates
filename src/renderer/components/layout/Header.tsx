@@ -43,7 +43,6 @@ const Header: React.FC = () => {
   const cartLength = useBillingStore((s) => s.cart.length);
   const syncedItemCount = useBillingStore((s) => s.syncedItemCount);
   const isDayOpen = useDaySessionStore((s) => s.isDayOpen);
-  const currentSession = useDaySessionStore((s) => s.currentSession);
   const fetchDaySession = useDaySessionStore((s) => s.fetch);
   const { restaurant, fetchRestaurant } = useSettings();
   const openTour = useTourStore((s) => s.openTour);

@@ -1,4 +1,5 @@
 import * as orderRepo from '../db/repositories/order.repo';
+import * as kotRepo from '../db/repositories/kot.repo';
 
 import * as tableRepo from '../db/repositories/table.repo';
 

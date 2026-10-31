@@ -54,6 +54,9 @@ export interface POItem {
 export interface StockTransaction {
   id: number;
   inventoryItemId: number;
+  itemName?: string;
+  unit?: string;
+  reason?: string;
   transactionType: StockTransactionType;
   quantity: number;
   referenceType?: string;

@@ -1242,7 +1242,7 @@ export function registerAllHandlers(): void {
     }
   });
 
-  ipcMain.handle(BACKUP.cloudBackup, async (): Promise<IpcResult<{ folder: string }>> => {
+  ipcMain.handle(BACKUP.cloudBackup, async (): Promise<IpcResult<any>> => {
     try {
       const result = await supabaseBackupService.performDatabaseBackupAndUpload();
       settingsRepo.set('last_supabase_backup', new Date().toISOString(), 'general');

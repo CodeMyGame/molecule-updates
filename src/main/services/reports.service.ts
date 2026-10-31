@@ -219,11 +219,12 @@ export function cashFlow(dateRange: DateRangeFilter): CashFlowReport {
 }
 
 export function inventoryConsumption(dateRange: DateRangeFilter): {
-  inventoryItemId: number;
-  name: string;
+  ingredientId: number;
+  ingredientName: string;
   unit: string;
   totalConsumed: number;
-  totalPurchased: number;
+  totalWasted: number;
+  totalCost: number;
 }[] {
   const db = getDb();
   const { startDate, endDate } = normalizeDateRange(dateRange);

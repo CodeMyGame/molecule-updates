@@ -244,7 +244,7 @@ const Tables: React.FC = () => {
     const selectedIds = splitModal.items.filter((i) => i.selected).map((i) => i.id);
     try {
       await ipc(window.electronAPI.orders.splitBill(splitModal.orderId, selectedIds, targetTableId));
-      const targetName = tables.find((t) => t.id === targetTableId)?.name ?? Table ;
+      const targetName = tables.find((t) => t.id === targetTableId)?.name ?? `Table #${targetTableId}`;
       toast.success(t('billingPage.itemsSplitTo', { name: targetName }));
       setSplitModal(null);
       await refetch();

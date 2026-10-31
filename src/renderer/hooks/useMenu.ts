@@ -23,6 +23,7 @@ export interface MenuItem {
   station?: string;
   has_variations?: boolean;
   has_addons?: boolean;
+  isPinned?: boolean;
 }
 
 export interface Variation {

@@ -2020,7 +2020,7 @@ const Reports: React.FC = () => {
 
     const columns = [
       {
-        key: 'voidedAt',
+        accessor: 'voidedAt',
         header: t('reports.date', 'Date & Time'),
         sortable: true,
         render: (item: any) => (
@@ -2030,7 +2030,7 @@ const Reports: React.FC = () => {
         ),
       },
       {
-        key: 'orderNumber',
+        accessor: 'orderNumber',
         header: t('reports.orderNo', 'Order #'),
         sortable: true,
         render: (item: any) => (
@@ -2040,7 +2040,7 @@ const Reports: React.FC = () => {
         ),
       },
       {
-        key: 'tableName',
+        accessor: 'tableName',
         header: t('reports.tableOrMode', 'Table / Mode'),
         sortable: true,
         render: (item: any) => (
@@ -2050,7 +2050,7 @@ const Reports: React.FC = () => {
         ),
       },
       {
-        key: 'itemName',
+        accessor: 'itemName',
         header: t('reports.item', 'Item Name'),
         sortable: true,
         render: (item: any) => (
@@ -2063,7 +2063,7 @@ const Reports: React.FC = () => {
         ),
       },
       {
-        key: 'quantity',
+        accessor: 'quantity',
         header: t('reports.qty', 'Qty'),
         sortable: true,
         render: (item: any) => (
@@ -2073,7 +2073,7 @@ const Reports: React.FC = () => {
         ),
       },
       {
-        key: 'totalAmount',
+        accessor: 'totalAmount',
         header: t('reports.amount', 'Void Amount'),
         sortable: true,
         render: (item: any) => (
@@ -2083,7 +2083,7 @@ const Reports: React.FC = () => {
         ),
       },
       {
-        key: 'reason',
+        accessor: 'reason',
         header: t('reports.cancellationReason', 'Cancellation Reason'),
         sortable: true,
         render: (item: any) => (
@@ -2094,7 +2094,7 @@ const Reports: React.FC = () => {
         ),
       },
       {
-        key: 'staffName',
+        accessor: 'staffName',
         header: t('reports.staff', 'Staff / Cashier'),
         sortable: true,
         render: (item: any) => (
@@ -2218,7 +2218,6 @@ const Reports: React.FC = () => {
         <DataTable
           columns={columns}
           data={filteredItems}
-          loading={reports.loading}
           emptyMessage={t('reports.noVoidRecords', 'No voided or cancelled items recorded for this period.')}
         />
       </div>

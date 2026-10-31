@@ -1958,7 +1958,7 @@ const MenuManagement: React.FC = () => {
                       taxRate: comboTax,
                       isActive: true,
                       items: comboItems,
-                    });
+                    } as any);
                   }
                   setShowComboModal(false);
                   await loadCombos();
