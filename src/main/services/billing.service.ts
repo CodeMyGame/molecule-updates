@@ -1163,7 +1163,7 @@ export function moveTable(orderId: number, newTableId: number): Order & { items:
 
     const oldTableId = order.tableId;
     const oldTableName = order.tableName || (oldTableId ? `Table #${oldTableId}` : order.orderNumber);
-    const transferNote = `Split from ${oldTableName}`;
+    const transferNote = `Moved from ${oldTableName}`;
 
     // Update order table, snapshot, notes
     db.prepare(`
