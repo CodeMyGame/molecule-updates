@@ -48,7 +48,10 @@ export const ORDERS = {
   applyDiscount: 'orders:applyDiscount',
   splitBill: 'orders:splitBill',
   mergeBills: 'orders:mergeBills',
+  mergeBillsPartial: 'orders:mergeBillsPartial',
   moveTable: 'orders:moveTable',
+  transferOrder: 'orders:transferOrder',
+  transferPartial: 'orders:transferPartial',
   updateCustomer: 'orders:updateCustomer',
   getByCustomer: 'orders:getByCustomer',
   delete: 'orders:delete',
@@ -176,6 +179,7 @@ export const SETTINGS = {
   getRoles: 'settings:getRoles',
   updateRole: 'settings:updateRole',
   getPrinters: 'settings:getPrinters',
+  isFreshInstall: 'settings:isFreshInstall',
 } as const;
 
 export const DAY_SESSION = {

@@ -2021,7 +2021,7 @@ const Settings: React.FC = () => {
             {!cloudStatus.connected ? (
               <div className="space-y-4">
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  Sign in with your Owner Email & Password. Use these same credentials to log in on your phone or web browser.
+                  Sign in with your Owner Email & Password. Use this same email and password to log in on your phone or web browser.
                 </p>
 
                 <div>
@@ -2286,7 +2286,7 @@ const Settings: React.FC = () => {
             </div>
             <h4 className="text-sm font-bold text-gray-900 mb-1">Cash Drawer & Day Session</h4>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Supervise opening cash float, total cash sales collected, expected cash in register, and day session closure status from anywhere.
+              Supervise opening cash in drawer, total cash sales collected, expected cash in register, and daily register closing status from anywhere.
             </p>
           </div>
 
@@ -2297,7 +2297,7 @@ const Settings: React.FC = () => {
             </div>
             <h4 className="text-sm font-bold text-gray-900 mb-1">Loss Prevention & Anti-Theft</h4>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Detect leakages with instant alerts on order cancellations, voided items, void rates, discounts given, and store audit health ratings.
+              Detect leakages with instant alerts on order cancellations, cancelled items, cancellation rates, discounts given, and store health ratings.
             </p>
           </div>
 
@@ -2306,9 +2306,9 @@ const Settings: React.FC = () => {
             <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center mb-3">
               <BarChart3 size={18} />
             </div>
-            <h4 className="text-sm font-bold text-gray-900 mb-1">Analytics & CSV Export</h4>
+            <h4 className="text-sm font-bold text-gray-900 mb-1">Analytics & Spreadsheet Export</h4>
             <p className="text-xs text-gray-600 leading-relaxed">
-              Analyze multi-period sales (Today, Week, Month, Year, Custom dates), Week-over-Week comparisons, 7-day moving averages, and 1-click CSV export.
+              Analyze multi-period sales (Today, Week, Month, Year, Custom dates), Week-over-Week comparisons, 7-day moving averages, and 1-click Excel/spreadsheet export.
             </p>
           </div>
 

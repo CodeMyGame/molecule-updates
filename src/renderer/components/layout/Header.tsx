@@ -297,7 +297,7 @@ const Header: React.FC = () => {
                       <h3 className="text-xs font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
                         {t('header.dailyHeadsUp', 'Daily Heads-Up')}
                       </h3>
-                      <p className="text-[10px] text-gray-500">Quick snapshot & business pulse</p>
+                      <p className="text-[10px] text-gray-500">Quick store overview & business pulse</p>
                     </div>
                   </div>
                   <button
@@ -407,7 +407,7 @@ const Header: React.FC = () => {
                                         {formatCurrency(p.total)}
                                       </div>
                                       <div className="text-[9px] text-gray-400 font-medium">
-                                        {p.count} txn
+                                        {p.count} {p.count === 1 ? 'bill' : 'bills'}
                                       </div>
                                     </div>
                                   );

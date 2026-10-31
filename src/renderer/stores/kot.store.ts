@@ -71,7 +71,7 @@ export const useKOTStore = create<KOTState>((set, get) => ({
 
       set({ activeKOTs: active, completedKOTs: completed });
     } catch (err: any) {
-      set({ error: err.message ?? 'Failed to fetch KOTs' });
+      set({ error: err.message ?? 'Could not load kitchen orders. Please check your connection.' });
     } finally {
       set({ loading: false });
     }

@@ -23,6 +23,7 @@ export interface Order {
   splitFromOrderId?: number;
   splitFromOrderNumber?: string;
   kots?: OrderKotSummary[];
+  outboundTransfers?: { targetTableName: string; items: { name: string; quantity: number }[] }[];
   createdAt: string;
   updatedAt: string;
   completedAt?: string;

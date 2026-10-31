@@ -139,6 +139,135 @@ export function create(data: CreateOrderDTO): Order {
   return getById(orderId)!;
 }
 
+export function getOutboundTransfersForOrder(
+  orderId: number,
+  tableNameSnapshot?: string | null,
+  tableId?: number | null,
+  notes?: string | null
+): { targetTableName: string; items: { name: string; quantity: number }[] }[] {
+  const db = getDb();
+  let currentTableName = tableNameSnapshot;
+  if (!currentTableName && tableId) {
+    const tRow = db.prepare('SELECT name FROM tables WHERE id = ?').get(tableId) as any;
+    if (tRow) currentTableName = tRow.name;
+  }
+
+  // Check if THIS specific order actually transferred anything:
+  // 1) Either its notes record an outbound transfer (e.g. "Transferred to T2", "Split into...")
+  // 2) Or another active order has split_from_order_id = this orderId
+  const hasOutboundInNotes = Boolean(
+    notes &&
+    notes.split('|').some((n) => {
+      const trimmed = n.trim();
+      return !/\bfrom\b/i.test(trimmed) &&
+        /(?:transferred(?:\s+partial\s+items)?\s+(?:to|into)|merged(?:\s+partial\s+items)?\s+(?:to|into)|split into)/i.test(trimmed);
+    })
+  );
+
+  let splitChildCount = 0;
+  try {
+    const row = db.prepare(
+      "SELECT COUNT(*) as count FROM orders WHERE split_from_order_id = ? AND status IN ('active', 'hold')"
+    ).get(orderId) as any;
+    splitChildCount = row?.count ?? 0;
+  } catch {
+    // ignore
+  }
+
+  // If this order has no outbound notes and no split child orders, it has no outbound transfers!
+  if (!hasOutboundInNotes && splitChildCount === 0) {
+    return [];
+  }
+
+  const outboundMap = new Map<string, { targetTableName: string; items: { name: string; quantity: number }[] }>();
+
+  const addItemToMap = (dest: string, itemName: string, qty: number) => {
+    const cleanTbl = dest.trim();
+    const cleanItem = itemName.trim();
+    if (!cleanTbl || !cleanItem || qty <= 0) return;
+    if (currentTableName && cleanTbl.toLowerCase() === currentTableName.toLowerCase()) return;
+
+    if (!outboundMap.has(cleanTbl)) {
+      outboundMap.set(cleanTbl, { targetTableName: cleanTbl, items: [] });
+    }
+    const entry = outboundMap.get(cleanTbl)!;
+    const existing = entry.items.find(
+      (it) => it.name.trim().toLowerCase() === cleanItem.toLowerCase()
+    );
+    if (existing) {
+      existing.quantity = Math.max(existing.quantity, qty);
+    } else {
+      entry.items.push({ name: cleanItem, quantity: qty });
+    }
+  };
+
+  // 1. Look up items on active/hold orders that were split from THIS specific order
+  if (splitChildCount > 0) {
+    try {
+      const q = `
+        SELECT oi.name, oi.quantity, COALESCE(t.name, o.table_name_snapshot, o.order_number) AS dest_table
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.id
+        LEFT JOIN tables t ON o.table_id = t.id
+        WHERE o.split_from_order_id = ? AND o.status IN ('active', 'hold')
+      `;
+      const rows = db.prepare(q).all(orderId) as any[];
+      for (const row of rows) {
+        let dest = row.dest_table || 'Other';
+        if (dest.startsWith('ORD-')) {
+          const tRow = db.prepare('SELECT t.name FROM orders o JOIN tables t ON o.table_id = t.id WHERE o.order_number = ?').get(dest) as any;
+          if (tRow && tRow.name) dest = tRow.name;
+        }
+        addItemToMap(dest, row.name, row.quantity);
+      }
+    } catch {
+      // Non-fatal
+    }
+  }
+
+  // 2. Also inspect notes on this specific order
+  if (notes) {
+    for (const n of notes.split('|')) {
+      const trimmed = n.trim();
+      if (/\bfrom\b/i.test(trimmed)) continue;
+      const m = trimmed.match(/(?:transferred(?:\s+partial\s+items)?\s+(?:to|into)|merged(?:\s+partial\s+items)?\s+(?:to|into)|split into)\s+([^:,|]+)(?::\s*([^|]+))?/i);
+      if (m && m[1]) {
+        let dest = m[1].trim();
+        if (dest.startsWith('ORD-')) {
+          try {
+            const tRow = db.prepare('SELECT t.name FROM orders o JOIN tables t ON o.table_id = t.id WHERE o.order_number = ?').get(dest) as any;
+            if (tRow && tRow.name) dest = tRow.name;
+          } catch { /* ignore */ }
+        }
+        if (dest && (!currentTableName || dest.toLowerCase() !== currentTableName.toLowerCase())) {
+          if (m[2]) {
+            for (const part of m[2].split(',')) {
+              const p = part.trim();
+              if (p) {
+                const qm = p.match(/(.+?)\s*[xX×]\s*(\d+)/) || p.match(/(\d+)\s*[xX×]\s*(.+)/);
+                if (qm) {
+                  const qty = /^\d+$/.test(qm[1]) ? parseInt(qm[1], 10) : parseInt(qm[2], 10);
+                  const name = /^\d+$/.test(qm[1]) ? qm[2].trim() : qm[1].trim();
+                  addItemToMap(dest, name, qty);
+                } else {
+                  addItemToMap(dest, p, 1);
+                }
+              }
+            }
+          } else {
+            // Table recorded without items
+            if (!outboundMap.has(dest)) {
+              outboundMap.set(dest, { targetTableName: dest, items: [] });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return Array.from(outboundMap.values());
+}
+
 export function getById(id: number): (Order & { items: OrderItem[]; kots: OrderKotSummary[] }) | undefined {
   const db = getDb();
   const row = db.prepare(`
@@ -155,8 +284,9 @@ export function getById(id: number): (Order & { items: OrderItem[]; kots: OrderK
   const order = mapOrder(row);
   const items = getOrderItems(id);
   const kots = getOrderKots(id);
+  const outboundTransfers = getOutboundTransfersForOrder(order.id, order.tableName || row.table_name_snapshot, order.tableId, order.notes);
 
-  return { ...order, items, kots };
+  return { ...order, items, kots, outboundTransfers };
 }
 
 export function getActive(): (Order & { items: OrderItem[]; kots: OrderKotSummary[] })[] {
@@ -172,14 +302,22 @@ export function getActive(): (Order & { items: OrderItem[]; kots: OrderKotSummar
 
 export function getByTable(tableId: number): (Order & { items: OrderItem[]; kots: OrderKotSummary[] }) | undefined {
   const db = getDb();
-  const row = db.prepare(
-    "SELECT * FROM orders WHERE table_id = ? AND status = ? ORDER BY created_at DESC LIMIT 1"
-  ).get(tableId, OrderStatus.ACTIVE) as any;
+  const row = db.prepare(`
+    SELECT o.*,
+      mo.order_number AS merged_into_order_number,
+      sfo.order_number AS split_from_order_number
+    FROM orders o
+    LEFT JOIN orders mo ON o.merged_into_order_id = mo.id
+    LEFT JOIN orders sfo ON o.split_from_order_id = sfo.id
+    WHERE o.table_id = ? AND o.status = ?
+    ORDER BY o.created_at DESC LIMIT 1
+  `).get(tableId, OrderStatus.ACTIVE) as any;
   if (!row) return undefined;
   const order = mapOrder(row);
   const items = getOrderItems(order.id);
   const kots = getOrderKots(order.id);
-  return { ...order, items, kots };
+  const outboundTransfers = getOutboundTransfersForOrder(order.id, order.tableName || row.table_name_snapshot, order.tableId, order.notes);
+  return { ...order, items, kots, outboundTransfers };
 }
 
 export function getAll(filters?: {
@@ -189,17 +327,20 @@ export function getAll(filters?: {
   orderType?: string;
   limit?: number;
   offset?: number;
+  dateField?: 'created_at' | 'updated_at';
 }): Order[] {
   const db = getDb();
   const conditions: string[] = [];
   const params: unknown[] = [];
 
+  const dateCol = filters?.dateField === 'updated_at' ? 'COALESCE(o.updated_at, o.created_at)' : 'o.created_at';
+
   if (filters?.startDate) {
-    conditions.push('o.created_at >= ?');
+    conditions.push(`${dateCol} >= ?`);
     params.push(filters.startDate);
   }
   if (filters?.endDate) {
-    conditions.push('o.created_at <= ?');
+    conditions.push(`${dateCol} <= ?`);
     params.push(filters.endDate.includes(' ') ? filters.endDate : `${filters.endDate} 23:59:59`);
   }
   if (filters?.status) {
@@ -236,7 +377,7 @@ export function getAll(filters?: {
     LEFT JOIN orders mo ON o.merged_into_order_id = mo.id
     LEFT JOIN orders sfo ON o.split_from_order_id = sfo.id
     ${where}
-    ORDER BY o.created_at DESC
+    ORDER BY ${dateCol} DESC
     LIMIT ? OFFSET ?
   `).all(...params, limit, offset) as any[];
   return rows.map((row) => ({
@@ -385,7 +526,7 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
     let additionalTax = 0;
 
     const orderInfo = getOrderTable.get(orderId) as any;
-    const tableSnapshot = orderInfo?.table_name_snapshot || orderInfo?.current_table_name || null;
+    const tableSnapshot = orderInfo?.current_table_name || orderInfo?.table_name_snapshot || null;
 
     for (const item of items) {
       item.taxRate = resolveItemTaxRate(item.taxRate);

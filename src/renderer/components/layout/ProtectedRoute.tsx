@@ -9,6 +9,7 @@ import LicenseExpiryBanner from '../license/LicenseExpiryBanner';
 import TaxRegionSettingsSync from '../tax/TaxRegionSettingsSync';
 import QuickTourModal from '../tour/QuickTourModal';
 import { useTourStore } from '../../stores/tour.store';
+import { ipc } from '../../lib/ipc';
 
 const HARD_LOCKOUT_STATES = ['unlicensed', 'invalid', 'expired_hard'];
 
@@ -20,12 +21,24 @@ const ProtectedRoute: React.FC = () => {
     if (!isAuthenticated) return;
     try {
       const seen = localStorage.getItem('molecule_pos_tour_seen');
-      if (!seen) {
-        const timer = setTimeout(() => {
-          openTour(0);
-        }, 800);
-        return () => clearTimeout(timer);
-      }
+      if (seen) return;
+
+      // Only auto-trigger tour for freshly installed customers (0 orders, 0 sessions)
+      ipc<boolean>(window.electronAPI.settings.isFreshInstall())
+        .then((isFresh) => {
+          if (isFresh) {
+            const timer = setTimeout(() => {
+              openTour(0);
+            }, 800);
+            return () => clearTimeout(timer);
+          } else {
+            // Existing customer: mark as seen so it never pops up automatically
+            localStorage.setItem('molecule_pos_tour_seen', 'true');
+          }
+        })
+        .catch(() => {
+          localStorage.setItem('molecule_pos_tour_seen', 'true');
+        });
     } catch {
       /* ignore */
     }

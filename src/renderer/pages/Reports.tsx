@@ -239,6 +239,7 @@ const Reports: React.FC = () => {
   const [orderHistoryLoadingMore, setOrderHistoryLoadingMore] = useState(false);
   const [orderHistoryAvailableTypes, setOrderHistoryAvailableTypes] = useState<string[]>([]);
   const orderHistorySentinelRef = useRef<HTMLDivElement>(null);
+  const [orderDateBasis, setOrderDateBasis] = useState<'updated_at' | 'created_at'>('updated_at');
   const ORDER_PAGE_SIZE = 100;
   const [deleteModal, setDeleteModal] = useState<{ orderIds: number[]; label: string } | null>(null);
   const [deletePassword, setDeletePassword] = useState('');
@@ -290,6 +291,7 @@ const Reports: React.FC = () => {
         endDate: reports.dateRange.endDate,
         status: orderFilterStatus || undefined,
         orderType: orderFilterType || undefined,
+        dateField: orderDateBasis,
         limit: ORDER_PAGE_SIZE,
         offset,
       }));
@@ -411,7 +413,7 @@ const Reports: React.FC = () => {
       fetchOrderHistory(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderFilterStatus, orderFilterType]);
+  }, [orderFilterStatus, orderFilterType, orderDateBasis]);
 
   // IntersectionObserver for infinite scroll on order history
   useEffect(() => {
@@ -1179,12 +1181,26 @@ const Reports: React.FC = () => {
 
     const sorted = orderSortKey
       ? [...orderHistory].sort((a, b) => {
-          const av = a[orderSortKey] ?? '';
-          const bv = b[orderSortKey] ?? '';
+          let av = a[orderSortKey] ?? '';
+          let bv = b[orderSortKey] ?? '';
+          if (orderSortKey === 'updatedAt') {
+            av = a.updatedAt || a.createdAt || '';
+            bv = b.updatedAt || b.createdAt || '';
+          }
           const cmp = typeof av === 'string' ? av.localeCompare(bv) : av < bv ? -1 : av > bv ? 1 : 0;
           return orderSortDir === 'asc' ? cmp : -cmp;
         })
-      : orderHistory;
+      : [...orderHistory].sort((a, b) => {
+          if (orderDateBasis === 'updated_at') {
+            const av = a.updatedAt || a.createdAt || '';
+            const bv = b.updatedAt || b.createdAt || '';
+            return bv.localeCompare(av);
+          } else {
+            const av = a.createdAt || '';
+            const bv = b.createdAt || '';
+            return bv.localeCompare(av);
+          }
+        });
 
     const handleOrderSort = (key: string) => {
       if (orderSortKey === key) setOrderSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
@@ -1236,6 +1252,31 @@ const Reports: React.FC = () => {
             styleMap={TYPE_STYLES}
             options={orderTypes.map((ot) => ({ value: ot, label: ot.replace(/_/g, ' ') }))}
           />
+          {/* Order date basis toggle: Updated (default) vs Created */}
+          <div className="flex items-center gap-0.5 bg-gray-100 p-0.5 rounded-lg text-xs">
+            <button
+              type="button"
+              onClick={() => setOrderDateBasis('updated_at')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                orderDateBasis === 'updated_at'
+                  ? 'bg-white text-blue-700 shadow-2xs font-semibold'
+                  : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {t('reports.dateByUpdated', 'Last Updated')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setOrderDateBasis('created_at')}
+              className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+                orderDateBasis === 'created_at'
+                  ? 'bg-white text-blue-700 shadow-2xs font-semibold'
+                  : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              {t('reports.dateByCreated', 'Order Placed')}
+            </button>
+          </div>
           <span className="text-xs text-gray-400 px-1">
             {t('reports.ordersLoaded', { count: orderHistory.length })}{orderHistoryHasMore ? '+' : ''}
           </span>
@@ -1258,7 +1299,7 @@ const Reports: React.FC = () => {
                   [t('reports.orderNumber'), t('reports.date'), t('common.type'), t('reports.table'), t('reports.staffName'), t('reports.customer'), t('reports.phone'), t('common.items'), t('common.status'), t('reports.subtotal'), t('reports.discount'), t('reports.tax'), t('reports.total'), t('reports.coinsRedeemed')],
                   orderHistory.map((o) => [
                     o.orderNumber,
-                    formatDate(o.createdAt),
+                    formatDate(orderDateBasis === 'updated_at' ? (o.updatedAt || o.createdAt) : o.createdAt),
                     o.orderType,
                     o.tableName ?? '-',
                     o.staffName ?? '-',
@@ -1298,7 +1339,7 @@ const Reports: React.FC = () => {
                 </th>
                 {([
                   { label: t('reports.orderNumber'), key: 'orderNumber', align: 'left', nowrap: true },
-                  { label: t('reports.date'), key: 'createdAt', align: 'left', nowrap: true },
+                  { label: orderDateBasis === 'updated_at' ? t('reports.dateUpdated', 'Last Updated') : t('reports.dateCreated', 'Order Placed'), key: orderDateBasis === 'updated_at' ? 'updatedAt' : 'createdAt', align: 'left', nowrap: true },
                   { label: t('common.type'), key: 'orderType', align: 'left' },
                   { label: t('reports.table'), key: 'tableName', align: 'left' },
                   { label: t('reports.staffName'), key: 'staffName', align: 'left' },
@@ -1351,7 +1392,7 @@ const Reports: React.FC = () => {
                       )}
                       {!order.splitFromOrderNumber && order.notes?.includes('Split from') && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-                          {order.notes.split('|').find((n: string) => n.trim().startsWith('Split from'))?.trim() || 'Split order'}
+                          {order.notes.split('|').find((n: string) => n.trim().startsWith('Split from'))?.trim() || 'Split bill'}
                         </span>
                       )}
                       {order.notes?.includes('Split into') && (
@@ -1361,7 +1402,7 @@ const Reports: React.FC = () => {
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{formatDateTime(order.createdAt)}</td>
+                  <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{formatDateTime(orderDateBasis === 'updated_at' ? (order.updatedAt || order.createdAt) : order.createdAt)}</td>
                   <td className="px-3 py-2.5">
                     <span className="capitalize">{order.orderType?.replace('_', ' ')}</span>
                   </td>

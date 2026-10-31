@@ -36,6 +36,12 @@ export interface CartItem {
   createdAt?: string;
 }
 
+export interface OutboundTransferEvent {
+  targetTableName: string;
+  items: { name: string; quantity: number }[];
+  timestamp?: number;
+}
+
 export interface KotSummary {
   id: number;
   kotNumber: string;
@@ -72,8 +78,12 @@ interface BillingState {
   selectedCustomerId: number | null;
   discount: DiscountInfo | null;
   notes: string;
+  outboundTransfers: Record<number, OutboundTransferEvent[]>;
+  splitFromOrderId: number | null;
+  splitFromOrderNumber: string | null;
 
   // Actions
+  recordOutboundTransfer: (orderId: number, event: OutboundTransferEvent) => void;
   addToCart: (item: MenuItem, variation?: Variation, addons?: Addon[]) => void;
   addTempItemToCart: (name: string, priceInPaise: number, taxRate: number) => void;
   removeFromCart: (index: number) => void;
@@ -83,7 +93,7 @@ interface BillingState {
   setOrderType: (type: OrderType) => void;
   setTable: (tableId: number | null) => void;
   setKots: (kots: KotSummary[]) => void;
-  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string, kots?: KotSummary[]) => void;
+  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string, kots?: KotSummary[], outboundTransfersList?: OutboundTransferEvent[], splitInfo?: { splitFromOrderId?: number | null; splitFromOrderNumber?: string | null } | null) => void;
   resetForNewTable: (tableId: number) => void;
   setCustomer: (customerId: number | null) => void;
   applyDiscount: (discount: DiscountInfo | null) => void;
@@ -118,6 +128,21 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   selectedCustomerId: null,
   discount: null,
   notes: '',
+  outboundTransfers: {},
+  splitFromOrderId: null,
+  splitFromOrderNumber: null,
+
+  recordOutboundTransfer: (orderId: number, event: OutboundTransferEvent) => {
+    set((state) => {
+      const existing = state.outboundTransfers[orderId] || [];
+      return {
+        outboundTransfers: {
+          ...state.outboundTransfers,
+          [orderId]: [...existing, event],
+        },
+      };
+    });
+  },
 
   addToCart: (item: MenuItem, variation?: Variation, addons?: Addon[]) => {
     const unitPrice = calculateUnitPrice(item, variation, addons);
@@ -229,8 +254,8 @@ export const useBillingStore = create<BillingState>((set, get) => ({
 
   setKots: (kots: KotSummary[]) => set({ kots }),
 
-  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string, kots?: KotSummary[]) =>
-    set({
+  loadOrderIntoCart: (orderId: number, tableId: number | null, items: CartItem[], syncedCount: number, orderType?: OrderType, discount?: DiscountInfo | null, notes?: string, kots?: KotSummary[], outboundTransfersList?: OutboundTransferEvent[], splitInfo?: { splitFromOrderId?: number | null; splitFromOrderNumber?: string | null } | null) =>
+    set((state) => ({
       cart: items,
       currentOrderId: orderId,
       syncedItemCount: syncedCount,
@@ -240,7 +265,13 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       orderType: orderType ?? 'dine_in',
       discount: discount ?? null,
       notes: notes ?? '',
-    }),
+      splitFromOrderId: splitInfo?.splitFromOrderId ?? null,
+      splitFromOrderNumber: splitInfo?.splitFromOrderNumber ?? null,
+      outboundTransfers: {
+        ...state.outboundTransfers,
+        [orderId]: outboundTransfersList ?? [],
+      },
+    })),
 
   resetForNewTable: (tableId: number) =>
     set({
@@ -254,6 +285,8 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       selectedCustomerId: null,
       discount: null,
       notes: '',
+      splitFromOrderId: null,
+      splitFromOrderNumber: null,
     }),
 
   setCustomer: (customerId: number | null) => set({ selectedCustomerId: customerId }),
@@ -304,6 +337,8 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       selectedCustomerId: null,
       discount: null,
       notes: '',
+      splitFromOrderId: null,
+      splitFromOrderNumber: null,
     }),
 
   getSubtotal: () => {

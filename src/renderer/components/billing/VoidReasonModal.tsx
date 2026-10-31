@@ -49,7 +49,7 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={title || t('voidModal.title', 'Void / Cancellation Reason')}
+      title={title || t('voidModal.title', 'Cancellation Reason')}
       size="md"
       footer={
         <div className="flex items-center justify-end gap-2 w-full">
@@ -63,7 +63,7 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
             onClick={handleConfirm}
             disabled={!selectedReason && !customReason.trim()}
           >
-            {t('voidModal.confirmVoid', 'Confirm Void')}
+            {t('voidModal.confirmVoid', 'Confirm Cancellation')}
           </Button>
         </div>
       }
@@ -73,11 +73,11 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
         <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2.5">
           <AlertTriangle size={18} className="text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
           <div className="text-xs text-red-900 dark:text-red-200">
-            <p className="font-semibold">{t('voidModal.warningTitle', 'Void Audit Requirement')}</p>
+            <p className="font-semibold">{t('voidModal.warningTitle', 'Item Already Sent to Kitchen')}</p>
             <p className="text-[11px] text-red-700 dark:text-red-300 mt-0.5">
               {itemInfo
-                ? t('voidModal.itemWarning', 'This item was already sent to the kitchen. Please provide a mandatory cancellation reason for the audit report.')
-                : t('voidModal.orderWarning', 'Cancelling this active order will be recorded in the Void Audit Log with the selected reason.')}
+                ? t('voidModal.itemWarning', 'This item was already sent to the kitchen. Please select a reason for cancelling it.')
+                : t('voidModal.orderWarning', 'Cancelling this active order will be recorded in your daily summary with the selected reason.')}
             </p>
           </div>
         </div>

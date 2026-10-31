@@ -51,7 +51,12 @@ const api = {
     applyDiscount: (orderId: number, discount: any) => ipcRenderer.invoke('orders:applyDiscount', orderId, discount),
     splitBill: (orderId: number, itemIds: number[], targetTableId?: number) => ipcRenderer.invoke('orders:splitBill', orderId, itemIds, targetTableId),
     mergeBills: (sourceOrderId: number, targetOrderId: number) => ipcRenderer.invoke('orders:mergeBills', sourceOrderId, targetOrderId),
+    mergeBillsPartial: (sourceOrderId: number, targetOrderId: number, items: { orderItemId: number; quantity: number }[]) =>
+      ipcRenderer.invoke('orders:mergeBillsPartial', sourceOrderId, targetOrderId, items),
     moveTable: (orderId: number, tableId: number) => ipcRenderer.invoke('orders:moveTable', orderId, tableId),
+    transferOrder: (orderId: number, tableId: number) => ipcRenderer.invoke('orders:transferOrder', orderId, tableId),
+    transferPartial: (sourceOrderId: number, tableId: number, items: { orderItemId: number; quantity: number }[]) =>
+      ipcRenderer.invoke('orders:transferPartial', sourceOrderId, tableId, items),
     updateCustomer: (orderId: number, customerId: number) => ipcRenderer.invoke('orders:updateCustomer', orderId, customerId),
     getByCustomer: (customerId: number, limit?: number) => ipcRenderer.invoke('orders:getByCustomer', customerId, limit ?? 5),
     delete: (orderId: number) => ipcRenderer.invoke('orders:delete', orderId),
@@ -179,6 +184,7 @@ const api = {
     getRoles: () => ipcRenderer.invoke('settings:getRoles'),
     updateRole: (id: number, data: any) => ipcRenderer.invoke('settings:updateRole', id, data),
     getPrinters: () => ipcRenderer.invoke('settings:getPrinters'),
+    isFreshInstall: () => ipcRenderer.invoke('settings:isFreshInstall'),
   },
 
   daySession: {

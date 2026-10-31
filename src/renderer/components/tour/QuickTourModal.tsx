@@ -50,10 +50,10 @@ export const QuickTourModal: React.FC = () => {
       {
         id: 'day-session',
         targetSelector: '[data-tour="day-session-toggle"]',
-        badge: 'Cash Reconciliation',
+        badge: 'Cash Register Closing',
         title: 'Day Open & Day Close',
         description:
-          'Click "Open Day" at the start of your shift to record starting cash float. At end of shift, click "Close Day" to reconcile physical cash and print handover summaries.',
+          'Click "Open Day" at the start of your shift to record starting cash in drawer. At end of shift, click "Close Day" to count cash in drawer and print day-end summaries.',
         icon: <Sun size={18} className="text-amber-500" />,
         placement: 'right',
         accentBg: 'bg-amber-50 border-amber-200',
@@ -108,7 +108,7 @@ export const QuickTourModal: React.FC = () => {
         badge: 'Always Here to Help',
         title: 'Restart Tour Anytime',
         description:
-          'You can re-trigger this interactive walkthrough whenever new staff joins or as a quick refresher by clicking this Quick Tour button or visiting Settings.',
+          'You can restart this interactive guide whenever new staff joins or as a quick refresher by clicking this Quick Tour button or visiting Settings.',
         icon: <Sparkles size={18} className="text-purple-600" />,
         placement: 'bottom',
         accentBg: 'bg-purple-50 border-purple-200',

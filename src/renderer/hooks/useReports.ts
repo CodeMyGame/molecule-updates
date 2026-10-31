@@ -256,7 +256,7 @@ export function useReports(): UseReportsReturn {
       );
       setVoidReport(data ?? null);
     } catch (err: any) {
-      setError(err.message ?? 'Failed to fetch void report');
+      setError(err.message ?? 'Could not load cancelled items report');
     } finally {
       setLoading(false);
     }

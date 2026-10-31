@@ -12,7 +12,6 @@ import {
   Grid3X3,
   List,
   ArrowRightLeft,
-  Merge,
   Split,
   X,
   PlusCircle,
@@ -26,8 +25,10 @@ import {
   ArrowDownAZ,
   ArrowUpZA,
   HelpCircle,
+  MoreVertical,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import TransferMergeModal from '../components/tables/TransferMergeModal';
 import { useBillingStore } from '../stores/billing.store';
 import { syncOrderDiscountToServer } from '../lib/syncOrderDiscount';
 import { useMenu } from '../hooks/useMenu';
@@ -583,7 +584,11 @@ const Billing: React.FC = () => {
         const orderDiscount = order.discountType
           ? { type: order.discountType === 'percentage' ? 'percent' : order.discountType, value: order.discountValue ?? 0, reason: order.discountReason }
           : null;
-        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? []);
+        const splitInfo = {
+          splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
+          splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
+        };
+        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
       } else {
         resetForNewTable(tableId);
       }
@@ -623,7 +628,13 @@ const Billing: React.FC = () => {
     orderId: number;
     x: number;
     y: number;
-    mode: 'menu' | 'transfer' | 'merge';
+  } | null>(null);
+
+  const [transferMergeModal, setTransferMergeModal] = useState<{
+    mode: 'transfer' | 'merge';
+    table: Table;
+    orderId: number;
+    initialSelectedItemId?: number;
   } | null>(null);
 
   // Split bill state
@@ -640,9 +651,32 @@ const Billing: React.FC = () => {
       e.preventDefault();
       const order = await ipc<any>(window.electronAPI.orders.getByTable(table.id)).catch(() => null);
       const orderId = order ? order.id : 0;
-      setTransferMenu({ sourceTableId: table.id, orderId, x: e.clientX, y: e.clientY, mode: 'menu' });
+      setTransferMenu({ sourceTableId: table.id, orderId, x: e.clientX, y: e.clientY });
     },
     []
+  );
+
+  const handleTransferMergeSuccess = useCallback(
+    async (targetTableId: number, isPartial: boolean) => {
+      refreshTables();
+      if (!transferMergeModal) return;
+      const sourceId = transferMergeModal.table.id;
+      if (selectedTableId === sourceId) {
+        if (isPartial) {
+          const activeSourceOrder = await ipc<any>(window.electronAPI.orders.getByTable(sourceId)).catch(() => null);
+          if (activeSourceOrder?.id) {
+            await loadTableOrder(sourceId);
+          } else {
+            await loadTableOrder(targetTableId);
+          }
+        } else {
+          await loadTableOrder(targetTableId);
+        }
+      } else if (selectedTableId === targetTableId) {
+        await loadTableOrder(targetTableId);
+      }
+    },
+    [transferMergeModal, selectedTableId, refreshTables, loadTableOrder]
   );
 
   // Edit / delete table from context menu
@@ -802,6 +836,74 @@ const Billing: React.FC = () => {
   );
 
   const handleOpenSplitBill = useCallback(
+    async (targetOrderId?: number, targetSourceTableId?: number) => {
+      const ordId = targetOrderId ?? transferMenu?.orderId;
+      const srcTblId = targetSourceTableId ?? transferMenu?.sourceTableId ?? 0;
+      if (!ordId) return;
+      try {
+        const order = await ipc<any>(window.electronAPI.orders.getById(ordId));
+        if (!order?.items?.length) { toast.error(t('billingPage.noItemsToSplit')); return; }
+        setSplitModal({
+          orderId: ordId,
+          sourceTableId: srcTblId,
+          items: order.items.map((oi: any) => ({
+            id: oi.id,
+            name: oi.name,
+            quantity: oi.quantity,
+            total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
+            selected: false,
+          })),
+          step: 'items',
+        });
+      } catch (err: any) {
+        toast.error(err?.message ?? t('billingPage.failedToLoadOrder'));
+      }
+      setTransferMenu(null);
+    },
+    [transferMenu, t]
+  );
+
+  const handleOpenCartTransfer = useCallback((initialOrderItemId?: number) => {
+    if (!currentOrderId) return;
+    const tbl = tables.find((t) => t.id === selectedTableId) || {
+      id: selectedTableId ?? 0,
+      name: selectedTableId ? `Table ${selectedTableId}` : `Order #${currentOrderId}`,
+      capacity: 1,
+      shape: 'rectangle',
+      posX: 0,
+      posY: 0,
+      floorId: 0,
+      status: 'occupied' as any,
+    };
+    setTransferMergeModal({
+      mode: 'transfer',
+      table: tbl,
+      orderId: currentOrderId,
+      initialSelectedItemId: initialOrderItemId,
+    });
+  }, [currentOrderId, selectedTableId, tables]);
+
+  const handleOpenCartMerge = useCallback(() => {
+    if (!currentOrderId) return;
+    const tbl = tables.find((t) => t.id === selectedTableId) || {
+      id: selectedTableId ?? 0,
+      name: selectedTableId ? `Table ${selectedTableId}` : `Order #${currentOrderId}`,
+      capacity: 1,
+      shape: 'rectangle',
+      posX: 0,
+      posY: 0,
+      floorId: 0,
+      status: 'occupied' as any,
+    };
+    setTransferMergeModal({ mode: 'merge', table: tbl, orderId: currentOrderId });
+  }, [currentOrderId, selectedTableId, tables]);
+
+  const handleOpenCartSplit = useCallback(() => {
+    if (!currentOrderId) return;
+    handleOpenSplitBill(currentOrderId, selectedTableId ?? 0);
+  }, [currentOrderId, selectedTableId, handleOpenSplitBill]);
+
+  const _handleOpenSplitBillOld = useCallback(
     async () => {
       if (!transferMenu) return;
       try {
@@ -921,7 +1023,11 @@ const Billing: React.FC = () => {
         const orderDiscount = fullOrder.discountType
           ? { type: fullOrder.discountType === 'percentage' ? 'percent' : fullOrder.discountType, value: fullOrder.discountValue ?? 0, reason: fullOrder.discountReason }
           : null;
-        loadOrderIntoCart(orderId, tableId, cartItems, cartItems.length, fullOrder.orderType ?? fullOrder.order_type, orderDiscount, fullOrder.notes, fullOrder.kots ?? []);
+        const splitInfo = {
+          splitFromOrderId: fullOrder.splitFromOrderId ?? (fullOrder as any).split_from_order_id ?? null,
+          splitFromOrderNumber: fullOrder.splitFromOrderNumber ?? (fullOrder as any).split_from_order_number ?? null,
+        };
+        loadOrderIntoCart(orderId, tableId, cartItems, cartItems.length, fullOrder.orderType ?? fullOrder.order_type, orderDiscount, fullOrder.notes, fullOrder.kots ?? [], fullOrder.outboundTransfers ?? [], splitInfo);
       }
     } catch {
       toast.error(t('toast.loadOrderFailed'));
@@ -1417,6 +1523,16 @@ const Billing: React.FC = () => {
                   await loadOrderById(order.id);
                   fetchActiveOrders();
                 }}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  const tblId = (order as any).tableId ?? (order as any).table_id ?? 0;
+                  setTransferMenu({
+                    sourceTableId: tblId,
+                    orderId: order.id,
+                    x: e.clientX,
+                    y: e.clientY,
+                  });
+                }}
                 className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px]
                   font-medium border transition-colors ${typeBg}`}
               >
@@ -1432,6 +1548,23 @@ const Billing: React.FC = () => {
                     {kotLabel}
                   </span>
                 )}
+                <span
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                    const tblId = (order as any).tableId ?? (order as any).table_id ?? 0;
+                    setTransferMenu({
+                      sourceTableId: tblId,
+                      orderId: order.id,
+                      x: rect.left,
+                      y: rect.bottom + 4,
+                    });
+                  }}
+                  title={t('cart.orderOptions', 'Order Options')}
+                  className="ml-0.5 p-0.5 rounded hover:bg-black/10 transition-colors flex items-center justify-center cursor-pointer"
+                >
+                  <MoreVertical size={11} className="opacity-70 hover:opacity-100" />
+                </span>
               </button>
             );
           })
@@ -1610,6 +1743,8 @@ const Billing: React.FC = () => {
         {/* Right: Cart panel */}
         <div className="flex-shrink-0 border-l border-gray-100 shadow-[-2px_0_8px_rgba(0,0,0,0.04)]" style={{ width: cartWidth }}>
           <CartPanel
+            currentTableName={tables.find((t) => t.id === selectedTableId)?.name}
+            tables={tables}
             onHoldOrder={handleHoldOrder}
             onKot={handleKot}
             onPrintKot={handlePrintKot}
@@ -1617,6 +1752,8 @@ const Billing: React.FC = () => {
             onCancelOrder={handleCancelOrder}
             onOpenDiscount={() => setShowDiscount(true)}
             onItemRemoved={refreshTables}
+            onTransferOrder={handleOpenCartTransfer}
+            onSplitBill={handleOpenCartSplit}
           />
         </div>
       </div>
@@ -1724,7 +1861,7 @@ const Billing: React.FC = () => {
       />
 
       {/* Table context menu — transfer / merge / split */}
-      {transferMenu && transferMenu.mode === 'menu' && createPortal(
+      {transferMenu && createPortal(
         <div
           className="fixed inset-0 z-[9998]"
           onClick={() => setTransferMenu(null)}
@@ -1742,18 +1879,25 @@ const Billing: React.FC = () => {
               <>
                 <button
                   className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2"
-                  onClick={() => setTransferMenu({ ...transferMenu, mode: 'transfer' })}
+                  onClick={() => {
+                    const tbl = tables.find((t) => t.id === transferMenu.sourceTableId) || {
+                      id: transferMenu.sourceTableId,
+                      name: transferMenu.sourceTableId ? `Table ${transferMenu.sourceTableId}` : `Order #${transferMenu.orderId}`,
+                      capacity: 1,
+                      shape: 'rectangle',
+                      posX: 0,
+                      posY: 0,
+                      floorId: 0,
+                      status: 'occupied' as any,
+                    };
+                    setTransferMergeModal({ mode: 'transfer', table: tbl, orderId: transferMenu.orderId });
+                    setTransferMenu(null);
+                  }}
                 >
                   <ArrowRightLeft size={14} />
                   {t('billingPage.transferOrder')}
                 </button>
-                <button
-                  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
-                  onClick={() => setTransferMenu({ ...transferMenu, mode: 'merge' })}
-                >
-                  <Merge size={14} />
-                  {t('billingPage.mergeOrders')}
-                </button>
+
                 <button
                   className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 flex items-center gap-2"
                   onClick={() => handleOpenSplitBill()}
@@ -2002,75 +2146,21 @@ const Billing: React.FC = () => {
         </div>
       )}
 
-      {/* Transfer target list — free tables */}
-      {transferMenu?.mode === 'transfer' && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30" onClick={() => setTransferMenu(null)}>
-          <div
-            className="bg-white rounded-xl shadow-2xl border border-gray-200 w-72 max-h-[70vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200 flex items-center justify-between">
-              <span>{t('billingPage.transferTo')}</span>
-              <span className="text-xs font-normal text-gray-400">
-                {t('billingPage.fromName', { name: tables.find((t) => t.id === transferMenu.sourceTableId)?.name })}
-              </span>
-            </div>
-            <div className="overflow-y-auto flex-1">
-              {tables
-                .filter((t) => t.id !== transferMenu.sourceTableId && t.status !== 'occupied')
-                .map((t) => (
-                  <button
-                    key={t.id}
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 border-b border-gray-50 last:border-0"
-                    onClick={() => handleTransferOrder(t.id)}
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              {tables.filter((t) => t.id !== transferMenu.sourceTableId && t.status !== 'occupied').length === 0 && (
-                <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('billingPage.noFreeTables')}</div>
-              )}
-            </div>
-          </div>
-        </div>,
-        document.body
+      {/* Transfer / Merge Modal */}
+      {transferMergeModal && (
+        <TransferMergeModal
+          isOpen={true}
+          mode={transferMergeModal.mode}
+          sourceTable={transferMergeModal.table}
+          sourceOrderId={transferMergeModal.orderId}
+          tables={tables}
+          initialSelectedItemId={transferMergeModal.initialSelectedItemId}
+          onClose={() => setTransferMergeModal(null)}
+          onSuccess={handleTransferMergeSuccess}
+        />
       )}
 
-      {/* Merge target list — occupied tables */}
-      {transferMenu?.mode === 'merge' && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30" onClick={() => setTransferMenu(null)}>
-          <div
-            className="bg-white rounded-xl shadow-2xl border border-gray-200 w-72 max-h-[70vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200 flex items-center justify-between">
-              <span>{t('billingPage.mergeInto')}</span>
-              <span className="text-xs font-normal text-gray-400">
-                {t('billingPage.fromName', { name: tables.find((t) => t.id === transferMenu.sourceTableId)?.name })}
-              </span>
-            </div>
-            <div className="overflow-y-auto flex-1">
-              {tables
-                .filter((t) => t.id !== transferMenu.sourceTableId && t.status === 'occupied')
-                .map((t) => (
-                  <button
-                    key={t.id}
-                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 border-b border-gray-50 last:border-0"
-                    onClick={() => handleMergeOrders(t.id)}
-                  >
-                    {t.name}
-                  </button>
-                ))}
-              {tables.filter((t) => t.id !== transferMenu.sourceTableId && t.status === 'occupied').length === 0 && (
-                <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('billingPage.noOtherOccupiedTables')}</div>
-              )}
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Split Bill modal — step 1: select items, step 2: pick target table */}
+      {/* Split Bill modal      {/* Split Bill modal — step 1: select items, step 2: pick target table */}
       {splitModal && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30" onClick={() => setSplitModal(null)}>
           <div
@@ -2318,7 +2408,7 @@ const Billing: React.FC = () => {
         isOpen={showCancelOrderModal}
         onClose={() => setShowCancelOrderModal(false)}
         onConfirm={handleConfirmCancelOrder}
-        title={t('voidModal.cancelOrderTitle', 'Cancel Order — Audit Reason')}
+        title={t('voidModal.cancelOrderTitle', 'Cancel Order — Select Reason')}
       />
     </div>
   );

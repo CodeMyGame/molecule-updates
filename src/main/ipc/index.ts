@@ -176,8 +176,17 @@ export function registerAllHandlers(): void {
   handle(ORDERS.mergeBills, (sourceOrderId: number, targetOrderId: number) =>
     billingService.mergeBills(sourceOrderId, targetOrderId)
   );
+  handle(ORDERS.mergeBillsPartial, (sourceOrderId: number, targetOrderId: number, items: any[]) =>
+    billingService.mergeBillsPartial(sourceOrderId, targetOrderId, items)
+  );
   handle(ORDERS.moveTable, (orderId: number, newTableId: number) =>
     billingService.moveTable(orderId, newTableId)
+  );
+  handle(ORDERS.transferOrder, (orderId: number, targetTableId: number) =>
+    billingService.transferOrder(orderId, targetTableId)
+  );
+  handle(ORDERS.transferPartial, (sourceOrderId: number, targetTableId: number, items: any[]) =>
+    billingService.transferPartial(sourceOrderId, targetTableId, items)
   );
   handle(ORDERS.delete, (orderId: number) => orderRepo.deleteOrder(orderId));
   handle(ORDERS.getByCustomer, (customerId: number, limit: number) => {
@@ -851,6 +860,16 @@ export function registerAllHandlers(): void {
     return settingsRepo.updateRole(id, permissions);
   });
 
+  handle(SETTINGS.isFreshInstall, () => {
+    const db = getDb();
+    const orderCount = (db.prepare('SELECT COUNT(*) as count FROM orders').get() as any)?.count ?? 0;
+    if (orderCount > 0) return false;
+    const sessionCount = (db.prepare('SELECT COUNT(*) as count FROM day_sessions').get() as any)?.count ?? 0;
+    if (sessionCount > 0) return false;
+    const customerCount = (db.prepare('SELECT COUNT(*) as count FROM customers').get() as any)?.count ?? 0;
+    if (customerCount > 0) return false;
+    return true;
+  });
   handle(SETTINGS.getPrinters, async () => {
     const { BrowserWindow } = await import('electron');
     const win = BrowserWindow.getAllWindows()[0];

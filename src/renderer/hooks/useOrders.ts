@@ -286,6 +286,7 @@ export function useOrders(): UseOrdersReturn {
               unitPrice: oi.unitPrice ?? oi.unit_price,
               total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
               notes: oi.notes,
+              sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
               orderItemId: oi.id,
               kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
               kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
@@ -299,7 +300,12 @@ export function useOrders(): UseOrdersReturn {
               fullOrder.orderType ?? fullOrder.order_type ?? billingStore.orderType,
               billingStore.discount,
               fullOrder.notes ?? billingStore.notes,
-              fullOrder.kots ?? []
+              fullOrder.kots ?? [],
+              fullOrder.outboundTransfers ?? [],
+              {
+                splitFromOrderId: fullOrder.splitFromOrderId ?? (fullOrder as any).split_from_order_id ?? null,
+                splitFromOrderNumber: fullOrder.splitFromOrderNumber ?? (fullOrder as any).split_from_order_number ?? null,
+              }
             );
           }
         } catch { /* ignore fallback */ }

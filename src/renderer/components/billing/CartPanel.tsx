@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import {
   Minus,
   Plus,
@@ -16,6 +16,10 @@ import {
   Pencil,
   Clock,
   Receipt,
+  MoreHorizontal,
+  ArrowRightLeft,
+  Merge,
+  Split,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBillingStore } from '../../stores/billing.store';
@@ -90,6 +94,8 @@ const PRESET_COOKING_INSTRUCTIONS = [
 ];
 
 interface CartPanelProps {
+  currentTableName?: string;
+  tables?: any[];
   onHoldOrder: () => void;
   onKot: () => void;
   onPrintKot: () => void;
@@ -97,9 +103,13 @@ interface CartPanelProps {
   onCancelOrder: () => void;
   onOpenDiscount: () => void;
   onItemRemoved?: () => void;
+  onTransferOrder?: (orderItemId?: number) => void;
+  onSplitBill?: () => void;
 }
 
 const CartPanel: React.FC<CartPanelProps> = ({
+  currentTableName,
+  tables,
   onHoldOrder,
   onKot,
   onPrintKot,
@@ -107,10 +117,133 @@ const CartPanel: React.FC<CartPanelProps> = ({
   onCancelOrder,
   onOpenDiscount,
   onItemRemoved,
+  onTransferOrder,
+  onSplitBill,
 }) => {
+  const { t, i18n } = useTranslation();
+  const [showOrderMenu, setShowOrderMenu] = useState(false);
+  const [showTransferTooltip, setShowTransferTooltip] = useState(false);
   const cart = useBillingStore((s) => s.cart);
-  const discount = useBillingStore((s) => s.discount);
+  const orderNotes = useBillingStore((s) => s.notes);
+  const outboundTransfers = useBillingStore((s) => s.outboundTransfers);
   const currentOrderId = useBillingStore((s) => s.currentOrderId);
+
+  // Helper to resolve an order number (e.g. "ORD-20261031-021") to a table name if known
+  const resolveTableName = useCallback((nameOrOrder: string) => {
+    if (nameOrOrder.toUpperCase().startsWith('ORD-') && tables && tables.length > 0) {
+      for (const tbl of tables) {
+        if (tbl.activeOrder?.orderNumber === nameOrOrder || tbl.orderNumber === nameOrOrder) {
+          return tbl.name;
+        }
+      }
+    }
+    return nameOrOrder;
+  }, [tables]);
+
+  // Outbound transfer details (transferred / merged into)
+  const outboundTransfersInfo = useMemo(() => {
+    const tableMap = new Map<string, { tableName: string; items: Map<string, { name: string; quantity: number }> }>();
+
+    const addTransferItem = (rawTable: string, itemName: string, qty: number) => {
+      const resolved = resolveTableName(rawTable.trim());
+      if (!resolved || !itemName.trim() || qty <= 0) return;
+      if (currentTableName && resolved.toLowerCase() === currentTableName.toLowerCase()) return;
+
+      const tblKey = resolved.toLowerCase();
+      if (!tableMap.has(tblKey)) {
+        tableMap.set(tblKey, { tableName: resolved, items: new Map() });
+      }
+      const entry = tableMap.get(tblKey)!;
+      if (entry.tableName.startsWith('ORD-') && !resolved.startsWith('ORD-')) {
+        entry.tableName = resolved;
+      }
+
+      const itemKey = itemName.trim().toLowerCase();
+      const existing = entry.items.get(itemKey);
+      if (existing) {
+        existing.quantity = Math.max(existing.quantity, qty);
+      } else {
+        entry.items.set(itemKey, { name: itemName.trim(), quantity: qty });
+      }
+    };
+
+    // 1. From store outboundTransfers for currentOrderId
+    const storeEvents = currentOrderId ? outboundTransfers[currentOrderId] || [] : [];
+    for (const evt of storeEvents) {
+      if (evt.items && evt.items.length > 0) {
+        for (const it of evt.items) {
+          addTransferItem(evt.targetTableName, it.name, it.quantity);
+        }
+      } else {
+        const resolved = resolveTableName(evt.targetTableName.trim());
+        if (resolved && (!currentTableName || resolved.toLowerCase() !== currentTableName.toLowerCase())) {
+          const tblKey = resolved.toLowerCase();
+          if (!tableMap.has(tblKey)) {
+            tableMap.set(tblKey, { tableName: resolved, items: new Map() });
+          }
+        }
+      }
+    }
+
+    // 2. Parse transfer / merge from orderNotes
+    if (orderNotes) {
+      orderNotes.split('|').forEach((n) => {
+        const trimmed = n.trim();
+        if (/\bfrom\b/i.test(trimmed)) return;
+
+        const match = trimmed.match(/(?:transferred(?:\s+partial\s+items)?\s+(?:to|into)|merged(?:\s+partial\s+items)?\s+(?:to|into))\s+([^:,|]+)(?::\s*([^|]+))?/i);
+        if (match && match[1]) {
+          const rawTbl = match[1].trim();
+          const resolved = resolveTableName(rawTbl);
+          if (resolved && (!currentTableName || resolved.toLowerCase() !== currentTableName.toLowerCase())) {
+            const tblKey = resolved.toLowerCase();
+            if (!tableMap.has(tblKey)) {
+              tableMap.set(tblKey, { tableName: resolved, items: new Map() });
+            }
+
+            if (match[2]) {
+              const rawItems = match[2].split(',');
+              rawItems.forEach((ri) => {
+                const itemStr = ri.trim();
+                if (!itemStr) return;
+                const qtyMatch = itemStr.match(/(.+?)\s*[xX×]\s*(\d+)/) || itemStr.match(/(\d+)\s*[xX×]\s*(.+)/);
+                if (qtyMatch) {
+                  if (/^\d+$/.test(qtyMatch[1])) {
+                    addTransferItem(resolved, qtyMatch[2], parseInt(qtyMatch[1], 10));
+                  } else {
+                    addTransferItem(resolved, qtyMatch[1], parseInt(qtyMatch[2], 10));
+                  }
+                } else {
+                  addTransferItem(resolved, itemStr, 1);
+                }
+              });
+            }
+          }
+        }
+      });
+    }
+
+    return Array.from(tableMap.values()).map((t) => ({
+      tableName: t.tableName,
+      items: Array.from(t.items.values()),
+    }));
+  }, [orderNotes, currentTableName, currentOrderId, outboundTransfers, resolveTableName]);
+
+  const outboundTables = useMemo(() => {
+    return Array.from(new Set(outboundTransfersInfo.map((o) => o.tableName)));
+  }, [outboundTransfersInfo]);
+
+
+  // Inbound transferred items (items on this table that came from another table)
+  const transferredInItems = useMemo(() => {
+    return cart.filter((item) => item.sourceTableName && item.sourceTableName !== currentTableName);
+  }, [cart, currentTableName]);
+
+  const uniqueInboundSources = useMemo(() => {
+    return Array.from(new Set(transferredInItems.map((i) => i.sourceTableName).filter(Boolean)));
+  }, [transferredInItems]);
+
+  const discount = useBillingStore((s) => s.discount);
   const syncedItemCount = useBillingStore((s) => s.syncedItemCount);
   const syncedQuantities = useBillingStore((s) => s.syncedQuantities);
   const kots = useBillingStore((s) => s.kots);
@@ -125,7 +258,6 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const getRoundOff = useBillingStore((s) => s.getRoundOff);
   const getGrandTotal = useBillingStore((s) => s.getGrandTotal);
 
-  const { t, i18n } = useTranslation();
   const taxTerms = useTaxTerminology();
   const taxRegion = getTaxRegionForLanguage(i18n.language);
   const showIndiaGstSplit = taxRegion === 'in';
@@ -270,7 +402,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
     const itemKey = !item.menuItem.id
       ? `temp:${i}:${item.menuItem.name}:${item.unitPrice}`
       : String(item.menuItem.id);
-    const key = `${itemKey}|${variationKey}|${addonKey}|${noteKey}`;
+    const sourceKey = item.sourceTableName ? `src:${item.sourceTableName}` : 'local';
+    const key = `${itemKey}|${variationKey}|${addonKey}|${noteKey}|${sourceKey}`;
 
     const existingGroup = batch.groups.find((g) => g.key === key);
     if (existingGroup) {
@@ -317,7 +450,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
     const itemKey = !item.menuItem.id
       ? `temp:${i}:${item.menuItem.name}:${item.unitPrice}`
       : String(item.menuItem.id);
-    const key = `${itemKey}|${variationKey}|${addonKey}|${noteKey}`;
+    const sourceKey = item.sourceTableName ? `src:${item.sourceTableName}` : 'local';
+    const key = `${itemKey}|${variationKey}|${addonKey}|${noteKey}|${sourceKey}`;
     const existing = collapsedGroups.find((g) => g.key === key);
     const syncedQty = i < syncedItemCount ? (syncedQuantities[i] ?? 0) : 0;
     if (existing) {
@@ -482,14 +616,14 @@ const CartPanel: React.FC<CartPanelProps> = ({
         {/* Header */}
         <div className="px-3 py-1.5 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-semibold text-gray-900">
-              {t('cart.currentOrder')}
-              {currentOrderId && (
-                <span className="ml-1.5 text-[10px] font-normal text-gray-500">
-                  #{String(currentOrderId).padStart(3, '0')}
-                </span>
-              )}
-            </h2>
+          <h2 className="text-xs font-semibold text-gray-900">
+            {t('cart.currentOrder')}
+            {currentOrderId && (
+              <span className="ml-1.5 text-[10px] font-normal text-gray-500">
+                #{String(currentOrderId).padStart(3, '0')}
+              </span>
+            )}
+          </h2>
             <Tooltip
               text={
                 showKotSeparators
@@ -509,7 +643,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 }`}
               >
                 <Receipt size={10} className={showKotSeparators ? 'text-blue-600' : 'text-gray-400'} />
-                <span>{t('cart.kotViewToggle', 'KOT View')}</span>
+                <span>{t('cart.kotViewToggle', 'KOT')}</span>
                 <span
                   className={`inline-flex items-center w-5 h-2.5 rounded-full p-0.5 transition-colors ${
                     showKotSeparators ? 'bg-blue-600' : 'bg-gray-300'
@@ -583,7 +717,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 }`}
               >
                 <Receipt size={10} className={showKotSeparators ? 'text-blue-600' : 'text-gray-400'} />
-                <span>{t('cart.kotViewToggle', 'KOT View')}</span>
+                <span>{t('cart.kotViewToggle', 'KOT')}</span>
                 <span
                   className={`inline-flex items-center w-5 h-2.5 rounded-full p-0.5 transition-colors ${
                     showKotSeparators ? 'bg-blue-600' : 'bg-gray-300'
@@ -597,15 +731,158 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 </span>
               </button>
             </Tooltip>
-            <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
-              {t('cart.itemCount', { count: cart.length })}
-            </span>
+
+            {/* Order options icon near to KOT view */}
+            {currentOrderId && (onTransferOrder || onSplitBill) && (
+              <div className="relative">
+                <Tooltip text={t('cart.orderOptions', 'Order Options')} position="bottom" delay={false}>
+                  <button
+                    type="button"
+                    onClick={() => setShowOrderMenu((v) => !v)}
+                    className="p-1 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-100 border border-gray-200 transition-colors flex items-center justify-center"
+                  >
+                    <MoreHorizontal size={13} />
+                  </button>
+                </Tooltip>
+
+                {showOrderMenu && (
+                  <>
+                    <div className="fixed inset-0 z-[9990]" onClick={() => setShowOrderMenu(false)} />
+                    <div className="absolute right-0 top-full mt-1 z-[9991] bg-white rounded-xl shadow-xl border border-gray-200 py-1 min-w-[160px] animate-in fade-in zoom-in-95 duration-100">
+                      {onTransferOrder && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowOrderMenu(false);
+                            onTransferOrder();
+                          }}
+                          className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2"
+                        >
+                          <ArrowRightLeft size={13} className="text-blue-600" />
+                          <span>{t('billingPage.transferOrder')}</span>
+                        </button>
+                      )}
+
+                      {onSplitBill && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowOrderMenu(false);
+                            onSplitBill();
+                          }}
+                          className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-orange-50 hover:text-orange-700 flex items-center gap-2"
+                        >
+                          <Split size={13} className="text-orange-600" />
+                          <span>{t('billingPage.splitBill')}</span>
+                        </button>
+                      )}
+
+                      <div className="border-t border-gray-100 my-0.5" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowOrderMenu(false);
+                          onCancelOrder();
+                        }}
+                        className="w-full text-left px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      >
+                        <Trash2 size={13} />
+                        <span>{t('cart.cancelOrder', 'Cancel Order')}</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Cart items */}
       <div className="flex-1 overflow-y-auto">
+        {/* Outbound transfer notice for source table (T1) */}
+        {outboundTables.length > 0 && (
+          <div
+            onMouseEnter={() => setShowTransferTooltip(true)}
+            onMouseLeave={() => setShowTransferTooltip(false)}
+            onClick={() => setShowTransferTooltip((prev) => !prev)}
+            className="group/transferBanner relative mx-2.5 my-1.5 px-3 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300/80 rounded-xl text-xs text-amber-950 flex items-center justify-between shadow-2xs cursor-pointer select-none"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="p-1 rounded-lg bg-amber-100 text-amber-800 shrink-0">
+                <ArrowRightLeft size={13} className="text-amber-700" />
+              </span>
+              <p className="font-semibold text-xs text-amber-950 truncate">
+                {t('cart.someItemsTransferredTo', { table: outboundTables.join(', '), defaultValue: 'Some items transferred to {{table}}' })}
+              </p>
+            </div>
+            <span className="text-[10px] text-amber-700/80 font-medium shrink-0 ml-1">
+              {t('cart.hoverToView', 'Hover to view')}
+            </span>
+
+            {/* Hover popover / tooltip listing transferred items */}
+            {showTransferTooltip && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-gray-900/95 backdrop-blur-xs text-white p-3 rounded-xl shadow-2xl border border-gray-700 animate-in fade-in zoom-in-95 duration-100">
+                <div className="font-semibold text-amber-300 pb-1 mb-2 border-b border-gray-700/80 flex items-center justify-between text-[11px]">
+                  <span className="flex items-center gap-1.5">
+                    <ArrowRightLeft size={12} className="text-amber-400" />
+                    <span>{t('cart.transferredItemsTitle', 'Transferred Items')}</span>
+                  </span>
+                  <span className="text-[10px] text-gray-400">
+                    {outboundTables.join(', ')}
+                  </span>
+                </div>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                  {outboundTransfersInfo.map((info, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400/90">
+                        {t('cart.transferredTo', { table: info.tableName, defaultValue: `To ${info.tableName}:` })}
+                      </div>
+                      {info.items.length > 0 ? (
+                        <ul className="space-y-1 pl-1">
+                          {info.items.map((it, iIdx) => (
+                            <li key={iIdx} className="text-xs text-gray-200 flex items-center justify-between gap-2">
+                              <span className="truncate">• {it.name}</span>
+                              <span className="font-mono text-amber-300 text-[11px] shrink-0 font-medium">×{it.quantity}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-[11px] text-gray-400 italic pl-1">
+                          {t('cart.itemsTransferredNotice', 'Items moved to table')}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Inbound transfer notice for destination table (T2) */}
+        {transferredInItems.length > 0 && (
+          <div className="mx-2.5 my-2 p-2.5 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border border-blue-300 rounded-xl text-xs text-blue-950 shadow-xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="p-1 rounded-lg bg-blue-200/80 text-blue-800 shrink-0">
+                  <ArrowRightLeft size={13} className="text-blue-800" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-bold text-[12px] text-blue-950 truncate">
+                    {t('cart.transferredInTitle', { source: uniqueInboundSources.join(', '), defaultValue: 'Transferred from {{source}}' })}
+                  </p>
+                  <p className="text-[10px] text-blue-700/80 truncate">
+                    {t('cart.transferredInSubtitle', 'Highlighted items were moved from another table')}
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-200 text-blue-900 shrink-0">
+                {transferredInItems.length} {t('common.items', 'items')}
+              </span>
+            </div>
+          </div>
+        )}
         {showKotSeparators ? (
           <div className="py-0.5">
             {sortedBatches.map((batch, batchIdx) => {
@@ -709,8 +986,21 @@ const CartPanel: React.FC<CartPanelProps> = ({
                         const totalQty = group.totalQuantity;
                         const totalAmt = group.totalAmount;
 
+                        const isTransferredIn = Boolean(item.sourceTableName && item.sourceTableName !== currentTableName);
                         return (
-                          <div key={group.key} className="px-2.5 py-1.5 group hover:bg-gray-50/50 transition-colors">
+                          <div
+                            key={group.key}
+                            style={
+                              isTransferredIn
+                                ? { borderLeftColor: '#3b82f6', borderLeftWidth: '3px' }
+                                : undefined
+                            }
+                            className={`px-2.5 py-1.5 group hover:bg-gray-50/50 transition-colors ${
+                              isTransferredIn
+                                ? "bg-blue-50/40 border-l-[3px] !border-l-blue-500 pl-2"
+                                : ""
+                            }`}
+                          >
                             <div className="flex items-start gap-1.5">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-1.5">
@@ -719,6 +1009,12 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                       <p className="text-xs font-medium text-gray-900 truncate">
                                         {getName(item.menuItem)}
                                       </p>
+                                      {isTransferredIn && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                                          <ArrowRightLeft size={9} className="text-blue-600" />
+                                          {t('cart.fromTable', { name: item.sourceTableName, defaultValue: 'From {{name}}' })}
+                                        </span>
+                                      )}
                                     </div>
                                     {item.variation && (
                                       <p className="text-[10px] text-gray-500">{item.variation.name}</p>
@@ -754,7 +1050,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                 <div className="flex items-center gap-1.5 mt-1">
                                   <div className="flex items-center border border-gray-200 rounded-lg bg-white">
                                     <Tooltip
-                                      text={group.isSynced ? t('cart.voidItemTooltip', 'Void item (requires reason)') : t('cart.decreaseQty', 'Decrease quantity')}
+                                      text={group.isSynced ? t('cart.voidItemTooltip', 'Cancel sent item (requires reason)') : t('cart.decreaseQty', 'Decrease quantity')}
                                       position="top"
                                       delay={false}
                                     >
@@ -791,6 +1087,17 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                   </span>
 
                                   <div className="ml-auto flex items-center gap-0.5">
+                                    {currentOrderId && onTransferOrder && item.orderItemId && (
+                                      <Tooltip text={t('cart.transferItem', 'Transfer item')} position="top" delay={false}>
+                                        <button
+                                          type="button"
+                                          onClick={() => onTransferOrder(item.orderItemId)}
+                                          className="p-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100"
+                                        >
+                                          <ArrowRightLeft size={11} />
+                                        </button>
+                                      </Tooltip>
+                                    )}
                                     <Tooltip text={item.notes ? t('cart.editNote', 'Edit cooking note') : t('cart.addNote', 'Add cooking note')} position="top" delay={false}>
                                       <button
                                         type="button"
@@ -804,7 +1111,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                         <StickyNote size={12} />
                                       </button>
                                     </Tooltip>
-                                    <Tooltip text={group.isSynced ? t('cart.voidItem', 'Void item') : t('cart.removeItem', 'Remove item')} position="top" delay={false}>
+                                    <Tooltip text={group.isSynced ? t('cart.voidItem', 'Cancel item') : t('cart.removeItem', 'Remove item')} position="top" delay={false}>
                                       <button
                                         onClick={() => handleGroupRemove(group)}
                                         className="p-0.5 text-gray-400 hover:text-red-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
@@ -842,8 +1149,21 @@ const CartPanel: React.FC<CartPanelProps> = ({
               const totalAmt = group.totalAmount;
               const isMerged = group.indices.length > 1;
 
+              const isTransferredIn = Boolean(item.sourceTableName && item.sourceTableName !== currentTableName);
               return (
-                <div key={group.key} className="px-3 py-1.5 group hover:bg-gray-50/50 transition-colors">
+                <div
+                  key={group.key}
+                  style={
+                    isTransferredIn
+                      ? { borderLeftColor: '#3b82f6', borderLeftWidth: '3px' }
+                      : undefined
+                  }
+                  className={`px-3 py-1.5 group hover:bg-gray-50/50 transition-colors ${
+                    isTransferredIn
+                      ? "bg-blue-50/40 border-l-[3px] !border-l-blue-500 pl-2.5"
+                      : ""
+                  }`}
+                >
                   <div className="flex items-start gap-1.5">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-1.5">
@@ -852,6 +1172,12 @@ const CartPanel: React.FC<CartPanelProps> = ({
                             <p className="text-xs font-medium text-gray-900 truncate">
                               {getName(item.menuItem)}
                             </p>
+                            {isTransferredIn && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                                <ArrowRightLeft size={9} className="text-blue-600" />
+                                {t('cart.fromTable', { name: item.sourceTableName, defaultValue: 'From {{name}}' })}
+                              </span>
+                            )}
                           </div>
                           {item.variation && (
                             <p className="text-[10px] text-gray-500">{item.variation.name}</p>
@@ -944,6 +1270,20 @@ const CartPanel: React.FC<CartPanelProps> = ({
                         )}
 
                         <div className="ml-auto flex items-center gap-0.5">
+                          {currentOrderId && onTransferOrder && (
+                            <Tooltip text={t('cart.transferItem', 'Transfer item')} position="top" delay={false}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const targetItemId = group.indices.map((i) => cart[i]?.orderItemId).find(Boolean);
+                                  onTransferOrder(targetItemId);
+                                }}
+                                className="p-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100"
+                              >
+                                <ArrowRightLeft size={11} />
+                              </button>
+                            </Tooltip>
+                          )}
                           <Tooltip text={item.notes ? t('cart.editNote', 'Edit cooking note') : t('cart.addNote', 'Add cooking note')} position="top" delay={false}>
                             <button
                               type="button"

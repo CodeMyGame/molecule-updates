@@ -124,7 +124,7 @@ export function getByStation(station: string): KOT[] {
 
 // -- Helpers --
 
-function generateKotNumber(): string {
+export function generateKotNumber(): string {
   const db = getDb();
   const today = format(new Date(), 'yyyyMMdd');
   const prefix = `KOT-${today}-`;
@@ -158,9 +158,10 @@ function getKotById(id: number): KOT | undefined {
 function getKotItems(kotId: number): KOTItem[] {
   const db = getDb();
   const rows = db.prepare(`
-    SELECT ki.*, oi.name as item_name, oi.notes
+    SELECT ki.*, oi.name as item_name, oi.notes, oi.quantity as oi_qty
     FROM kot_items ki
-    LEFT JOIN order_items oi ON ki.order_item_id = oi.id
+    JOIN order_items oi ON ki.order_item_id = oi.id
+    JOIN kots k ON ki.kot_id = k.id AND oi.order_id = k.order_id
     WHERE ki.kot_id = ?
   `).all(kotId) as any[];
   const getAddons = db.prepare('SELECT name FROM order_item_addons WHERE order_item_id = ?');
@@ -173,7 +174,7 @@ function getKotItems(kotId: number): KOTItem[] {
       kotId: row.kot_id,
       orderItemId: row.order_item_id,
       name: row.item_name ?? 'Unknown item',
-      quantity: row.quantity,
+      quantity: Math.min(row.quantity, row.oi_qty ?? row.quantity),
       notes: row.notes ?? undefined,
       isNew: !!row.is_new,
       isCancelled: !!row.is_cancelled,

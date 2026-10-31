@@ -17,7 +17,12 @@ import {
   CreditCard,
   UtensilsCrossed,
   Pin,
+  ArrowRightLeft,
+  Merge,
+  Split,
+  Unlock,
 } from 'lucide-react';
+import TransferMergeModal from '../components/tables/TransferMergeModal';
 import { TableStatus } from '../../shared/enums';
 import type { Table, CreateTableDTO, UpdateTableDTO } from '../../shared/types/table.types';
 import type { Floor } from '../../shared/types/table.types';
@@ -95,11 +100,33 @@ const Tables: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
 
   // Right-click context menus
-  const [tableContextMenu, setTableContextMenu] = useState<{ x: number; y: number; table: Table } | null>(null);
+  const [tableContextMenu, setTableContextMenu] = useState<{
+    x: number;
+    y: number;
+    table: Table;
+    orderId: number;
+  } | null>(null);
   const [floorContextMenu, setFloorContextMenu] = useState<{ x: number; y: number; floor: Floor } | null>(null);
   const [editingFloor, setEditingFloor] = useState<Floor | null>(null);
-  const handleTableContextMenu = useCallback((e: React.MouseEvent, table: Table) => {
-    setTableContextMenu({ x: e.clientX, y: e.clientY, table });
+
+  const [transferMergeModal, setTransferMergeModal] = useState<{
+    mode: 'transfer' | 'merge';
+    table: Table;
+    orderId: number;
+  } | null>(null);
+
+  const [splitModal, setSplitModal] = useState<{
+    orderId: number;
+    sourceTableId: number;
+    items: { id: number; name: string; quantity: number; total: number; selected: boolean }[];
+    step: 'items' | 'table';
+  } | null>(null);
+
+  const handleTableContextMenu = useCallback(async (e: React.MouseEvent, table: Table) => {
+    e.preventDefault();
+    const order = await ipc<any>(window.electronAPI.orders.getByTable(table.id)).catch(() => null);
+    const orderId = order ? order.id : 0;
+    setTableContextMenu({ x: e.clientX, y: e.clientY, table, orderId });
   }, []);
   const handleFloorContextMenu = (e: React.MouseEvent, floor: Floor) => {
     e.preventDefault();
@@ -123,32 +150,109 @@ const Tables: React.FC = () => {
   const [tableOrdersMap, setTableOrdersMap] = useState<Map<number, { grandTotal: number; itemCount: number; createdAt: string }>>(new Map());
 
   // Fetch order summaries for all occupied tables
-  useEffect(() => {
+  const fetchAllTableOrders = useCallback(async () => {
     const occupiedTables = tables.filter((t) => t.status === TableStatus.OCCUPIED);
     if (occupiedTables.length === 0) {
       setTableOrdersMap(new Map());
       return;
     }
-    const fetchAll = async () => {
-      const map = new Map<number, { grandTotal: number; itemCount: number; createdAt: string }>();
-      await Promise.all(
-        occupiedTables.map(async (t) => {
-          try {
-            const order = await ipc<any>(window.electronAPI.orders.getByTable(t.id));
-            if (order) {
-              map.set(t.id, {
-                grandTotal: order.grandTotal ?? 0,
-                itemCount: (order.items ?? []).length,
-                createdAt: order.createdAt ?? '',
-              });
-            }
-          } catch { /* ignore */ }
-        })
-      );
-      setTableOrdersMap(map);
-    };
-    fetchAll();
+    const map = new Map<number, { grandTotal: number; itemCount: number; createdAt: string }>();
+    await Promise.all(
+      occupiedTables.map(async (t) => {
+        try {
+          const order = await ipc<any>(window.electronAPI.orders.getByTable(t.id));
+          if (order) {
+            map.set(t.id, {
+              grandTotal: order.grandTotal ?? 0,
+              itemCount: (order.items ?? []).length,
+              createdAt: order.createdAt ?? '',
+            });
+          }
+        } catch { /* ignore */ }
+      })
+    );
+    setTableOrdersMap(map);
   }, [tables]);
+
+  useEffect(() => {
+    fetchAllTableOrders();
+  }, [fetchAllTableOrders]);
+
+  const handleOpenTransfer = (table: Table, orderId: number) => {
+    setTableContextMenu(null);
+    setShowStatusModal(false);
+    setTransferMergeModal({ mode: 'transfer', table, orderId });
+  };
+
+
+
+  const handleOpenSplitBill = async (table: Table, orderId: number) => {
+    setTableContextMenu(null);
+    setShowStatusModal(false);
+    try {
+      const order = await ipc<any>(window.electronAPI.orders.getById(orderId));
+      if (!order?.items?.length) {
+        toast.error(t('billingPage.noItemsToSplit'));
+        return;
+      }
+      setSplitModal({
+        orderId,
+        sourceTableId: table.id,
+        items: order.items.map((oi: any) => ({
+          id: oi.id,
+          name: oi.name,
+          quantity: oi.quantity,
+          total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
+          selected: false,
+        })),
+        step: 'items',
+      });
+    } catch (err: any) {
+      toast.error(err?.message ?? t('billingPage.failedToLoadOrder'));
+    }
+  };
+
+  const handleFreeTable = async (table: Table, orderId: number) => {
+    setTableContextMenu(null);
+    setShowStatusModal(false);
+    try {
+      await ipc(window.electronAPI.orders.updateStatus(orderId, 'cancelled'));
+      toast.success(t('billingPage.tableFreedAndCancelled'));
+      await refetch();
+      await fetchAllTableOrders();
+    } catch (err: any) {
+      toast.error(err?.message ?? t('billingPage.failedToFreeTable'));
+    }
+  };
+
+  const handleSplitBillNext = () => {
+    if (!splitModal) return;
+    const selectedIds = splitModal.items.filter((i) => i.selected).map((i) => i.id);
+    if (selectedIds.length === 0) {
+      toast.error(t('billingPage.selectItemsToSplit'));
+      return;
+    }
+    if (selectedIds.length === splitModal.items.length) {
+      toast.error(t('billingPage.cannotSplitAll'));
+      return;
+    }
+    setSplitModal({ ...splitModal, step: 'table' });
+  };
+
+  const handleSplitBillConfirm = async (targetTableId: number) => {
+    if (!splitModal) return;
+    const selectedIds = splitModal.items.filter((i) => i.selected).map((i) => i.id);
+    try {
+      await ipc(window.electronAPI.orders.splitBill(splitModal.orderId, selectedIds, targetTableId));
+      const targetName = tables.find((t) => t.id === targetTableId)?.name ?? Table ;
+      toast.success(t('billingPage.itemsSplitTo', { name: targetName }));
+      setSplitModal(null);
+      await refetch();
+      await fetchAllTableOrders();
+    } catch (err: any) {
+      toast.error(err?.message ?? t('billingPage.splitFailed'));
+    }
+  };
 
   // Poll the table list every 5s so orders placed from waiter tablets show up
   // here in near real-time (occupations, KOT statuses).
@@ -227,7 +331,11 @@ const Tables: React.FC = () => {
             kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
             createdAt: oi.createdAt ?? oi.created_at ?? undefined,
           }));
-          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? []);
+          const splitInfo = {
+            splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
+            splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
+          };
+          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
           navigate('/billing');
           return;
         }
@@ -293,7 +401,11 @@ const Tables: React.FC = () => {
           kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
           createdAt: oi.createdAt ?? oi.created_at ?? undefined,
         }));
-        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? []);
+        const splitInfo = {
+          splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
+          splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
+        };
+        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
       }
     } catch {
       billingStore.setOrderType('dine_in');
@@ -822,6 +934,40 @@ const Tables: React.FC = () => {
                     {t('tables.pay')}
                   </Button>
                 </div>
+
+                {/* Table order actions: Transfer / Merge / Split / Free Table */}
+                {tableOrder && (
+                  <div className="grid grid-cols-3 gap-2 pt-1 border-t border-gray-100">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      icon={<ArrowRightLeft size={14} className="text-blue-600" />}
+                      onClick={() => handleOpenTransfer(selectedTable, tableOrder.id)}
+                    >
+                      {t('billingPage.transferOrder')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      icon={<Split size={14} className="text-orange-600" />}
+                      onClick={() => handleOpenSplitBill(selectedTable, tableOrder.id)}
+                    >
+                      {t('billingPage.splitBill')}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      icon={<Unlock size={14} className="text-red-500" />}
+                      onClick={() => handleFreeTable(selectedTable, tableOrder.id)}
+                    >
+                      {t('billingPage.freeTable')}
+                    </Button>
+                  </div>
+                )}
+
                 <Button
                   variant="primary"
                   fullWidth
@@ -916,21 +1062,61 @@ const Tables: React.FC = () => {
           onContextMenu={(e) => { e.preventDefault(); setTableContextMenu(null); }}
         >
           <div
-            className="absolute bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[180px]"
-            style={{ left: tableContextMenu.x, top: tableContextMenu.y }}
+            className="absolute bg-white rounded-lg shadow-xl border border-gray-200 py-1 min-w-[200px]"
+            style={{
+              left: Math.min(tableContextMenu.x, window.innerWidth - 220),
+              top: Math.min(tableContextMenu.y, window.innerHeight - 280),
+            }}
             onClick={(e) => e.stopPropagation()}
             onContextMenu={(e) => e.preventDefault()}
           >
-            <div className="px-3 py-1.5 text-[10px] uppercase tracking-wide text-gray-400 border-b border-gray-100">
-              {tableContextMenu.table.name}
+            <div className="px-3 py-1.5 text-[10px] uppercase tracking-wide text-gray-400 border-b border-gray-100 flex items-center justify-between">
+              <span>{tableContextMenu.table.name}</span>
+              {tableContextMenu.orderId > 0 && (
+                <span className="text-[9px] bg-red-100 text-red-700 font-bold px-1.5 py-0.5 rounded">
+                  {t('tables.statusOccupied', 'Occupied')}
+                </span>
+              )}
             </div>
+
+            {tableContextMenu.orderId > 0 && (
+              <>
+                <button
+                  onClick={() => handleOpenTransfer(tableContextMenu.table, tableContextMenu.orderId)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                >
+                  <ArrowRightLeft size={14} className="text-blue-600" />
+                  {t('billingPage.transferOrder')}
+                </button>
+
+                <button
+                  onClick={() => handleOpenSplitBill(tableContextMenu.table, tableContextMenu.orderId)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
+                >
+                  <Split size={14} className="text-orange-600" />
+                  {t('billingPage.splitBill')}
+                </button>
+                <button
+                  onClick={() => handleFreeTable(tableContextMenu.table, tableContextMenu.orderId)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <Unlock size={14} className="text-red-500" />
+                  {t('billingPage.freeTable')}
+                </button>
+                <div className="border-t border-gray-100 my-1" />
+              </>
+            )}
+
             <button
+              disabled={tableContextMenu.table.status === 'occupied'}
+              title={tableContextMenu.table.status === 'occupied' ? t('billingPage.onlyFreeTablesEditable') : undefined}
               onClick={() => {
                 const tbl = tableContextMenu.table;
+                if (tbl.status === 'occupied') return;
                 setTableContextMenu(null);
                 openEditTableModal(tbl);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Edit2 size={14} className="text-gray-500" />
               {t('tables.editTable')}
@@ -953,18 +1139,144 @@ const Tables: React.FC = () => {
               {tableContextMenu.table.isPinned ? t('common.unpinFromTop') : t('common.pinToTop')}
             </button>
             <button
+              disabled={tableContextMenu.table.status === 'occupied'}
+              title={tableContextMenu.table.status === 'occupied' ? t('billingPage.onlyFreeTablesEditable') : undefined}
               onClick={async () => {
                 const tbl = tableContextMenu.table;
+                if (tbl.status === 'occupied') return;
                 setTableContextMenu(null);
                 if (window.confirm(t('tables.confirmDeleteTable', { name: tbl.name }))) {
                   try { await deleteTable(tbl.id); } catch { /* handled */ }
                 }
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Trash2 size={14} />
               {t('tables.deleteTable')}
             </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Transfer / Merge Modal */}
+      {transferMergeModal && (
+        <TransferMergeModal
+          isOpen={true}
+          mode={transferMergeModal.mode}
+          sourceTable={transferMergeModal.table}
+          sourceOrderId={transferMergeModal.orderId}
+          tables={tables}
+          onClose={() => setTransferMergeModal(null)}
+          onSuccess={async () => {
+            await refetch();
+            await fetchAllTableOrders();
+            if (selectedTable) {
+              await fetchTableOrder(selectedTable.id);
+            }
+          }}
+        />
+      )}
+
+      {/* Split Bill modal */}
+      {splitModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 p-4" onClick={() => setSplitModal(null)}>
+          <div
+            className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-sm max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {splitModal.step === 'items' ? (
+              <>
+                <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700">{t('billingPage.splitBillSelectItems')}</h3>
+                    <p className="text-xs text-gray-400">{t('billingPage.chooseItemsToMove')}</p>
+                  </div>
+                  <button onClick={() => setSplitModal(null)} className="p-1 hover:bg-gray-100 rounded">
+                    <X size={16} className="text-gray-400" />
+                  </button>
+                </div>
+                <div className="overflow-y-auto flex-1 p-2">
+                  {splitModal.items.map((item, idx) => (
+                    <label
+                      key={item.id}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
+                        item.selected ? 'bg-orange-50 border border-orange-200' : 'hover:bg-gray-50 border border-transparent'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={item.selected}
+                        onChange={() => {
+                          const updated = [...splitModal.items];
+                          updated[idx] = { ...updated[idx], selected: !updated[idx].selected };
+                          setSplitModal({ ...splitModal, items: updated });
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-800 truncate">{item.name}</p>
+                        <p className="text-xs text-gray-400">{t('billingPage.qty', { count: item.quantity })}</p>
+                      </div>
+                      <span className="text-sm font-medium text-gray-600">{formatCurrency(item.total)}</span>
+                    </label>
+                  ))}
+                </div>
+                <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+                  <div className="text-xs text-gray-500">
+                    {t('billingPage.itemsOfTotal', {
+                      shown: splitModal.items.filter((i) => i.selected).length,
+                      total: splitModal.items.length,
+                    })}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSplitModal(null)}
+                      className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      {t('common.cancel')}
+                    </button>
+                    <button
+                      onClick={handleSplitBillNext}
+                      disabled={splitModal.items.filter((i) => i.selected).length === 0}
+                      className="px-3 py-1.5 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {t('billingPage.nextPickTable')}
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700">{t('billingPage.splitBillChooseTable')}</h3>
+                    <p className="text-xs text-gray-400">
+                      {t('billingPage.itemsWillMove', { count: splitModal.items.filter((i) => i.selected).length })}
+                    </p>
+                  </div>
+                  <button onClick={() => setSplitModal({ ...splitModal, step: 'items' })} className="px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded">
+                    {t('common.back')}
+                  </button>
+                </div>
+                <div className="overflow-y-auto flex-1 p-1">
+                  {tables
+                    .filter((t) => t.id !== splitModal.sourceTableId && t.status !== 'occupied')
+                    .map((t) => (
+                      <button
+                        key={t.id}
+                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 border-b border-gray-50 last:border-0 rounded-lg"
+                        onClick={() => handleSplitBillConfirm(t.id)}
+                      >
+                        {t.name}
+                      </button>
+                    ))}
+                  {tables.filter((t) => t.id !== splitModal.sourceTableId && t.status !== 'occupied').length === 0 && (
+                    <div className="px-4 py-3 text-sm text-gray-400 text-center">{t('billingPage.noFreeTablesAvailable')}</div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>,
         document.body
