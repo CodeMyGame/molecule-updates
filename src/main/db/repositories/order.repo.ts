@@ -23,8 +23,8 @@ export function create(data: CreateOrderDTO): Order {
   const db = getDb();
 
   const insertOrder = db.prepare(`
-    INSERT INTO orders (order_number, order_type, table_id, table_name_snapshot, customer_id, staff_id, status, subtotal, tax_amount, grand_total, round_off, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO orders (order_number, order_type, table_id, table_name_snapshot, customer_id, staff_id, status, subtotal, discount_amount, discount_type, discount_value, discount_reason, tax_amount, grand_total, round_off, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const getTableName = db.prepare('SELECT name FROM tables WHERE id = ?');
 
@@ -53,13 +53,29 @@ export function create(data: CreateOrderDTO): Order {
     // Calculate totals
     for (const item of data.items) {
       item.taxRate = resolveItemTaxRate(item.taxRate);
-      const itemTotal = item.unitPrice * item.quantity;
-      const itemTax = Math.round(itemTotal * item.taxRate / 100);
-      subtotal += itemTotal;
-      taxAmount += itemTax;
+      subtotal += item.unitPrice * item.quantity;
     }
 
-    const grandTotal = subtotal + taxAmount;
+    let discountAmount = 0;
+    const discount = data.discount;
+    const discType = discount ? (discount.type === 'percent' ? 'percentage' : discount.type) : null;
+    if (discount) {
+      if (discType === 'percentage') {
+        discountAmount = Math.round((subtotal * discount.value) / 100);
+      } else if (discType === 'flat') {
+        discountAmount = Math.min(discount.value, subtotal);
+      }
+    }
+
+    // Tax is calculated on post-discount amounts (proportional reduction per item)
+    const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
+    for (const item of data.items) {
+      const itemTotal = item.unitPrice * item.quantity;
+      const discountedItemTotal = Math.round(itemTotal * (1 - discountRatio));
+      taxAmount += Math.round((discountedItemTotal * item.taxRate) / 100);
+    }
+
+    const grandTotal = subtotal - discountAmount + taxAmount;
     const roundOff = Math.round(grandTotal / 100) * 100 - grandTotal;
 
     const isDineIn = data.orderType === 'dine_in';
@@ -76,6 +92,10 @@ export function create(data: CreateOrderDTO): Order {
       data.staffId,
       OrderStatus.ACTIVE,
       subtotal,
+      discountAmount,
+      discType ?? null,
+      discount?.value ?? 0,
+      discount?.reason ?? null,
       taxAmount,
       grandTotal + roundOff,
       roundOff,
@@ -85,9 +105,9 @@ export function create(data: CreateOrderDTO): Order {
     const orderId = result.lastInsertRowid as number;
 
     for (const item of data.items) {
-      item.taxRate = resolveItemTaxRate(item.taxRate);
       const itemTotal = item.unitPrice * item.quantity;
-      const itemTax = Math.round(itemTotal * item.taxRate / 100);
+      const discountedItemTotal = Math.round(itemTotal * (1 - discountRatio));
+      const itemTax = Math.round((discountedItemTotal * item.taxRate) / 100);
 
       const itemResult = insertOrderItem.run(
         orderId,
@@ -865,7 +885,7 @@ function generateOrderNumber(): string {
 
 export function recalculateOrderTotals(orderId: number): void {
   const db = getDb();
-  const items = db.prepare('SELECT unit_price, quantity, tax_rate FROM order_items WHERE order_id = ?').all(orderId) as any[];
+  const items = db.prepare('SELECT id, unit_price, quantity, tax_rate FROM order_items WHERE order_id = ?').all(orderId) as any[];
 
   let subtotal = 0;
   for (const item of items) {
@@ -875,18 +895,22 @@ export function recalculateOrderTotals(orderId: number): void {
   const order = db.prepare('SELECT discount_type, discount_value FROM orders WHERE id = ?').get(orderId) as any;
   let discountAmount = 0;
   if (order?.discount_type === 'percentage') {
-    discountAmount = Math.round(subtotal * order.discount_value / 100);
+    discountAmount = Math.round((subtotal * order.discount_value) / 100);
   } else if (order?.discount_type === 'flat') {
-    discountAmount = order.discount_value || 0;
+    discountAmount = Math.min(order.discount_value || 0, subtotal);
   }
 
   // Tax is calculated on post-discount amounts (proportional reduction per item)
   const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
   let taxAmount = 0;
+  const updateOrderItemTax = db.prepare('UPDATE order_items SET tax_amount = ?, total = ? WHERE id = ?');
+
   for (const item of items) {
     const itemTotal = item.unit_price * item.quantity;
     const discountedItemTotal = Math.round(itemTotal * (1 - discountRatio));
-    taxAmount += Math.round(discountedItemTotal * item.tax_rate / 100);
+    const itemTax = Math.round((discountedItemTotal * item.tax_rate) / 100);
+    taxAmount += itemTax;
+    updateOrderItemTax.run(itemTax, itemTotal + itemTax, item.id);
   }
 
   const grandTotal = subtotal - discountAmount + taxAmount;

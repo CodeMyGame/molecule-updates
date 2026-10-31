@@ -74,6 +74,7 @@ export interface CreateOrderDTO {
   staffId: number;
   items: CartItem[];
   notes?: string;
+  discount?: { type: 'percentage' | 'flat' | 'percent'; value: number; reason?: string } | null;
 }
 
 export interface CartItem {

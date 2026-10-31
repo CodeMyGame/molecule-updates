@@ -90,73 +90,44 @@ export function createOrder(data: CreateOrderDTO): Order & { items: OrderItem[] 
 
 
 export function calculateTotals(
-
   items: CartItem[],
-
-  discount?: { type: 'percentage' | 'flat'; value: number },
-
+  discount?: { type: 'percentage' | 'flat' | 'percent'; value: number },
 ): {
-
   subtotal: number;
-
   taxAmount: number;
-
   discountAmount: number;
-
   grandTotal: number;
-
   roundOff: number;
-
 } {
-
   let subtotal = 0;
-
-  let taxAmount = 0;
-
-
-
   for (const item of items) {
-
-    const itemTotal = item.unitPrice * item.quantity;
-
-    const itemTax = Math.round(itemTotal * item.taxRate / 100);
-
-    subtotal += itemTotal;
-
-    taxAmount += itemTax;
-
+    subtotal += item.unitPrice * item.quantity;
   }
-
-
 
   let discountAmount = 0;
-
   if (discount) {
-
-    if (discount.type === 'percentage') {
-
-      discountAmount = Math.round(subtotal * discount.value / 100);
-
+    const discType = discount.type === 'percent' ? 'percentage' : discount.type;
+    if (discType === 'percentage') {
+      discountAmount = Math.round((subtotal * discount.value) / 100);
     } else {
-
-      discountAmount = discount.value;
-
+      discountAmount = Math.min(discount.value, subtotal);
     }
-
   }
 
-
+  // Tax is calculated on post-discount amounts (proportional reduction per item)
+  const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
+  let taxAmount = 0;
+  for (const item of items) {
+    const itemTotal = item.unitPrice * item.quantity;
+    const discountedItemTotal = Math.round(itemTotal * (1 - discountRatio));
+    taxAmount += Math.round((discountedItemTotal * item.taxRate) / 100);
+  }
 
   const total = subtotal - discountAmount + taxAmount;
-
   const roundOff = Math.round(total / 100) * 100 - total;
-
   const grandTotal = total + roundOff;
 
-
-
   return { subtotal, taxAmount, discountAmount, grandTotal, roundOff };
-
 }
 
 
