@@ -292,13 +292,21 @@ export function useOrders(): UseOrdersReturn {
               kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
               createdAt: oi.createdAt ?? oi.created_at ?? undefined,
             }));
+            const rawDiscountType = fullOrder.discountType ?? fullOrder.discount_type;
+            const orderDiscount = rawDiscountType
+              ? {
+                  type: ((rawDiscountType === 'percentage' || rawDiscountType === 'percent') ? 'percent' : 'flat') as 'percent' | 'flat',
+                  value: fullOrder.discountValue ?? fullOrder.discount_value ?? 0,
+                  reason: fullOrder.discountReason ?? fullOrder.discount_reason ?? undefined,
+                }
+              : billingStore.discount;
             billingStore.loadOrderIntoCart(
               id,
               fullOrder.tableId ?? fullOrder.table_id ?? billingStore.selectedTableId,
               updatedCartItems,
               updatedCartItems.length,
               fullOrder.orderType ?? fullOrder.order_type ?? billingStore.orderType,
-              billingStore.discount,
+              orderDiscount,
               fullOrder.notes ?? billingStore.notes,
               fullOrder.kots ?? [],
               fullOrder.outboundTransfers ?? [],

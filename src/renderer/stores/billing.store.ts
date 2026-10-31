@@ -263,7 +263,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       kots: kots ?? [],
       selectedTableId: (orderType && orderType !== 'dine_in') ? null : tableId,
       orderType: orderType ?? 'dine_in',
-      discount: discount ?? null,
+      discount: discount !== undefined ? discount : state.discount,
       notes: notes ?? '',
       splitFromOrderId: splitInfo?.splitFromOrderId ?? null,
       splitFromOrderNumber: splitInfo?.splitFromOrderNumber ?? null,

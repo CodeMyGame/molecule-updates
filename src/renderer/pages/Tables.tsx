@@ -331,11 +331,20 @@ const Tables: React.FC = () => {
             kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
             createdAt: oi.createdAt ?? oi.created_at ?? undefined,
           }));
+          const rawDiscountType = order.discountType ?? order.discount_type;
+          const orderDiscount = rawDiscountType
+            ? {
+                type: ((rawDiscountType === 'percentage' || rawDiscountType === 'percent') ? 'percent' : 'flat') as 'percent' | 'flat',
+                value: order.discountValue ?? order.discount_value ?? 0,
+                reason: order.discountReason ?? order.discount_reason ?? undefined,
+              }
+            : null;
           const splitInfo = {
             splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
             splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
           };
-          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
+          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
+          billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
           navigate('/billing');
           return;
         }
@@ -401,11 +410,20 @@ const Tables: React.FC = () => {
           kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
           createdAt: oi.createdAt ?? oi.created_at ?? undefined,
         }));
+        const rawDiscountType = order.discountType ?? order.discount_type;
+        const orderDiscount = rawDiscountType
+          ? {
+              type: ((rawDiscountType === 'percentage' || rawDiscountType === 'percent') ? 'percent' : 'flat') as 'percent' | 'flat',
+              value: order.discountValue ?? order.discount_value ?? 0,
+              reason: order.discountReason ?? order.discount_reason ?? undefined,
+            }
+          : null;
         const splitInfo = {
           splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
           splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
         };
-        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, undefined, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
+        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
+        billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
       }
     } catch {
       billingStore.setOrderType('dine_in');
