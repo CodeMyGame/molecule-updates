@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "{{tableName}} 'ਤੇ ਨਵਾਂ ਆਰਡਰ #{{orderNumber}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "ਆਰਜ਼ੀ ਆਈਟਮ",
+    "tempItem": "ਕਸਟਮ ਆਈਟਮ",
     "tempItemName": "ਆਈਟਮ ਦਾ ਨਾਮ",
     "tempItemPrice": "ਕੀਮਤ",
-    "addTempItem": "ਆਰਜ਼ੀ ਆਈਟਮ ਸ਼ਾਮਲ ਕਰੋ",
+    "addTempItem": "ਕਸਟਮ ਆਈਟਮ ਸ਼ਾਮਲ ਕਰੋ",
     "resizeMenuTable": "ਆਕਾਰ ਬਦਲਣ ਲਈ ਖਿੱਚੋ",
     "resizeFloorSidebar": "ਆਕਾਰ ਬਦਲਣ ਲਈ ਖਿੱਚੋ",
     "resizeCart": "ਆਕਾਰ ਬਦਲਣ ਲਈ ਖਿੱਚੋ"

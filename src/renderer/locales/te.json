@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "{{tableName}} పై కొత్త ఆర్డర్ #{{orderNumber}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "తాత్కాలిక అంశం",
+    "tempItem": "అనుకూల అంశం",
     "tempItemName": "అంశం పేరు",
     "tempItemPrice": "ధర",
-    "addTempItem": "తాత్కాలిక అంశాన్ని జోడించండి",
+    "addTempItem": "అనుకూల అంశాన్ని జోడించండి",
     "resizeMenuTable": "పరిమాణాన్ని మార్చడానికి లాగండి",
     "resizeFloorSidebar": "పరిమాణాన్ని మార్చడానికి లాగండి",
     "resizeCart": "పరిమాణాన్ని మార్చడానికి లాగండి"

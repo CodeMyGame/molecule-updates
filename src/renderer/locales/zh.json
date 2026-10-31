@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "{{tableName}} 的新订单 #{{orderNumber}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "临时菜品",
+    "tempItem": "自定义菜品",
     "tempItemName": "菜品名称",
     "tempItemPrice": "价格",
-    "addTempItem": "添加临时菜品",
+    "addTempItem": "添加自定义菜品",
     "resizeMenuTable": "拖动调整大小",
     "resizeFloorSidebar": "拖动调整大小",
     "resizeCart": "拖动调整大小"

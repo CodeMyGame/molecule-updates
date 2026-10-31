@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "طلب جديد رقم {{orderNumber}} على {{tableName}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "عنصر مؤقت",
+    "tempItem": "صنف مخصص",
     "tempItemName": "اسم العنصر",
     "tempItemPrice": "السعر",
-    "addTempItem": "إضافة عنصر مؤقت",
+    "addTempItem": "إضافة صنف مخصص",
     "resizeMenuTable": "اسحب لإعادة الحجم",
     "resizeFloorSidebar": "اسحب لإعادة الحجم",
     "resizeCart": "اسحب لإعادة الحجم"

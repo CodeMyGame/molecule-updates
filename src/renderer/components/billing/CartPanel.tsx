@@ -816,9 +816,6 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 {t('cart.someItemsTransferredTo', { table: outboundTables.join(', '), defaultValue: 'Some items transferred to {{table}}' })}
               </p>
             </div>
-            <span className="text-[10px] text-amber-700/80 font-medium shrink-0 ml-1">
-              {t('cart.hoverToView', 'Hover to view')}
-            </span>
 
             {/* Hover popover / tooltip listing transferred items */}
             {showTransferTooltip && (

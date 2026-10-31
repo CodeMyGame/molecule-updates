@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "Nuevo pedido #{{orderNumber}} en {{tableName}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "Artículo temporal",
+    "tempItem": "Artículo personalizado",
     "tempItemName": "Nombre del artículo",
     "tempItemPrice": "Precio",
-    "addTempItem": "Añadir artículo temporal",
+    "addTempItem": "Añadir artículo personalizado",
     "resizeMenuTable": "Arrastra para redimensionar",
     "resizeFloorSidebar": "Arrastra para redimensionar",
     "resizeCart": "Arrastra para redimensionar"

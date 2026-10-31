@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "{{tableName}} で新しい注文 #{{orderNumber}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "臨時商品",
+    "tempItem": "カスタム商品",
     "tempItemName": "商品名",
     "tempItemPrice": "価格",
-    "addTempItem": "臨時商品を追加",
+    "addTempItem": "カスタム商品を追加",
     "resizeMenuTable": "ドラッグしてサイズ変更",
     "resizeFloorSidebar": "ドラッグしてサイズ変更",
     "resizeCart": "ドラッグしてサイズ変更"

@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "Nouvelle commande #{{orderNumber}} sur {{tableName}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "Article temporaire",
+    "tempItem": "Article personnalisé",
     "tempItemName": "Nom de l'article",
     "tempItemPrice": "Prix",
-    "addTempItem": "Ajouter un article temporaire",
+    "addTempItem": "Ajouter un article personnalisé",
     "resizeMenuTable": "Glisser pour redimensionner",
     "resizeFloorSidebar": "Glisser pour redimensionner",
     "resizeCart": "Glisser pour redimensionner"

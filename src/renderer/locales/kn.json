@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "{{tableName}} ನಲ್ಲಿ ಹೊಸ ಆದೇಶ #{{orderNumber}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "ತಾತ್ಕಾಲಿಕ ಐಟಂ",
+    "tempItem": "ಕಸ್ಟಮ್ ಐಟಂ",
     "tempItemName": "ಐಟಂ ಹೆಸರು",
     "tempItemPrice": "ಬೆಲೆ",
-    "addTempItem": "ತಾತ್ಕಾಲಿಕ ಐಟಂ ಸೇರಿಸಿ",
+    "addTempItem": "ಕಸ್ಟಮ್ ಐಟಂ ಸೇರಿಸಿ",
     "resizeMenuTable": "ಗಾತ್ರ ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
     "resizeFloorSidebar": "ಗಾತ್ರ ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
     "resizeCart": "ಗಾತ್ರ ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ"

@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "{{tableName}} இல் புதிய ஆர்டர் #{{orderNumber}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "தற்காலிக உருப்படி",
+    "tempItem": "தனிப்பயன் உருப்படி",
     "tempItemName": "உருப்படியின் பெயர்",
     "tempItemPrice": "விலை",
-    "addTempItem": "தற்காலிக உருப்படியைச் சேர்க்கவும்",
+    "addTempItem": "தனிப்பயன் உருப்படியைச் சேர்க்கவும்",
     "resizeMenuTable": "அளவை மாற்ற இழுக்கவும்",
     "resizeFloorSidebar": "அளவை மாற்ற இழுக்கவும்",
     "resizeCart": "அளவை மாற்ற இழுக்கவும்"

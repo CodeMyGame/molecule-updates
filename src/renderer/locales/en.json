@@ -62,10 +62,10 @@
     "newOrderFromTableToast": "New order #{{orderNumber}} on {{tableName}}",
     "ordersBarLabel": "Orders:",
     "orderHeldBadge": "held",
-    "tempItem": "Temp Item",
+    "tempItem": "Custom Item",
     "tempItemName": "Item Name",
     "tempItemPrice": "Price",
-    "addTempItem": "Add Temp Item",
+    "addTempItem": "Add Custom Item",
     "resizeMenuTable": "Drag to resize",
     "resizeFloorSidebar": "Drag to resize",
     "resizeCart": "Drag to resize"

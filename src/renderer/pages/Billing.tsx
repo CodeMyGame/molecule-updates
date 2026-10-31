@@ -1418,15 +1418,15 @@ const Billing: React.FC = () => {
             </button>
           </div>
 
-          {/* Temp item button */}
-          <Tooltip text={t('billing.addTempItem')} position="bottom">
+          {/* Custom item button */}
+          <Tooltip text={t('billing.addTempItem', 'Add Custom Item')} position="bottom">
             <button
               onClick={() => setShowTempItemModal(true)}
               className="flex items-center gap-1.5 px-3 py-1 text-xs text-orange-600 bg-orange-50
                 hover:bg-orange-100 border border-orange-200 rounded-md transition-colors font-semibold"
             >
               <PlusCircle size={13} />
-              {t('billing.tempItem')}
+              {t('billing.tempItem', 'Custom Item')}
             </button>
           </Tooltip>
 
@@ -1765,12 +1765,12 @@ const Billing: React.FC = () => {
         onComplete={handlePaymentComplete}
       />
 
-      {/* Temp item modal */}
+      {/* Custom item modal */}
       {showTempItemModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30" onClick={() => setShowTempItemModal(false)}>
           <div className="bg-white rounded-xl shadow-xl w-80 p-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-gray-800">{t('billing.addTempItem')}</h3>
+              <h3 className="text-base font-semibold text-gray-800">{t('billing.addTempItem', 'Add Custom Item')}</h3>
               <button onClick={() => setShowTempItemModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X size={18} />
               </button>
@@ -1833,7 +1833,7 @@ const Billing: React.FC = () => {
                 className="w-full py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600
                   disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
               >
-                {t('billing.addTempItem')}
+                {t('billing.addTempItem', 'Add Custom Item')}
               </button>
             </div>
           </div>
