@@ -309,7 +309,24 @@ export function registerAllHandlers(): void {
     if (!order) throw new Error('Order not found');
     const paymentTotal = payments.reduce((sum: number, p: any) => sum + (p.amount ?? 0), 0);
     const tip = typeof data.tip === 'number' ? data.tip : 0;
-    const coinDiscount = typeof data.coinsToRedeem === 'number' ? data.coinsToRedeem * 100 : 0; // coins to paise
+    const redeemCoins = typeof data.coinsToRedeem === 'number' && data.coinsToRedeem > 0 ? Math.floor(data.coinsToRedeem) : 0;
+    const coinDiscount = redeemCoins * 100; // coins to paise
+
+    if (redeemCoins > 0) {
+      if (coinDiscount > order.grand_total) {
+        throw new Error(`Coins to redeem (${redeemCoins}) cannot exceed order total (${order.grand_total / 100})`);
+      }
+      if (!data.customer?.phone) {
+        throw new Error('Customer phone is required to redeem loyalty coins');
+      }
+      const existingCustomer = customerRepo.findByPhone(data.customer.phone);
+      if (!existingCustomer || existingCustomer.loyaltyPoints < redeemCoins) {
+        throw new Error(
+          `Insufficient loyalty coins: requested ${redeemCoins}, available ${existingCustomer?.loyaltyPoints ?? 0}`
+        );
+      }
+    }
+
     if (paymentTotal + coinDiscount < order.grand_total + tip) {
       throw new Error(`Payment total (${paymentTotal + coinDiscount}) is less than order total (${order.grand_total + tip})`);
     }
@@ -340,16 +357,16 @@ export function registerAllHandlers(): void {
           if (customerId) {
             db.prepare("UPDATE orders SET customer_id = ?, updated_at = datetime('now') WHERE id = ?")
               .run(customerId, orderId);
-            customerRepo.recordVisit(customerId, order.grand_total);
+            customerRepo.recordVisit(customerId, Math.max(0, order.grand_total - coinDiscount));
 
             // --- Coin redemption ---
-            const redeemCoins = typeof data.coinsToRedeem === 'number' ? data.coinsToRedeem : 0;
             if (redeemCoins > 0) {
               const customer = customerRepo.getById(customerId);
-              if (customer && customer.loyaltyPoints >= redeemCoins) {
-                customerRepo.addLoyalty(customerId, orderId, -redeemCoins, `Redeemed ${redeemCoins} coins on order #${orderId}`);
-                coinsRedeemed = redeemCoins;
+              if (!customer || customer.loyaltyPoints < redeemCoins) {
+                throw new Error(`Insufficient loyalty coins: requested ${redeemCoins}, available ${customer?.loyaltyPoints ?? 0}`);
               }
+              customerRepo.addLoyalty(customerId, orderId, -redeemCoins, `Redeemed ${redeemCoins} coins on order #${orderId}`);
+              coinsRedeemed = redeemCoins;
             }
 
             // --- Coin awarding based on slabs ---
@@ -361,8 +378,8 @@ export function registerAllHandlers(): void {
                 slabs = slabsJson ? JSON.parse(slabsJson) : [];
               } catch { slabs = []; }
 
-              // grand_total is in paise, slabs are in rupees
-              const billRupees = order.grand_total / 100;
+              // grand_total is in paise, slabs are in rupees (net of redeemed coins)
+              const billRupees = Math.max(0, order.grand_total - coinDiscount) / 100;
               let earned = 0;
               for (const slab of slabs) {
                 if (billRupees >= slab.minAmount) earned = slab.coins;
@@ -375,6 +392,7 @@ export function registerAllHandlers(): void {
           }
         } catch (err) {
           logger.error('Customer handling failed:', err);
+          throw err;
         }
       }
 
