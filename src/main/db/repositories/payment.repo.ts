@@ -47,21 +47,24 @@ export function getReconciliation(dateRange: { startDate: string; endDate: strin
   totalAmount: number;
   tipAmount: number;
 }[] {
-  if (dateRange.startDate > dateRange.endDate) {
+  const startDate = dateRange.startDate?.includes(' ') ? dateRange.startDate : `${dateRange.startDate} 00:00:00`;
+  const endDate = dateRange.endDate?.includes(' ') ? dateRange.endDate : `${dateRange.endDate} 23:59:59`;
+  if (startDate > endDate) {
     throw new Error('Start date must not be after end date');
   }
   const db = getDb();
   const rows = db.prepare(`
     SELECT
-      payment_mode,
+      p.payment_mode,
       COUNT(*) AS transaction_count,
-      SUM(amount) AS total_amount,
-      SUM(tip_amount) AS tip_amount
-    FROM payments
-    WHERE created_at >= ? AND created_at <= ?
-    GROUP BY payment_mode
-    ORDER BY payment_mode
-  `).all(dateRange.startDate, dateRange.endDate) as any[];
+      SUM(p.amount) AS total_amount,
+      SUM(p.tip_amount) AS tip_amount
+    FROM payments p
+    JOIN orders o ON p.order_id = o.id
+    WHERE p.created_at >= ? AND p.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    GROUP BY p.payment_mode
+    ORDER BY p.payment_mode
+  `).all(startDate, endDate) as any[];
 
   return rows.map((row) => ({
     paymentMode: row.payment_mode as PaymentMode,
