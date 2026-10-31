@@ -504,6 +504,14 @@ async function handleWaiterApi(
     // may append items.
     loadOwners();
     const order = orderRepo.getById(orderId) as any;
+    if (!order) {
+      sendStatus(res, 404, 'Order not found');
+      return true;
+    }
+    if (order.status !== 'active') {
+      sendStatus(res, 400, `Cannot add items: Order #${orderId} is ${order.status}`);
+      return true;
+    }
     const orderTableId = order?.tableId ?? order?.table_id;
     if (typeof orderTableId === 'number') {
       const owner = tableOwners.get(orderTableId);

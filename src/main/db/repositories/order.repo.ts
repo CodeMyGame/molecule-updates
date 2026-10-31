@@ -549,6 +549,18 @@ export function updateStatus(
 export function addItems(orderId: number, items: CartItem[]): Order | undefined {
   const db = getDb();
 
+  const existingOrder = db.prepare('SELECT id, status FROM orders WHERE id = ?').get(orderId) as any;
+  if (!existingOrder) {
+    throw new Error(`Order #${orderId} not found`);
+  }
+  if (existingOrder.status !== OrderStatus.ACTIVE) {
+    throw new Error(`Cannot add items to order #${orderId} because its status is '${existingOrder.status}'`);
+  }
+
+  if (!items || items.length === 0) {
+    return getById(orderId);
+  }
+
   const insertOrderItem = db.prepare(`
     INSERT INTO order_items (order_id, menu_item_id, combo_id, variation_id, name, quantity, unit_price, tax_rate, tax_amount, total, notes, source_table_name, kot_status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -565,7 +577,7 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
     'SELECT price FROM addon_variation_prices WHERE addon_id = ? AND variation_name = ?'
   );
   const getOrderTable = db.prepare(`
-    SELECT o.table_name_snapshot, t.name as current_table_name
+    SELECT o.status, o.table_name_snapshot, t.name as current_table_name
     FROM orders o
     LEFT JOIN tables t ON o.table_id = t.id
     WHERE o.id = ?
@@ -576,6 +588,9 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
     let additionalTax = 0;
 
     const orderInfo = getOrderTable.get(orderId) as any;
+    if (!orderInfo || orderInfo.status !== OrderStatus.ACTIVE) {
+      throw new Error(`Cannot add items to order #${orderId} because its status is '${orderInfo?.status}'`);
+    }
     const tableSnapshot = orderInfo?.current_table_name || orderInfo?.table_name_snapshot || null;
 
     for (const item of items) {
@@ -639,7 +654,7 @@ export function removeItem(
 
   const removeInTransaction = db.transaction(() => {
     const item = db.prepare(`
-      SELECT oi.*, o.order_number, o.table_name_snapshot, o.staff_id as order_staff_id,
+      SELECT oi.*, o.order_number, o.table_name_snapshot, o.staff_id as order_staff_id, o.status as order_status,
              t.name as table_name, s.name as staff_name, v.name as variation_name
       FROM order_items oi
       JOIN orders o ON o.id = oi.order_id
@@ -650,6 +665,10 @@ export function removeItem(
     `).get(staffId ?? null, orderItemId) as any;
 
     if (!item) return;
+
+    if (item.order_status !== OrderStatus.ACTIVE) {
+      throw new Error(`Cannot remove item #${orderItemId} from order #${item.order_id} because order is ${item.order_status}`);
+    }
 
     // Log to void_items audit
     try {
@@ -737,8 +756,11 @@ export function applyDiscount(
   const db = getDb();
 
   const applyInTransaction = db.transaction(() => {
-    const order = db.prepare('SELECT subtotal FROM orders WHERE id = ?').get(orderId) as any;
+    const order = db.prepare('SELECT subtotal, status FROM orders WHERE id = ?').get(orderId) as any;
     if (!order) return;
+    if (order.status !== OrderStatus.ACTIVE) {
+      throw new Error(`Cannot apply discount to order #${orderId} because its status is '${order.status}'`);
+    }
 
     let discountAmount: number;
     if (type === 'percentage') {
@@ -763,6 +785,11 @@ export function applyDiscount(
 export function clearDiscount(orderId: number): Order | undefined {
   const db = getDb();
   const clearInTransaction = db.transaction(() => {
+    const order = db.prepare('SELECT status FROM orders WHERE id = ?').get(orderId) as any;
+    if (!order) return;
+    if (order.status !== OrderStatus.ACTIVE) {
+      throw new Error(`Cannot clear discount on order #${orderId} because its status is '${order.status}'`);
+    }
     db.prepare(`
       UPDATE orders
       SET discount_type = NULL, discount_value = 0, discount_amount = 0, discount_reason = NULL,
