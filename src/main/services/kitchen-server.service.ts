@@ -12,6 +12,7 @@ import * as tableRepo from '../db/repositories/table.repo';
 import * as orderRepo from '../db/repositories/order.repo';
 import * as settingsRepo from '../db/repositories/settings.repo';
 import * as billingService from './billing.service';
+import * as inventoryService from './inventory.service';
 import { getDb } from '../db/connection';
 import { KOTStatus } from '../../shared/enums';
 import { logger } from '../utils/logger';
@@ -518,6 +519,11 @@ async function handleWaiterApi(
         taxRate: getEffectiveTaxRate(it.taxRate),
       }));
       orderRepo.addItems(orderId, items);
+      try {
+        inventoryService.deductForOrder(orderId);
+      } catch (deductErr) {
+        logger.error('Inventory deduction failed for kitchen addItems:', deductErr, { orderId });
+      }
       autoSendKot(orderId);
       sendJson(res, 200, orderRepo.getById(orderId));
     } catch (err: any) {

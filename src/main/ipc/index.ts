@@ -45,6 +45,7 @@ import { WHATSAPP_FEATURE_ENABLED } from '../../shared/featureFlags';
 import { mergeLayout, BILL_FIELD_DEFS, isFieldVisible } from '../../shared/receipt-layout';
 import { renderBillText, buildSampleBillModel, DEFAULT_BILL_LABELS, ReceiptItemStyle } from '../../shared/receipt-render';
 import * as billingService from '../services/billing.service';
+import * as inventoryService from '../services/inventory.service';
 import * as reportsService from '../services/reports.service';
 import * as kotPrintService from '../services/kot-print.service';
 import { createPrinter, sendRawToPrinter, VIRTUAL_PRINTER_NAME } from '../services/escpos-print.service';
@@ -157,7 +158,16 @@ export function registerAllHandlers(): void {
   handle(ORDERS.getByTable, (tableId: number) => orderRepo.getByTable(tableId));
   handle(ORDERS.getAll, (filters) => orderRepo.getAll(filters));
   handle(ORDERS.updateStatus, (id: number, status, reason?: string, staffId?: number) => { const r = orderRepo.updateStatus(id, status, reason, staffId); cloudSync.scheduleSync(); return r; });
-  handle(ORDERS.addItems, (orderId: number, items) => { const r = orderRepo.addItems(orderId, items); cloudSync.scheduleSync(); return r; });
+  handle(ORDERS.addItems, (orderId: number, items) => {
+    const r = orderRepo.addItems(orderId, items);
+    try {
+      inventoryService.deductForOrder(orderId);
+    } catch (err) {
+      logger.error('Inventory deduction failed for addItems:', err, { orderId });
+    }
+    cloudSync.scheduleSync();
+    return r;
+  });
   handle(ORDERS.removeItem, (_orderId: number, orderItemId: number, reason?: string, staffId?: number) => { const r = orderRepo.removeItem(orderItemId, reason, staffId); cloudSync.scheduleSync(); return r; });
   handle(ORDERS.applyDiscount, (orderId: number, discount: any) => {
     if (discount == null) {
@@ -398,6 +408,13 @@ export function registerAllHandlers(): void {
 
       // Create payment records
       const result = paymentRepo.create(orderId, payments, tip);
+
+      // Ensure all order items have had their recipe stock deducted
+      try {
+        inventoryService.deductForOrder(orderId);
+      } catch (err) {
+        logger.error('Inventory deduction failed on payment completion:', err, { orderId });
+      }
 
       // Atomically mark order as completed + free table + close KOTs
       orderRepo.updateStatus(orderId, OrderStatus.COMPLETED);

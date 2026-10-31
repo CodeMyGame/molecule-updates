@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { logger } from '../../utils/logger';
 import * as settingsRepo from './settings.repo';
 import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem, OrderKotSummary } from '../../../shared/types/order.types';
-import { OrderStatus, KOTStatus } from '../../../shared/enums';
+import { OrderStatus, KOTStatus, StockTransactionType } from '../../../shared/enums';
 
 function resolveItemTaxRate(itemRate?: number | null): number {
   const raw = settingsRepo.get('default_tax_rate');
@@ -478,6 +478,36 @@ export function updateStatus(
             staffId ?? order.staff_id ?? null,
             order.staff_name ?? null
           );
+
+          // Restock inventory for each cancelled item if it was previously deducted
+          try {
+            const deductedTxns = db.prepare(`
+              SELECT inventory_item_id, quantity
+              FROM stock_transactions
+              WHERE reference_type = 'order_item' AND reference_id = ? AND transaction_type = 'consumption'
+            `).all(item.id) as { inventory_item_id: number; quantity: number }[];
+
+            for (const txn of deductedTxns) {
+              db.prepare(`
+                UPDATE inventory_items
+                SET current_stock = current_stock + ?, updated_at = datetime('now')
+                WHERE id = ?
+              `).run(txn.quantity, txn.inventory_item_id);
+
+              db.prepare(`
+                INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
+                VALUES (?, ?, ?, 'order_item', ?, ?)
+              `).run(
+                txn.inventory_item_id,
+                StockTransactionType.ADJUSTMENT,
+                txn.quantity,
+                item.id,
+                `Restocked from cancelled order #${id} (${voidReason})`,
+              );
+            }
+          } catch (restockErr) {
+            logger.error('Failed to restock cancelled order item:', restockErr, { orderItemId: item.id });
+          }
         }
       }
     } catch (err) {
@@ -647,6 +677,36 @@ export function removeItem(
       );
     } catch (err) {
       logger.error('Failed to log void item on removeItem:', err, { orderId: item.order_id, orderItemId });
+    }
+
+    // Restock any inventory that was auto-deducted for this item
+    try {
+      const deductedTxns = db.prepare(`
+        SELECT inventory_item_id, quantity
+        FROM stock_transactions
+        WHERE reference_type = 'order_item' AND reference_id = ? AND transaction_type = 'consumption'
+      `).all(orderItemId) as { inventory_item_id: number; quantity: number }[];
+
+      for (const txn of deductedTxns) {
+        db.prepare(`
+          UPDATE inventory_items
+          SET current_stock = current_stock + ?, updated_at = datetime('now')
+          WHERE id = ?
+        `).run(txn.quantity, txn.inventory_item_id);
+
+        db.prepare(`
+          INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
+          VALUES (?, ?, ?, 'order_item', ?, ?)
+        `).run(
+          txn.inventory_item_id,
+          StockTransactionType.ADJUSTMENT,
+          txn.quantity,
+          orderItemId,
+          `Restocked from voided item #${orderItemId} (${reason || 'Item Removed'})`,
+        );
+      }
+    } catch (err) {
+      logger.error('Failed to restock inventory on removeItem:', err, { orderItemId });
     }
 
     db.prepare('DELETE FROM kot_items WHERE order_item_id = ?').run(orderItemId);
