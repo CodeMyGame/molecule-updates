@@ -259,7 +259,9 @@ export function gstReport(dateRange: DateRangeFilter): GSTReport[] {
   const rows = db.prepare(`
     SELECT
       oi.tax_rate,
-      SUM(oi.unit_price * oi.quantity) AS taxable_amount,
+      CAST(ROUND(SUM(
+        (oi.unit_price * oi.quantity) * (1.0 - CASE WHEN o.subtotal > 0 THEN CAST(o.discount_amount AS REAL) / o.subtotal ELSE 0.0 END)
+      )) AS INTEGER) AS taxable_amount,
       SUM(oi.tax_amount) AS total_tax,
       COUNT(DISTINCT o.id) AS invoice_count
     FROM order_items oi
