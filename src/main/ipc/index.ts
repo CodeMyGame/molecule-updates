@@ -1028,14 +1028,84 @@ export function registerAllHandlers(): void {
   });
 
   // ---- Purchase Orders ----
+  const mapPurchaseOrderItem = (item: any) => ({
+    id: item.id,
+    poId: item.po_id,
+    inventoryItemId: item.inventory_item_id,
+    itemName: item.item_name,
+    unit: item.unit,
+    quantity: item.quantity,
+    unitCost: item.unit_cost,
+    receivedQty: item.received_qty ?? 0,
+  });
+
+  const getPurchaseOrderById = (db: any, id: number) => {
+    const po = db.prepare(`
+      SELECT po.*, s.name as supplier_name
+      FROM purchase_orders po
+      JOIN suppliers s ON po.supplier_id = s.id
+      WHERE po.id = ?
+    `).get(id) as any;
+
+    if (!po) return null;
+
+    const items = db.prepare(`
+      SELECT poi.*, ii.name as item_name, ii.unit
+      FROM purchase_order_items poi
+      JOIN inventory_items ii ON poi.inventory_item_id = ii.id
+      WHERE poi.po_id = ?
+    `).all(id) as any[];
+
+    return {
+      id: po.id,
+      poNumber: po.po_number,
+      supplierId: po.supplier_id,
+      supplierName: po.supplier_name,
+      status: po.status,
+      totalAmount: po.total_amount,
+      notes: po.notes ?? undefined,
+      orderedAt: po.ordered_at ?? undefined,
+      receivedAt: po.received_at ?? undefined,
+      createdAt: po.created_at,
+      items: items.map(mapPurchaseOrderItem),
+    };
+  };
+
   handle(PURCHASE_ORDERS.getAll, () => {
     const db = getDb();
-    return db.prepare(`
+    const pos = db.prepare(`
       SELECT po.*, s.name as supplier_name
       FROM purchase_orders po
       JOIN suppliers s ON po.supplier_id = s.id
       ORDER BY po.created_at DESC
-    `).all();
+    `).all() as any[];
+
+    const allItems = db.prepare(`
+      SELECT poi.*, ii.name as item_name, ii.unit
+      FROM purchase_order_items poi
+      JOIN inventory_items ii ON poi.inventory_item_id = ii.id
+    `).all() as any[];
+
+    const itemsByPoId = new Map<number, any[]>();
+    for (const it of allItems) {
+      const list = itemsByPoId.get(it.po_id) || [];
+      list.push(mapPurchaseOrderItem(it));
+      itemsByPoId.set(it.po_id, list);
+    }
+
+    return pos.map((po) => ({
+      id: po.id,
+      poNumber: po.po_number,
+      supplierId: po.supplier_id,
+      supplierName: po.supplier_name,
+      status: po.status,
+      totalAmount: po.total_amount,
+      notes: po.notes ?? undefined,
+      orderedAt: po.ordered_at ?? undefined,
+      receivedAt: po.received_at ?? undefined,
+      createdAt: po.created_at,
+      items: itemsByPoId.get(po.id) || [],
+    }));
   });
 
   handle(PURCHASE_ORDERS.create, (data: any) => {
@@ -1043,25 +1113,134 @@ export function registerAllHandlers(): void {
     const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
     const last = db.prepare("SELECT po_number FROM purchase_orders WHERE po_number LIKE ? ORDER BY id DESC LIMIT 1").get(`PO-${today}-%`) as any;
     let seq = 1;
-    if (last) { const parts = last.po_number.split('-'); seq = parseInt(parts[2], 10) + 1; }
+    if (last && last.po_number) {
+      const parts = last.po_number.split('-');
+      if (parts.length >= 3) {
+        const parsed = parseInt(parts[2], 10);
+        if (!isNaN(parsed)) seq = parsed + 1;
+      }
+    }
     const poNumber = `PO-${today}-${String(seq).padStart(3, '0')}`;
 
-    const result = db.prepare(
-      'INSERT INTO purchase_orders (po_number, supplier_id, status, total_amount, notes) VALUES (?, ?, ?, ?, ?)'
-    ).run(poNumber, data.supplierId ?? data.supplier_id, 'draft', data.totalAmount ?? data.total_amount ?? 0, data.notes ?? null);
-    return db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(result.lastInsertRowid);
+    const items: Array<{ inventoryItemId: number; quantity: number; unitCost: number }> =
+      data.items ?? [];
+    const calculatedTotal = items.reduce(
+      (sum, it) => sum + Math.round((Number(it.quantity) || 0) * (Number(it.unitCost) || 0)),
+      0
+    );
+    const totalAmount = data.totalAmount ?? data.total_amount ?? calculatedTotal;
+    const status = data.status || 'ordered';
+
+    const insertPo = db.transaction(() => {
+      const result = db.prepare(
+        `INSERT INTO purchase_orders (po_number, supplier_id, status, total_amount, notes, ordered_at)
+         VALUES (?, ?, ?, ?, ?, datetime('now'))`
+      ).run(poNumber, data.supplierId ?? data.supplier_id, status, totalAmount, data.notes ?? null);
+
+      const poId = Number(result.lastInsertRowid);
+      const insertItemStmt = db.prepare(
+        `INSERT INTO purchase_order_items (po_id, inventory_item_id, quantity, unit_cost, received_qty)
+         VALUES (?, ?, ?, ?, 0)`
+      );
+
+      for (const it of items) {
+        insertItemStmt.run(poId, it.inventoryItemId, it.quantity, it.unitCost);
+      }
+
+      return poId;
+    });
+
+    const newId = insertPo();
+    return getPurchaseOrderById(db, newId);
   });
 
   handle(PURCHASE_ORDERS.update, (id: number, data: any) => {
     const db = getDb();
-    db.prepare('UPDATE purchase_orders SET status = ?, notes = ? WHERE id = ?').run(data.status, data.notes ?? null, id);
-    return db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id);
+    const fields: string[] = [];
+    const values: unknown[] = [];
+
+    if (data.status !== undefined) {
+      fields.push('status = ?');
+      values.push(data.status);
+    }
+    if (data.notes !== undefined) {
+      fields.push('notes = ?');
+      values.push(data.notes ?? null);
+    }
+    if (data.orderedAt !== undefined) {
+      fields.push('ordered_at = ?');
+      values.push(data.orderedAt);
+    }
+
+    if (fields.length > 0) {
+      values.push(id);
+      db.prepare(`UPDATE purchase_orders SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    }
+
+    return getPurchaseOrderById(db, id);
   });
 
-  handle(PURCHASE_ORDERS.receive, (id: number, data: any) => {
+  handle(PURCHASE_ORDERS.receive, (id: number, data?: any) => {
     const db = getDb();
-    db.prepare("UPDATE purchase_orders SET status = 'received', received_at = datetime('now') WHERE id = ?").run(id);
-    return db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id);
+    const po = db.prepare('SELECT * FROM purchase_orders WHERE id = ?').get(id) as any;
+    if (!po) {
+      throw new Error(`Purchase order ${id} not found`);
+    }
+
+    const receiveTx = db.transaction(() => {
+      const existingItems = db.prepare('SELECT * FROM purchase_order_items WHERE po_id = ?').all(id) as any[];
+
+      if (data?.items && Array.isArray(data.items) && data.items.length > 0) {
+        const itemMap = new Map<number, number>();
+        for (const it of data.items) {
+          if (it.poItemId) {
+            itemMap.set(Number(it.poItemId), Math.max(0, Number(it.receivedQty) || 0));
+          }
+        }
+
+        for (const poi of existingItems) {
+          if (itemMap.has(poi.id)) {
+            const newReceived = itemMap.get(poi.id)!;
+            const delta = newReceived - (poi.received_qty || 0);
+
+            db.prepare('UPDATE purchase_order_items SET received_qty = ? WHERE id = ?').run(newReceived, poi.id);
+
+            if (delta > 0) {
+              db.prepare(
+                "UPDATE inventory_items SET current_stock = current_stock + ?, updated_at = datetime('now') WHERE id = ?"
+              ).run(delta, poi.inventory_item_id);
+
+              db.prepare(
+                `INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
+                 VALUES (?, 'purchase', ?, 'purchase_order', ?, ?)`
+              ).run(poi.inventory_item_id, delta, id, `Received via ${po.po_number}`);
+            }
+          }
+        }
+      } else {
+        // Fallback: receive all remaining quantities
+        for (const poi of existingItems) {
+          const delta = poi.quantity - (poi.received_qty || 0);
+          db.prepare('UPDATE purchase_order_items SET received_qty = quantity WHERE id = ?').run(poi.id);
+
+          if (delta > 0) {
+            db.prepare(
+              "UPDATE inventory_items SET current_stock = current_stock + ?, updated_at = datetime('now') WHERE id = ?"
+            ).run(delta, poi.inventory_item_id);
+
+            db.prepare(
+              `INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
+               VALUES (?, 'purchase', ?, 'purchase_order', ?, ?)`
+            ).run(poi.inventory_item_id, delta, id, `Received via ${po.po_number}`);
+          }
+        }
+      }
+
+      db.prepare("UPDATE purchase_orders SET status = 'received', received_at = datetime('now') WHERE id = ?").run(id);
+    });
+
+    receiveTx();
+    return getPurchaseOrderById(db, id);
   });
 
   // ---- Cloud Sync (remote owner dashboard) ----
