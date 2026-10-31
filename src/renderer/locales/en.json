@@ -65,7 +65,10 @@
     "tempItem": "Temp Item",
     "tempItemName": "Item Name",
     "tempItemPrice": "Price",
-    "addTempItem": "Add Temp Item"
+    "addTempItem": "Add Temp Item",
+    "resizeMenuTable": "Drag to resize",
+    "resizeFloorSidebar": "Drag to resize",
+    "resizeCart": "Drag to resize"
   },
   "cart": {
     "empty": "Cart is empty",
@@ -92,7 +95,30 @@
     "notePrefix": "Note: {{value}}",
     "itemSentToKitchen": "Item already sent to kitchen. Ask kitchen to cancel, or void from the order.",
     "kotCount": "({{count}} KOTs)",
-    "flat": "Flat"
+    "flat": "Flat",
+    "addedToNextKot": "Added 1 to new items for next KOT",
+    "disableKotView": "KOT View: ON (Click to show combined list)",
+    "enableKotView": "KOT View: OFF (Click to separate by KOTs)",
+    "kotViewToggle": "KOT View",
+    "cancelOrder": "Cancel Order",
+    "itemCount": "{{count}} items",
+    "newItems": "New Items",
+    "newItemsPending": "New Items (Pending KOT)",
+    "pendingKot": "Order Items (Pending KOT)",
+    "notSentToKitchen": "Not sent to kitchen yet",
+    "unsent": "Unsent",
+    "kotSlip": "KOT Slip",
+    "voidItemTooltip": "Void item (requires reason)",
+    "decreaseQty": "Decrease quantity",
+    "addToNextKotTooltip": "Add 1 more to new items (for next KOT)",
+    "increaseQty": "Increase quantity",
+    "editNote": "Edit cooking note",
+    "voidItem": "Void item",
+    "slipItems": "{{count}} items",
+    "cookingInstructions": "Cooking Instructions & Notes",
+    "quickPresets": "Quick Presets (Click to Add / Remove)",
+    "customInstructions": "Custom Preparation Note",
+    "kotNoteHint": "These notes will be printed on the KOT and displayed on the Kitchen Display System (KDS)."
   },
   "tables": {
     "title": "Table Management",
@@ -144,7 +170,8 @@
     "confirmDeleteTable": "Delete table \"{{name}}\"?",
     "pinnedToast": "Pinned {{name}}",
     "unpinnedToast": "Unpinned {{name}}",
-    "failedToUpdatePin": "Failed to update pin"
+    "failedToUpdatePin": "Failed to update pin",
+    "longHourAlert": "Occupied over 2 hours"
   },
   "kitchen": {
     "title": "Kitchen Display",
@@ -175,7 +202,8 @@
     "kotElapsedHourMin": "{{hours}}h {{mins}}m",
     "orderNumberPrefix": "Order #{{number}}",
     "itemCount_one": "{{count}} item",
-    "itemCount_other": "{{count}} items"
+    "itemCount_other": "{{count}} items",
+    "itemCount": "{{count}} items"
   },
   "waiter": {
     "takeOrder": "Take Order",
@@ -417,7 +445,17 @@
       "ordered": "Ordered",
       "received": "Received",
       "cancelled": "Cancelled"
-    }
+    },
+    "menuItems": "Menu Items",
+    "recipeConfigured": "Recipe Configured",
+    "noRecipe": "No Recipe",
+    "menuPrice": "Menu Price",
+    "recipeCost": "Recipe Cost",
+    "foodCostPercent": "Food Cost %",
+    "cost": "Cost",
+    "noIngredientsConfigured": "No ingredients configured for this recipe",
+    "selectItemForRecipe": "Select a menu item to view or configure its recipe",
+    "notes": "Notes"
   },
   "reports": {
     "orderHistory": "Order History",
@@ -578,7 +616,28 @@
     "to": "to",
     "deleteLabel": "Delete {{label}}",
     "deletePasswordPrompt": "Enter password to confirm deletion. This cannot be undone.",
-    "password": "Password"
+    "password": "Password",
+    "orderCompletedSuccess": "Order completed successfully!",
+    "failedToCompleteOrder": "Failed to complete order",
+    "voidAudit": "Void / Cancelled Items Audit",
+    "cancelledOrders": "Cancelled Orders",
+    "cancelledOrdersDesc": "Orders that were voided or cancelled by staff",
+    "cancelledCountVal": "{{count}} order(s) — {{amount}}",
+    "cancelledValueOnly": "Total Cancelled Value",
+    "cancelledValue": "Cancelled Value",
+    "completeOrder": "Complete Order",
+    "cancellationReason": "Cancellation Reason",
+    "mainOrder": "Main Order",
+    "orderNo": "Order #",
+    "tableOrMode": "Table / Mode",
+    "qty": "Qty",
+    "totalVoidItems": "Total Items Voided",
+    "totalVoidValue": "Total Voided Value",
+    "topVoidReason": "Top Void Reason",
+    "reasonBreakdown": "Void Breakdown by Reason",
+    "searchVoidAudit": "Search by item, order #, table, reason, staff...",
+    "showingEntries": "Showing {{count}} void entries",
+    "noVoidRecords": "No voided or cancelled items recorded for this period."
   },
   "menu": {
     "menuManagement": "Menu Management",
@@ -626,7 +685,9 @@
     "import": "Import",
     "export": "Export",
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
-    "importFailed": "Failed to import menu data. Please check the file format."
+    "importFailed": "Failed to import menu data. Please check the file format.",
+    "importSuccessBulk": "Menu successfully replaced with the uploaded one!",
+    "station": "Station"
   },
   "bill": {
     "preview": "Bill Preview",
@@ -746,7 +807,9 @@
     "whatsappDisconnect": "Disconnect",
     "whatsappConnectFailed": "Failed to connect WhatsApp",
     "whatsappDisconnectFailed": "Failed to disconnect WhatsApp",
-    "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only."
+    "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
+    "updateManualDownloadPrompt": "A new software version is available. Click below to start the download.",
+    "downloadUpdate": "Download Update"
   },
   "language": {
     "title": "Region & language",
@@ -937,7 +1000,8 @@
     "confirmDeleteOffer": "Delete this offer?",
     "whatsappBillSent": "Bill sent via WhatsApp",
     "whatsappBillFailed": "Failed to send bill via WhatsApp",
-    "autoSaveFailed": "Could not save current order"
+    "autoSaveFailed": "Could not save current order",
+    "noFreeTables": "No empty tables available for Dine-In. Please free a table first."
   },
   "settingsPage": {
     "saved": "Saved",
@@ -1222,7 +1286,43 @@
       "grandTotal": "Grand Total",
       "thankYou": "Thank you! Visit again",
       "amount": "Amount"
-    }
+    },
+    "livePreviewTitle": "Live Preview",
+    "livePreviewDesc": "Reflects the selected paper width and print mode",
+    "cloudBackupSuccess": "Cloud backup uploaded to: {{folder}}",
+    "cloudBackupFailed": "Cloud backup failed",
+    "cloudErrWeakPassword": "Password must be at least 6 characters.",
+    "cloudErrEmailInUse": "An account already exists for this email. Uncheck “Create a new account” and just connect.",
+    "cloudErrInvalidEmail": "Please enter a valid email address.",
+    "cloudErrBadCreds": "Incorrect email or password.",
+    "cloudErrNoAccount": "No account found. Check “Create a new account” for first-time setup.",
+    "cloudErrNetwork": "Network error. Check your internet connection.",
+    "cloudErrTooMany": "Too many attempts. Please wait a moment and try again.",
+    "cloudErrNotAllowed": "Email/password sign-in is not enabled for this project.",
+    "cloudConnectFailed": "Connection failed.",
+    "cloudEmailPasswordRequired": "Enter an email and password.",
+    "cloudConnected": "Connected successfully! Your mobile web dashboard is now syncing live.",
+    "cloudDisconnectConfirm": "Stop syncing to your remote mobile dashboard on this device?",
+    "cloudDisconnected": "Disconnected from mobile dashboard sync.",
+    "cloudSyncSuccess": "Dashboard synced successfully.",
+    "cloudSyncFailed": "Sync failed.",
+    "mobileAppDashboardTitle": "Owner Mobile App & Live Web Dashboard",
+    "mobileAppDashboardDesc": "Molecule comes with a companion Web & Mobile Application (PWA) built specifically for restaurant owners and admins. Open it on your smartphone (iPhone or Android) or any web browser anytime, anywhere to watch today",
+    "cloudNotConfigured": "Cloud sync is not configured in this build. Please configure cloud service details and try again.",
+    "cloudEmail": "Owner Email Address",
+    "cloudPassword": "Password",
+    "cloudCreateConnect": "Create Account & Connect Mobile App",
+    "cloudConnect": "Connect Mobile App",
+    "cloudLastSync": "Last synced: {{time}}",
+    "cloudSyncNow": "Sync Now",
+    "cloudDisconnect": "Disconnect",
+    "cloudLastError": "Last error: {{message}}",
+    "cloudSecurityNote": "Only summary totals, table status, and loss prevention alerts are synced. Customer phone numbers and sensitive data never leave this machine.",
+    "mobileAppFeaturesTitle": "All Capabilities & Usages of the Mobile & Web Dashboard",
+    "cloudBackupTitle": "Cloud Backup (Supabase)",
+    "cloudBackupDesc": "Securely backup your database to Supabase cloud storage. Backups are isolated per customer license.",
+    "cloudBackupButton": "Backup to Cloud Now",
+    "lastCloudBackup": "Last cloud backup: {{time}}"
   },
   "common": {
     "save": "Save",
@@ -1274,7 +1374,10 @@
     "tax": "Tax",
     "veg": "Veg",
     "nonVeg": "Non-Veg",
-    "searchPlaceholder": "Search..."
+    "searchPlaceholder": "Search...",
+    "clear": "Clear Note",
+    "clearFilter": "Show All",
+    "copied": "Dashboard URL copied to clipboard!"
   },
   "billingPage": {
     "failedToDelete": "Failed to delete",
@@ -1402,7 +1505,8 @@
     "variationNamePlaceholder": "e.g. Half, Full, Large",
     "addonGroupSummary": "{{count}} addon(s) · Select {{rule}}",
     "comboNamePlaceholder": "e.g. Family Pack, Lunch Special",
-    "individualTotal": "Individual total:"
+    "individualTotal": "Individual total:",
+    "selectedCount": "{{count}} selected"
   },
   "sidebar": {
     "endShiftLogout": "End Shift & Logout",
@@ -1444,5 +1548,24 @@
     "viewCustomers": "View Customers",
     "manageCustomers": "Manage Customers",
     "manageLoyalty": "Manage Loyalty"
+  },
+  "shortcuts": {
+    "title": "POS Keyboard Shortcuts (Cheat Sheet)",
+    "footerHint": "Press Esc or click outside to dismiss.",
+    "searchPlaceholder": "Search shortcuts (e.g. Pay, KOT, F1)...",
+    "noResults": "No matching shortcuts found.",
+    "tooltip": "Keyboard Shortcuts (Press ? or Ctrl+/)",
+    "button": "Shortcuts"
+  },
+  "voidModal": {
+    "title": "Void / Cancellation Reason",
+    "confirmVoid": "Confirm Void",
+    "warningTitle": "Void Audit Requirement",
+    "itemWarning": "This item was already sent to the kitchen. Please provide a mandatory cancellation reason for the audit report.",
+    "orderWarning": "Cancelling this active order will be recorded in the Void Audit Log with the selected reason.",
+    "selectReason": "Select Reason:",
+    "otherReason": "Or Type Custom Explanation:",
+    "customPlaceholder": "e.g., Guest had food allergy, order recreated on table 4...",
+    "cancelOrderTitle": "Cancel Order — Audit Reason"
   }
 }
