@@ -939,11 +939,19 @@ export function registerAllHandlers(): void {
 
   handle(DAY_SESSION.open, (data: any) => {
     const db = getDb();
-    const result = db.prepare(`
-      INSERT INTO day_sessions (opened_by, opening_cash, notes)
-      VALUES (?, ?, ?)
-    `).run(data.openedBy ?? data.staffId ?? 1, data.openingCash ?? 0, data.notes ?? null);
-    const row = db.prepare('SELECT * FROM day_sessions WHERE id = ?').get(result.lastInsertRowid);
+    const openTx = db.transaction(() => {
+      const existing = db.prepare('SELECT id FROM day_sessions WHERE closed_at IS NULL ORDER BY id DESC LIMIT 1').get() as any;
+      if (existing) {
+        throw new Error('A day session is already open. Please close the active session before opening a new one.');
+      }
+      const result = db.prepare(`
+        INSERT INTO day_sessions (opened_by, opening_cash, notes)
+        VALUES (?, ?, ?)
+      `).run(data.openedBy ?? data.staffId ?? 1, data.openingCash ?? 0, data.notes ?? null);
+      return db.prepare('SELECT * FROM day_sessions WHERE id = ?').get(result.lastInsertRowid);
+    });
+
+    const row = openTx();
     cloudSync.scheduleSync();
     return mapDaySession(row);
   });
@@ -958,11 +966,23 @@ export function registerAllHandlers(): void {
     }
     if (!sessionId) throw new Error('No open session to close');
 
-    db.prepare(`
-      UPDATE day_sessions SET closed_by = ?, closing_cash = ?, expected_cash = ?, closed_at = datetime('now'), notes = ?
-      WHERE id = ? AND closed_at IS NULL
-    `).run(data.closedBy ?? data.staffId ?? 1, data.closingCash ?? 0, data.expectedCash ?? 0, data.notes ?? null, sessionId);
-    const row = db.prepare('SELECT * FROM day_sessions WHERE id = ?').get(sessionId);
+    const closeTx = db.transaction(() => {
+      db.prepare(`
+        UPDATE day_sessions SET closed_by = ?, closing_cash = ?, expected_cash = ?, closed_at = datetime('now'), notes = ?
+        WHERE id = ? AND closed_at IS NULL
+      `).run(data.closedBy ?? data.staffId ?? 1, data.closingCash ?? 0, data.expectedCash ?? 0, data.notes ?? null, sessionId);
+
+      // Clean up any earlier orphaned sessions if multiple existed previously
+      db.prepare(`
+        UPDATE day_sessions
+        SET closed_by = ?, closed_at = datetime('now'), notes = COALESCE(notes || ' | ', '') || 'Auto-closed with session #' || ?
+        WHERE closed_at IS NULL AND id != ?
+      `).run(data.closedBy ?? data.staffId ?? 1, sessionId, sessionId);
+
+      return db.prepare('SELECT * FROM day_sessions WHERE id = ?').get(sessionId);
+    });
+
+    const row = closeTx();
     // Day close finalizes cash reconciliation — push live snapshot + archive daily.
     cloudSync.scheduleSync();
     cloudSync.pushDailySnapshot().catch((e) => logger.error('Cloud: daily snapshot failed', e));
