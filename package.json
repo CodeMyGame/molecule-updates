@@ -19,7 +19,9 @@
     "package:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27",
     "release:win": "electron-vite build && electron-builder --win --ia32 -c.electronVersion=22.3.27 --publish always",
     "keygen": "node scripts/keygen.js",
-    "rebuild": "electron-rebuild -f -w better-sqlite3,@grandchef/node-printer"
+    "rebuild": "electron-rebuild -f -w better-sqlite3,@grandchef/node-printer",
+    "test": "node scripts/run-tests.js",
+    "test:happy-flows": "node scripts/run-tests.js"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
