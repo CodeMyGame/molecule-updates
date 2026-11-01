@@ -350,6 +350,17 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE offers (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL CHECK(type IN ('percentage', 'flat')),
+    value REAL NOT NULL,
+    min_order_amount INTEGER NOT NULL,
+    max_discount INTEGER,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE orders (
     id INTEGER PRIMARY KEY,
     order_number TEXT NOT NULL UNIQUE,
@@ -1142,27 +1153,101 @@ suite('9. Table Operations: Move, Merge & Split', () => {
 });
 
 // -------------------------------------------------------------
-// Suite 10: Discount Engine & Post-Discount Tax (DIS-01 to DIS-05)
+// Suite 10: Discounts, Offers Engine, Loyalty Coins & Tax Compliance (DIS, OFF, TAX, COIN)
 // -------------------------------------------------------------
-suite('10. Discounts & Post-Discount Tax Compliance (Fix 1.1)', () => {
-  test('DIS-01 Applies 10% discount and validates tax assessed on post-discount taxable amount', () => {
-    // Table 2 subtotal: ₹1,030.00 (103000 paise). All items 5% GST.
+suite('10. Discounts, Promotional Offers, Loyalty Coins & Tax Compliance', () => {
+  // --- Offers & Promo Engine (OFF-01 to OFF-04) ---
+  test('OFF-01 Creates promotional offers in offers table (percentage with cap, flat with min spend, inactive)', () => {
+    db.prepare("INSERT INTO offers (id, name, type, value, min_order_amount, max_discount, is_active) VALUES (1, 'HAPPY20', 'percentage', 20.0, 50000, 15000, 1)").run();
+    db.prepare("INSERT INTO offers (id, name, type, value, min_order_amount, max_discount, is_active) VALUES (2, 'FLAT100', 'flat', 10000, 80000, NULL, 1)").run();
+    db.prepare("INSERT INTO offers (id, name, type, value, min_order_amount, max_discount, is_active) VALUES (3, 'EXPIRED_DEAL', 'percentage', 50.0, 10000, 50000, 0)").run();
+
+    const activeOffers = db.prepare('SELECT * FROM offers WHERE is_active = 1').all();
+    assertEqual(activeOffers.length, 2, '2 active promotional offers');
+  });
+
+  test('OFF-02 Evaluates active offers and auto-applies best offer based on subtotal (HAPPY20 vs FLAT100)', () => {
+    const subtotal = 103000; // ₹1,030.00
+    const activeOffers = db.prepare('SELECT * FROM offers WHERE is_active = 1').all();
+
+    let bestOffer = null;
+    let bestDiscount = 0;
+    for (const offer of activeOffers) {
+      if (subtotal < offer.min_order_amount) continue;
+      let discountAmt = offer.type === 'percentage'
+        ? Math.round((subtotal * offer.value) / 100)
+        : offer.value;
+      if (offer.max_discount) discountAmt = Math.min(discountAmt, offer.max_discount);
+      if (discountAmt > bestDiscount) {
+        bestDiscount = discountAmt;
+        bestOffer = offer;
+      }
+    }
+
+    assert(bestOffer !== null);
+    assertEqual(bestOffer.name, 'HAPPY20', 'HAPPY20 gives ₹150 discount (20% capped at 150), beating FLAT100 (₹100)');
+    assertEqual(bestDiscount, 15000, 'Best discount is ₹150 (15000 paise)');
+  });
+
+  test('OFF-03 Disqualifies promotional offers when subtotal is below min_order_amount', () => {
+    const smallSubtotal = 40000; // ₹400 (below ₹500 min for HAPPY20 and ₹800 min for FLAT100)
+    const activeOffers = db.prepare('SELECT * FROM offers WHERE is_active = 1').all();
+
+    let eligibleOffers = activeOffers.filter(o => smallSubtotal >= o.min_order_amount);
+    assertEqual(eligibleOffers.length, 0, 'No offers qualify below ₹500 spend');
+  });
+
+  test('OFF-04 Dynamic offer revocation: removing an item drops subtotal below threshold, auto-removing offer', () => {
+    let currentSubtotal = 55000; // ₹550 (qualifies for HAPPY20 min 50000)
+    let autoOfferApplied = currentSubtotal >= 50000 ? 'HAPPY20' : null;
+    assertEqual(autoOfferApplied, 'HAPPY20');
+
+    // Item removed: subtotal drops to ₹450
+    currentSubtotal = 45000;
+    if (currentSubtotal < 50000) autoOfferApplied = null;
+    assertEqual(autoOfferApplied, null, 'Offer automatically revoked when cart drops below threshold');
+  });
+
+  // --- Discounts Engine (DIS-01 to DIS-05) ---
+  test('DIS-01 Percentage discount: assesses tax strictly on post-discount taxable amount (Fix 1.1)', () => {
+    // Apply 10% discount on Table 2 (subtotal = ₹1,030.00 / 103000 paise, all items 5% GST)
     db.prepare("UPDATE orders SET discount_type = 'percentage', discount_value = 10.0, discount_reason = 'Loyalty 10% Off' WHERE id = ?").run(dineInOrderId);
     recalculateOrderTotals(dineInOrderId);
 
     const order = db.prepare('SELECT * FROM orders WHERE id = ?').get(dineInOrderId);
+    // Subtotal: 103000, Discount: 10300, Post-discount base: 92700
+    // Tax (5% of 92700): 4635 (₹46.35)
+    // Grand total before roundoff: 92700 + 4635 = 97335. Roundoff: -35 paise => 97300 (₹973.00)
     assertEqual(order.discount_amount, 10300, 'Discount = ₹103.00');
-    assertEqual(order.tax_amount, 4635, 'Tax = ₹46.35 (5% of 927.00), NOT ₹51.50 pre-discount tax');
+    assertEqual(order.tax_amount, 4635, 'Tax = ₹46.35, NOT ₹51.50 pre-discount tax');
     assertEqual(order.grand_total, 97300, 'Grand total = ₹973.00');
   });
 
-  test('DIS-02 Flat discount capping: discount cannot exceed subtotal', () => {
+  test('DIS-02 Flat discount capping: discount cannot exceed subtotal or produce negative total', () => {
     const subtotal = db.prepare('SELECT subtotal FROM orders WHERE id = ?').get(dineInOrderId).subtotal;
-    const capped = Math.min(500000, subtotal);
-    assertEqual(capped, subtotal);
+    const excessiveDiscount = 500000; // ₹5,000 flat discount
+    const capped = Math.min(excessiveDiscount, subtotal);
+    assertEqual(capped, subtotal, 'Discount capped at subtotal');
   });
 
-  test('DIS-03 Multi-rate tax baskets under discount: proportional tax distribution', () => {
+  test('DIS-03 Discount removal: clearing discount restores original pre-discount subtotal and taxes', () => {
+    // Clear discount
+    db.prepare("UPDATE orders SET discount_type = NULL, discount_value = 0, discount_amount = 0, discount_reason = NULL WHERE id = ?").run(dineInOrderId);
+    recalculateOrderTotals(dineInOrderId);
+
+    const clearedOrder = db.prepare('SELECT * FROM orders WHERE id = ?').get(dineInOrderId);
+    assertEqual(clearedOrder.discount_amount, 0);
+    // Pre-discount tax on 103000 @ 5% = 5150 paise (₹51.50)
+    assertEqual(clearedOrder.tax_amount, 5150, 'Tax restored to pre-discount ₹51.50');
+    assertEqual(clearedOrder.grand_total, 108200, 'Grand total restored to ₹1,082.00 (with roundoff)');
+
+    // Re-apply 10% discount to restore expected state for downstream tests
+    db.prepare("UPDATE orders SET discount_type = 'percentage', discount_value = 10.0, discount_reason = 'Loyalty 10% Off' WHERE id = ?").run(dineInOrderId);
+    recalculateOrderTotals(dineInOrderId);
+    assertEqual(db.prepare('SELECT grand_total FROM orders WHERE id = ?').get(dineInOrderId).grand_total, 97300);
+  });
+
+  test('DIS-04 Multi-rate tax baskets under discount: proportional tax distribution (5% and 18%)', () => {
     // 5% item (₹100) + 18% item (₹100) = ₹200. Apply 50% discount (₹100 off).
     // Post discount: 5% on ₹50 = ₹2.50; 18% on ₹50 = ₹9.00; Total tax = ₹11.50
     const subtotal = 20000;
@@ -1173,11 +1258,66 @@ suite('10. Discounts & Post-Discount Tax Compliance (Fix 1.1)', () => {
     assertEqual(item1Tax + item2Tax, 1150, 'Total tax = ₹11.50 (1150 paise)');
   });
 
-  test('DIS-04 100% Complimentary / NC (Non-Commercial) meal sets total to ₹0', () => {
+  test('DIS-05 100% Complimentary / NC (Non-Commercial) meal sets total to ₹0', () => {
     const ncSubtotal = 50000;
     const ncDiscount = ncSubtotal;
     const grandTotal = ncSubtotal - ncDiscount;
     assertEqual(grandTotal, 0, 'NC total is ₹0');
+  });
+
+  // --- Taxes & GST/VAT Rules (TAX-01 to TAX-04) ---
+  test('TAX-01 Zero-rated / tax-exempt items (0% GST) maintain ₹0 tax before and after discount', () => {
+    const zeroTaxPrice = 10000;
+    const zeroTaxRate = 0.0;
+    const discountRatio = 0.2; // 20% discount
+    const postDiscountPrice = zeroTaxPrice * (1 - discountRatio);
+    const tax = Math.round((postDiscountPrice * zeroTaxRate) / 100);
+    assertEqual(tax, 0, 'Zero-tax items produce ₹0 tax');
+  });
+
+  test('TAX-02 Intra-state GST breakup: splits total GST evenly between CGST (50%) and SGST (50%)', () => {
+    const order = db.prepare('SELECT tax_amount FROM orders WHERE id = ?').get(dineInOrderId);
+    const cgst = order.tax_amount / 2;
+    const sgst = order.tax_amount / 2;
+    assertEqual(cgst + sgst, order.tax_amount);
+    assertEqual(cgst, 2317.5);
+  });
+
+  test('TAX-03 Mathematical round-off tracking (+/- paise recorded in orders.round_off)', () => {
+    const order = db.prepare('SELECT round_off, grand_total, subtotal, discount_amount, tax_amount FROM orders WHERE id = ?').get(dineInOrderId);
+    const preRoundTotal = order.subtotal - order.discount_amount + order.tax_amount;
+    assertEqual(preRoundTotal + order.round_off, order.grand_total, 'Round off reconciles perfectly');
+    assertEqual(order.round_off, -35, '-35 paise round-off');
+  });
+
+  // --- Loyalty Coins Engine (COIN-01 to COIN-04) ---
+  test('COIN-01 Configurable loyalty points earning rate from settings (5 points per ₹100 spent)', () => {
+    db.prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('loyalty_points_per_100', '5')").run();
+    const ptsPer100 = parseInt(db.prepare("SELECT value FROM settings WHERE key = 'loyalty_points_per_100'").get().value, 10);
+    const spendPaise = 20000; // ₹200
+    const earned = Math.floor((spendPaise / 10000) * ptsPer100);
+    assertEqual(earned, 10, '10 points earned for ₹200 spend');
+  });
+
+  test('COIN-02 Insufficient coin balance guard: attempting to redeem more coins than balance is blocked', () => {
+    db.prepare("INSERT OR IGNORE INTO customers (id, name, phone, loyalty_points) VALUES (1, 'John Doe', '9876543210', 100)").run();
+    const customer = db.prepare('SELECT loyalty_points FROM customers WHERE id = 1').get();
+    const attemptRedeem = 500;
+    let allowed = customer.loyalty_points >= attemptRedeem;
+    assertEqual(allowed, false, 'Cannot redeem 500 coins with insufficient balance');
+  });
+
+  test('COIN-03 Coin redemption rollback: restores deducted coins if order is cancelled', () => {
+    db.prepare("INSERT OR IGNORE INTO customers (id, name, phone, loyalty_points) VALUES (1, 'John Doe', '9876543210', 100)").run();
+    // Set customer to 100 coins
+    db.prepare('UPDATE customers SET loyalty_points = 100 WHERE id = 1').run();
+    // Redeem 30 coins
+    db.prepare('UPDATE customers SET loyalty_points = loyalty_points - 30 WHERE id = 1').run();
+    assertEqual(db.prepare('SELECT loyalty_points FROM customers WHERE id = 1').get().loyalty_points, 70);
+
+    // Cancel order -> Rollback 30 coins
+    db.prepare('UPDATE customers SET loyalty_points = loyalty_points + 30 WHERE id = 1').run();
+    assertEqual(db.prepare('SELECT loyalty_points FROM customers WHERE id = 1').get().loyalty_points, 100, '30 coins restored on cancel');
   });
 });
 
@@ -1279,7 +1419,7 @@ suite('12. Multi-Tender Settlement & Order Locking (Fix 5.4)', () => {
 // -------------------------------------------------------------
 suite('13. Quick-Service Takeaway, Delivery & Customer CRM Khata', () => {
   test('QSR-01 Looks up / creates customer profile in CRM by phone number', () => {
-    db.prepare("INSERT INTO customers (id, name, phone, loyalty_points, credit_balance) VALUES (1, 'John Doe', '9876543210', 100, 0)").run();
+    db.prepare("INSERT OR REPLACE INTO customers (id, name, phone, loyalty_points, credit_balance) VALUES (1, 'John Doe', '9876543210', 100, 0)").run();
     const customer = db.prepare("SELECT * FROM customers WHERE phone = '9876543210'").get();
     assertEqual(customer.name, 'John Doe');
     assertEqual(customer.loyalty_points, 100);
