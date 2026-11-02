@@ -558,8 +558,8 @@ export function updateStatus(
     if (order?.table_id) {
       // Only free if no other active orders on the table
       const activeOnTable = db.prepare(
-        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status = ? AND id != ?"
-      ).get(order.table_id, OrderStatus.ACTIVE, id) as any;
+        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status IN (?, ?) AND id != ?"
+      ).get(order.table_id, OrderStatus.ACTIVE, OrderStatus.HOLD, id) as any;
       if (activeOnTable.count === 0) {
         db.prepare("UPDATE tables SET status = 'free' WHERE id = ?").run(order.table_id);
       }
@@ -725,7 +725,7 @@ export function removeItem(
 
     if (!item) return;
 
-    if (item.order_status !== OrderStatus.ACTIVE) {
+    if (item.order_status !== OrderStatus.ACTIVE && item.order_status !== OrderStatus.HOLD) {
       throw new Error(`Cannot remove item #${orderItemId} from order #${item.order_id} because order is ${item.order_status}`);
     }
 
@@ -817,7 +817,7 @@ export function applyDiscount(
   const applyInTransaction = db.transaction(() => {
     const order = db.prepare('SELECT subtotal, status FROM orders WHERE id = ?').get(orderId) as any;
     if (!order) return;
-    if (order.status !== OrderStatus.ACTIVE) {
+    if (order.status !== OrderStatus.ACTIVE && order.status !== OrderStatus.HOLD) {
       throw new Error(`Cannot apply discount to order #${orderId} because its status is '${order.status}'`);
     }
 
@@ -846,7 +846,7 @@ export function clearDiscount(orderId: number): Order | undefined {
   const clearInTransaction = db.transaction(() => {
     const order = db.prepare('SELECT status FROM orders WHERE id = ?').get(orderId) as any;
     if (!order) return;
-    if (order.status !== OrderStatus.ACTIVE) {
+    if (order.status !== OrderStatus.ACTIVE && order.status !== OrderStatus.HOLD) {
       throw new Error(`Cannot clear discount on order #${orderId} because its status is '${order.status}'`);
     }
     db.prepare(`
