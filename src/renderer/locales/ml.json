@@ -140,7 +140,11 @@
     "splitItemsTitle": "വിഭജിച്ച ഇനങ്ങൾ",
     "splitTo": "{{table}}-ലേക്ക് വിഭജിച്ചത്:",
     "itemsSplitNotice": "ബില്ലിലേക്ക് ഇനങ്ങൾ വിഭജിച്ചു",
-    "anotherBill": "മറ്റൊരു ബിൽ"
+    "anotherBill": "മറ്റൊരു ബിൽ",
+    "refreshOrder": "ഓർഡർ പുതുക്കുക",
+    "orderRefreshed": "ഓർഡർ പുതുക്കി",
+    "unhold": "അൺഹോൾഡ് ചെയ്യുക",
+    "onHold": "ഹോൾഡിലാണ്"
   },
   "tables": {
     "title": "ടേബിൾ മാനേജ്മെന്റ്",
@@ -761,7 +765,8 @@
     "note": "കുറിപ്പ്",
     "defaultRestaurantName": "റെസ്റ്റോറന്റ്",
     "coinsRedeemed": "റിഡീം ചെയ്ത കോയിനുകൾ",
-    "coinsEarned": "നേടിയ കോയിനുകൾ"
+    "coinsEarned": "നേടിയ കോയിനുകൾ",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "ക്രമീകരണങ്ങൾ",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "Could not send bill via WhatsApp. Please check your connection.",
     "autoSaveFailed": "നിലവിലെ ഓർഡർ സംരക്ഷിക്കാൻ കഴിഞ്ഞില്ല",
     "noFreeTables": "ഡൈൻ-ഇന്നിനായി ഒഴിവുള്ള ടേബിളുകളൊന്നുമില്ല. ആദ്യം ഒരു ടേബിൾ ഒഴിവാക്കുക.",
-    "kotReprinted": "KOT വിജയകരമായി വീണ്ടും പ്രിന്റ് ചെയ്തു"
+    "kotReprinted": "KOT വിജയകരമായി വീണ്ടും പ്രിന്റ് ചെയ്തു",
+    "orderUnheld": "ഓർഡർ പുനരാരംഭിച്ചു",
+    "unholdOrderFailed": "ഓർഡർ പുനരാരംഭിക്കുന്നതിൽ പരാജയപ്പെട്ടു"
   },
   "settingsPage": {
     "saved": "സംരക്ഷിച്ചു",
@@ -1151,7 +1158,8 @@
         "roundOff": "റൗണ്ട് ഓഫ്",
         "grandTotal": "ആകെ തുക",
         "coins": "ലോയൽറ്റി കോയിനുകൾ",
-        "thankYou": "നന്ദി സന്ദേശം"
+        "thankYou": "നന്ദി സന്ദേശം",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "KOT തലക്കെട്ട്",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "ക്ലൗഡ് ബാക്കപ്പ് (Supabase)",
     "cloudBackupDesc": "നിങ്ങളുടെ ഡാറ്റാബേസ് Supabase ക്ലൗഡിൽ സുരക്ഷിതമായി ബാക്കപ്പ് ചെയ്യുക.",
     "cloudBackupButton": "ഇപ്പോൾ ക്ലൗഡിലേക്ക് ബാക്കപ്പ് ചെയ്യുക",
-    "lastCloudBackup": "അവസാന ക്ലൗഡ് ബാക്കപ്പ്: {{time}}"
+    "lastCloudBackup": "അവസാന ക്ലൗഡ് ബാക്കപ്പ്: {{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "സേവ്",
@@ -1619,5 +1641,13 @@
     "otherReason": "അല്ലെങ്കിൽ ഇഷ്‌ടാനുസൃത വിശദീകരണം നൽകുക:",
     "customPlaceholder": "ഉദാ: അതിഥിക്ക് അലർജിയുണ്ടായിരുന്നു, ടേബിൾ 4-ൽ വീണ്ടും ഓർഡർ നൽകി...",
     "cancelOrderTitle": "ഓർഡർ റദ്ദാക്കുക — കാരണം തിരഞ്ഞെടുക്കുക"
+  },
+  "whatsNew": {
+    "title": "മോളിക്യൂൾ പിഒഎസിൽ പുതിയതെന്ത്",
+    "button": "പുതിയതെന്ത്",
+    "latest": "ഏറ്റവും പുതിയത്",
+    "releaseNotes": "റിലീസുകൾ",
+    "gotIt": "മനസ്സിലായി, ആരംഭിക്കാം!",
+    "explorePos": "പിഒഎസ് എക്സ്പ്ലോർ ചെയ്യുക"
   }
 }

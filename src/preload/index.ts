@@ -154,7 +154,7 @@ const api = {
   },
 
   bill: {
-    printReceipt: (receiptText: string) => ipcRenderer.invoke('bill:printReceipt', receiptText),
+    printReceipt: (receiptText: string, options?: { upiUrl?: string; amount?: number; amountStr?: string; orderNo?: string; upiId?: string; style?: string }) => ipcRenderer.invoke('bill:printReceipt', receiptText, options),
     testPrint: () => ipcRenderer.invoke('bill:testPrint'),
   },
 

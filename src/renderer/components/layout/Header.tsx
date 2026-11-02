@@ -22,6 +22,7 @@ import {
   Package,
   Download,
   RefreshCw,
+  Rocket,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 import toast from 'react-hot-toast';
@@ -29,6 +30,7 @@ import { useBillingStore } from '../../stores/billing.store';
 import { useDaySessionStore } from '../../stores/daySession.store';
 import { useSettings } from '../../hooks/useSettings';
 import { useTourStore } from '../../stores/tour.store';
+import { useWhatsNewStore } from '../../stores/whatsNew.store';
 import { ipc } from '../../lib/ipc';
 import { formatCurrency } from '../../lib/formatters';
 import Modal from '../common/Modal';
@@ -46,6 +48,8 @@ const Header: React.FC = () => {
   const fetchDaySession = useDaySessionStore((s) => s.fetch);
   const { restaurant, fetchRestaurant } = useSettings();
   const openTour = useTourStore((s) => s.openTour);
+  const openWhatsNew = useWhatsNewStore((s) => s.openWhatsNew);
+  const hasUnseenUpdate = useWhatsNewStore((s) => s.hasUnseenUpdate);
   useEffect(() => { void fetchRestaurant(); }, [fetchRestaurant]);
   const restaurantName = restaurant?.name?.trim() || t('header.appName');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -229,6 +233,19 @@ const Header: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-1.5">
+        {/* What's New Button */}
+        <button
+          onClick={() => openWhatsNew()}
+          className="relative flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-indigo-700 bg-indigo-50/90 hover:bg-indigo-100 hover:text-indigo-800 border border-indigo-200/80 transition-all shadow-xs active:scale-95"
+          title={t('whatsNew.button', "What's New")}
+        >
+          <Rocket size={13} className="text-indigo-600" />
+          <span className="hidden md:inline">{t('whatsNew.button', "What's New")}</span>
+          {hasUnseenUpdate && (
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          )}
+        </button>
+
         {/* Quick Tour Button */}
         <button
           data-tour="quick-tour-btn"

@@ -23,6 +23,8 @@ import { cleanupMergedOrders } from './db/migrations/017_cleanup_merged_orders';
 import { addSourceTableToOrderItems } from './db/migrations/018_add_source_table_to_order_items';
 import { addSplitFromOrderId } from './db/migrations/019_add_split_from_order_id';
 import { syncOrderItemsTax } from './db/migrations/020_sync_order_items_tax';
+import { defaultPaperAndFontSize } from './db/migrations/021_default_paper_and_font_size';
+import { addQrStyleSetting } from './db/migrations/022_add_qr_style_setting';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -139,6 +141,8 @@ function initializeDatabase(): void {
       addSourceTableToOrderItems,
       addSplitFromOrderId,
       syncOrderItemsTax,
+      defaultPaperAndFontSize,
+      addQrStyleSetting,
     ]);
 
     // Seed default data

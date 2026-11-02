@@ -1,3 +1,5 @@
+import QRCode from 'qrcode';
+import { generateUpiUrl } from '../../shared/receipt-render';
 import { BrowserWindow } from 'electron';
 import * as orderRepo from '../db/repositories/order.repo';
 import * as paymentRepo from '../db/repositories/payment.repo';
@@ -121,13 +123,13 @@ function computeTaxSlabs(
   return slabs;
 }
 
-function buildBillHtml(
+async function buildBillHtml(
   order: ReturnType<typeof orderRepo.getById>,
   payments: ReturnType<typeof paymentRepo.getByOrder>,
   restaurant: ReturnType<typeof settingsRepo.getRestaurant>,
   labels: BillLabels,
   customer?: { name: string; phone?: string }
-): string {
+): Promise<string> {
   if (!order) throw new Error('Order not found');
 
   let logoDataUri = '';
@@ -201,6 +203,33 @@ function buildBillHtml(
       : customer.phone
     : '';
 
+
+  let qrHtml = '';
+  const isDynamicQrEnabled = settingsRepo.get('dynamic_qr_bill') === 'true';
+  const upiId = (
+    settingsRepo.get('upi_id') ||
+    (restaurant?.phone ? `${restaurant.phone}@upi` : '')
+  ).trim();
+  if (isDynamicQrEnabled && upiId && order.totalAmount > 0) {
+    try {
+      const upiUrl = generateUpiUrl({
+        upiId,
+        payeeName: settingsRepo.get('upi_payee_name') || restaurant?.name,
+        restaurantName: restaurant?.name,
+        amount: order.totalAmount / 100,
+        orderNo: order.orderNumber,
+      });
+      const qrDataUri = await QRCode.toDataURL(upiUrl, { width: 140, margin: 1 });
+      qrHtml = `
+  <div style="text-align: center; margin: 12px 0 6px; padding-top: 10px; border-top: 1px dashed #888;">
+    <div style="font-size: 11px; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 4px;">SCAN & PAY VIA UPI</div>
+    <img src="${qrDataUri}" style="width: 125px; height: 125px; margin: 0 auto; display: block;" />
+  </div>`;
+    } catch (err) {
+      logger.warn('Failed to generate UPI QR for PDF bill:', err);
+    }
+  }
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -209,7 +238,7 @@ function buildBillHtml(
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
-    font-size: ${({ small: '11px', medium: '14px', large: '17px', 'x-large': '22px', 'xx-large': '28px', max: '36px' } as Record<string, string>)[settingsRepo.get('bill_font_size') ?? 'medium'] ?? '14px'};
+    font-size: ${({ small: '11px', medium: '14px', large: '17px', 'x-large': '22px', 'xx-large': '28px', max: '36px' } as Record<string, string>)[settingsRepo.get('bill_font_size') ?? 'small'] ?? '11px'};
     color: #222;
     background: #fff;
     width: 400px;
@@ -278,6 +307,7 @@ function buildBillHtml(
     ${paymentsHtml}
   </div>
 
+  ${qrHtml}
   <div class="footer">
     <div class="thankyou">${escapeHtml(labels.thankYou)}</div>
   </div>
@@ -303,7 +333,7 @@ export async function generate(orderId: number, labels?: Partial<BillLabels>): P
     if (c) customer = { name: c.name, phone: c.phone };
   }
 
-  const html = buildBillHtml(order, payments, restaurant, mergedLabels, customer);
+  const html = await buildBillHtml(order, payments, restaurant, mergedLabels, customer);
 
   const imageBuffer = await new Promise<Buffer>((resolve, reject) => {
     const win = new BrowserWindow({

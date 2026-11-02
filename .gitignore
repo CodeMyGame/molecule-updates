@@ -49,6 +49,9 @@ dist/
 release/
 package/
 
+# Local menu dumps
+menu-*.json
+
 # IDEs and editors
 .idea/
 .vscode/

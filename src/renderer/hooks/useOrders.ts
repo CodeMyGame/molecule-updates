@@ -51,6 +51,7 @@ interface UseOrdersReturn {
   fetchActiveOrders: () => Promise<void>;
   createOrder: () => Promise<Order>;
   holdOrder: () => Promise<void>;
+  unholdOrder: (orderId?: number) => Promise<void>;
   cancelOrder: (orderId: number, reason?: string) => Promise<void>;
   completePayment: (data: PaymentData) => Promise<void>;
   printKot: (orderId?: number, shouldPrint?: boolean) => Promise<void>;
@@ -149,16 +150,68 @@ export function useOrders(): UseOrdersReturn {
       if (!orderId) {
         const order = await createOrder();
         orderId = order.id;
+      } else {
+        // If order already exists, ensure any newly added cart items are saved to DB
+        const { cart, syncedItemCount, syncedQuantities } = billingStore;
+        const deltaItems = cart.slice(0, syncedItemCount).flatMap((item, i) => {
+          const delta = item.quantity - (syncedQuantities[i] ?? item.quantity);
+          if (delta <= 0) return [];
+          return [{
+            menuItemId: item.menuItem.id || null,
+            variationId: item.variation?.id ?? null,
+            addonIds: item.addons.map((a) => a.id),
+            name: item.menuItem.name + (item.variation ? ` (${item.variation.name})` : ''),
+            quantity: delta,
+            unitPrice: item.unitPrice,
+            taxRate: item.menuItem.taxRate,
+            notes: item.notes ?? '',
+          }];
+        });
+
+        const newItems = cart.slice(syncedItemCount).map((item) => ({
+          menuItemId: item.menuItem.id || null,
+          variationId: item.variation?.id ?? null,
+          addonIds: item.addons.map((a) => a.id),
+          name: item.menuItem.name + (item.variation ? ` (${item.variation.name})` : ''),
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          taxRate: item.menuItem.taxRate,
+          notes: item.notes ?? '',
+        }));
+
+        const allItemsToAdd = [...deltaItems, ...newItems];
+        if (allItemsToAdd.length > 0) {
+          await ipc(window.electronAPI.orders.addItems(orderId, allItemsToAdd));
+          billingStore.markItemsSynced();
+        }
       }
 
       await ipc(window.electronAPI.orders.updateStatus(orderId!, 'hold'));
-      billingStore.clearCart();
+      billingStore.setOrderStatus('hold');
+      // Do not clear cart or unselect table — keep order items visible and table selected
       await fetchActiveOrders();
     } catch (err: any) {
       setError(err.message ?? 'Failed to hold order');
       throw err;
     }
   }, [billingStore, createOrder, fetchActiveOrders]);
+
+  const unholdOrder = useCallback(
+    async (orderId?: number) => {
+      try {
+        const targetId = orderId ?? billingStore.currentOrderId;
+        if (!targetId) return;
+
+        await ipc(window.electronAPI.orders.updateStatus(targetId, 'active'));
+        billingStore.setOrderStatus('active');
+        await fetchActiveOrders();
+      } catch (err: any) {
+        setError(err.message ?? 'Failed to resume order');
+        throw err;
+      }
+    },
+    [billingStore, fetchActiveOrders]
+  );
 
   const cancelOrder = useCallback(
     async (orderId: number, reason?: string) => {
@@ -352,6 +405,7 @@ export function useOrders(): UseOrdersReturn {
     fetchActiveOrders,
     createOrder,
     holdOrder,
+    unholdOrder,
     cancelOrder,
     completePayment,
     printKot,

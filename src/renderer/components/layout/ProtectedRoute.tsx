@@ -8,7 +8,9 @@ import Header from './Header';
 import LicenseExpiryBanner from '../license/LicenseExpiryBanner';
 import TaxRegionSettingsSync from '../tax/TaxRegionSettingsSync';
 import QuickTourModal from '../tour/QuickTourModal';
+import WhatsNewModal from '../whats-new/WhatsNewModal';
 import { useTourStore } from '../../stores/tour.store';
+import { useWhatsNewStore } from '../../stores/whatsNew.store';
 import { ipc } from '../../lib/ipc';
 
 const HARD_LOCKOUT_STATES = ['unlicensed', 'invalid', 'expired_hard'];
@@ -16,6 +18,25 @@ const HARD_LOCKOUT_STATES = ['unlicensed', 'invalid', 'expired_hard'];
 const ProtectedRoute: React.FC = () => {
   const { isAuthenticated } = useAuthStore();
   const openTour = useTourStore((s) => s.openTour);
+  const checkWhatsNew = useWhatsNewStore((s) => s.checkAndPrompt);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const triggerWhatsNew = async () => {
+      try {
+        let version = '';
+        if (window.electronAPI?.updater?.getVersion) {
+          version = await ipc<string>(window.electronAPI.updater.getVersion());
+        }
+        setTimeout(() => {
+          checkWhatsNew(version);
+        }, 700);
+      } catch {
+        checkWhatsNew();
+      }
+    };
+    triggerWhatsNew();
+  }, [isAuthenticated, checkWhatsNew]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -76,6 +97,7 @@ const ProtectedRoute: React.FC = () => {
     <div className="flex h-screen overflow-hidden">
       <TaxRegionSettingsSync />
       <QuickTourModal />
+      <WhatsNewModal />
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         {/* License expiry warning banner */}

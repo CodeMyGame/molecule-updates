@@ -140,7 +140,11 @@
     "splitItemsTitle": "分割された品目",
     "splitTo": "{{table}} に分割:",
     "itemsSplitNotice": "伝票に商品を分割",
-    "anotherBill": "別の伝票"
+    "anotherBill": "別の伝票",
+    "refreshOrder": "注文を更新",
+    "orderRefreshed": "注文を更新しました",
+    "unhold": "保留解除",
+    "onHold": "保留中"
   },
   "tables": {
     "title": "テーブル管理",
@@ -761,7 +765,8 @@
     "note": "メモ",
     "defaultRestaurantName": "レストラン",
     "coinsRedeemed": "利用コイン",
-    "coinsEarned": "獲得コイン"
+    "coinsEarned": "獲得コイン",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "設定",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "Could not send bill via WhatsApp. Please check your connection.",
     "autoSaveFailed": "現在の注文を保存できませんでした",
     "noFreeTables": "店内に利用可能な空席がありません。先にテーブルを空けてください。",
-    "kotReprinted": "KOTが正常に再印刷されました"
+    "kotReprinted": "KOTが正常に再印刷されました",
+    "orderUnheld": "注文の保留を解除しました",
+    "unholdOrderFailed": "注文の再開に失敗しました"
   },
   "settingsPage": {
     "saved": "保存しました",
@@ -1151,7 +1158,8 @@
         "roundOff": "端数調整",
         "grandTotal": "合計金額",
         "coins": "ポイント",
-        "thankYou": "お礼メッセージ"
+        "thankYou": "お礼メッセージ",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "KOTタイトル",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "クラウドバックアップ (Supabase)",
     "cloudBackupDesc": "Supabaseクラウドに安全にデータベースをバックアップします。ライセンスごとに分離されています。",
     "cloudBackupButton": "今すぐクラウドにバックアップ",
-    "lastCloudBackup": "最終クラウドバックアップ: {{time}}"
+    "lastCloudBackup": "最終クラウドバックアップ: {{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "保存",
@@ -1619,5 +1641,13 @@
     "otherReason": "またはカスタム理由を入力:",
     "customPlaceholder": "例: アレルギーによる変更、テーブル4で再注文作成...",
     "cancelOrderTitle": "注文キャンセル — 理由を選択"
+  },
+  "whatsNew": {
+    "title": "Molecule POS の新機能",
+    "button": "新機能",
+    "latest": "最新",
+    "releaseNotes": "リリース",
+    "gotIt": "了解、始める！",
+    "explorePos": "POSを見る"
   }
 }

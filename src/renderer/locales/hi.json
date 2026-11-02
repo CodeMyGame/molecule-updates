@@ -140,7 +140,11 @@
     "splitItemsTitle": "विभाजित आइटम",
     "splitTo": "{{table}} में विभाजित:",
     "itemsSplitNotice": "बिल में विभाजित आइटम",
-    "anotherBill": "दूसरा बिल"
+    "anotherBill": "दूसरा बिल",
+    "refreshOrder": "ऑर्डर रीफ़्रेश करें",
+    "orderRefreshed": "ऑर्डर रीफ़्रेश हो गया",
+    "unhold": "अनहोल्ड करें",
+    "onHold": "होल्ड पर"
   },
   "tables": {
     "title": "टेबल प्रबंधन",
@@ -761,7 +765,8 @@
     "note": "नोट",
     "defaultRestaurantName": "रेस्टोरेंट",
     "coinsRedeemed": "रिडीम किए कॉइन",
-    "coinsEarned": "अर्जित कॉइन"
+    "coinsEarned": "अर्जित कॉइन",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "सेटिंग्स",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "व्हाट्सएप बिल नहीं भेजा जा सका।",
     "autoSaveFailed": "वर्तमान ऑर्डर सहेजा नहीं जा सका",
     "noFreeTables": "डाइन-इन के लिए कोई खाली टेबल उपलब्ध नहीं है। कृपया पहले एक टेबल खाली करें।",
-    "kotReprinted": "KOT सफलतापूर्वक पुनः प्रिंट हो गया"
+    "kotReprinted": "KOT सफलतापूर्वक पुनः प्रिंट हो गया",
+    "orderUnheld": "ऑर्डर फिर से चालू किया गया",
+    "unholdOrderFailed": "ऑर्डर फिर से चालू करने में विफल"
   },
   "settingsPage": {
     "saved": "सहेजा गया",
@@ -1151,7 +1158,8 @@
         "roundOff": "राउंड ऑफ",
         "grandTotal": "कुल योग (ग्रैंड टोटल)",
         "coins": "लॉयल्टी कॉइन्स",
-        "thankYou": "धन्यवाद संदेश"
+        "thankYou": "धन्यवाद संदेश",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "KOT शीर्षक",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "क्लाउड बैकअप (Supabase)",
     "cloudBackupDesc": "अपने स्टोर डेटा को लाइसेंस के साथ सुरक्षित रूप से क्लाउड बैकअप करें।",
     "cloudBackupButton": "क्लाउड पर अभी बैकअप लें",
-    "lastCloudBackup": "अंतिम क्लाउड बैकअप: {{time}}"
+    "lastCloudBackup": "अंतिम क्लाउड बैकअप: {{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "सहेजें",
@@ -1619,5 +1641,13 @@
     "otherReason": "या अपना स्पष्टीकरण टाइप करें:",
     "customPlaceholder": "उदा. ग्राहक को एलर्जी थी, टेबल 4 पर दोबारा ऑर्डर बनाया गया...",
     "cancelOrderTitle": "ऑर्डर रद्द करें — कारण चुनें"
+  },
+  "whatsNew": {
+    "title": "मॉलिक्यूल पीओएस में नया क्या है",
+    "button": "नया क्या है",
+    "latest": "नवीनतम",
+    "releaseNotes": "रिलीज़",
+    "gotIt": "समझ गया, शुरू करें!",
+    "explorePos": "पीओएस देखें"
   }
 }

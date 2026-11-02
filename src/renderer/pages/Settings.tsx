@@ -47,6 +47,7 @@ import {
   Gift,
   Share2,
   Sparkles,
+  Rocket,
   CheckCircle2,
   MessageCircle,
   Globe,
@@ -70,6 +71,7 @@ import Modal from '../components/common/Modal';
 import { formatCurrency, formatDateTime } from '../lib/formatters';
 import { useSettings } from '../hooks/useSettings';
 import { useTourStore } from '../stores/tour.store';
+import { useWhatsNewStore } from '../stores/whatsNew.store';
 import { ipc } from '../lib/ipc';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -112,7 +114,9 @@ import {
   computePrintLineWidth,
   fontScale,
   type ReceiptItemStyle,
+  generateUpiUrl,
 } from '../../shared/receipt-render';
+import { renderQrSvg, QR_STYLES, type QrStyle } from '../../shared/qr-render';
 import { useUIStore } from '../stores/ui.store';
 import { useDaySessionStore } from '../stores/daySession.store';
 
@@ -177,6 +181,10 @@ const SETTING_KEYS = [
   'coins_enabled',
   'coin_slabs',
   'show_menu_prices',
+  'dynamic_qr_bill',
+  'upi_id',
+  'upi_payee_name',
+  'qr_style',
 ];
 
 // Stable, locally-buffered input for renaming a receipt field. Edits are held in
@@ -208,6 +216,7 @@ const ReceiptFieldLabelInput: React.FC<{
 
 const Settings: React.FC = () => {
   const openTour = useTourStore((s) => s.openTour);
+  const openWhatsNew = useWhatsNewStore((s) => s.openWhatsNew);
   const licenseStatus = useLicenseStore((s) => s.status);
   const { t, i18n } = useTranslation();
   const CurrencyIcon = useLocaleCurrencyIcon();
@@ -864,7 +873,7 @@ const Settings: React.FC = () => {
     const key = kind === 'bill' ? 'bill_layout' : 'kot_layout';
     const layout: ReceiptLayout = mergeLayout(settings[key], defs);
     const widthMap: Record<string, number> = { '58mm': 32, '72mm': 38, '76mm': 40, '80mm': 42, '112mm': 56 };
-    const W = widthMap[settings.paper_width ?? '80mm'] ?? 42;
+    const W = widthMap[settings.paper_width ?? '58mm'] ?? 32;
 
     const persist = (next: ReceiptLayout) => { void setSetting(key, JSON.stringify(next)); };
     const toggleVisible = (id: string) => persist(layout.map((c) => {
@@ -901,6 +910,7 @@ const Settings: React.FC = () => {
     // The logo prints as an image (not text), so show a mock placeholder in the
     // preview when the logo field is toggled on so the layout is obvious.
     const showLogoPreview = kind === 'bill' && isFieldVisible(layout, 'logo');
+    const showQrPreview = kind === 'bill' && isFieldVisible(layout, 'dynamicQr');
 
     return (
       <div className="border border-gray-200 rounded-lg p-3">
@@ -973,6 +983,14 @@ const Settings: React.FC = () => {
                   </div>
                 )}
                 <pre className="text-xs font-mono text-gray-700 leading-relaxed whitespace-pre inline-block">{previewText}</pre>
+                {showQrPreview && (
+                  <div className="mt-2 flex flex-col items-center text-gray-500">
+                    <div className="w-16 h-16 rounded border border-dashed border-gray-400 bg-white flex flex-col items-center justify-center p-1 text-center shadow-xs">
+                      <QrCode size={24} className="text-gray-700" />
+                    </div>
+                    <span className="text-[8px] uppercase tracking-wider mt-1 text-gray-600 font-semibold">{t('settingsPage.receiptFields.bill.dynamicQr', { defaultValue: 'Dynamic UPI QR' })}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -986,13 +1004,13 @@ const Settings: React.FC = () => {
   // scaling is forced for the preview so its effect is visible in every print
   // mode (not only raster).
   const renderLivePreview = () => {
-    const paperWidth = settings.paper_width ?? '80mm';
+    const paperWidth = settings.paper_width ?? '58mm';
     const printMode = settings.print_mode ?? 'thermal';
     const billLayout = mergeLayout(settings.bill_layout, BILL_FIELD_DEFS);
     const kotLayout = mergeLayout(settings.kot_layout, KOT_FIELD_DEFS);
 
-    const billW = computePrintLineWidth(paperWidth, printMode, settings.bill_font_size, true);
-    const kotW = computePrintLineWidth(paperWidth, printMode, settings.kot_font_size, true);
+    const billW = computePrintLineWidth(paperWidth, printMode, (settings.bill_font_size ?? 'small'), true);
+    const kotW = computePrintLineWidth(paperWidth, printMode, (settings.kot_font_size ?? 'small'), true);
 
     const billLabels: Record<string, string> = {
       phone: t('bill.tel'), gstin: taxTerms.businessTaxId, fssai: taxTerms.foodLicense,
@@ -1015,19 +1033,41 @@ const Settings: React.FC = () => {
     );
 
     // Base monospace cell at 1x; scales with the selected font size.
-    const billFontPx = 7 * fontScale(settings.bill_font_size);
-    const kotFontPx = 7 * fontScale(settings.kot_font_size);
+    const billFontPx = 7 * fontScale((settings.bill_font_size ?? 'small'));
+    const kotFontPx = 7 * fontScale((settings.kot_font_size ?? 'small'));
 
-    const paperCard = (text: string, fontPx: number, title: string) => (
+    const paperCard = (text: string, fontPx: number, title: string, isBill = false) => (
       <div className="flex-1 min-w-0">
         <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-1.5">{title}</p>
         <div className="bg-gray-100 rounded-lg p-3 overflow-x-auto flex justify-center">
-          <pre
-            className="bg-white text-gray-800 font-mono shadow-sm rounded-sm px-2 py-3 whitespace-pre leading-tight inline-block"
-            style={{ fontSize: `${fontPx}px` }}
-          >
-            {text}
-          </pre>
+          <div className="bg-white text-gray-800 font-mono shadow-sm rounded-sm px-2 py-3 inline-block text-center">
+            <pre className="whitespace-pre text-left leading-tight inline-block" style={{ fontSize: `${fontPx}px` }}>
+              {text}
+            </pre>
+            {isBill && settings.dynamic_qr_bill === 'true' && (
+              <div className="mt-2 pt-2 border-t border-dashed border-gray-300 text-center">
+                <div
+                  className="w-16 h-16 mx-auto bg-white p-1 border rounded shadow-xs"
+                  dangerouslySetInnerHTML={{
+                    __html: renderQrSvg(
+                      generateUpiUrl({
+                        upiId: settings.upi_id || 'demo@upi',
+                        payeeName: settings.upi_payee_name || restaurant?.name || 'Cafe',
+                        restaurantName: restaurant?.name || settings.upi_payee_name || 'Cafe',
+                        amount: 315.00,
+                        orderNo: '001',
+                      }),
+                      (settings.qr_style ?? 'square') as QrStyle,
+                      1
+                    ),
+                  }}
+                />
+                <span className="text-[8px] uppercase tracking-wider text-gray-600 block mt-1 font-bold">
+                  UPI QR ({QR_STYLES.find((s) => s.id === (settings.qr_style ?? 'square'))?.name || 'Classic'})
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -1049,7 +1089,7 @@ const Settings: React.FC = () => {
           </span>
         </div>
         <div className="flex flex-col lg:flex-row gap-4">
-          {paperCard(billText, billFontPx, t('settingsPage.receiptFields.billTitle'))}
+          {paperCard(billText, billFontPx, t('settingsPage.receiptFields.billTitle'), true)}
           {paperCard(kotText, kotFontPx, t('settingsPage.receiptFields.kotTitle'))}
         </div>
       </div>
@@ -1268,7 +1308,7 @@ const Settings: React.FC = () => {
                 key={width}
                 onClick={() => handleUpdateSetting('paper_width', width)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  (settings.paper_width ?? '80mm') === width
+                  (settings.paper_width ?? '58mm') === width
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
@@ -1443,7 +1483,7 @@ const Settings: React.FC = () => {
               { key: 'medium', label: t('settingsPage.fontSize.medium'), desc: t('settingsPage.fontSize.twoXH') },
               { key: 'large', label: t('settingsPage.fontSize.large'), desc: '2x' },
             ]).map(({ key, label, desc }) => {
-              const selected = (settings.kot_font_size ?? 'medium') === key;
+              const selected = (settings.kot_font_size ?? 'small') === key;
               return (
                 <button
                   key={key}
@@ -1472,7 +1512,7 @@ const Settings: React.FC = () => {
               { key: 'medium', label: t('settingsPage.fontSize.medium'), desc: t('settingsPage.fontSize.twoXH') },
               { key: 'large', label: t('settingsPage.fontSize.large'), desc: '2x' },
             ]).map(({ key, label, desc }) => {
-              const selected = (settings.bill_font_size ?? 'medium') === key;
+              const selected = (settings.bill_font_size ?? 'small') === key;
               return (
                 <button
                   key={key}
@@ -1532,6 +1572,86 @@ const Settings: React.FC = () => {
               <ToggleLeft size={32} className="text-gray-400" />
             )}
           </button>
+        </div>
+
+
+        {/* Dynamic UPI Payment QR Code */}
+        <div className="p-4 bg-gray-50 rounded-lg lg:col-span-2 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-700">{t('settingsPage.dynamicQrTitle')}</p>
+              <p className="text-xs text-gray-500">{t('settingsPage.dynamicQrDesc')}</p>
+            </div>
+            <button onClick={() => handleToggleSetting('dynamic_qr_bill')}>
+              {settings.dynamic_qr_bill === 'true' ? (
+                <ToggleRight size={32} className="text-blue-600" />
+              ) : (
+                <ToggleLeft size={32} className="text-gray-400" />
+              )}
+            </button>
+          </div>
+
+          {settings.dynamic_qr_bill === 'true' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-gray-200">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  {t('settingsPage.upiIdLabel')}
+                </label>
+                <input
+                  type="text"
+                  value={settings.upi_id ?? ''}
+                  onChange={(e) => handleUpdateSetting('upi_id', e.target.value)}
+                  placeholder={t('settingsPage.upiIdPlaceholder')}
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  {t('settingsPage.upiPayeeNameLabel')}
+                </label>
+                <input
+                  type="text"
+                  value={settings.upi_payee_name ?? ''}
+                  onChange={(e) => handleUpdateSetting('upi_payee_name', e.target.value)}
+                  placeholder={t('settingsPage.upiPayeeNamePlaceholder')}
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="sm:col-span-2 pt-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                  {t('settingsPage.qrStyleLabel', { defaultValue: 'QR Code Shape & Pattern' })}
+                </label>
+                <p className="text-[11px] text-gray-500 mb-2">
+                  {t('settingsPage.qrStyleDesc', { defaultValue: 'Choose the visual pattern and corner shape for the printed UPI QR code' })}
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {QR_STYLES.map((st) => {
+                    const isSelected = (settings.qr_style ?? 'square') === st.id;
+                    return (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => handleUpdateSetting('qr_style', st.id)}
+                        className={`flex flex-col items-center p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                          isSelected
+                            ? 'border-blue-600 bg-blue-50/70 text-blue-900 shadow-sm ring-2 ring-blue-500/30'
+                            : 'border-gray-200 bg-white hover:border-gray-300 text-gray-700 hover:bg-gray-50/50'
+                        }`}
+                      >
+                        <div
+                          className="w-14 h-14 mb-1.5 p-1 bg-white border border-gray-200 rounded shadow-xs flex items-center justify-center overflow-hidden"
+                          dangerouslySetInnerHTML={{ __html: renderQrSvg('upi://pay?pa=demo@upi', st.id, 1) }}
+                        />
+                        <span className="text-xs font-semibold leading-tight">{t(`settingsPage.qrStyles.${st.id}`, { defaultValue: st.name })}</span>
+                        <span className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">{st.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex gap-2 lg:col-span-2">
@@ -3428,17 +3548,26 @@ const Settings: React.FC = () => {
               <p className="text-xs text-gray-500 font-mono mt-0.5">v{appVersion || '...'}</p>
             </div>
           </div>
-          <Button
-            variant="secondary"
-            onClick={handleCheckForUpdates}
-            disabled={updateState === 'checking' || updateState === 'downloading' || updateState === 'ready'}
-            loading={updateState === 'checking'}
-            icon={<RefreshCw size={16} />}
-          >
-            {updateState === 'checking'
-              ? t('settings.checkingUpdates', 'Checking...')
-              : t('settings.checkUpdates', 'Check for Updates')}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => openWhatsNew()}
+              icon={<Rocket size={16} className="text-indigo-600" />}
+            >
+              {t('whatsNew.button', "What's New")}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleCheckForUpdates}
+              disabled={updateState === 'checking' || updateState === 'downloading' || updateState === 'ready'}
+              loading={updateState === 'checking'}
+              icon={<RefreshCw size={16} />}
+            >
+              {updateState === 'checking'
+                ? t('settings.checkingUpdates', 'Checking...')
+                : t('settings.checkUpdates', 'Check for Updates')}
+            </Button>
+          </div>
         </div>
 
         {/* Update Status Details */}

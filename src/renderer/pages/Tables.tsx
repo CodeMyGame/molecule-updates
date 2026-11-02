@@ -343,7 +343,7 @@ const Tables: React.FC = () => {
             splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
             splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
           };
-          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
+          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null);
           billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
           navigate('/billing');
           return;
@@ -422,7 +422,7 @@ const Tables: React.FC = () => {
           splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
           splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
         };
-        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
+        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null);
         billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
       }
     } catch {

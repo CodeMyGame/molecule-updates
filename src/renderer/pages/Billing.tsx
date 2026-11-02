@@ -101,6 +101,7 @@ const Billing: React.FC = () => {
     loading: ordersLoading,
     createOrder,
     holdOrder,
+    unholdOrder,
     cancelOrder,
     printKot,
   } = useOrders();
@@ -589,7 +590,7 @@ const Billing: React.FC = () => {
           splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
           splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
         };
-        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo);
+        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null);
       } else {
         resetForNewTable(tableId);
       }
@@ -1028,12 +1029,23 @@ const Billing: React.FC = () => {
           splitFromOrderId: fullOrder.splitFromOrderId ?? (fullOrder as any).split_from_order_id ?? null,
           splitFromOrderNumber: fullOrder.splitFromOrderNumber ?? (fullOrder as any).split_from_order_number ?? null,
         };
-        loadOrderIntoCart(orderId, tableId, cartItems, cartItems.length, fullOrder.orderType ?? fullOrder.order_type, orderDiscount, fullOrder.notes, fullOrder.kots ?? [], fullOrder.outboundTransfers ?? [], splitInfo);
+        loadOrderIntoCart(orderId, tableId, cartItems, cartItems.length, fullOrder.orderType ?? fullOrder.order_type, orderDiscount, fullOrder.notes, fullOrder.kots ?? [], fullOrder.outboundTransfers ?? [], splitInfo, fullOrder.status, fullOrder.customerId ?? (fullOrder as any).customer_id ?? null);
       }
     } catch {
       toast.error(t('toast.loadOrderFailed'));
     }
   }, [loadOrderIntoCart, setOrderType, t, settings.default_tax_rate, i18n.language]);
+
+  const handleUnholdOrder = useCallback(async () => {
+    if (!currentOrderId) return;
+    try {
+      await unholdOrder(currentOrderId);
+      toast.success(t('toast.orderUnheld', 'Order resumed from hold'));
+      refreshTables();
+    } catch {
+      toast.error(t('toast.unholdOrderFailed', 'Failed to resume order'));
+    }
+  }, [currentOrderId, unholdOrder, refreshTables, t]);
 
   const handleAddToCart = useCallback(
     (item: any, variation?: Variation, addons?: Addon[]) => {
@@ -1297,6 +1309,48 @@ const Billing: React.FC = () => {
     },
     [currentOrderId, createOrder, fetchActiveOrders, clearCart, refreshTables, t, settings.whatsapp_enabled, taxTerms]
   );
+
+  const handleRefreshCartOrder = useCallback(async () => {
+    if (orderType === 'dine_in' && selectedTableId) {
+      await loadTableOrder(selectedTableId);
+    } else if (currentOrderId) {
+      const order = await ipc<any>(window.electronAPI.orders.getById(currentOrderId));
+      if (order) {
+        const cartItems = (order.items || []).map((oi: any) => ({
+          menuItem: {
+            id: oi.menuItemId ?? oi.menu_item_id ?? 0,
+            name: oi.name?.split(' (')[0] ?? oi.name,
+            basePrice: oi.unitPrice ?? oi.unit_price,
+            categoryId: 0,
+            taxRate: resolveOrderItemTaxRateFallback(
+              oi.taxRate ?? oi.tax_rate,
+              settings.default_tax_rate,
+              categories
+            ),
+          },
+          quantity: oi.quantity,
+          unitPrice: oi.unitPrice ?? oi.unit_price,
+          total: oi.total,
+          notes: oi.notes ?? undefined,
+          variation: oi.variationName
+            ? { id: oi.variationId ?? 0, name: oi.variationName, price: oi.unitPrice ?? oi.unit_price }
+            : undefined,
+          addons: (oi.addons || []).map((a: any) => ({
+            id: a.addonId ?? a.addon_id ?? a.id,
+            name: a.name,
+            price: a.price,
+          })),
+          isComplimentary: Boolean(oi.isComplimentary ?? oi.is_complimentary),
+          complimentaryReason: oi.complimentaryReason ?? oi.complimentary_reason,
+          orderItemId: oi.id,
+        }));
+        useBillingStore.getState().setCart(cartItems);
+        useBillingStore.getState().setSyncedItemCount(cartItems.length);
+      }
+    }
+    await fetchActiveOrders();
+    refreshTables();
+  }, [orderType, selectedTableId, currentOrderId, loadTableOrder, categories, settings.default_tax_rate, fetchActiveOrders, refreshTables]);
 
   const selectedTable = tables.find((tb) => tb.id === selectedTableId);
 
@@ -1747,6 +1801,7 @@ const Billing: React.FC = () => {
             currentTableName={tables.find((t) => t.id === selectedTableId)?.name}
             tables={tables}
             onHoldOrder={handleHoldOrder}
+            onUnholdOrder={handleUnholdOrder}
             onKot={handleKot}
             onPrintKot={handlePrintKot}
             onPay={handlePay}
@@ -1755,6 +1810,7 @@ const Billing: React.FC = () => {
             onItemRemoved={refreshTables}
             onTransferOrder={handleOpenCartTransfer}
             onSplitBill={handleOpenCartSplit}
+            onRefresh={handleRefreshCartOrder}
           />
         </div>
       </div>

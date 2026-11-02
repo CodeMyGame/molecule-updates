@@ -140,7 +140,11 @@
     "splitItemsTitle": "Artículos divididos",
     "splitTo": "Dividido en {{table}}:",
     "itemsSplitNotice": "Artículos divididos a la cuenta",
-    "anotherBill": "otra cuenta"
+    "anotherBill": "otra cuenta",
+    "refreshOrder": "Actualizar pedido",
+    "orderRefreshed": "Pedido actualizado",
+    "unhold": "Reanudar",
+    "onHold": "EN ESPERA"
   },
   "tables": {
     "title": "Gestión de mesas",
@@ -761,7 +765,8 @@
     "note": "Nota",
     "defaultRestaurantName": "Restaurante",
     "coinsRedeemed": "Monedas canjeadas",
-    "coinsEarned": "Monedas ganadas"
+    "coinsEarned": "Monedas ganadas",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "Ajustes",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "Could not send bill via WhatsApp. Please check your connection.",
     "autoSaveFailed": "No se pudo guardar el pedido actual",
     "noFreeTables": "No hay mesas libres para consumo en el local. Libere una mesa primero.",
-    "kotReprinted": "KOT reimpreso con éxito"
+    "kotReprinted": "KOT reimpreso con éxito",
+    "orderUnheld": "Pedido reanudado de la espera",
+    "unholdOrderFailed": "Error al reanudar el pedido"
   },
   "settingsPage": {
     "saved": "Guardado",
@@ -1151,7 +1158,8 @@
         "roundOff": "Redondeo",
         "grandTotal": "Total a pagar",
         "coins": "Monedas de fidelidad",
-        "thankYou": "Mensaje de agradecimiento"
+        "thankYou": "Mensaje de agradecimiento",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "Título del KOT",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "Copia de seguridad en la nube (Supabase)",
     "cloudBackupDesc": "Copia de seguridad segura de su base de datos en Supabase. Aislada por licencia.",
     "cloudBackupButton": "Hacer copia en la nube ahora",
-    "lastCloudBackup": "Última copia en la nube: {{time}}"
+    "lastCloudBackup": "Última copia en la nube: {{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "Guardar",
@@ -1619,5 +1641,13 @@
     "otherReason": "O escriba una explicación personalizada:",
     "customPlaceholder": "Ej. El cliente tenía alergia, pedido recreado en mesa 4...",
     "cancelOrderTitle": "Cancelar pedido — Seleccionar motivo"
+  },
+  "whatsNew": {
+    "title": "Novedades en Molecule POS",
+    "button": "Novedades",
+    "latest": "Más reciente",
+    "releaseNotes": "Versiones",
+    "gotIt": "¡Entendido, vamos!",
+    "explorePos": "Explorar POS"
   }
 }

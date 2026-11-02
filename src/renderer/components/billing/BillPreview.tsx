@@ -1,3 +1,4 @@
+import QRCode from 'qrcode';
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Printer } from 'lucide-react';
@@ -11,7 +12,8 @@ import { ipc } from '../../lib/ipc';
 import { useMenuTranslations } from '../../hooks/useMenuTranslations';
 import { useTaxTerminology } from '../../hooks/useTaxTerminology';
 import { mergeLayout, BILL_FIELD_DEFS, getFieldDef, ReceiptLayout, ReceiptFieldConfig, ReceiptFieldDef } from '../../../shared/receipt-layout';
-import { renderBillText, BillModel, ReceiptItemStyle, computePrintLineWidth } from '../../../shared/receipt-render';
+import { renderBillText, BillModel, ReceiptItemStyle, computePrintLineWidth, generateUpiUrl } from '../../../shared/receipt-render';
+import { renderQrDataUri, QrStyle } from '../../../shared/qr-render';
 
 interface BillPreviewProps {
   isOpen: boolean;
@@ -90,6 +92,11 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
   // print-only state — does NOT affect the visual preview
   const [printLineWidth, setPrintLineWidth] = useState(42);
   const [rasterWordWrap, setRasterWordWrap] = useState(false);
+  const [upiId, setUpiId] = useState<string>('');
+  const [upiPayeeName, setUpiPayeeName] = useState<string>('');
+  const [dynamicQrEnabled, setDynamicQrEnabled] = useState<boolean>(false);
+  const [qrStyle, setQrStyle] = useState<QrStyle>('square');
+  const [previewQrDataUrl, setPreviewQrDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -120,6 +127,22 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
       .then((val) => setBillLayout(mergeLayout(val, BILL_FIELD_DEFS)))
       .catch(() => {});
 
+    ipc<string | null>(window.electronAPI.settings.get('dynamic_qr_bill'))
+      .then((val) => setDynamicQrEnabled(val === 'true'))
+      .catch(() => {});
+
+    ipc<string | null>(window.electronAPI.settings.get('upi_id'))
+      .then((val) => { if (val) setUpiId(val.trim()); })
+      .catch(() => {});
+
+    ipc<string | null>(window.electronAPI.settings.get('upi_payee_name'))
+      .then((val) => { if (val) setUpiPayeeName(val.trim()); })
+      .catch(() => {});
+
+    ipc<string | null>(window.electronAPI.settings.get('qr_style'))
+      .then((val) => { if (val) setQrStyle(val as QrStyle); })
+      .catch(() => {});
+
     Promise.all([
       ipc<string | null>(window.electronAPI.settings.get('paper_width')),
       ipc<string | null>(window.electronAPI.settings.get('print_mode')),
@@ -139,6 +162,29 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
   const taxBreakdown = getTaxBreakdown();
   const roundOff = getRoundOff();
   const grandTotal = getGrandTotal();
+
+  const effectiveUpiId = (upiId || (restaurant.phone ? `${restaurant.phone}@upi` : '')).trim();
+  const effectivePayeeName = upiPayeeName || restaurant.name || 'Restaurant';
+
+  useEffect(() => {
+    if (!dynamicQrEnabled || !effectiveUpiId || grandTotal <= 0) {
+      setPreviewQrDataUrl(null);
+      return;
+    }
+    const upiUrl = generateUpiUrl({
+      upiId: effectiveUpiId,
+      payeeName: effectivePayeeName,
+      restaurantName: restaurant.name,
+      amount: grandTotal / 100,
+      orderNo: orderId ? String(orderId).padStart(3, '0') : undefined,
+    });
+    try {
+      const dataUri = renderQrDataUri(upiUrl, qrStyle);
+      setPreviewQrDataUrl(dataUri);
+    } catch {
+      setPreviewQrDataUrl(null);
+    }
+  }, [dynamicQrEnabled, effectiveUpiId, effectivePayeeName, grandTotal, orderId, qrStyle]);
   const now = new Date().toISOString();
 
   const orderTypeLabels: Record<string, string> = {
@@ -340,7 +386,24 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
 
   const handlePrint = async () => {
     try {
-      await ipc(window.electronAPI.bill.printReceipt(buildReceiptText()));
+      const qrUrl = (effectiveUpiId && grandTotal > 0) ? generateUpiUrl({
+        upiId: effectiveUpiId,
+        payeeName: effectivePayeeName,
+        restaurantName: restaurant.name,
+        amount: grandTotal / 100,
+        orderNo: orderId ? String(orderId).padStart(3, '0') : undefined,
+      }) : undefined;
+
+      const qrPayload = (dynamicQrEnabled && qrUrl) ? {
+        upiUrl: qrUrl,
+        amount: grandTotal / 100,
+        amountStr: formatRupees(grandTotal),
+        orderNo: orderId ? String(orderId).padStart(3, '0') : undefined,
+        upiId: effectiveUpiId,
+        style: qrStyle,
+      } : undefined;
+
+      await ipc(window.electronAPI.bill.printReceipt(buildReceiptText(), qrPayload));
     } catch {
       toast.error(t('bill.printerNotAvailable'));
     }
@@ -449,6 +512,27 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
         return model.coins
           ? <>{model.coins.redeemedStr && <Row label={model.labels.coinsRedeemed} value={model.coins.redeemedStr} />}{model.coins.earnedStr && <Row label={model.labels.coinsEarned} value={model.coins.earnedStr} />}</>
           : null;
+      case 'dynamicQr': {
+        if (!dynamicQrEnabled) return null;
+        if (previewQrDataUrl) {
+          return (
+            <div className="py-2.5 text-center border-t border-dashed border-gray-300 my-1">
+              <p className="text-[10px] font-bold text-gray-800 tracking-wider mb-1">
+                {label || t('bill.scanAndPayUpi')}
+              </p>
+              <img src={previewQrDataUrl} alt="UPI QR" className="w-28 h-28 mx-auto" />
+            </div>
+          );
+        }
+        return (
+          <div className="py-2 text-center text-xs text-amber-700 bg-amber-50 rounded border border-amber-200 my-1">
+            <p className="font-semibold text-[11px]">UPI QR is enabled</p>
+            <p className="text-[10px] text-gray-500 mt-0.5">
+              {effectiveUpiId ? 'Loading QR code...' : 'Enter your UPI ID in Settings > Printer Setup'}
+            </p>
+          </div>
+        );
+      }
       case 'thankYou':
         return <p className="text-xs text-gray-400 italic text-center">{label}</p>;
       default:
@@ -574,6 +658,14 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
             <div className="px-5 py-3 border-b border-dashed border-gray-300 space-y-0.5">
               {coinInfo.redeemed > 0 && <Row label={t('bill.coinsRedeemed')} value={`- ${coinInfo.redeemed}`} />}
               {coinInfo.earned > 0 && <Row label={t('bill.coinsEarned')} value={`+ ${coinInfo.earned}`} />}
+            </div>
+          )}
+
+          {/* Dynamic UPI QR Code */}
+          {dynamicQrEnabled && previewQrDataUrl && (
+            <div className="px-5 py-3 border-b border-dashed border-gray-300 text-center bg-gray-50/50">
+              <p className="text-[10px] font-bold text-gray-700 tracking-wider mb-1">{t('bill.scanAndPayUpi')}</p>
+              <img src={previewQrDataUrl} alt="UPI QR" className="w-28 h-28 mx-auto" />
             </div>
           )}
 

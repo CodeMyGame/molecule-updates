@@ -20,6 +20,8 @@ import {
   ArrowRightLeft,
   Merge,
   Split,
+  RotateCw,
+  Play,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBillingStore } from '../../stores/billing.store';
@@ -97,6 +99,7 @@ interface CartPanelProps {
   currentTableName?: string;
   tables?: any[];
   onHoldOrder: () => void;
+  onUnholdOrder?: () => void;
   onKot: () => void;
   onPrintKot: () => void;
   onPay: () => void;
@@ -105,12 +108,14 @@ interface CartPanelProps {
   onItemRemoved?: () => void;
   onTransferOrder?: (orderItemId?: number) => void;
   onSplitBill?: () => void;
+  onRefresh?: () => void | Promise<void>;
 }
 
 const CartPanel: React.FC<CartPanelProps> = ({
   currentTableName,
   tables,
   onHoldOrder,
+  onUnholdOrder,
   onKot,
   onPrintKot,
   onPay,
@@ -119,9 +124,26 @@ const CartPanel: React.FC<CartPanelProps> = ({
   onItemRemoved,
   onTransferOrder,
   onSplitBill,
+  onRefresh,
 }) => {
   const { t, i18n } = useTranslation();
+  const orderStatus = useBillingStore((s) => s.orderStatus);
   const [showOrderMenu, setShowOrderMenu] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      if (onRefresh) {
+        await onRefresh();
+      }
+      toast.success(t('cart.orderRefreshed', 'Order refreshed'), { duration: 1500 });
+    } catch {
+      toast.error(t('cart.refreshFailed', 'Failed to refresh order'));
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 350);
+    }
+  }, [onRefresh, t]);
   const [showTransferTooltip, setShowTransferTooltip] = useState(false);
   const cart = useBillingStore((s) => s.cart);
   const orderNotes = useBillingStore((s) => s.notes);
@@ -624,6 +646,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
               </span>
             )}
           </h2>
+          <div className="flex items-center gap-1.5">
             <Tooltip
               text={
                 showKotSeparators
@@ -657,8 +680,23 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 </span>
               </button>
             </Tooltip>
+
+            {onRefresh && (
+              <Tooltip text={t('cart.refreshOrder', 'Refresh Order')} position="bottom" delay={false}>
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center justify-center w-6 h-6 rounded-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-800 hover:border-gray-300 transition-all active:scale-95 disabled:opacity-50"
+                  title={t('cart.refreshOrder', 'Refresh Order')}
+                >
+                  <RotateCw size={11} className={isRefreshing ? 'animate-spin text-blue-600' : ''} />
+                </button>
+              </Tooltip>
+            )}
           </div>
         </div>
+      </div>
 
         {/* Empty state */}
         <div className="flex-1 flex flex-col items-center justify-center text-gray-400 px-4">
@@ -731,6 +769,21 @@ const CartPanel: React.FC<CartPanelProps> = ({
                 </span>
               </button>
             </Tooltip>
+
+            {/* Refresh Order Button */}
+            {onRefresh && (
+              <Tooltip text={t('cart.refreshOrder', 'Refresh Order')} position="bottom" delay={false}>
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center justify-center w-6 h-6 rounded-full border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-800 hover:border-gray-300 transition-all active:scale-95 disabled:opacity-50"
+                  title={t('cart.refreshOrder', 'Refresh Order')}
+                >
+                  <RotateCw size={11} className={isRefreshing ? 'animate-spin text-blue-600' : ''} />
+                </button>
+              </Tooltip>
+            )}
 
             {/* Order options icon near to KOT view */}
             {currentOrderId && (onTransferOrder || onSplitBill) && (
@@ -1412,15 +1465,28 @@ const CartPanel: React.FC<CartPanelProps> = ({
       {/* Action buttons */}
       <div data-tour="cart-actions" className="px-3 py-1.5 border-t border-gray-200 flex-shrink-0">
         <div className="grid grid-cols-3 gap-1.5 mb-1.5">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Pause size={13} />}
-            onClick={onHoldOrder}
-            fullWidth
-          >
-            {t('cart.hold')}
-          </Button>
+          {orderStatus === 'hold' ? (
+            <Button
+              variant="warning"
+              size="sm"
+              icon={<Play size={13} />}
+              onClick={onUnholdOrder}
+              fullWidth
+              className="bg-amber-500 hover:bg-amber-600 text-white font-medium"
+            >
+              {t('cart.unhold', 'Unhold')}
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Pause size={13} />}
+              onClick={onHoldOrder}
+              fullWidth
+            >
+              {t('cart.hold')}
+            </Button>
+          )}
           <Button
             variant="secondary"
             size="sm"

@@ -140,7 +140,11 @@
     "splitItemsTitle": "విభజించబడిన వస్తువులు",
     "splitTo": "{{table}} కి విభజించబడింది:",
     "itemsSplitNotice": "బిల్లుకు అంశాలు విభజించబడ్డాయి",
-    "anotherBill": "మరొక బిల్"
+    "anotherBill": "మరొక బిల్",
+    "refreshOrder": "ఆర్డర్‌ని రిఫ్రెష్ చేయండి",
+    "orderRefreshed": "ఆర్డర్ రిఫ్రెష్ చేయబడింది",
+    "unhold": "అన్‌హోల్డ్ చేయండి",
+    "onHold": "హోల్డ్‌లో ఉంది"
   },
   "tables": {
     "title": "టేబుల్ నిర్వహణ",
@@ -761,7 +765,8 @@
     "note": "గమనిక",
     "defaultRestaurantName": "రెస్టారెంట్",
     "coinsRedeemed": "రిడీమ్ చేసిన కాయిన్‌లు",
-    "coinsEarned": "సంపాదించిన కాయిన్‌లు"
+    "coinsEarned": "సంపాదించిన కాయిన్‌లు",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "సెట్టింగులు",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "Could not send bill via WhatsApp. Please check your connection.",
     "autoSaveFailed": "ప్రస్తుత ఆర్డర్‌ను సేవ్ చేయలేకపోయింది",
     "noFreeTables": "డైన్-ఇన్ కోసం ఖాళీ టేబుల్‌లు లేవు. దయచేసి ముందుగా ఒక టేబుల్‌ను ఖాళీ చేయండి.",
-    "kotReprinted": "KOT విజయవంతంగా పునర్ముద్రించబడింది"
+    "kotReprinted": "KOT విజయవంతంగా పునర్ముద్రించబడింది",
+    "orderUnheld": "ఆర్డర్ పునఃప్రారంభించబడింది",
+    "unholdOrderFailed": "ఆర్డర్‌ను పునఃప్రారంభించడంలో విఫలమైంది"
   },
   "settingsPage": {
     "saved": "సేవ్ చేయబడింది",
@@ -1151,7 +1158,8 @@
         "roundOff": "రౌండ్ ఆఫ్",
         "grandTotal": "మొత్తం చెల్లింపు",
         "coins": "లాయల్టీ నాణేలు",
-        "thankYou": "ధన్యవాదాల సందేశం"
+        "thankYou": "ధన్యవాదాల సందేశం",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "KOT శీర్షిక",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "క్లౌడ్ బ్యాకప్ (Supabase)",
     "cloudBackupDesc": "మీ డేటాబేస్‌ను Supabase క్లౌడ్‌లో సురక్షితంగా బ్యాకప్ చేయండి.",
     "cloudBackupButton": "ఇప్పుడే క్లౌడ్‌కి బ్యాకప్ చేయండి",
-    "lastCloudBackup": "చివరి క్లౌడ్ బ్యాకప్: {{time}}"
+    "lastCloudBackup": "చివరి క్లౌడ్ బ్యాకప్: {{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "సేవ్",
@@ -1619,5 +1641,13 @@
     "otherReason": "లేదా అనుకూల వివరణను టైప్ చేయండి:",
     "customPlaceholder": "ఉదా. అతిథికి అలర్జీ ఉంది, టేబుల్ 4 లో తిరిగి ఆర్డర్ సృష్టించబడింది...",
     "cancelOrderTitle": "ఆర్డర్ రద్దు చేయండి — కారణం ఎంచుకోండి"
+  },
+  "whatsNew": {
+    "title": "మాలిక్యూల్ POS లో కొత్తది ఏమిటి",
+    "button": "కొత్తవి ఏమిటి",
+    "latest": "తాజాది",
+    "releaseNotes": "విడుదలలు",
+    "gotIt": "అర్థమైంది, వెళ్దాం!",
+    "explorePos": "POS ని అన్వేషించండి"
   }
 }

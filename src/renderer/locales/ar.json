@@ -140,7 +140,11 @@
     "splitItemsTitle": "العناصر المقسمة",
     "splitTo": "مقسم إلى {{table}}:",
     "itemsSplitNotice": "تم تقسيم الأصناف إلى فاتورة",
-    "anotherBill": "فاتورة أخرى"
+    "anotherBill": "فاتورة أخرى",
+    "refreshOrder": "تحديث الطلب",
+    "orderRefreshed": "تم تحديث الطلب",
+    "unhold": "استئناف الطلب",
+    "onHold": "معلّق"
   },
   "tables": {
     "title": "إدارة الطاولات",
@@ -761,7 +765,8 @@
     "note": "ملاحظة",
     "defaultRestaurantName": "المطعم",
     "coinsRedeemed": "النقاط المستبدلة",
-    "coinsEarned": "النقاط المكتسبة"
+    "coinsEarned": "النقاط المكتسبة",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "الإعدادات",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "Could not send bill via WhatsApp. Please check your connection.",
     "autoSaveFailed": "تعذر حفظ الطلب الحالي",
     "noFreeTables": "لا توجد طاولات شاغرة متاحة لتناول الطعام. يرجى إخلاء طاولة أولاً.",
-    "kotReprinted": "تمت إعادة طباعة KOT بنجاح"
+    "kotReprinted": "تمت إعادة طباعة KOT بنجاح",
+    "orderUnheld": "تم استئناف الطلب",
+    "unholdOrderFailed": "فشل في استئناف الطلب"
   },
   "settingsPage": {
     "saved": "تم الحفظ",
@@ -1151,7 +1158,8 @@
         "roundOff": "التقريب",
         "grandTotal": "المجموع الكلي",
         "coins": "نقاط الولاء",
-        "thankYou": "رسالة الشكر"
+        "thankYou": "رسالة الشكر",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "عنوان تذكرة المطبخ",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "النسخ الاحتياطي السحابي (Supabase)",
     "cloudBackupDesc": "نسخ احتياطي آمن لقاعدتك السحابية على Supabase. معزولة حسب ترخيص العميل.",
     "cloudBackupButton": "نسخ احتياطي سحابي الآن",
-    "lastCloudBackup": "آخر نسخ احتياطي سحابي: {{time}}"
+    "lastCloudBackup": "آخر نسخ احتياطي سحابي: {{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "حفظ",
@@ -1619,5 +1641,13 @@
     "otherReason": "أو اكتب توضيحاً مخصصاً:",
     "customPlaceholder": "مثال: حساسية طعام لدى الضيف، تمت إعادة الطلب على طاولة 4...",
     "cancelOrderTitle": "إلغاء الطلب — اختيار السبب"
+  },
+  "whatsNew": {
+    "title": "ما الجديد في Molecule POS",
+    "button": "ما الجديد",
+    "latest": "الأحدث",
+    "releaseNotes": "الإصدارات",
+    "gotIt": "فهمت، لنبدأ!",
+    "explorePos": "استكشف POS"
   }
 }

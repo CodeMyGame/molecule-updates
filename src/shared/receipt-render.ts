@@ -59,15 +59,15 @@ export function computePrintLineWidth(
   fontSize?: string | null,
   forceFontScaling = false,
 ): number {
-  const paper = paperWidth ?? '80mm';
+  const paper = paperWidth ?? '58mm';
   const scaled = (printMode === 'raster' || forceFontScaling) && !!fontSize && fontSize !== 'small';
   if (scaled) {
     const cellBase = paper === '58mm' ? 9 : 14;
     const cellWidth = Math.round(cellBase * fontScale(fontSize));
-    const dots = PAPER_DOTS[paper] ?? 576;
+    const dots = PAPER_DOTS[paper] ?? 384;
     return Math.floor(dots / cellWidth);
   }
-  return BASE_CHAR_WIDTH[paper] ?? 42;
+  return BASE_CHAR_WIDTH[paper] ?? 32;
 }
 
 // ── text helpers ──────────────────────────────────────────────────────────────
@@ -225,6 +225,7 @@ export const DEFAULT_BILL_LABELS: Record<string, string> = {
   grandTotal: 'GRAND TOTAL',
   coinsRedeemed: 'Coins Redeemed',
   coinsEarned: 'Coins Earned',
+  dynamicQr: 'Scan & Pay via UPI',
   thankYou: 'Thank you! Visit again',
 };
 
@@ -348,6 +349,8 @@ function renderBillField(
       if (model.coins.earnedStr) out.push(padLine(model.labels.coinsEarned ?? 'Coins Earned', model.coins.earnedStr, W));
       return out.length ? out : null;
     }
+    case 'dynamicQr':
+      return null; // rendered via QR code image / ESC/POS printQR
     case 'thankYou':
       return ['', centerText(labelFor(cfg, model.labels), W), ''];
     default:
@@ -516,4 +519,40 @@ export function buildSampleKotModel(labels: Record<string, string>, itemStyle: R
     totalItems: '4',
     labels,
   };
+}
+
+
+/** Generate standard UPI intent URL for payment */
+export function generateUpiUrl(params: {
+  upiId: string;
+  payeeName?: string;
+  amount?: number;
+  orderNo?: string | number;
+  restaurantName?: string;
+  note?: string;
+}): string {
+  const upiId = params.upiId.trim();
+  const restName = (params.restaurantName || params.payeeName || '').trim();
+  const name = (params.payeeName || params.restaurantName || 'Restaurant').trim();
+  let url = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(name)}&cu=INR`;
+  if (params.amount && params.amount > 0) {
+    url += `&am=${params.amount.toFixed(2)}`;
+  }
+
+  let tn = '';
+  if (params.note) {
+    tn = params.note;
+  } else if (restName && restName.toLowerCase() !== 'restaurant' && params.orderNo) {
+    tn = `${restName} - Order #${params.orderNo}`;
+  } else if (params.orderNo) {
+    tn = `Order #${params.orderNo}`;
+  } else if (restName && restName.toLowerCase() !== 'restaurant') {
+    tn = restName;
+  }
+
+  if (tn) {
+    const safeTn = tn.length > 50 ? tn.substring(0, 47) + '...' : tn;
+    url += `&tn=${encodeURIComponent(safeTn)}`;
+  }
+  return url;
 }

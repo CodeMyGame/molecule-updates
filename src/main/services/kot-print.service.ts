@@ -78,8 +78,8 @@ const PAPER_PRINT_DOTS: Record<string, [number, number]> = {
 
 /** Base character width derived from the paper_width setting */
 function getBaseCharWidth(): number {
-  const paper = settingsRepo.get('paper_width') ?? '80mm';
-  return PAPER_CHAR_WIDTH[paper] ?? 42;
+  const paper = settingsRepo.get('paper_width') ?? '58mm';
+  return PAPER_CHAR_WIDTH[paper] ?? 32;
 }
 
 /** Width multiplier: how many times wider than normal each font size prints */
@@ -92,15 +92,15 @@ function getWidthMultiplier(size: FontSize): number {
 }
 
 function buildKotEscPos(data: KOTPrintData, style: ItemStyle, fontSize: FontSize): Buffer {
-  const paper = settingsRepo.get('paper_width') ?? '80mm';
-  const baseWidth = PAPER_CHAR_WIDTH[paper] ?? 42;
+  const paper = settingsRepo.get('paper_width') ?? '58mm';
+  const baseWidth = PAPER_CHAR_WIDTH[paper] ?? 32;
   const p = createPrinter(baseWidth);
   const effectiveWidth = Math.floor(baseWidth / getWidthMultiplier(fontSize));
 
   // Ensure Font A, reset left margin to 0, and maximise print area
   p.setTypeFontA();
   p.add(Buffer.from([0x1d, 0x4c, 0x00, 0x00]));
-  const [nL, nH] = PAPER_PRINT_DOTS[paper] ?? [0x40, 0x02];
+  const [nL, nH] = PAPER_PRINT_DOTS[paper] ?? [0x80, 0x01];
   p.add(Buffer.from([0x1d, 0x57, nL, nH]));
 
   const location = data.orderType === 'dine_in' && data.tableName
@@ -194,7 +194,7 @@ function buildKotModel(data: KOTPrintData, style: ItemStyle): KotModel {
   };
 }
 
-function generateKotHtml(data: KOTPrintData, style: ItemStyle, fontSize: FontSize = 'medium', useLayout = false): string {
+function generateKotHtml(data: KOTPrintData, style: ItemStyle, fontSize: FontSize = 'small', useLayout = false): string {
   const W = getBaseCharWidth();
 
   // Raster mode honours the user's KOT field layout (show/hide, reorder, rename).
@@ -363,7 +363,7 @@ export function resolveKotPrinter(station?: string): string | null {
 export async function printKotReceipt(data: KOTPrintData): Promise<void> {
   const savedPrinterName = resolveKotPrinter(data.station);
   const style = (settingsRepo.get('kot_item_style') ?? 'name_qty') as ItemStyle;
-  const fontSize = (settingsRepo.get('kot_font_size') ?? 'medium') as FontSize;
+  const fontSize = (settingsRepo.get('kot_font_size') ?? 'small') as FontSize;
   const printMode = settingsRepo.get('print_mode') ?? 'thermal';
 
   // If customer chose HTML mode, skip ESC/POS entirely

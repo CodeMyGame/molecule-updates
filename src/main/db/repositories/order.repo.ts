@@ -79,17 +79,36 @@ export function create(data: CreateOrderDTO): Order {
     const roundOff = Math.round(grandTotal / 100) * 100 - grandTotal;
 
     const isDineIn = data.orderType === 'dine_in';
-    const effectiveTableId = isDineIn ? (data.tableId ?? null) : null;
-    const tableNameSnapshot = (isDineIn && effectiveTableId)
-      ? ((getTableName.get(effectiveTableId) as { name?: string } | undefined)?.name ?? null)
-      : null;
+    let effectiveTableId: number | null = null;
+    let tableNameSnapshot: string | null = null;
+    if (isDineIn && data.tableId && Number(data.tableId) > 0) {
+      const tbl = getTableName.get(data.tableId) as { name?: string } | undefined;
+      if (tbl) {
+        effectiveTableId = Number(data.tableId);
+        tableNameSnapshot = tbl.name ?? null;
+      }
+    }
+
+    let effectiveCustomerId: number | null = null;
+    if (data.customerId && Number(data.customerId) > 0) {
+      const cust = db.prepare('SELECT id FROM customers WHERE id = ?').get(data.customerId) as any;
+      if (cust) effectiveCustomerId = Number(data.customerId);
+    }
+
+    let effectiveStaffId = data.staffId;
+    const staffRow = db.prepare('SELECT id FROM staff WHERE id = ?').get(effectiveStaffId);
+    if (!staffRow) {
+      const fallbackStaff = db.prepare('SELECT id FROM staff ORDER BY id ASC LIMIT 1').get() as any;
+      if (fallbackStaff) effectiveStaffId = fallbackStaff.id;
+    }
+
     const result = insertOrder.run(
       orderNumber,
       data.orderType,
       effectiveTableId,
       tableNameSnapshot,
-      data.customerId ?? null,
-      data.staffId,
+      effectiveCustomerId,
+      effectiveStaffId,
       OrderStatus.ACTIVE,
       subtotal,
       discountAmount,
@@ -109,11 +128,29 @@ export function create(data: CreateOrderDTO): Order {
       const discountedItemTotal = Math.round(itemTotal * (1 - discountRatio));
       const itemTax = Math.round((discountedItemTotal * item.taxRate) / 100);
 
+      let effectiveMenuItemId: number | null = null;
+      if (item.menuItemId && Number(item.menuItemId) > 0) {
+        const mRow = db.prepare('SELECT id FROM menu_items WHERE id = ?').get(item.menuItemId);
+        if (mRow) effectiveMenuItemId = Number(item.menuItemId);
+      }
+
+      let effectiveComboId: number | null = null;
+      if (item.comboId && Number(item.comboId) > 0) {
+        const cRow = db.prepare('SELECT id FROM combos WHERE id = ?').get(item.comboId);
+        if (cRow) effectiveComboId = Number(item.comboId);
+      }
+
+      let effectiveVariationId: number | null = null;
+      if (item.variationId && Number(item.variationId) > 0) {
+        const vRow = db.prepare('SELECT id FROM item_variations WHERE id = ?').get(item.variationId);
+        if (vRow) effectiveVariationId = Number(item.variationId);
+      }
+
       const itemResult = insertOrderItem.run(
         orderId,
-        item.menuItemId ?? null,
-        item.comboId ?? null,
-        item.variationId ?? null,
+        effectiveMenuItemId,
+        effectiveComboId,
+        effectiveVariationId,
         item.name,
         item.quantity,
         item.unitPrice,
@@ -329,9 +366,9 @@ export function getByTable(tableId: number): (Order & { items: OrderItem[]; kots
     FROM orders o
     LEFT JOIN orders mo ON o.merged_into_order_id = mo.id
     LEFT JOIN orders sfo ON o.split_from_order_id = sfo.id
-    WHERE o.table_id = ? AND o.status = ?
-    ORDER BY o.created_at DESC LIMIT 1
-  `).get(tableId, OrderStatus.ACTIVE) as any;
+    WHERE o.table_id = ? AND o.status IN ('active', 'hold')
+    ORDER BY CASE WHEN o.status = 'active' THEN 0 ELSE 1 END, o.created_at DESC LIMIT 1
+  `).get(tableId) as any;
   if (!row) return undefined;
   const order = mapOrder(row);
   const items = getOrderItems(order.id);
@@ -553,7 +590,7 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
   if (!existingOrder) {
     throw new Error(`Order #${orderId} not found`);
   }
-  if (existingOrder.status !== OrderStatus.ACTIVE) {
+  if (existingOrder.status !== OrderStatus.ACTIVE && existingOrder.status !== OrderStatus.HOLD) {
     throw new Error(`Cannot add items to order #${orderId} because its status is '${existingOrder.status}'`);
   }
 
@@ -588,8 +625,12 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
     let additionalTax = 0;
 
     const orderInfo = getOrderTable.get(orderId) as any;
-    if (!orderInfo || orderInfo.status !== OrderStatus.ACTIVE) {
+    if (!orderInfo || (orderInfo.status !== OrderStatus.ACTIVE && orderInfo.status !== OrderStatus.HOLD)) {
       throw new Error(`Cannot add items to order #${orderId} because its status is '${orderInfo?.status}'`);
+    }
+
+    if (orderInfo.status === OrderStatus.HOLD) {
+      db.prepare("UPDATE orders SET status = 'active', updated_at = datetime('now') WHERE id = ?").run(orderId);
     }
     const tableSnapshot = orderInfo?.current_table_name || orderInfo?.table_name_snapshot || null;
 
@@ -600,11 +641,29 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
       additionalSubtotal += itemTotal;
       additionalTax += itemTax;
 
+      let effectiveMenuItemId: number | null = null;
+      if (item.menuItemId && Number(item.menuItemId) > 0) {
+        const mRow = db.prepare('SELECT id FROM menu_items WHERE id = ?').get(item.menuItemId);
+        if (mRow) effectiveMenuItemId = Number(item.menuItemId);
+      }
+
+      let effectiveComboId: number | null = null;
+      if (item.comboId && Number(item.comboId) > 0) {
+        const cRow = db.prepare('SELECT id FROM combos WHERE id = ?').get(item.comboId);
+        if (cRow) effectiveComboId = Number(item.comboId);
+      }
+
+      let effectiveVariationId: number | null = null;
+      if (item.variationId && Number(item.variationId) > 0) {
+        const vRow = db.prepare('SELECT id FROM item_variations WHERE id = ?').get(item.variationId);
+        if (vRow) effectiveVariationId = Number(item.variationId);
+      }
+
       const result = insertOrderItem.run(
         orderId,
-        item.menuItemId ?? null,
-        item.comboId ?? null,
-        item.variationId ?? null,
+        effectiveMenuItemId,
+        effectiveComboId,
+        effectiveVariationId,
         item.name,
         item.quantity,
         item.unitPrice,

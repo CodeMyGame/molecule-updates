@@ -351,7 +351,7 @@ export function seedDatabase(db: Database.Database): void {
     }
 
     const insertSetting = db.prepare(
-      'INSERT INTO settings (key, value, category) VALUES (?, ?, ?)'
+      'INSERT OR IGNORE INTO settings (key, value, category) VALUES (?, ?, ?)'
     );
     insertSetting.run('tax_inclusive', 'false', 'billing');
     insertSetting.run('default_tax_rate', '0', 'general');
@@ -359,12 +359,16 @@ export function seedDatabase(db: Database.Database): void {
     insertSetting.run('kot_prefix', 'KOT', 'billing');
     insertSetting.run('currency', 'INR', 'general');
     insertSetting.run('print_mode', 'raster', 'billing');
-    insertSetting.run('paper_width', '80mm', 'billing');
+    insertSetting.run('paper_width', '58mm', 'billing');
     insertSetting.run('kot_item_style', 'qty_x_name', 'billing');
-    insertSetting.run('bill_font_size', 'medium', 'billing');
-    insertSetting.run('kot_font_size', 'medium', 'billing');
+    insertSetting.run('bill_font_size', 'small', 'billing');
+    insertSetting.run('kot_font_size', 'small', 'billing');
     insertSetting.run('bill_center_print', 'true', 'billing');
     insertSetting.run('kot_count_mode', 'daily', 'billing');
+    insertSetting.run('dynamic_qr_bill', 'false', 'billing');
+    insertSetting.run('upi_id', '', 'billing');
+    insertSetting.run('upi_payee_name', '', 'billing');
+    insertSetting.run('qr_style', 'square', 'billing');
   });
 
   seed();

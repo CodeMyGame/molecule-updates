@@ -140,7 +140,11 @@
     "splitItemsTitle": "பிரிக்கப்பட்ட உருப்படிகள்",
     "splitTo": "{{table}}-க்கு பிரிக்கப்பட்டது:",
     "itemsSplitNotice": "பில்லுக்கு பிரிக்கப்பட்ட உருப்படிகள்",
-    "anotherBill": "மற்றொரு பில்"
+    "anotherBill": "மற்றொரு பில்",
+    "refreshOrder": "ஆர்டரைப் புதுப்பி",
+    "orderRefreshed": "ஆர்டர் புதுப்பிக்கப்பட்டது",
+    "unhold": "அன்ஹோல்ட் செய்",
+    "onHold": "ஹோல்டில் உள்ளது"
   },
   "tables": {
     "title": "மேசை மேலாண்மை",
@@ -761,7 +765,8 @@
     "note": "குறிப்பு",
     "defaultRestaurantName": "உணவகம்",
     "coinsRedeemed": "மீட்ட காயின்கள்",
-    "coinsEarned": "சம்பாதித்த காயின்கள்"
+    "coinsEarned": "சம்பாதித்த காயின்கள்",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "அமைப்புகள்",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "Could not send bill via WhatsApp. Please check your connection.",
     "autoSaveFailed": "தற்போதைய ஆர்டரைச் சேமிக்க முடியவில்லை",
     "noFreeTables": "டைன்-இன்னிற்கு காலியான மேஜைகள் இல்லை. முதலில் ஒரு மேஜையை விடுவிக்கவும்.",
-    "kotReprinted": "KOT வெற்றிகரமாக மீண்டும் அச்சிடப்பட்டது"
+    "kotReprinted": "KOT வெற்றிகரமாக மீண்டும் அச்சிடப்பட்டது",
+    "orderUnheld": "ஆர்டர் மீண்டும் தொடங்கப்பட்டது",
+    "unholdOrderFailed": "ஆர்டரை மீண்டும் தொடங்குவதில் தோல்வி"
   },
   "settingsPage": {
     "saved": "சேமிக்கப்பட்டது",
@@ -1151,7 +1158,8 @@
         "roundOff": "ரவுண்ட் ஆஃப்",
         "grandTotal": "மொத்தத் தொகை",
         "coins": "லாயல்டி நாணயங்கள்",
-        "thankYou": "நன்றி செய்தி"
+        "thankYou": "நன்றி செய்தி",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "KOT தலைப்பு",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "கிளவுட் காப்புப்பிரதி (Supabase)",
     "cloudBackupDesc": "உங்கள் தரவுத்தளத்தை Supabase கிளவுடில் பாதுகாப்பாக காப்புப் பிரதி எடுக்கவும்.",
     "cloudBackupButton": "இப்போது கிளவுடில் காப்புப் பிரதி எடுக்கவும்",
-    "lastCloudBackup": "கடைசி கிளவுட் காப்புப்பிரதி: {{time}}"
+    "lastCloudBackup": "கடைசி கிளவுட் காப்புப்பிரதி: {{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "சேமி",
@@ -1619,5 +1641,13 @@
     "otherReason": "அல்லது தனிப்பயன் விளக்கத்தைத் தட்டச்சு செய்க:",
     "customPlaceholder": "எ.கா. விருந்தினருக்கு ஒவ்வாமை இருந்தது, மேஜை 4 இல் மீண்டும் ஆர்டர் செய்யப்பட்டது...",
     "cancelOrderTitle": "ஆர்டரை ரத்துசெய் — காரணத்தைத் தேர்ந்தெடு"
+  },
+  "whatsNew": {
+    "title": "மாலிகுல் பிஓஎஸ்ஸில் புதியவை",
+    "button": "புதியவை",
+    "latest": "சமீபத்தியது",
+    "releaseNotes": "வெளியீடுகள்",
+    "gotIt": "புரிந்தது, செல்வோம்!",
+    "explorePos": "பிஓஎஸ் ஆராய்க"
   }
 }

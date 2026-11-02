@@ -54,6 +54,7 @@ export const BILL_FIELD_DEFS: ReceiptFieldDef[] = [
   { id: 'roundOff', section: 'totals', renamable: true },
   { id: 'grandTotal', section: 'grand', core: true, renamable: true },
   { id: 'coins', section: 'coins' },
+  { id: 'dynamicQr', section: 'footer', renamable: true },
   { id: 'thankYou', section: 'footer', renamable: true },
 ];
 

@@ -140,7 +140,11 @@
     "splitItemsTitle": "拆分商品",
     "splitTo": "拆分至 {{table}}:",
     "itemsSplitNotice": "已拆分到账单",
-    "anotherBill": "另一账单"
+    "anotherBill": "另一账单",
+    "refreshOrder": "刷新订单",
+    "orderRefreshed": "订单已刷新",
+    "unhold": "恢复订单",
+    "onHold": "挂单中"
   },
   "tables": {
     "title": "桌位管理",
@@ -761,7 +765,8 @@
     "note": "备注",
     "defaultRestaurantName": "餐厅",
     "coinsRedeemed": "已兑换积分",
-    "coinsEarned": "已获得积分"
+    "coinsEarned": "已获得积分",
+    "scanAndPayUpi": "Scan & Pay via UPI"
   },
   "settings": {
     "title": "设置",
@@ -1050,7 +1055,9 @@
     "whatsappBillFailed": "Could not send bill via WhatsApp. Please check your connection.",
     "autoSaveFailed": "无法保存当前订单",
     "noFreeTables": "没有堂食空桌可用。请先清出一张桌子。",
-    "kotReprinted": "KOT 重打成功"
+    "kotReprinted": "KOT 重打成功",
+    "orderUnheld": "已恢复挂起的订单",
+    "unholdOrderFailed": "恢复订单失败"
   },
   "settingsPage": {
     "saved": "已保存",
@@ -1151,7 +1158,8 @@
         "roundOff": "四舍五入",
         "grandTotal": "总计金额",
         "coins": "会员积分",
-        "thankYou": "致谢寄语"
+        "thankYou": "致谢寄语",
+        "dynamicQr": "Dynamic UPI QR (Scan & Pay)"
       },
       "kot": {
         "title": "后厨单标题",
@@ -1371,7 +1379,21 @@
     "cloudBackupTitle": "云端备份 (Supabase)",
     "cloudBackupDesc": "将您的数据库安全备份至 Supabase 云存储。每个客户许可证的数据相互隔离。",
     "cloudBackupButton": "立即备份至云端",
-    "lastCloudBackup": "上次云端备份：{{time}}"
+    "lastCloudBackup": "上次云端备份：{{time}}",
+    "dynamicQrTitle": "Dynamic UPI Payment QR",
+    "dynamicQrDesc": "Print a dynamic QR code at the bottom of the bill with the exact order total for instant customer payment via UPI (GPay, PhonePe, Paytm, etc.)",
+    "upiIdLabel": "Merchant UPI ID / VPA",
+    "upiIdPlaceholder": "e.g. merchant@okhdfcbank, 9876543210@paytm",
+    "upiPayeeNameLabel": "UPI Payee Name (Optional)",
+    "upiPayeeNamePlaceholder": "Leave blank to use restaurant name",
+    "qrStyleLabel": "QR Code Shape & Pattern",
+    "qrStyleDesc": "Choose the visual pattern and corner shape for the printed UPI QR code",
+    "qrStyles": {
+      "square": "Classic Square",
+      "rounded": "Modern Rounded",
+      "dots": "Circular Dots",
+      "classy": "Smooth Squircle"
+    }
   },
   "common": {
     "save": "保存",
@@ -1619,5 +1641,13 @@
     "otherReason": "或输入自定义原因：",
     "customPlaceholder": "例如：顾客对食物过敏，已在4号桌重新下单...",
     "cancelOrderTitle": "取消订单 — 选择原因"
+  },
+  "whatsNew": {
+    "title": "Molecule POS 新功能",
+    "button": "新功能",
+    "latest": "最新",
+    "releaseNotes": "版本发布",
+    "gotIt": "知道了，出发！",
+    "explorePos": "探索 POS"
   }
 }

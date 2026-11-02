@@ -122,16 +122,57 @@ function extractRasterPreview(data: Buffer): { rgba: Buffer; width: number; heig
 }
 
 /**
+ * Convert a single monochrome ESC/POS raster block to a BMP data URI.
+ */
+function rasterBlockToBmpDataUri(width: number, height: number, bytes: Buffer): string {
+  const widthBytes = width / 8;
+  const rowSize = Math.floor((24 * width + 31) / 32) * 4;
+  const pixelArraySize = rowSize * height;
+  const fileSize = 54 + pixelArraySize;
+  const bmp = Buffer.alloc(fileSize);
+  bmp.write('BM', 0, 'ascii');
+  bmp.writeUInt32LE(fileSize, 2);
+  bmp.writeUInt32LE(0, 6);
+  bmp.writeUInt32LE(54, 10);
+  bmp.writeUInt32LE(40, 14);
+  bmp.writeInt32LE(width, 18);
+  bmp.writeInt32LE(-height, 22);
+  bmp.writeUInt16LE(1, 26);
+  bmp.writeUInt16LE(24, 28);
+  bmp.writeUInt32LE(0, 30);
+  bmp.writeUInt32LE(pixelArraySize, 34);
+  bmp.writeInt32LE(2835, 38);
+  bmp.writeInt32LE(2835, 42);
+  for (let y = 0; y < height; y++) {
+    const rowStart = 54 + y * rowSize;
+    for (let x = 0; x < width; x++) {
+      const byteIdx = y * widthBytes + (x >> 3);
+      const bit = (bytes[byteIdx] >> (7 - (x & 7))) & 1;
+      const v = bit ? 0 : 255;
+      const dst = rowStart + x * 3;
+      bmp[dst] = v;
+      bmp[dst + 1] = v;
+      bmp[dst + 2] = v;
+    }
+  }
+  return `data:image/bmp;base64,${bmp.toString('base64')}`;
+}
+
+/**
  * Show ESC/POS buffer content in a preview window.
  * If the buffer contains raster `GS v 0` blocks (raster print mode), render
  * the actual bitmap. Otherwise strip control codes and show as text.
  */
 function showVirtualPrinterPreview(data: Buffer): Promise<void> {
   const raster = extractRasterPreview(data);
-  if (raster) return showVirtualRasterPreview(raster, data.length);
+  // If it's a pure raster receipt without significant ASCII text, show pure raster preview
+  const asciiCount = data.filter((b) => (b >= 0x41 && b <= 0x5a) || (b >= 0x61 && b <= 0x7a)).length;
+  if (raster && (asciiCount < 20 || raster.height > 400)) {
+    return showVirtualRasterPreview(raster, data.length);
+  }
 
-  // Strip ESC/POS binary commands, keep only printable ASCII + newlines
-  const lines: string[] = [];
+  // Mixed or text-mode: extract printable text and inline any embedded raster images (e.g. QR)
+  const elements: ({ type: 'text'; text: string } | { type: 'image'; dataUri: string; width: number })[] = [];
   let currentLine = '';
   let i = 0;
   while (i < data.length) {
@@ -153,6 +194,28 @@ function showVirtualPrinterPreview(data: Buffer): Promise<void> {
         }
       }
     } else if (byte === 0x1d) {
+      // Check for GS v 0 (raster image block)
+      if (i + 7 < data.length && data[i + 1] === 0x76 && data[i + 2] === 0x30) {
+        if (currentLine) {
+          elements.push({ type: 'text', text: currentLine });
+          currentLine = '';
+        }
+        const xL = data[i + 4];
+        const xH = data[i + 5];
+        const yL = data[i + 6];
+        const yH = data[i + 7];
+        const widthBytes = xL + xH * 256;
+        const height = yL + yH * 256;
+        const width = widthBytes * 8;
+        const dataStart = i + 8;
+        const dataEnd = dataStart + widthBytes * height;
+        if (dataEnd <= data.length) {
+          const bmpUri = rasterBlockToBmpDataUri(width, height, data.subarray(dataStart, dataEnd));
+          elements.push({ type: 'image', dataUri: bmpUri, width });
+          i = dataEnd;
+          continue;
+        }
+      }
       // GS command — skip
       i++;
       if (i < data.length) {
@@ -167,7 +230,7 @@ function showVirtualPrinterPreview(data: Buffer): Promise<void> {
       }
     } else if (byte === 0x0a) {
       // Newline
-      lines.push(currentLine);
+      elements.push({ type: 'text', text: currentLine });
       currentLine = '';
       i++;
     } else if (byte >= 0x20 && byte < 0x7f) {
@@ -177,14 +240,26 @@ function showVirtualPrinterPreview(data: Buffer): Promise<void> {
       i++; // skip other control bytes
     }
   }
-  if (currentLine) lines.push(currentLine);
+  if (currentLine) elements.push({ type: 'text', text: currentLine });
 
-  const receiptText = lines.join('\n');
+  const receiptHtml = elements
+    .map((el) => {
+      if (el.type === 'text') {
+        const safe = el.text.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        return `<div class="line">${safe || '&nbsp;'}</div>`;
+      } else {
+        return `<div class="img-wrap"><img src="${el.dataUri}" style="width:${Math.min(el.width, 150)}px;height:auto;" /></div>`;
+      }
+    })
+    .join('');
+
   const bufferSize = data.length;
 
   const html = `<!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
+<title>Virtual Thermal Printer Preview</title>
 <style>
   body {
     font-family: -apple-system, sans-serif;
@@ -208,13 +283,20 @@ function showVirtualPrinterPreview(data: Buffer): Promise<void> {
     width: 302px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.12);
     border-radius: 2px;
-    white-space: pre;
     font-family: 'Menlo', 'Consolas', 'Monaco', 'Liberation Mono', monospace;
     font-size: 11.5px;
     line-height: 1.6;
     font-weight: 600;
     color: #000;
     letter-spacing: 0.2px;
+  }
+  .receipt .line {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .receipt .img-wrap {
+    text-align: center;
+    margin: 8px 0;
   }
   .meta {
     margin-top: 12px;
@@ -226,8 +308,8 @@ function showVirtualPrinterPreview(data: Buffer): Promise<void> {
 </head>
 <body>
   <div class="label">Virtual Thermal Printer Preview</div>
-  <div class="receipt">${receiptText.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</div>
-  <div class="meta">node-thermal-printer &bull; ESC/POS buffer: ${bufferSize} bytes &bull; ${lines.length} lines</div>
+  <div class="receipt">${receiptHtml}</div>
+  <div class="meta">node-thermal-printer &bull; ESC/POS buffer: ${bufferSize} bytes &bull; ${elements.length} elements</div>
 </body>
 </html>`;
 
@@ -239,6 +321,7 @@ function showVirtualPrinterPreview(data: Buffer): Promise<void> {
       webPreferences: { nodeIntegration: false, contextIsolation: true },
     });
 
+    win.setMenuBarVisibility(false);
     win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
     win.webContents.on('did-finish-load', () => resolve());
     win.webContents.on('did-fail-load', () => {
@@ -375,6 +458,7 @@ function showVirtualRasterPreview(
       title: 'Virtual Thermal Printer — Raster Preview',
       webPreferences: { nodeIntegration: false, contextIsolation: true },
     });
+    win.setMenuBarVisibility(false);
     win.loadFile(htmlPath);
     win.webContents.on('did-finish-load', () => resolve());
     win.webContents.on('did-fail-load', () => {
