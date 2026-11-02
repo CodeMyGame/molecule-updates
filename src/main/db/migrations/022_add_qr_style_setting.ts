@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { Migration } from '../migrator';
+import type { Migration } from './runner';
 
 export const addQrStyleSetting: Migration = {
   version: 22,

@@ -16,10 +16,48 @@ export interface ReleaseEntry {
 
 export const RELEASES: ReleaseEntry[] = [
   {
+    version: '1.1.20',
+    title: "Hold Order Management, QR Bill Upgrades & What's New",
+    date: 'November 2026',
+    badge: 'Latest',
+    summary: 'Seamless hold & unhold billing workflow with table retention, clean high-contrast UPI QR bill printing without clutter, cart auto-refresh, foreign key safeguards, and What\'s New release updates.',
+    highlights: [
+      {
+        title: 'Hold & Unhold Table Billing',
+        description: 'Easily hold orders while keeping tables selected and active items visible in the cart, with a single-tap Unhold button to resume billing anytime.',
+        tag: 'New',
+        icon: 'Zap',
+      },
+      {
+        title: 'Minimalist UPI QR Bill Presentation',
+        description: 'Clean receipt QR code display with centered atom emblem and uncluttered layout, omitting redundant text labels for quick scanning.',
+        tag: 'Improved',
+        icon: 'QrCode',
+      },
+      {
+        title: 'Live Cart Order Refresh',
+        description: 'Quick refresh button beside KOT toggle instantly re-syncs active table items and orders without switching screens.',
+        tag: 'New',
+        icon: 'Sparkles',
+      },
+      {
+        title: 'Foreign Key & Order Robustness',
+        description: 'Defensive validation on custom items, staff references, and customer links protects against SQLite constraint issues during hold and resume.',
+        tag: 'Improved',
+        icon: 'ShieldCheck',
+      },
+      {
+        title: "What's New Release Modal",
+        description: 'In-app notification dialog showcasing release features and enhancements to users right after updating.',
+        tag: 'New',
+        icon: 'Sparkles',
+      },
+    ],
+  },
+  {
     version: '1.1.19',
     title: 'Dynamic UPI QR on Bills & Styled Receipt Printing',
     date: 'November 2026',
-    badge: 'Latest',
     summary: 'Empower your billing counter with dynamic scannable UPI QR codes on thermal and PDF bills, complete with custom QR shapes, Molecule atom branding, and virtual printer previewing.',
     highlights: [
       {
@@ -108,4 +146,4 @@ export const RELEASES: ReleaseEntry[] = [
   },
 ];
 
-export const LATEST_VERSION = RELEASES[0]?.version || '1.1.19';
+export const LATEST_VERSION = RELEASES[0]?.version || '1.1.20';

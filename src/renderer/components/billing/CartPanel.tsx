@@ -1467,12 +1467,12 @@ const CartPanel: React.FC<CartPanelProps> = ({
         <div className="grid grid-cols-3 gap-1.5 mb-1.5">
           {orderStatus === 'hold' ? (
             <Button
-              variant="warning"
+              variant="secondary"
               size="sm"
               icon={<Play size={13} />}
               onClick={onUnholdOrder}
               fullWidth
-              className="bg-amber-500 hover:bg-amber-600 text-white font-medium"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-medium border-amber-600"
             >
               {t('cart.unhold', 'Unhold')}
             </Button>

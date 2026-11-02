@@ -1325,15 +1325,16 @@ const Billing: React.FC = () => {
             taxRate: resolveOrderItemTaxRateFallback(
               oi.taxRate ?? oi.tax_rate,
               settings.default_tax_rate,
-              categories
+              i18n.language
             ),
+            isVeg: false,
           },
           quantity: oi.quantity,
           unitPrice: oi.unitPrice ?? oi.unit_price,
-          total: oi.total,
+          total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
           notes: oi.notes ?? undefined,
-          variation: oi.variationName
-            ? { id: oi.variationId ?? 0, name: oi.variationName, price: oi.unitPrice ?? oi.unit_price }
+          variation: oi.variationId
+            ? { id: oi.variationId, name: oi.variationName ?? oi.name?.match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
             : undefined,
           addons: (oi.addons || []).map((a: any) => ({
             id: a.addonId ?? a.addon_id ?? a.id,
@@ -1342,15 +1343,38 @@ const Billing: React.FC = () => {
           })),
           isComplimentary: Boolean(oi.isComplimentary ?? oi.is_complimentary),
           complimentaryReason: oi.complimentaryReason ?? oi.complimentary_reason,
+          sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
           orderItemId: oi.id,
+          kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+          kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+          createdAt: oi.createdAt ?? oi.created_at ?? undefined,
         }));
-        useBillingStore.getState().setCart(cartItems);
-        useBillingStore.getState().setSyncedItemCount(cartItems.length);
+        const orderDiscount = order.discountType
+          ? { type: order.discountType === 'percentage' ? 'percent' : order.discountType, value: order.discountValue ?? 0, reason: order.discountReason }
+          : null;
+        const splitInfo = {
+          splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
+          splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
+        };
+        loadOrderIntoCart(
+          order.id,
+          selectedTableId,
+          cartItems,
+          cartItems.length,
+          order.orderType ?? order.order_type,
+          orderDiscount,
+          order.notes,
+          order.kots ?? [],
+          order.outboundTransfers ?? [],
+          splitInfo,
+          order.status,
+          order.customerId ?? (order as any).customer_id ?? null
+        );
       }
     }
     await fetchActiveOrders();
     refreshTables();
-  }, [orderType, selectedTableId, currentOrderId, loadTableOrder, categories, settings.default_tax_rate, fetchActiveOrders, refreshTables]);
+  }, [orderType, selectedTableId, currentOrderId, loadTableOrder, loadOrderIntoCart, i18n.language, settings.default_tax_rate, fetchActiveOrders, refreshTables]);
 
   const selectedTable = tables.find((tb) => tb.id === selectedTableId);
 

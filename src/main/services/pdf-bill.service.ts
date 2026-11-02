@@ -210,13 +210,13 @@ async function buildBillHtml(
     settingsRepo.get('upi_id') ||
     (restaurant?.phone ? `${restaurant.phone}@upi` : '')
   ).trim();
-  if (isDynamicQrEnabled && upiId && order.totalAmount > 0) {
+  if (isDynamicQrEnabled && upiId && order.grandTotal > 0) {
     try {
       const upiUrl = generateUpiUrl({
         upiId,
         payeeName: settingsRepo.get('upi_payee_name') || restaurant?.name,
         restaurantName: restaurant?.name,
-        amount: order.totalAmount / 100,
+        amount: order.grandTotal / 100,
         orderNo: order.orderNumber,
       });
       const qrDataUri = await QRCode.toDataURL(upiUrl, { width: 140, margin: 1 });

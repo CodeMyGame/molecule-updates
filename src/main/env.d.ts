@@ -7,3 +7,5 @@ interface ImportMetaEnv {
   readonly MAIN_VITE_SUPABASE_KEY?: string;
   readonly MAIN_VITE_SUPABASE_BUCKET?: string;
 }
+
+declare module 'pngjs';
