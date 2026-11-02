@@ -25,7 +25,6 @@ import {
   ArrowDownAZ,
   ArrowUpZA,
   HelpCircle,
-  MoreVertical,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import TransferMergeModal from '../components/tables/TransferMergeModal';
@@ -1627,23 +1626,6 @@ const Billing: React.FC = () => {
                     {kotLabel}
                   </span>
                 )}
-                <span
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                    const tblId = (order as any).tableId ?? (order as any).table_id ?? 0;
-                    setTransferMenu({
-                      sourceTableId: tblId,
-                      orderId: order.id,
-                      x: rect.left,
-                      y: rect.bottom + 4,
-                    });
-                  }}
-                  title={t('cart.orderOptions', 'Order Options')}
-                  className="ml-0.5 p-0.5 rounded hover:bg-black/10 transition-colors flex items-center justify-center cursor-pointer"
-                >
-                  <MoreVertical size={11} className="opacity-70 hover:opacity-100" />
-                </span>
               </button>
             );
           })
