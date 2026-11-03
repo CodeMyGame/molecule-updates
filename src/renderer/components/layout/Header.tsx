@@ -9,17 +9,13 @@ import {
   CreditCard,
   Smartphone,
   Bell,
-  TrendingUp,
   RotateCcw,
   Sparkles,
-  ShoppingBag,
   AlertTriangle,
   ChevronRight,
-  Sun,
   Flame,
   ArrowUpRight,
   BarChart2,
-  Package,
   Download,
   RefreshCw,
   Rocket,
@@ -35,6 +31,7 @@ import { ipc } from '../../lib/ipc';
 import { formatCurrency } from '../../lib/formatters';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
+import Tooltip from '../common/Tooltip';
 
 const Header: React.FC = () => {
   const { t } = useTranslation();
@@ -234,33 +231,37 @@ const Header: React.FC = () => {
 
       <div className="flex items-center gap-1.5">
         {/* What's New Button */}
-        <button
-          onClick={() => openWhatsNew()}
-          className="relative flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-indigo-700 bg-indigo-50/90 hover:bg-indigo-100 hover:text-indigo-800 border border-indigo-200/80 transition-all shadow-xs active:scale-95"
-          title={t('whatsNew.button', "What's New")}
-        >
-          <Rocket size={13} className="text-indigo-600" />
-          <span className="hidden md:inline">{t('whatsNew.button', "What's New")}</span>
-          {hasUnseenUpdate && (
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          )}
-        </button>
+        <Tooltip text={t('whatsNew.button', "What's New")} position="bottom">
+          <button
+            onClick={() => openWhatsNew()}
+            className="relative flex items-center justify-center w-7 h-7 rounded-full text-indigo-700 bg-indigo-50/90 hover:bg-indigo-100 hover:text-indigo-800 border border-indigo-200/80 transition-all shadow-xs active:scale-95"
+            title={t('whatsNew.button', "What's New")}
+            aria-label={t('whatsNew.button', "What's New")}
+          >
+            <Rocket size={14} className="text-indigo-600" />
+            {hasUnseenUpdate && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
+            )}
+          </button>
+        </Tooltip>
 
         {/* Quick Tour Button */}
-        <button
-          data-tour="quick-tour-btn"
-          onClick={() => {
-            if (location.pathname !== '/billing') {
-              navigate('/billing');
-            }
-            openTour(0);
-          }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold text-blue-700 bg-blue-50/90 hover:bg-blue-100 hover:text-blue-800 border border-blue-200/80 transition-all shadow-xs active:scale-95"
-          title={t('header.quickTour', 'Quick Tour & Feature Guide')}
-        >
-          <Sparkles size={13} className="text-blue-600 animate-pulse" />
-          <span className="hidden md:inline">{t('header.quickTour', 'Quick Tour')}</span>
-        </button>
+        <Tooltip text={t('header.quickTour', 'Quick Tour')} position="bottom">
+          <button
+            data-tour="quick-tour-btn"
+            onClick={() => {
+              if (location.pathname !== '/billing') {
+                navigate('/billing');
+              }
+              openTour(0);
+            }}
+            className="flex items-center justify-center w-7 h-7 rounded-full text-blue-700 bg-blue-50/90 hover:bg-blue-100 hover:text-blue-800 border border-blue-200/80 transition-all shadow-xs active:scale-95"
+            title={t('header.quickTour', 'Quick Tour')}
+            aria-label={t('header.quickTour', 'Quick Tour')}
+          >
+            <Sparkles size={14} className="text-blue-600 animate-pulse" />
+          </button>
+        </Tooltip>
 
         {/* Daily Heads-Up & Notification Menu */}
         <div className="relative flex items-center">

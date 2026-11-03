@@ -100,7 +100,7 @@
     "addedToNextKot": "1 ajouté au prochain KOT",
     "disableKotView": "Vue KOT : ACTIVÉE (Cliquer pour liste combinée)",
     "enableKotView": "Vue KOT : DÉSACTIVÉE (Cliquer pour séparer par KOT)",
-    "kotViewToggle": "KOT",
+    "kotViewToggle": "Vue KOT",
     "cancelOrder": "Annuler la commande",
     "itemCount": "{{count}} articles",
     "newItems": "Nouveaux articles",

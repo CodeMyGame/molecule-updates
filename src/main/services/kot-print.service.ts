@@ -7,7 +7,6 @@ import {
   KotModel,
   DEFAULT_KOT_LABELS,
   formatKotItemLines,
-  formatKotItemLine,
   wrapText,
 } from '../../shared/receipt-render';
 

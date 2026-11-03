@@ -1,5 +1,8 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 
+const listenerMap = new Map<number, { channel: string; handler: (_event: IpcRendererEvent, ...args: any[]) => void }>();
+let nextListenerId = 1;
+
 const api = {
   menu: {
     getCategories: () => ipcRenderer.invoke('menu:getCategories'),
@@ -60,6 +63,7 @@ const api = {
     updateCustomer: (orderId: number, customerId: number) => ipcRenderer.invoke('orders:updateCustomer', orderId, customerId),
     getByCustomer: (customerId: number, limit?: number) => ipcRenderer.invoke('orders:getByCustomer', customerId, limit ?? 5),
     delete: (orderId: number) => ipcRenderer.invoke('orders:delete', orderId),
+    deleteMany: (orderIds: number[]) => ipcRenderer.invoke('orders:deleteMany', orderIds),
   },
 
   favorites: {
@@ -172,6 +176,8 @@ const api = {
     shiftHandover: (staffId: number, filters?: any) => ipcRenderer.invoke('reports:shiftHandover', staffId, filters),
     busyHours: (filters?: any) => ipcRenderer.invoke('reports:busyHours', filters),
     voidReport: (filters?: any) => ipcRenderer.invoke('reports:voidReport', filters),
+    getTableWiseSales: (dateRange: { startDate: string; endDate: string }) =>
+      ipcRenderer.invoke('reports:tableWiseSales', dateRange),
   },
 
   settings: {
@@ -288,13 +294,28 @@ const api = {
 
   // Event listeners for push events from main process
   on: (channel: string, callback: (...args: any[]) => void) => {
+    const listenerId = nextListenerId++;
     const subscription = (_event: IpcRendererEvent, ...args: any[]) => callback(...args);
     ipcRenderer.on(channel, subscription);
-    return subscription;
+    listenerMap.set(listenerId, { channel, handler: subscription });
+    return listenerId;
   },
 
-  removeListener: (channel: string, callback: (...args: any[]) => void) => {
-    ipcRenderer.removeListener(channel, callback);
+  removeListener: (channel: string, subscriptionOrId: any) => {
+    if (typeof subscriptionOrId === 'number') {
+      const entry = listenerMap.get(subscriptionOrId);
+      if (entry) {
+        ipcRenderer.removeListener(entry.channel, entry.handler);
+        listenerMap.delete(subscriptionOrId);
+        return;
+      }
+    }
+    for (const [id, entry] of listenerMap.entries()) {
+      if (entry.channel === channel) {
+        ipcRenderer.removeListener(entry.channel, entry.handler);
+        listenerMap.delete(id);
+      }
+    }
   },
 };
 

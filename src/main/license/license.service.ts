@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import * as https from 'https';
 import * as settingsRepo from '../db/repositories/settings.repo';
-import { base32Encode, base32Decode } from './base32';
+import { base32Decode } from './base32';
 import type { LicenseStatus } from '../../shared/types/license.types';
 import { FIREBASE_CONFIG, isFirebaseConfigured } from '../services/firebase-config';
 import { logger } from '../utils/logger';

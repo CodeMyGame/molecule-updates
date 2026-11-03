@@ -319,28 +319,11 @@ const Reports: React.FC = () => {
   const fetchTableWiseReport = async () => {
     setTableWiseLoading(true);
     try {
-      const orders = await ipc<any[]>(window.electronAPI.orders.getAll({
+      const data = await ipc<any[]>(window.electronAPI.reports.getTableWiseSales({
         startDate: reports.dateRange.startDate,
         endDate: reports.dateRange.endDate,
       }));
-      // Group by table
-      const tableMap = new Map<string, { tableName: string; totalOrders: number; completedOrders: number; cancelledOrders: number; revenue: number; discount: number; tax: number }>();
-      for (const o of (orders ?? [])) {
-        if (!o.tableId) continue;
-        const key = String(o.tableId);
-        const existing = tableMap.get(key) ?? { tableName: o.tableName || t('reports.tableFallback', { id: o.tableId }), totalOrders: 0, completedOrders: 0, cancelledOrders: 0, revenue: 0, discount: 0, tax: 0 };
-        existing.totalOrders++;
-        if (o.status === 'completed') {
-          existing.completedOrders++;
-          existing.revenue += o.grandTotal ?? 0;
-          existing.discount += o.discountAmount ?? 0;
-          existing.tax += o.taxAmount ?? 0;
-        } else if (o.status === 'cancelled') {
-          existing.cancelledOrders++;
-        }
-        tableMap.set(key, existing);
-      }
-      setTableWiseData(Array.from(tableMap.values()).sort((a, b) => b.revenue - a.revenue));
+      setTableWiseData(data ?? []);
     } catch {
       setTableWiseData([]);
     } finally {
@@ -366,7 +349,7 @@ const Reports: React.FC = () => {
       return;
     }
     try {
-      await Promise.all(deleteModal.orderIds.map((id) => ipc(window.electronAPI.orders.delete(id))));
+      await ipc(window.electronAPI.orders.deleteMany(deleteModal.orderIds));
       toast.success(t('reports.deletedLabel', { label: deleteModal.label }));
       const deletedSet = new Set(deleteModal.orderIds);
       setOrderHistory((prev) => prev.filter((o) => !deletedSet.has(o.id)));

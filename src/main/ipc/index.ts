@@ -45,7 +45,7 @@ import { WHATSAPP_FEATURE_ENABLED } from '../../shared/featureFlags';
 import { mergeLayout, BILL_FIELD_DEFS, isFieldVisible } from '../../shared/receipt-layout';
 import QRCode from 'qrcode';
 import { renderBillText, buildSampleBillModel, DEFAULT_BILL_LABELS, ReceiptItemStyle, generateUpiUrl } from '../../shared/receipt-render';
-import { QrStyle, renderQrSvg, renderQrDataUri } from '../../shared/qr-render';
+import { QrStyle, renderQrDataUri } from '../../shared/qr-render';
 import { renderQrPngBuffer } from '../services/qr-image.service';
 import * as billingService from '../services/billing.service';
 import * as inventoryService from '../services/inventory.service';
@@ -202,6 +202,7 @@ export function registerAllHandlers(): void {
     billingService.transferPartial(sourceOrderId, targetTableId, items)
   );
   handle(ORDERS.delete, (orderId: number) => orderRepo.deleteOrder(orderId));
+  handle(ORDERS.deleteMany, (orderIds: number[]) => orderRepo.deleteOrders(orderIds));
   handle(ORDERS.getByCustomer, (customerId: number, limit: number) => {
     const db = getDb();
     const rows = db.prepare(`
@@ -276,9 +277,9 @@ export function registerAllHandlers(): void {
   handle(STAFF.create, (data) => staffRepo.create(data));
   handle(STAFF.update, (id: number, data) => staffRepo.update(id, data));
   handle(STAFF.delete, (id: number) => staffRepo.deleteStaff(id));
-  handle(STAFF.login, (pin: string) => {
+  handle(STAFF.login, async (pin: string) => {
     checkPinRateLimit();
-    const staff = staffRepo.findByPin(pin);
+    const staff = await staffRepo.findByPinAsync(pin);
     if (!staff) {
       recordPinFailure();
       throw new Error('INVALID_PIN');
@@ -317,9 +318,15 @@ export function registerAllHandlers(): void {
       referenceNo: p.reference ?? p.referenceNo ?? null,
     }));
 
-    // Validate payment total covers order amount
-    const order = db.prepare('SELECT grand_total FROM orders WHERE id = ?').get(orderId) as any;
+    // Validate payment total covers order amount and order is in a valid state
+    const order = db.prepare('SELECT status, grand_total FROM orders WHERE id = ?').get(orderId) as any;
     if (!order) throw new Error('Order not found');
+    if (order.status === OrderStatus.COMPLETED) {
+      throw new Error(`Cannot process payment on an order that is already completed (Order #${orderId})`);
+    }
+    if (order.status === OrderStatus.CANCELLED) {
+      throw new Error(`Cannot process payment on a cancelled order (Order #${orderId})`);
+    }
     const paymentTotal = payments.reduce((sum: number, p: any) => sum + (p.amount ?? 0), 0);
     const tip = typeof data.tip === 'number' ? data.tip : 0;
     const redeemCoins = typeof data.coinsToRedeem === 'number' && data.coinsToRedeem > 0 ? Math.floor(data.coinsToRedeem) : 0;
@@ -989,6 +996,7 @@ export function registerAllHandlers(): void {
   handle(REPORTS.shiftHandover, (staffId: number, dateRange) => reportsService.shiftHandover(staffId, dateRange));
   handle(REPORTS.busyHours, (dateRange) => reportsService.busyHours(dateRange));
   handle(REPORTS.voidReport, (dateRange) => reportsService.voidReport(dateRange));
+  handle(REPORTS.tableWiseSales, (dateRange) => reportsService.tableWiseSales(dateRange));
 
   // ---- Settings ----
   handle(SETTINGS.get, (key: string) => settingsRepo.get(key));

@@ -15,10 +15,8 @@ import {
   Check,
   Pencil,
   Clock,
-  Receipt,
   MoreHorizontal,
   ArrowRightLeft,
-  Merge,
   Split,
   RotateCw,
   Play,
@@ -293,45 +291,30 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const [comboSuggestions, setComboSuggestions] = useState<any[]>([]);
   const [dismissedCombos, setDismissedCombos] = useState<Set<number>>(new Set());
   const lastClickTimeRef = useRef<number>(0);
+  const combosCacheRef = useRef<any[] | null>(null);
 
-  // KOT separation view toggle (default: false / OFF). Persisted via settings & localStorage.
-  const [showKotSeparators, setShowKotSeparators] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('show_kot_separators') === 'true';
-    } catch {
-      return false;
+  // KOT separation view toggle (persisted via billing store)
+  const showKotSeparators = useBillingStore((s) => s.showKotSeparators);
+
+  // Fetch combos and suggest matching ones based on cart items (debounced & cached)
+  useEffect(() => {
+    if (cart.length === 0) {
+      setComboSuggestions([]);
+      return;
     }
-  });
 
-  useEffect(() => {
-    ipc<string | null>(window.electronAPI.settings.get('show_kot_separators'))
-      .then((val) => {
-        if (val !== null && val !== undefined) {
-          setShowKotSeparators(val === 'true');
-          try {
-            localStorage.setItem('show_kot_separators', val);
-          } catch { /* ignore */ }
+    const timer = setTimeout(async () => {
+      try {
+        let combos = combosCacheRef.current;
+        if (!combos) {
+          combos = await ipc<any[]>(window.electronAPI.menu.getCombos());
+          if (combos) {
+            combosCacheRef.current = combos;
+          }
         }
-      })
-      .catch(() => {});
-  }, []);
-
-  const handleToggleKotSeparators = useCallback(async () => {
-    const nextVal = !showKotSeparators;
-    setShowKotSeparators(nextVal);
-    try {
-      localStorage.setItem('show_kot_separators', String(nextVal));
-      await ipc(window.electronAPI.settings.set('show_kot_separators', String(nextVal), 'billing'));
-    } catch { /* ignore */ }
-  }, [showKotSeparators]);
-
-  // Fetch combos and suggest matching ones based on cart items
-  useEffect(() => {
-    if (cart.length === 0) { setComboSuggestions([]); return; }
-    const cartItemIds = new Set(cart.map((c) => c.menuItem.id));
-    ipc<any[]>(window.electronAPI.menu.getCombos())
-      .then((combos) => {
         if (!combos) return;
+
+        const cartItemIds = new Set(cart.map((c) => c.menuItem.id));
         const suggestions = combos.filter((combo) => {
           if (dismissedCombos.has(combo.id)) return false;
           // If any item in the combo is in the cart, suggest the combo
@@ -339,8 +322,12 @@ const CartPanel: React.FC<CartPanelProps> = ({
           return comboItemIds.some((id) => cartItemIds.has(id));
         });
         setComboSuggestions(suggestions.slice(0, 2)); // max 2 suggestions
-      })
-      .catch(() => {});
+      } catch {
+        // ignore
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
   }, [cart, dismissedCombos]);
 
   const subtotal = getSubtotal();
@@ -647,41 +634,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
             )}
           </h2>
           <div className="flex items-center gap-1.5">
-            <Tooltip
-              text={
-                showKotSeparators
-                  ? t('cart.disableKotView', 'KOT View: ON (Click to show combined list)')
-                  : t('cart.enableKotView', 'KOT View: OFF (Click to separate by KOTs)')
-              }
-              position="bottom"
-              delay={false}
-            >
-              <button
-                type="button"
-                onClick={handleToggleKotSeparators}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-all border cursor-pointer ${
-                  showKotSeparators
-                    ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 shadow-xs'
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-800'
-                }`}
-              >
-                <Receipt size={10} className={showKotSeparators ? 'text-blue-600' : 'text-gray-400'} />
-                <span>{t('cart.kotViewToggle', 'KOT')}</span>
-                <span
-                  className={`inline-flex items-center w-5 h-2.5 rounded-full p-0.5 transition-colors ${
-                    showKotSeparators ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full bg-white transition-transform duration-150 ${
-                      showKotSeparators ? 'translate-x-2.5' : 'translate-x-0'
-                    }`}
-                  />
-                </span>
-              </button>
-            </Tooltip>
-
-            {onRefresh && (
+            {Boolean(currentOrderId && onRefresh) && (
               <Tooltip text={t('cart.refreshOrder', 'Refresh Order')} position="bottom" delay={false}>
                 <button
                   type="button"
@@ -736,42 +689,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
             )}
           </h2>
           <div className="flex items-center gap-1.5">
-            <Tooltip
-              text={
-                showKotSeparators
-                  ? t('cart.disableKotView', 'KOT View: ON (Click to show combined list)')
-                  : t('cart.enableKotView', 'KOT View: OFF (Click to separate by KOTs)')
-              }
-              position="bottom"
-              delay={false}
-            >
-              <button
-                type="button"
-                onClick={handleToggleKotSeparators}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-all border cursor-pointer ${
-                  showKotSeparators
-                    ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 shadow-xs'
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-800'
-                }`}
-              >
-                <Receipt size={10} className={showKotSeparators ? 'text-blue-600' : 'text-gray-400'} />
-                <span>{t('cart.kotViewToggle', 'KOT')}</span>
-                <span
-                  className={`inline-flex items-center w-5 h-2.5 rounded-full p-0.5 transition-colors ${
-                    showKotSeparators ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full bg-white transition-transform duration-150 ${
-                      showKotSeparators ? 'translate-x-2.5' : 'translate-x-0'
-                    }`}
-                  />
-                </span>
-              </button>
-            </Tooltip>
-
             {/* Refresh Order Button */}
-            {onRefresh && (
+            {Boolean(currentOrderId && onRefresh) && (
               <Tooltip text={t('cart.refreshOrder', 'Refresh Order')} position="bottom" delay={false}>
                 <button
                   type="button"

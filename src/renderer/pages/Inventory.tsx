@@ -11,12 +11,10 @@ import {
   Truck,
   Users,
   BookOpen,
-  ClipboardList,
   ArrowDownUp,
   Eye,
   CheckCircle2,
   XCircle,
-  ChevronRight,
   UtensilsCrossed,
 } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
@@ -26,7 +24,7 @@ import SearchInput from '../components/common/SearchInput';
 import { useInventory } from '../hooks/useInventory';
 import { useTaxTerminology } from '../hooks/useTaxTerminology';
 import { useMenu, type MenuItem } from '../hooks/useMenu';
-import { formatCurrency, formatDate, formatDateTime } from '../lib/formatters';
+import { formatCurrency, formatDate } from '../lib/formatters';
 import { StockTransactionType, POStatus } from '../../shared/enums';
 import type {
   InventoryItem,

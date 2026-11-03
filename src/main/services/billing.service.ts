@@ -13,7 +13,7 @@ import { logger } from '../utils/logger';
 
 import type { CreateOrderDTO, Order, OrderItem, CartItem } from '../../shared/types/order.types';
 
-import { OrderStatus, TableStatus, KOTStatus } from '../../shared/enums';
+import { OrderStatus, TableStatus } from '../../shared/enums';
 
 
 
@@ -1221,36 +1221,6 @@ export function moveTable(orderId: number, newTableId: number): Order & { items:
 
 
 export function generateOrderNumber(): string {
-
-  const db = getDb();
-
-  const today = format(new Date(), 'yyyyMMdd');
-
-  const prefix = `ORD-${today}-`;
-
-
-
-  const last = db.prepare(
-
-    "SELECT order_number FROM orders WHERE order_number LIKE ? ORDER BY id DESC LIMIT 1"
-
-  ).get(`${prefix}%`) as any;
-
-
-
-  let seq = 1;
-
-  if (last) {
-
-    const parts = last.order_number.split('-');
-
-    seq = parseInt(parts[2], 10) + 1;
-
-  }
-
-
-
-  return `${prefix}${seq.toString().padStart(3, '0')}`;
-
+  return orderRepo.generateOrderNumber();
 }
 

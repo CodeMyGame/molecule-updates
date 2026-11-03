@@ -63,18 +63,13 @@ export const useWhatsNewStore = create<WhatsNewState>((set, get) => ({
       }
     }
 
-    // If never seen or updated to a newer version
+    // Do not show automatically on login or version change
     const isUnseen = !seenVersion || seenVersion !== version;
-    if (isUnseen) {
-      set({
-        isOpen: true,
-        activeVersion: version,
-        hasUnseenUpdate: true,
-      });
-      return true;
-    }
-
-    set({ hasUnseenUpdate: false });
-    return false;
+    set({
+      isOpen: false,
+      activeVersion: version,
+      hasUnseenUpdate: isUnseen,
+    });
+    return isUnseen;
   },
 }));

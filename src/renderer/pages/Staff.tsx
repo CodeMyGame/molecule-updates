@@ -14,13 +14,12 @@ import {
   LogIn,
   LogOut,
   Calendar,
-  Search,
   Check,
 } from 'lucide-react';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import DataTable from '../components/common/DataTable';
-import { formatDate, formatTime } from '../lib/formatters';
+import { formatTime } from '../lib/formatters';
 import { useStaff } from '../hooks/useStaff';
 import type { Staff as StaffType, Role, Attendance, CreateStaffDTO } from '../../shared/types/staff.types';
 

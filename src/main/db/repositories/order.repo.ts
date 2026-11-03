@@ -349,10 +349,98 @@ export function getById(id: number): (Order & { items: OrderItem[]; kots: OrderK
 export function getActive(): (Order & { items: OrderItem[]; kots: OrderKotSummary[] })[] {
   const db = getDb();
   const rows = db.prepare("SELECT * FROM orders WHERE status IN (?, ?) ORDER BY created_at DESC").all(OrderStatus.ACTIVE, OrderStatus.HOLD) as any[];
+  if (rows.length === 0) return [];
+
+  const orderIds = rows.map((r) => r.id);
+  const orderPlaceholders = orderIds.map(() => '?').join(',');
+
+  // 1. Fetch all items for all active orders in 1 batched query
+  const itemRows = db.prepare(
+    `SELECT * FROM order_items WHERE order_id IN (${orderPlaceholders}) ORDER BY id ASC`
+  ).all(...orderIds) as any[];
+
+  // 2. Fetch all addons for all retrieved order items in 1 batched query
+  const addonsByItemId = new Map<number, OrderItemAddon[]>();
+  if (itemRows.length > 0) {
+    const itemIds = itemRows.map((r) => r.id);
+    const itemPlaceholders = itemIds.map(() => '?').join(',');
+    const addonRows = db.prepare(
+      `SELECT * FROM order_item_addons WHERE order_item_id IN (${itemPlaceholders})`
+    ).all(...itemIds) as any[];
+
+    for (const addon of addonRows) {
+      const list = addonsByItemId.get(addon.order_item_id);
+      const mapped = mapOrderItemAddon(addon);
+      if (list) {
+        list.push(mapped);
+      } else {
+        addonsByItemId.set(addon.order_item_id, [mapped]);
+      }
+    }
+  }
+
+  // Group items by order_id
+  const itemsByOrderId = new Map<number, OrderItem[]>();
+  for (const row of itemRows) {
+    const item: OrderItem = {
+      id: row.id,
+      orderId: row.order_id,
+      menuItemId: row.menu_item_id ?? undefined,
+      comboId: row.combo_id ?? undefined,
+      variationId: row.variation_id ?? undefined,
+      name: row.name,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      taxRate: row.tax_rate,
+      taxAmount: row.tax_amount,
+      total: row.total,
+      notes: row.notes ?? undefined,
+      sourceTableName: row.source_table_name ?? undefined,
+      kotStatus: row.kot_status as KOTStatus,
+      kotNumber: row.kot_number ?? undefined,
+      station: row.station ?? undefined,
+      createdAt: row.created_at,
+      addons: addonsByItemId.get(row.id) ?? [],
+    };
+    const list = itemsByOrderId.get(row.order_id);
+    if (list) {
+      list.push(item);
+    } else {
+      itemsByOrderId.set(row.order_id, [item]);
+    }
+  }
+
+  // 3. Fetch all KOT summaries for all active orders in 1 batched query
+  const kotRows = db.prepare(`
+    SELECT id, kot_number, station, status, printed_at, created_at, order_id
+    FROM kots
+    WHERE order_id IN (${orderPlaceholders})
+    ORDER BY id ASC
+  `).all(...orderIds) as any[];
+
+  const kotsByOrderId = new Map<number, OrderKotSummary[]>();
+  for (const r of kotRows) {
+    const kot: OrderKotSummary = {
+      id: r.id,
+      kotNumber: r.kot_number,
+      station: r.station ?? undefined,
+      status: r.status,
+      printedAt: r.printed_at,
+      createdAt: r.created_at ?? r.printed_at,
+    };
+    const list = kotsByOrderId.get(r.order_id);
+    if (list) {
+      list.push(kot);
+    } else {
+      kotsByOrderId.set(r.order_id, [kot]);
+    }
+  }
+
+  // 4. Assemble orders
   return rows.map((row) => {
     const order = mapOrder(row);
-    const items = getOrderItems(order.id);
-    const kots = getOrderKots(order.id);
+    const items = itemsByOrderId.get(order.id) ?? [];
+    const kots = kotsByOrderId.get(order.id) ?? [];
     return { ...order, items, kots };
   });
 }
@@ -456,130 +544,187 @@ export function updateStatus(
   staffId?: number
 ): Order | undefined {
   const db = getDb();
-  const updates: string[] = ["status = ?", "updated_at = datetime('now')"];
-  const params: unknown[] = [status];
 
-  if (status === OrderStatus.COMPLETED) {
-    updates.push("completed_at = datetime('now')");
-  }
+  const updateStatusAtomic = db.transaction(() => {
+    const updates: string[] = ["status = ?", "updated_at = datetime('now')"];
+    const params: unknown[] = [status];
 
-  if (status === OrderStatus.CANCELLED) {
-    if (reason) {
-      updates.push("cancellation_reason = ?");
-      params.push(reason);
+    if (status === OrderStatus.COMPLETED) {
+      updates.push("completed_at = datetime('now')");
     }
-  }
 
-  params.push(id);
-  db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+    if (status === OrderStatus.CANCELLED) {
+      if (reason) {
+        updates.push("cancellation_reason = ?");
+        params.push(reason);
+      }
+    }
 
-  // When order is cancelled, log all its items to void_items audit log
-  if (status === OrderStatus.CANCELLED) {
-    try {
-      const order = db.prepare(`
-        SELECT o.*, t.name as table_name, s.name as staff_name
-        FROM orders o
-        LEFT JOIN tables t ON t.id = o.table_id
-        LEFT JOIN staff s ON s.id = ?
-        WHERE o.id = ?
-      `).get(staffId ?? null, id) as any;
+    params.push(id);
+    db.prepare(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`).run(...params);
 
-      if (order) {
-        const tableName = order.table_name_snapshot || order.table_name || 'Counter';
-        const voidReason = reason || 'Order Cancelled';
-        const items = db.prepare(`
-          SELECT oi.*, v.name as variation_name
-          FROM order_items oi
-          LEFT JOIN item_variations v ON v.id = oi.variation_id
-          WHERE oi.order_id = ?
-        `).all(id) as any[];
+    // When order is cancelled, log all its items to void_items audit log and rollback stock/loyalty
+    if (status === OrderStatus.CANCELLED) {
+      try {
+        const order = db.prepare(`
+          SELECT o.*, t.name as table_name, s.name as staff_name
+          FROM orders o
+          LEFT JOIN tables t ON t.id = o.table_id
+          LEFT JOIN staff s ON s.id = ?
+          WHERE o.id = ?
+        `).get(staffId ?? null, id) as any;
 
-        for (const item of items) {
-          db.prepare(`
-            INSERT INTO void_items (
-              order_id, order_number, table_name, menu_item_id, item_name,
-              variation_name, quantity, unit_price, total_amount, reason,
-              staff_id, staff_name, voided_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-          `).run(
-            order.id,
-            order.order_number,
-            tableName,
-            item.menu_item_id,
-            item.name,
-            item.variation_name ?? null,
-            item.quantity,
-            item.unit_price,
-            item.total,
-            voidReason,
-            staffId ?? order.staff_id ?? null,
-            order.staff_name ?? null
-          );
+        if (order) {
+          const tableName = order.table_name_snapshot || order.table_name || 'Counter';
+          const voidReason = reason || 'Order Cancelled';
+          const items = db.prepare(`
+            SELECT oi.*, v.name as variation_name
+            FROM order_items oi
+            LEFT JOIN item_variations v ON v.id = oi.variation_id
+            WHERE oi.order_id = ?
+          `).all(id) as any[];
 
-          // Restock inventory for each cancelled item if it was previously deducted
-          try {
-            const deductedTxns = db.prepare(`
-              SELECT inventory_item_id, quantity
-              FROM stock_transactions
-              WHERE reference_type = 'order_item' AND reference_id = ? AND transaction_type = 'consumption'
-            `).all(item.id) as { inventory_item_id: number; quantity: number }[];
+          for (const item of items) {
+            db.prepare(`
+              INSERT INTO void_items (
+                order_id, order_number, table_name, menu_item_id, item_name,
+                variation_name, quantity, unit_price, total_amount, reason,
+                staff_id, staff_name, voided_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            `).run(
+              order.id,
+              order.order_number,
+              tableName,
+              item.menu_item_id,
+              item.name,
+              item.variation_name ?? null,
+              item.quantity,
+              item.unit_price,
+              item.total,
+              voidReason,
+              staffId ?? order.staff_id ?? null,
+              order.staff_name ?? null
+            );
 
-            for (const txn of deductedTxns) {
-              db.prepare(`
-                UPDATE inventory_items
-                SET current_stock = current_stock + ?, updated_at = datetime('now')
-                WHERE id = ?
-              `).run(txn.quantity, txn.inventory_item_id);
+            // Restock inventory for each cancelled item if it was previously deducted
+            try {
+              const deductedTxns = db.prepare(`
+                SELECT inventory_item_id, quantity
+                FROM stock_transactions
+                WHERE reference_type = 'order_item' AND reference_id = ? AND transaction_type = 'consumption'
+              `).all(item.id) as { inventory_item_id: number; quantity: number }[];
 
-              db.prepare(`
-                INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
-                VALUES (?, ?, ?, 'order_item', ?, ?)
-              `).run(
-                txn.inventory_item_id,
-                StockTransactionType.ADJUSTMENT,
-                txn.quantity,
-                item.id,
-                `Restocked from cancelled order #${id} (${voidReason})`,
-              );
+              for (const txn of deductedTxns) {
+                db.prepare(`
+                  UPDATE inventory_items
+                  SET current_stock = current_stock + ?, updated_at = datetime('now')
+                  WHERE id = ?
+                `).run(txn.quantity, txn.inventory_item_id);
+
+                db.prepare(`
+                  INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
+                  VALUES (?, ?, ?, 'order_item', ?, ?)
+                `).run(
+                  txn.inventory_item_id,
+                  StockTransactionType.ADJUSTMENT,
+                  txn.quantity,
+                  item.id,
+                  `Restocked from cancelled order #${id} (${voidReason})`,
+                );
+              }
+            } catch (restockErr) {
+              logger.error('Failed to restock cancelled order item:', restockErr, { orderItemId: item.id });
             }
-          } catch (restockErr) {
-            logger.error('Failed to restock cancelled order item:', restockErr, { orderItemId: item.id });
+          }
+
+          // Rollback customer visit and loyalty points if this order was completed/had loyalty transactions
+          if (order.customer_id) {
+            try {
+              const loyaltyTxns = db.prepare(`
+                SELECT points FROM loyalty_transactions WHERE order_id = ?
+              `).all(id) as { points: number }[];
+
+              let netPoints = 0;
+              for (const txn of loyaltyTxns) {
+                netPoints += txn.points;
+              }
+
+              if (netPoints !== 0) {
+                // If net points were deducted (e.g. netPoints = -30 redeemed), restore them (+30).
+                // If net points were earned (e.g. netPoints = +15 earned), reverse them (-15).
+                db.prepare(`
+                  UPDATE customers
+                  SET loyalty_points = MAX(0, loyalty_points - ?), updated_at = datetime('now')
+                  WHERE id = ?
+                `).run(netPoints, order.customer_id);
+
+                db.prepare(`
+                  INSERT INTO loyalty_transactions (customer_id, order_id, points, description)
+                  VALUES (?, ?, ?, ?)
+                `).run(
+                  order.customer_id,
+                  id,
+                  -netPoints,
+                  netPoints < 0
+                    ? `Restored ${Math.abs(netPoints)} redeemed coins from cancelled order #${id}`
+                    : `Reversed ${netPoints} earned coins from cancelled order #${id}`
+                );
+              }
+
+              // Rollback customer visit & spend if the order was previously completed
+              if (order.completed_at) {
+                const redeemTxn = loyaltyTxns.find((t) => t.points < 0);
+                const coinDiscount = redeemTxn ? Math.abs(redeemTxn.points) * 100 : 0;
+                const spendToDeduct = Math.max(0, order.grand_total - coinDiscount);
+
+                db.prepare(`
+                  UPDATE customers
+                  SET total_spent = MAX(0, total_spent - ?),
+                      total_visits = MAX(0, total_visits - 1),
+                      updated_at = datetime('now')
+                  WHERE id = ?
+                `).run(spendToDeduct, order.customer_id);
+              }
+            } catch (custErr) {
+              logger.error('Failed to rollback customer loyalty/visit on cancellation:', custErr, { orderId: id });
+            }
           }
         }
-      }
-    } catch (err) {
-      logger.error('Failed to log void items for cancelled order:', err, { orderId: id });
-    }
-  }
-
-  // Free up table and clear KOTs if order completed or cancelled
-  if (status === OrderStatus.COMPLETED || status === OrderStatus.CANCELLED) {
-    const order = db.prepare('SELECT table_id FROM orders WHERE id = ?').get(id) as any;
-    if (order?.table_id) {
-      // Only free if no other active orders on the table
-      const activeOnTable = db.prepare(
-        "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status IN (?, ?) AND id != ?"
-      ).get(order.table_id, OrderStatus.ACTIVE, OrderStatus.HOLD, id) as any;
-      if (activeOnTable.count === 0) {
-        db.prepare("UPDATE tables SET status = 'free' WHERE id = ?").run(order.table_id);
+      } catch (err) {
+        logger.error('Failed to log void items for cancelled order:', err, { orderId: id });
       }
     }
 
-    const targetKotStatus = status === OrderStatus.CANCELLED ? 'cancelled' : 'served';
+    // Free up table and clear KOTs if order completed or cancelled
+    if (status === OrderStatus.COMPLETED || status === OrderStatus.CANCELLED) {
+      const order = db.prepare('SELECT table_id FROM orders WHERE id = ?').get(id) as any;
+      if (order?.table_id) {
+        // Only free if no other active orders on the table
+        const activeOnTable = db.prepare(
+          "SELECT COUNT(*) as count FROM orders WHERE table_id = ? AND status IN (?, ?) AND id != ?"
+        ).get(order.table_id, OrderStatus.ACTIVE, OrderStatus.HOLD, id) as any;
+        if (activeOnTable.count === 0) {
+          db.prepare("UPDATE tables SET status = 'free' WHERE id = ?").run(order.table_id);
+        }
+      }
 
-    // Mark all active KOTs for this order as cancelled or served
-    db.prepare(`
-      UPDATE kots SET status = ?
-      WHERE order_id = ? AND status IN ('pending', 'sent', 'preparing', 'ready')
-    `).run(targetKotStatus, id);
+      const targetKotStatus = status === OrderStatus.CANCELLED ? 'cancelled' : 'served';
 
-    // Also update order_items kot_status
-    db.prepare(`
-      UPDATE order_items SET kot_status = ?
-      WHERE order_id = ? AND kot_status != 'served'
-    `).run(targetKotStatus, id);
-  }
+      // Mark all active KOTs for this order as cancelled or served
+      db.prepare(`
+        UPDATE kots SET status = ?
+        WHERE order_id = ? AND status IN ('pending', 'sent', 'preparing', 'ready')
+      `).run(targetKotStatus, id);
 
+      // Also update order_items kot_status
+      db.prepare(`
+        UPDATE order_items SET kot_status = ?
+        WHERE order_id = ? AND kot_status != 'served'
+      `).run(targetKotStatus, id);
+    }
+  });
+
+  updateStatusAtomic();
   return getById(id);
 }
 
@@ -878,6 +1023,13 @@ export function deleteOrder(orderId: number): void {
       }
     }
 
+    // Unlink any orders referencing this order (splits / merges) to satisfy foreign key constraints
+    db.prepare('UPDATE orders SET split_from_order_id = NULL WHERE split_from_order_id = ?').run(orderId);
+    db.prepare('UPDATE orders SET merged_into_order_id = NULL WHERE merged_into_order_id = ?').run(orderId);
+
+    // Delete loyalty transactions referencing this order
+    db.prepare('DELETE FROM loyalty_transactions WHERE order_id = ?').run(orderId);
+
     // Delete related records
     db.prepare('DELETE FROM kot_items WHERE order_item_id IN (SELECT id FROM order_items WHERE order_id = ?)').run(orderId);
     db.prepare('DELETE FROM order_item_addons WHERE order_item_id IN (SELECT id FROM order_items WHERE order_id = ?)').run(orderId);
@@ -888,6 +1040,17 @@ export function deleteOrder(orderId: number): void {
   });
 
   deleteInTransaction();
+}
+
+export function deleteOrders(orderIds: number[]): void {
+  if (orderIds.length === 0) return;
+  const db = getDb();
+  const tx = db.transaction(() => {
+    for (const id of orderIds) {
+      deleteOrder(id);
+    }
+  });
+  tx();
 }
 
 // -- Archive & purge --
@@ -1011,19 +1174,26 @@ export function purgeOrdersOlderThan(cutoffIso: string): number {
 
 // -- Helpers --
 
-function generateOrderNumber(): string {
+export function generateOrderNumber(): string {
   const db = getDb();
   const today = format(new Date(), 'yyyyMMdd');
-  const prefix = `ORD-${today}-`;
+  const customPrefix = (settingsRepo.get('order_prefix') || '').trim();
+  const cleanPrefix = customPrefix ? (customPrefix.endsWith('-') ? customPrefix : `${customPrefix}-`) : 'ORD-';
+  const prefix = `${cleanPrefix}${today}-`;
 
   const last = db.prepare(
     "SELECT order_number FROM orders WHERE order_number LIKE ? ORDER BY id DESC LIMIT 1"
   ).get(`${prefix}%`) as any;
 
   let seq = 1;
-  if (last) {
-    const parts = last.order_number.split('-');
-    seq = parseInt(parts[2], 10) + 1;
+  if (last && last.order_number) {
+    const match = last.order_number.slice(prefix.length).match(/^(\d+)/);
+    if (match) {
+      const lastSeq = parseInt(match[1], 10);
+      if (!isNaN(lastSeq)) {
+        seq = lastSeq + 1;
+      }
+    }
   }
 
   return `${prefix}${seq.toString().padStart(3, '0')}`;
@@ -1072,30 +1242,43 @@ export function recalculateOrderTotals(orderId: number): void {
 function getOrderItems(orderId: number): OrderItem[] {
   const db = getDb();
   const rows = db.prepare('SELECT * FROM order_items WHERE order_id = ? ORDER BY id ASC').all(orderId) as any[];
+  if (rows.length === 0) return [];
 
-  return rows.map((row) => {
-    const addons = db.prepare('SELECT * FROM order_item_addons WHERE order_item_id = ?').all(row.id) as any[];
-    return {
-      id: row.id,
-      orderId: row.order_id,
-      menuItemId: row.menu_item_id ?? undefined,
-      comboId: row.combo_id ?? undefined,
-      variationId: row.variation_id ?? undefined,
-      name: row.name,
-      quantity: row.quantity,
-      unitPrice: row.unit_price,
-      taxRate: row.tax_rate,
-      taxAmount: row.tax_amount,
-      total: row.total,
-      notes: row.notes ?? undefined,
-      sourceTableName: row.source_table_name ?? undefined,
-      kotStatus: row.kot_status as KOTStatus,
-      kotNumber: row.kot_number ?? undefined,
-      station: row.station ?? undefined,
-      createdAt: row.created_at,
-      addons: addons.map(mapOrderItemAddon),
-    };
-  });
+  const itemIds = rows.map((r) => r.id);
+  const placeholders = itemIds.map(() => '?').join(',');
+  const addonsRows = db.prepare(`SELECT * FROM order_item_addons WHERE order_item_id IN (${placeholders})`).all(...itemIds) as any[];
+
+  const addonsByItemId = new Map<number, OrderItemAddon[]>();
+  for (const addon of addonsRows) {
+    const list = addonsByItemId.get(addon.order_item_id);
+    const mapped = mapOrderItemAddon(addon);
+    if (list) {
+      list.push(mapped);
+    } else {
+      addonsByItemId.set(addon.order_item_id, [mapped]);
+    }
+  }
+
+  return rows.map((row) => ({
+    id: row.id,
+    orderId: row.order_id,
+    menuItemId: row.menu_item_id ?? undefined,
+    comboId: row.combo_id ?? undefined,
+    variationId: row.variation_id ?? undefined,
+    name: row.name,
+    quantity: row.quantity,
+    unitPrice: row.unit_price,
+    taxRate: row.tax_rate,
+    taxAmount: row.tax_amount,
+    total: row.total,
+    notes: row.notes ?? undefined,
+    sourceTableName: row.source_table_name ?? undefined,
+    kotStatus: row.kot_status as KOTStatus,
+    kotNumber: row.kot_number ?? undefined,
+    station: row.station ?? undefined,
+    createdAt: row.created_at,
+    addons: addonsByItemId.get(row.id) ?? [],
+  }));
 }
 
 function getOrderKots(orderId: number): OrderKotSummary[] {

@@ -57,6 +57,7 @@ export async function sendWhatsAppImage(phone: string, imageBase64: string, capt
         port: 443,
         path: '/apis/sendImage.php',
         method: 'POST',
+        timeout: 15000,
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': Buffer.byteLength(body),
@@ -87,6 +88,11 @@ export async function sendWhatsAppImage(phone: string, imageBase64: string, capt
         });
       }
     );
+
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('WhatsApp API request timed out after 15 seconds. Please check your internet connection.'));
+    });
 
     req.on('error', (err) => {
       logger.error('ChatMitra request failed:', err);

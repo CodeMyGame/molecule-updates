@@ -269,6 +269,8 @@
     @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 cursor-pointer
       hover:shadow-md hover:border-blue-300 active:bg-blue-50 dark:active:bg-blue-900/30
       transition-all duration-150 select-none;
+    content-visibility: auto;
+    contain-intrinsic-size: 80px;
   }
 
   /* Order item row */

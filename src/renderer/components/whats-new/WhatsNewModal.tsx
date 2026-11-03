@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   X,
@@ -25,16 +25,8 @@ import { RELEASES, ReleaseHighlight } from '../../data/changelog';
 
 export const WhatsNewModal: React.FC = () => {
   const { t } = useTranslation();
-  const { isOpen, activeVersion, closeWhatsNew, openWhatsNew } = useWhatsNewStore();
+  const { isOpen, closeWhatsNew } = useWhatsNewStore();
   const openTour = useTourStore((s) => s.openTour);
-
-  const [selectedVer, setSelectedVer] = useState<string>(activeVersion || RELEASES[0]?.version || '1.1.19');
-
-  useEffect(() => {
-    if (activeVersion) {
-      setSelectedVer(activeVersion);
-    }
-  }, [activeVersion]);
 
   // Handle escape key
   useEffect(() => {
@@ -48,7 +40,7 @@ export const WhatsNewModal: React.FC = () => {
 
   if (!isOpen) return null;
 
-  const currentRelease = RELEASES.find((r) => r.version === selectedVer) || RELEASES[0];
+  const currentRelease = RELEASES[0];
 
   const renderIcon = (iconName: ReleaseHighlight['icon']) => {
     switch (iconName) {
@@ -141,36 +133,6 @@ export const WhatsNewModal: React.FC = () => {
             >
               <X size={18} />
             </button>
-          </div>
-
-          {/* Release Version Switcher Tabs */}
-          <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/15 overflow-x-auto no-scrollbar">
-            <span className="text-[11px] font-semibold text-blue-200 uppercase tracking-wider shrink-0 mr-1">
-              {t('whatsNew.releaseNotes', 'Releases')}:
-            </span>
-            {RELEASES.map((rel) => {
-              const isSelected = rel.version === selectedVer;
-              return (
-                <button
-                  key={rel.version}
-                  onClick={() => setSelectedVer(rel.version)}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all shrink-0 ${
-                    isSelected
-                      ? 'bg-white text-blue-900 shadow-md font-bold'
-                      : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                  }`}
-                >
-                  <span>v{rel.version}</span>
-                  {rel.badge && (
-                    <span className={`text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider ${
-                      isSelected ? 'bg-blue-600 text-white' : 'bg-emerald-400 text-gray-900 font-bold'
-                    }`}>
-                      {rel.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
           </div>
         </div>
 

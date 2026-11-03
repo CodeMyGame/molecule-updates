@@ -55,6 +55,7 @@ export const ORDERS = {
   updateCustomer: 'orders:updateCustomer',
   getByCustomer: 'orders:getByCustomer',
   delete: 'orders:delete',
+  deleteMany: 'orders:deleteMany',
 } as const;
 
 export const FAVORITES = {
@@ -167,6 +168,7 @@ export const REPORTS = {
   shiftHandover: 'reports:shiftHandover',
   busyHours: 'reports:busyHours',
   voidReport: 'reports:voidReport',
+  tableWiseSales: 'reports:tableWiseSales',
 } as const;
 
 export const SETTINGS = {

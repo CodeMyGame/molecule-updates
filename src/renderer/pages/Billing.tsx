@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, type MouseEvent as ReactMouseEvent } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import {
   UtensilsCrossed,
   ShoppingBag,
   Truck,
-  LayoutGrid,
   FileText,
   Layers,
   CircleDot,
@@ -25,6 +24,7 @@ import {
   ArrowDownAZ,
   ArrowUpZA,
   HelpCircle,
+  Receipt,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import TransferMergeModal from '../components/tables/TransferMergeModal';
@@ -129,6 +129,21 @@ const Billing: React.FC = () => {
   const getSubtotal = useBillingStore((s) => s.getSubtotal);
   const loadOrderIntoCart = useBillingStore((s) => s.loadOrderIntoCart);
   const resetForNewTable = useBillingStore((s) => s.resetForNewTable);
+  const showKotSeparators = useBillingStore((s) => s.showKotSeparators);
+  const toggleKotSeparators = useBillingStore((s) => s.toggleKotSeparators);
+
+  // Sync KOT view preference on mount
+  useEffect(() => {
+    if (window.electronAPI?.settings?.get) {
+      ipc<string | null>(window.electronAPI.settings.get('show_kot_separators'))
+        .then((val) => {
+          if (val !== null && val !== undefined) {
+            useBillingStore.getState().setShowKotSeparators(val === 'true');
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   // Modals
   const [showPayment, setShowPayment] = useState(false);
@@ -164,13 +179,33 @@ const Billing: React.FC = () => {
   const leftRef = useRef<HTMLDivElement>(null);
 
   const startDrag = useCallback((onMove: (e: globalThis.MouseEvent) => void) => {
+    let animId: number | null = null;
+    let latestEvent: globalThis.MouseEvent | null = null;
+
+    const throttledMove = (e: globalThis.MouseEvent) => {
+      latestEvent = e;
+      if (animId === null) {
+        animId = requestAnimationFrame(() => {
+          animId = null;
+          if (latestEvent) {
+            onMove(latestEvent);
+          }
+        });
+      }
+    };
+
     const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      document.removeEventListener('mousemove', throttledMove);
       document.removeEventListener('mouseup', onUp);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
-    document.addEventListener('mousemove', onMove);
+
+    document.addEventListener('mousemove', throttledMove);
     document.addEventListener('mouseup', onUp);
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
@@ -186,18 +221,34 @@ const Billing: React.FC = () => {
   }, [startDrag]);
 
   const onMenuTableHandleDown = useCallback(() => {
+    let animId: number | null = null;
+    let latestEvent: globalThis.MouseEvent | null = null;
+
     const onMove = (e: globalThis.MouseEvent) => {
-      if (!leftRef.current) return;
-      const rect = leftRef.current.getBoundingClientRect();
-      const percent = ((e.clientY - rect.top) / rect.height) * 100;
-      setMenuHeightPercent(Math.max(30, Math.min(90, percent)));
+      latestEvent = e;
+      if (animId === null) {
+        animId = requestAnimationFrame(() => {
+          animId = null;
+          if (latestEvent && leftRef.current) {
+            const rect = leftRef.current.getBoundingClientRect();
+            const percent = ((latestEvent.clientY - rect.top) / rect.height) * 100;
+            setMenuHeightPercent(Math.max(30, Math.min(90, percent)));
+          }
+        });
+      }
     };
+
     const onUp = () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
+
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
     document.body.style.cursor = 'row-resize';
@@ -1310,6 +1361,7 @@ const Billing: React.FC = () => {
   );
 
   const handleRefreshCartOrder = useCallback(async () => {
+    if (!currentOrderId) return;
     if (orderType === 'dine_in' && selectedTableId) {
       await loadTableOrder(selectedTableId);
     } else if (currentOrderId) {
@@ -1509,15 +1561,49 @@ const Billing: React.FC = () => {
           </Tooltip>
 
           <div className="ml-auto flex items-center gap-1.5">
+            {/* KOT View toggle */}
+            <Tooltip
+              text={
+                showKotSeparators
+                  ? t('cart.disableKotView', 'KOT View: ON (Click to show combined list)')
+                  : t('cart.enableKotView', 'KOT View: OFF (Click to separate by KOTs)')
+              }
+              position="bottom"
+              delay={false}
+            >
+              <button
+                type="button"
+                onClick={toggleKotSeparators}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium transition-all border cursor-pointer select-none ${
+                  showKotSeparators
+                    ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 shadow-xs'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-100 hover:text-gray-800'
+                }`}
+              >
+                <Receipt size={10} className={showKotSeparators ? 'text-blue-600' : 'text-gray-400'} />
+                <span>{t('cart.kotViewToggle', 'KOT View')}</span>
+                <span
+                  className={`inline-flex items-center w-5 h-2.5 rounded-full p-0.5 transition-colors ${
+                    showKotSeparators ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full bg-white transition-transform duration-150 ${
+                      showKotSeparators ? 'translate-x-2.5' : 'translate-x-0'
+                    }`}
+                  />
+                </span>
+              </button>
+            </Tooltip>
+
             {/* Shortcuts cheat sheet button */}
             <Tooltip text={t('shortcuts.tooltip', 'Keyboard Shortcuts (Press ? or Ctrl+/)')} position="bottom">
               <button
                 onClick={() => setShowShortcuts(true)}
-                className="flex items-center gap-1.5 px-3 py-1 text-gray-600 hover:text-blue-600 hover:bg-blue-50 border border-gray-200 rounded-md transition-colors text-xs font-medium select-none"
+                className="flex items-center p-1.5 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors select-none"
+                aria-label={t('shortcuts.button', 'Shortcuts')}
               >
-                <HelpCircle size={13} />
-                <span className="hidden sm:inline">{t('shortcuts.button', 'Shortcuts')}</span>
-                <kbd className="text-[9px] font-mono font-bold bg-gray-100 dark:bg-gray-700 px-1 rounded">?</kbd>
+                <HelpCircle size={14} />
               </button>
             </Tooltip>
 

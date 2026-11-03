@@ -10,8 +10,6 @@ import {
   List,
   ToggleLeft,
   ToggleRight,
-  ChevronRight,
-  ChevronDown,
   Upload,
   Download,
   Package,
@@ -32,10 +30,6 @@ import {
   Addon,
   AddonGroup,
   Combo,
-  ComboItem,
-  CreateMenuItemDTO,
-  UpdateMenuItemDTO,
-  CreateCategoryDTO,
 } from '../hooks/useMenu';
 import toast from 'react-hot-toast';
 import { formatCurrency } from '../lib/formatters';

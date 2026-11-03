@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ipc } from '../lib/ipc';
 
 export interface MenuCategory {
@@ -190,17 +190,19 @@ export function useMenu(): UseMenuReturn {
     fetchData();
   }, [fetchData]);
 
-  const filteredItems = items.filter((item) => {
-    const matchesCategory =
-      selectedCategoryId === null || item.categoryId === selectedCategoryId;
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const matchesCategory =
+        selectedCategoryId === null || item.categoryId === selectedCategoryId;
 
-    const matchesSearch =
-      searchQuery === '' ||
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.shortCode && item.shortCode.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesSearch =
+        searchQuery === '' ||
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.shortCode && item.shortCode.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesCategory && matchesSearch;
-  });
+      return matchesCategory && matchesSearch;
+    });
+  }, [items, selectedCategoryId, searchQuery]);
 
   const getVariations = useCallback(async (itemId: number): Promise<Variation[]> => {
     const cached = variationsCache.current.get(itemId);

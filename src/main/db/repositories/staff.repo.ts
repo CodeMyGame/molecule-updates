@@ -1,6 +1,14 @@
 import { getDb } from '../connection';
 import bcrypt from 'bcryptjs';
+import { Worker } from 'worker_threads';
 import type { Staff, Role, Attendance, CreateStaffDTO } from '../../../shared/types/staff.types';
+
+// In-memory verified PIN cache (pin -> staffId) to make repeat unlocks instantaneous (0ms)
+const pinCache = new Map<string, number>();
+
+export function clearPinCache(): void {
+  pinCache.clear();
+}
 
 export function getAll(): Staff[] {
   const db = getDb();
@@ -26,6 +34,7 @@ export function getById(id: number): Staff | undefined {
 }
 
 export function create(data: CreateStaffDTO): Staff {
+  clearPinCache();
   const db = getDb();
   const pinHash = bcrypt.hashSync(data.pin, 10);
 
@@ -46,6 +55,7 @@ export function create(data: CreateStaffDTO): Staff {
 }
 
 export function update(id: number, data: Partial<CreateStaffDTO>): Staff | undefined {
+  clearPinCache();
   const db = getDb();
   const fields: string[] = [];
   const values: unknown[] = [];
@@ -70,12 +80,125 @@ export function update(id: number, data: Partial<CreateStaffDTO>): Staff | undef
 }
 
 export function deleteStaff(id: number): void {
+  clearPinCache();
   const db = getDb();
   db.prepare("UPDATE staff SET is_active = 0, updated_at = datetime('now') WHERE id = ?").run(id);
 }
 
+function verifyPinInWorker(
+  pin: string,
+  candidates: { id: number; pinHash: string }[]
+): Promise<number | null> {
+  return new Promise((resolve) => {
+    try {
+      const workerCode = `
+        const { parentPort, workerData } = require('worker_threads');
+        const bcrypt = require('bcryptjs');
+        const { pin, candidates } = workerData;
+        let matchId = null;
+        for (const c of candidates) {
+          if (bcrypt.compareSync(pin, c.pinHash)) {
+            matchId = c.id;
+            break;
+          }
+        }
+        parentPort.postMessage({ matchId });
+      `;
+
+      const worker = new Worker(workerCode, {
+        eval: true,
+        workerData: { pin, candidates },
+      });
+
+      worker.on('message', (msg: any) => {
+        resolve(msg?.matchId ?? null);
+      });
+
+      worker.on('error', () => {
+        resolve(fallbackCompare(pin, candidates));
+      });
+    } catch {
+      resolve(fallbackCompare(pin, candidates));
+    }
+  });
+}
+
+async function fallbackCompare(
+  pin: string,
+  candidates: { id: number; pinHash: string }[]
+): Promise<number | null> {
+  for (const c of candidates) {
+    try {
+      const match = await bcrypt.compare(pin, c.pinHash);
+      if (match) return c.id;
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
+export async function findByPinAsync(pin: string): Promise<Staff | undefined> {
+  const db = getDb();
+
+  // 1. Check in-memory verified PIN cache for instant 0ms unlock
+  const cachedStaffId = pinCache.get(pin);
+  if (cachedStaffId !== undefined) {
+    const cachedRow = db.prepare(`
+      SELECT s.*, r.name AS role_name, r.permissions AS role_permissions
+      FROM staff s
+      JOIN roles r ON s.role_id = r.id
+      WHERE s.id = ? AND s.is_active = 1
+    `).get(cachedStaffId) as any;
+
+    if (cachedRow) {
+      return mapStaffWithRole(cachedRow);
+    }
+    pinCache.delete(pin);
+  }
+
+  // 2. Fetch all active candidates
+  const rows = db.prepare(`
+    SELECT s.*, r.name AS role_name, r.permissions AS role_permissions
+    FROM staff s
+    JOIN roles r ON s.role_id = r.id
+    WHERE s.is_active = 1
+  `).all() as any[];
+
+  if (rows.length === 0) return undefined;
+
+  const candidates = rows.map((r) => ({ id: r.id, pinHash: r.pin_hash }));
+  const matchedId = await verifyPinInWorker(pin, candidates);
+
+  if (matchedId !== null) {
+    const matchedRow = rows.find((r) => r.id === matchedId);
+    if (matchedRow) {
+      pinCache.set(pin, matchedId);
+      return mapStaffWithRole(matchedRow);
+    }
+  }
+
+  return undefined;
+}
+
 export function findByPin(pin: string): Staff | undefined {
   const db = getDb();
+
+  const cachedStaffId = pinCache.get(pin);
+  if (cachedStaffId !== undefined) {
+    const cachedRow = db.prepare(`
+      SELECT s.*, r.name AS role_name, r.permissions AS role_permissions
+      FROM staff s
+      JOIN roles r ON s.role_id = r.id
+      WHERE s.id = ? AND s.is_active = 1
+    `).get(cachedStaffId) as any;
+
+    if (cachedRow) {
+      return mapStaffWithRole(cachedRow);
+    }
+    pinCache.delete(pin);
+  }
+
   const rows = db.prepare(`
     SELECT s.*, r.name AS role_name, r.permissions AS role_permissions
     FROM staff s
@@ -85,6 +208,7 @@ export function findByPin(pin: string): Staff | undefined {
 
   for (const row of rows) {
     if (bcrypt.compareSync(pin, row.pin_hash)) {
+      pinCache.set(pin, row.id);
       return mapStaffWithRole(row);
     }
   }
@@ -96,6 +220,17 @@ export function clockIn(staffId: number): Attendance {
   const now = new Date();
   const date = now.toISOString().split('T')[0];
   const clockInTime = now.toISOString();
+
+  // If there's already an active open session (clock_out is null), return it
+  const openSession = db.prepare(`
+    SELECT * FROM attendance
+    WHERE staff_id = ? AND clock_out IS NULL
+    ORDER BY clock_in DESC, id DESC LIMIT 1
+  `).get(staffId) as any;
+
+  if (openSession) {
+    return mapAttendance(openSession);
+  }
 
   const result = db.prepare(`
     INSERT INTO attendance (staff_id, clock_in, date)

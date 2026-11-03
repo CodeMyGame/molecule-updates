@@ -22,7 +22,7 @@ import {
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import DataTable from '../components/common/DataTable';
-import { formatCurrency, formatDate, formatDateTime } from '../lib/formatters';
+import { formatCurrency, formatDateTime } from '../lib/formatters';
 import { useCustomers } from '../hooks/useCustomers';
 import { useLocaleCurrencyIcon } from '../hooks/useLocaleCurrencyIcon';
 import { useBillingStore } from '../stores/billing.store';

@@ -1,9 +1,9 @@
 import './fetch-polyfill';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import fs from 'fs';
 import { is } from '@electron-toolkit/utils';
-import { getDb, closeDb, getDbPath } from './db/connection';
+import { getDb, closeDb } from './db/connection';
 import { runMigrations } from './db/migrations/runner';
 import { initialMigration } from './db/migrations/001_initial';
 import { addStationToMenuItems } from './db/migrations/002_add_station_to_menu_items';
@@ -25,6 +25,9 @@ import { addSplitFromOrderId } from './db/migrations/019_add_split_from_order_id
 import { syncOrderItemsTax } from './db/migrations/020_sync_order_items_tax';
 import { defaultPaperAndFontSize } from './db/migrations/021_default_paper_and_font_size';
 import { addQrStyleSetting } from './db/migrations/022_add_qr_style_setting';
+import { allowMultipleAttendanceShifts } from './db/migrations/023_allow_multiple_attendance_shifts';
+import { addOrderItemAddonsPerfIndex } from './db/migrations/024_add_order_item_addons_perf_index';
+import { addMissingFkIndexes } from './db/migrations/025_add_missing_fk_indexes';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -92,7 +95,9 @@ function createWindow(): void {
   });
 
   mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
-    logger.info(`[Renderer] ${message} (${sourceId}:${line})`);
+    if (level >= 2 || is.dev) {
+      logger.info(`[Renderer] ${message} (${sourceId}:${line})`);
+    }
     if (level === 3) {
       errorLogger.recordError({
         source: 'renderer',
@@ -143,6 +148,9 @@ function initializeDatabase(): void {
       syncOrderItemsTax,
       defaultPaperAndFontSize,
       addQrStyleSetting,
+      allowMultipleAttendanceShifts,
+      addOrderItemAddonsPerfIndex,
+      addMissingFkIndexes,
     ]);
 
     // Seed default data

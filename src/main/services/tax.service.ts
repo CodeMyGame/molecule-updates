@@ -28,12 +28,13 @@ export function calculateTax(
   }
 
   // Tax is calculated on post-discount amounts (proportional reduction per item)
+  const netOrderAmount = subtotal - discountAmount;
   const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
   const slabMap = new Map<number, { taxableAmount: number }>();
 
   for (const item of items) {
     const itemTotal = item.unitPrice * item.quantity;
-    const discountedItemTotal = Math.round(itemTotal * (1 - discountRatio));
+    const discountedItemTotal = itemTotal * (1 - discountRatio);
     const existing = slabMap.get(item.taxRate);
     if (existing) {
       existing.taxableAmount += discountedItemTotal;
@@ -48,20 +49,34 @@ export function calculateTax(
   let totalSGST = 0;
   let totalTax = 0;
 
-  for (const [rate, data] of slabMap) {
-    const halfRate = rate / 2;
-    const cgst = Math.round((data.taxableAmount * halfRate) / 100);
-    const sgst = Math.round((data.taxableAmount * halfRate) / 100);
-    const slabTax = cgst + sgst;
+  // Round each slab's total taxable amount to integer paise, reconciling any residual difference with netOrderAmount
+  const slabEntries = Array.from(slabMap.entries()).sort((a, b) => b[1].taxableAmount - a[1].taxableAmount);
+  let allocatedTaxable = 0;
+  const roundedSlabs: { rate: number; taxableAmount: number }[] = [];
+
+  for (let i = 0; i < slabEntries.length; i++) {
+    const [rate, data] = slabEntries[i];
+    let roundedAmount = Math.round(data.taxableAmount);
+    if (i === slabEntries.length - 1 && slabEntries.length > 0) {
+      roundedAmount = netOrderAmount - allocatedTaxable;
+    }
+    allocatedTaxable += roundedAmount;
+    roundedSlabs.push({ rate, taxableAmount: Math.max(0, roundedAmount) });
+  }
+
+  for (const { rate, taxableAmount } of roundedSlabs) {
+    const slabTax = Math.round((taxableAmount * rate) / 100);
+    const cgst = Math.round(slabTax / 2);
+    const sgst = slabTax - cgst;
 
     slabs.push({
       rate,
-      taxableAmount: data.taxableAmount,
+      taxableAmount,
       cgst,
       sgst,
     });
 
-    totalTaxable += data.taxableAmount;
+    totalTaxable += taxableAmount;
     totalCGST += cgst;
     totalSGST += sgst;
     totalTax += slabTax;

@@ -183,13 +183,13 @@ export function cashFlow(dateRange: DateRangeFilter): CashFlowReport {
   const db = getDb();
   const { startDate, endDate } = normalizeDateRange(dateRange);
 
-  // Get day session info
-  const session = db.prepare(`
+  // Get all day sessions in range to accurately account for multi-shift operations
+  const sessions = db.prepare(`
     SELECT opening_cash, closing_cash, expected_cash
     FROM day_sessions
     WHERE opened_at >= ? AND opened_at <= ?
-    ORDER BY opened_at DESC LIMIT 1
-  `).get(startDate, endDate) as any;
+    ORDER BY opened_at ASC
+  `).all(startDate, endDate) as any[];
 
   const cashSales = db.prepare(`
     SELECT COALESCE(SUM(p.amount), 0) AS total
@@ -202,9 +202,9 @@ export function cashFlow(dateRange: DateRangeFilter): CashFlowReport {
 
   const coins = getCoinTotals(startDate, endDate);
 
-  const openingCash = session?.opening_cash ?? 0;
+  const openingCash = sessions.reduce((sum: number, s: any) => sum + (s.opening_cash ?? 0), 0);
   const cashSalesAmount = cashSales?.total ?? 0;
-  const closingCash = session?.closing_cash ?? 0;
+  const closingCash = sessions.reduce((sum: number, s: any) => sum + (s.closing_cash ?? 0), 0);
   const expectedCash = openingCash + cashSalesAmount;
 
   return {
@@ -233,12 +233,13 @@ export function inventoryConsumption(dateRange: DateRangeFilter): {
       ii.id AS inventory_item_id,
       ii.name,
       ii.unit,
+      ii.cost_per_unit,
       COALESCE(SUM(CASE WHEN st.transaction_type = 'consumption' THEN st.quantity ELSE 0 END), 0) AS total_consumed,
       COALESCE(SUM(CASE WHEN st.transaction_type = 'purchase' THEN st.quantity ELSE 0 END), 0) AS total_purchased
     FROM inventory_items ii
     LEFT JOIN stock_transactions st ON ii.id = st.inventory_item_id
       AND st.created_at >= ? AND st.created_at <= ?
-    GROUP BY ii.id, ii.name, ii.unit
+    GROUP BY ii.id, ii.name, ii.unit, ii.cost_per_unit
     HAVING total_consumed > 0 OR total_purchased > 0
     ORDER BY total_consumed DESC
   `).all(startDate, endDate) as any[];
@@ -249,7 +250,7 @@ export function inventoryConsumption(dateRange: DateRangeFilter): {
     unit: row.unit,
     totalConsumed: row.total_consumed,
     totalWasted: 0,
-    totalCost: row.total_purchased,
+    totalCost: Math.round(row.total_consumed * (row.cost_per_unit ?? 0)),
   }));
 }
 
@@ -352,13 +353,12 @@ export function dayEndSummary(dateRange: DateRangeFilter): {
     WHERE p.payment_mode = 'cash' AND p.created_at >= ? AND p.created_at <= ? AND o.status = 'completed'
   `).get(startDate, endDate) as any;
 
-  const session = db.prepare(`
+  const sessions = db.prepare(`
     SELECT opening_cash FROM day_sessions
     WHERE opened_at >= ? AND opened_at <= ?
-    ORDER BY opened_at DESC LIMIT 1
-  `).get(startDate, endDate) as any;
+  `).all(startDate, endDate) as any[];
 
-  const openingCash = session?.opening_cash ?? 0;
+  const openingCash = sessions.reduce((sum: number, s: any) => sum + (s.opening_cash ?? 0), 0);
   const expectedCash = openingCash + (cashPayments?.total ?? 0);
 
   const coins = getCoinTotals(startDate, endDate);
@@ -616,4 +616,37 @@ export function voidReport(dateRange: DateRangeFilter): VoidReportSummary {
     items,
   };
 }
+
+export function tableWiseSales(dateRange: { startDate: string; endDate: string }) {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT
+      o.table_id,
+      COALESCE(t.name, o.table_name_snapshot, 'Table ' || o.table_id) AS table_name,
+      COUNT(*) AS total_orders,
+      SUM(CASE WHEN o.status = 'completed' THEN 1 ELSE 0 END) AS completed_orders,
+      SUM(CASE WHEN o.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_orders,
+      SUM(CASE WHEN o.status = 'completed' THEN o.grand_total ELSE 0 END) AS revenue,
+      SUM(CASE WHEN o.status = 'completed' THEN o.discount_amount ELSE 0 END) AS discount,
+      SUM(CASE WHEN o.status = 'completed' THEN o.tax_amount ELSE 0 END) AS tax
+    FROM orders o
+    LEFT JOIN tables t ON o.table_id = t.id
+    WHERE o.table_id IS NOT NULL
+      AND date(o.created_at) >= date(?)
+      AND date(o.created_at) <= date(?)
+    GROUP BY o.table_id
+    ORDER BY revenue DESC
+  `).all(dateRange.startDate, dateRange.endDate) as any[];
+
+  return rows.map((r) => ({
+    tableName: r.table_name,
+    totalOrders: Number(r.total_orders) || 0,
+    completedOrders: Number(r.completed_orders) || 0,
+    cancelledOrders: Number(r.cancelled_orders) || 0,
+    revenue: Number(r.revenue) || 0,
+    discount: Number(r.discount) || 0,
+    tax: Number(r.tax) || 0,
+  }));
+}
+
 

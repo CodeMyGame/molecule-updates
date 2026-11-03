@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ipc } from '../lib/ipc';
 import { TableStatus } from '../../shared/enums';
 import type { Table, Floor, CreateTableDTO, UpdateTableDTO } from '../../shared/types/table.types';

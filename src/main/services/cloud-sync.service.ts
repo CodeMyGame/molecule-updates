@@ -204,24 +204,70 @@ function periodMetrics(startDate: string, endDate: string): Record<string, unkno
 
 // ── Snapshot builder (reuses reports.service) ────────────────────────────────
 
+const PERIOD_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours cache for multi-day period rollups (week, month, year)
+let cachedPeriods: {
+  date: string;
+  timestamp: number;
+  week: Record<string, unknown>;
+  month: Record<string, unknown>;
+  year: Record<string, unknown>;
+} | null = null;
+
+export function invalidatePeriodCache(): void {
+  cachedPeriods = null;
+}
+
 /**
  * Build the live dashboard payload for a given date (defaults to today).
  * Tier 1 (performance) + Tier 2 (loss prevention), all from existing reports.
  */
-export function buildSnapshot(date = localDateStr()): Record<string, unknown> {
+export function buildSnapshot(date = localDateStr(), forceFresh = false): Record<string, unknown> {
   const cash = reportsService.cashFlow({ startDate: date, endDate: date }); // opening/closing/expected + difference
 
+  const isToday = date === localDateStr();
   const yearStart = `${date.slice(0, 4)}-01-01`;
   const monthStart = `${date.slice(0, 7)}-01`;
 
-  // Full metric blocks per period. `today` doubles as the top-level fields below
-  // (backward compatibility with dashboards that predate `periods`).
+  // Live "today" metrics are always freshly evaluated in real-time
   const today = periodMetrics(date, date);
+
+  let week: Record<string, unknown>;
+  let month: Record<string, unknown>;
+  let year: Record<string, unknown>;
+
+  const now = Date.now();
+  if (
+    !forceFresh &&
+    isToday &&
+    cachedPeriods &&
+    cachedPeriods.date === date &&
+    now - cachedPeriods.timestamp < PERIOD_CACHE_TTL_MS
+  ) {
+    // Reuse cached multi-day period metrics to prevent running heavy multi-month/year SQL queries every 15s
+    week = cachedPeriods.week;
+    month = cachedPeriods.month;
+    year = cachedPeriods.year;
+  } else {
+    week = periodMetrics(weekStartStr(), date);
+    month = periodMetrics(monthStart, date);
+    year = periodMetrics(yearStart, date);
+
+    if (isToday) {
+      cachedPeriods = {
+        date,
+        timestamp: now,
+        week,
+        month,
+        year,
+      };
+    }
+  }
+
   const periods = {
     today,
-    week: periodMetrics(weekStartStr(), date),
-    month: periodMetrics(monthStart, date),
-    year: periodMetrics(yearStart, date),
+    week,
+    month,
+    year,
   };
 
   // Tier 3 — low stock alerts (lightweight). Not period-scoped ("right now").
@@ -447,7 +493,7 @@ export async function pushDailySnapshot(): Promise<void> {
   if (!currentUser || !firestore) return;
   const uid = currentUser.uid;
   const today = localDateStr();
-  const snapshot = buildSnapshot(today);
+  const snapshot = buildSnapshot(today, true);
   const payload = { ...snapshot, updatedAt: serverTimestamp() };
   await Promise.all([
     setDoc(doc(firestore, `restaurants/${uid}/daily/${today}`), payload, { merge: true }),

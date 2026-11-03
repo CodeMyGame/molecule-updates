@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Download, RefreshCw, X } from 'lucide-react';
 
 type UpdateState = 'idle' | 'available' | 'downloading' | 'ready' | 'error';

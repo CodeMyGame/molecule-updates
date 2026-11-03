@@ -100,7 +100,7 @@
     "addedToNextKot": "次のKOTに1つ追加しました",
     "disableKotView": "KOT表示：ON（クリックで統合リスト表示）",
     "enableKotView": "KOT表示：OFF（クリックでKOTごとに分割）",
-    "kotViewToggle": "KOT",
+    "kotViewToggle": "KOT表示",
     "cancelOrder": "注文をキャンセル",
     "itemCount": "{{count}} 点",
     "newItems": "新規商品",

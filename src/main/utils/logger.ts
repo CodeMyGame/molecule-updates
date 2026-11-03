@@ -23,13 +23,43 @@ function getLogFilePath(): string {
   return path.join(logDir, `pos-${date}.log`);
 }
 
+let logBuffer: string[] = [];
+let flushTimeout: NodeJS.Timeout | null = null;
+
+function flushLogBuffer(): void {
+  if (logBuffer.length === 0) return;
+  const chunk = logBuffer.join('');
+  logBuffer = [];
+  if (flushTimeout) {
+    clearTimeout(flushTimeout);
+    flushTimeout = null;
+  }
+  const filePath = getLogFilePath();
+  fs.appendFile(filePath, chunk, () => {
+    // asynchronous non-blocking disk write
+  });
+}
+
 function writeToFile(level: string, message: string, ...args: unknown[]): void {
   const logLine = `[${getTimestamp()}] [${level}] ${message} ${args.length > 0 ? JSON.stringify(args) : ''}\n`;
-  try {
-    fs.appendFileSync(getLogFilePath(), logLine);
-  } catch {
-    // Silently fail file logging
+  logBuffer.push(logLine);
+
+  if (logBuffer.length >= 25) {
+    flushLogBuffer();
+  } else if (!flushTimeout) {
+    flushTimeout = setTimeout(flushLogBuffer, 500);
   }
+}
+
+if (typeof process !== 'undefined') {
+  process.on('beforeExit', flushLogBuffer);
+  process.on('exit', () => {
+    if (logBuffer.length > 0) {
+      try {
+        fs.appendFileSync(getLogFilePath(), logBuffer.join(''));
+      } catch {}
+    }
+  });
 }
 
 export const logger = {

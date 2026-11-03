@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { ipc } from '../lib/ipc';
 
 interface MenuItem {
   id: number;
@@ -82,8 +83,11 @@ interface BillingState {
   outboundTransfers: Record<number, OutboundTransferEvent[]>;
   splitFromOrderId: number | null;
   splitFromOrderNumber: string | null;
+  showKotSeparators: boolean;
 
   // Actions
+  setShowKotSeparators: (show: boolean) => void;
+  toggleKotSeparators: () => void;
   recordOutboundTransfer: (orderId: number, event: OutboundTransferEvent) => void;
   addToCart: (item: MenuItem, variation?: Variation, addons?: Addon[]) => void;
   addTempItemToCart: (name: string, priceInPaise: number, taxRate: number) => void;
@@ -113,10 +117,90 @@ interface BillingState {
   getGrandTotal: () => number;
 }
 
+function getInitialKotSeparators(): boolean {
+  try {
+    return localStorage.getItem('show_kot_separators') === 'true';
+  } catch {
+    return false;
+  }
+}
+
 function calculateUnitPrice(item: MenuItem, variation?: Variation, addons?: Addon[]): number {
   const basePrice = variation ? item.basePrice + variation.priceDelta : item.basePrice;
   const addonsTotal = (addons ?? []).reduce((sum, a) => sum + a.price, 0);
   return basePrice + addonsTotal;
+}
+
+interface CartCalculations {
+  subtotal: number;
+  discountAmount: number;
+  taxBreakdown: TaxBreakdownItem[];
+  roundOff: number;
+  grandTotal: number;
+}
+
+let lastCartRef: CartItem[] | null = null;
+let lastDiscountRef: DiscountInfo | null = null;
+let cachedCalc: CartCalculations | null = null;
+
+function computeCartTotals(cart: CartItem[], discount: DiscountInfo | null): CartCalculations {
+  if (cachedCalc && lastCartRef === cart && lastDiscountRef === discount) {
+    return cachedCalc;
+  }
+
+  const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+
+  let discountAmount = 0;
+  if (discount) {
+    if (discount.type === 'percent') {
+      const clampedPercent = Math.min(discount.value, 100);
+      discountAmount = Math.round((subtotal * clampedPercent) / 100);
+    } else {
+      discountAmount = Math.min(discount.value, subtotal);
+    }
+  }
+
+  const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
+  const taxMap = new Map<number, number>();
+  for (const item of cart) {
+    const rate = item.menuItem.taxRate;
+    const current = taxMap.get(rate) ?? 0;
+    const discountedAmount = Math.round(item.total * (1 - discountRatio));
+    taxMap.set(rate, current + discountedAmount);
+  }
+
+  const taxBreakdown: TaxBreakdownItem[] = [];
+  let totalTax = 0;
+  for (const [rate, taxableAmount] of taxMap) {
+    const taxAmount = Math.round((taxableAmount * rate) / 100);
+    const cgst = Math.round(taxAmount / 2);
+    const sgst = taxAmount - cgst;
+    totalTax += taxAmount;
+    taxBreakdown.push({
+      rate,
+      taxableAmount,
+      cgst,
+      sgst,
+      total: taxAmount,
+    });
+  }
+  taxBreakdown.sort((a, b) => a.rate - b.rate);
+
+  const rawTotal = subtotal - discountAmount + totalTax;
+  const roundOff = Math.round(rawTotal / 100) * 100 - rawTotal;
+  const grandTotal = rawTotal + roundOff;
+
+  lastCartRef = cart;
+  lastDiscountRef = discount;
+  cachedCalc = {
+    subtotal,
+    discountAmount,
+    taxBreakdown,
+    roundOff,
+    grandTotal,
+  };
+
+  return cachedCalc;
 }
 
 export const useBillingStore = create<BillingState>((set, get) => ({
@@ -134,6 +218,25 @@ export const useBillingStore = create<BillingState>((set, get) => ({
   outboundTransfers: {},
   splitFromOrderId: null,
   splitFromOrderNumber: null,
+  showKotSeparators: getInitialKotSeparators(),
+
+  setShowKotSeparators: (show: boolean) => {
+    try {
+      localStorage.setItem('show_kot_separators', String(show));
+    } catch { /* ignore */ }
+    set({ showKotSeparators: show });
+  },
+
+  toggleKotSeparators: () => {
+    const nextVal = !get().showKotSeparators;
+    try {
+      localStorage.setItem('show_kot_separators', String(nextVal));
+    } catch { /* ignore */ }
+    if (window.electronAPI?.settings?.set) {
+      ipc(window.electronAPI.settings.set('show_kot_separators', String(nextVal), 'billing')).catch(() => {});
+    }
+    set({ showKotSeparators: nextVal });
+  },
 
   recordOutboundTransfer: (orderId: number, event: OutboundTransferEvent) => {
     set((state) => {
@@ -351,70 +454,27 @@ export const useBillingStore = create<BillingState>((set, get) => ({
     }),
 
   getSubtotal: () => {
-    return get().cart.reduce((sum, item) => sum + item.total, 0);
+    const { cart, discount } = get();
+    return computeCartTotals(cart, discount).subtotal;
   },
 
   getTaxBreakdown: () => {
-    const { cart } = get();
-    const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-    const discountAmount = get().getDiscountAmount();
-    // Proportionally reduce each item's taxable base by the discount ratio
-    const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;
-
-    const taxMap = new Map<number, number>();
-    for (const item of cart) {
-      const rate = item.menuItem.taxRate;
-      const current = taxMap.get(rate) ?? 0;
-      const discountedAmount = Math.round(item.total * (1 - discountRatio));
-      taxMap.set(rate, current + discountedAmount);
-    }
-
-    const breakdown: TaxBreakdownItem[] = [];
-    for (const [rate, taxableAmount] of taxMap) {
-      const taxAmount = Math.round((taxableAmount * rate) / 100);
-      const cgst = Math.round(taxAmount / 2);
-      const sgst = taxAmount - cgst;
-      breakdown.push({
-        rate,
-        taxableAmount,
-        cgst,
-        sgst,
-        total: taxAmount,
-      });
-    }
-
-    return breakdown.sort((a, b) => a.rate - b.rate);
+    const { cart, discount } = get();
+    return computeCartTotals(cart, discount).taxBreakdown;
   },
 
   getDiscountAmount: () => {
-    const { discount } = get();
-    if (!discount) return 0;
-
-    const subtotal = get().getSubtotal();
-
-    if (discount.type === 'percent') {
-      const clampedPercent = Math.min(discount.value, 100);
-      return Math.round((subtotal * clampedPercent) / 100);
-    }
-    return Math.min(discount.value, subtotal);
+    const { cart, discount } = get();
+    return computeCartTotals(cart, discount).discountAmount;
   },
 
   getRoundOff: () => {
-    const subtotal = get().getSubtotal();
-    const discountAmount = get().getDiscountAmount();
-    const taxBreakdown = get().getTaxBreakdown();
-    const totalTax = taxBreakdown.reduce((sum, t) => sum + t.total, 0);
-    const rawTotal = subtotal - discountAmount + totalTax;
-    return Math.round(rawTotal / 100) * 100 - rawTotal;
+    const { cart, discount } = get();
+    return computeCartTotals(cart, discount).roundOff;
   },
 
   getGrandTotal: () => {
-    const subtotal = get().getSubtotal();
-    const discountAmount = get().getDiscountAmount();
-    const taxBreakdown = get().getTaxBreakdown();
-    const totalTax = taxBreakdown.reduce((sum, t) => sum + t.total, 0);
-    const rawTotal = subtotal - discountAmount + totalTax;
-    const roundOff = Math.round(rawTotal / 100) * 100 - rawTotal;
-    return rawTotal + roundOff;
+    const { cart, discount } = get();
+    return computeCartTotals(cart, discount).grandTotal;
   },
 }));

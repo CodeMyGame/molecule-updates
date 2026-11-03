@@ -1,6 +1,7 @@
 import { getDb } from '../connection';
 import { format } from 'date-fns';
 import { KOTStatus } from '../../../shared/enums';
+import * as settingsRepo from './settings.repo';
 
 export interface KOT {
   id: number;
@@ -79,7 +80,9 @@ export function getActive(): KOT[] {
     WHERE o.status = 'active'
     ORDER BY k.printed_at DESC
   `).all() as any[];
-  return rows.map((row) => mapKot(row, getKotItems(row.id)));
+  const kotIds = rows.map((r) => r.id);
+  const itemsMap = batchLoadKotItems(kotIds);
+  return rows.map((row) => mapKot(row, itemsMap.get(row.id) ?? []));
 }
 
 export function updateStatus(id: number, status: KOTStatus): KOT | undefined {
@@ -119,7 +122,9 @@ export function getByStation(station: string): KOT[] {
     WHERE k.station = ? AND k.status IN (?, ?, ?, ?)
     ORDER BY k.printed_at ASC
   `).all(station, KOTStatus.PENDING, KOTStatus.SENT, KOTStatus.PREPARING, KOTStatus.READY) as any[];
-  return rows.map((row) => mapKot(row, getKotItems(row.id)));
+  const kotIds = rows.map((r) => r.id);
+  const itemsMap = batchLoadKotItems(kotIds);
+  return rows.map((row) => mapKot(row, itemsMap.get(row.id) ?? []));
 }
 
 // -- Helpers --
@@ -127,16 +132,23 @@ export function getByStation(station: string): KOT[] {
 export function generateKotNumber(): string {
   const db = getDb();
   const today = format(new Date(), 'yyyyMMdd');
-  const prefix = `KOT-${today}-`;
+  const customPrefix = (settingsRepo.get('kot_prefix') || '').trim();
+  const cleanPrefix = customPrefix ? (customPrefix.endsWith('-') ? customPrefix : `${customPrefix}-`) : 'KOT-';
+  const prefix = `${cleanPrefix}${today}-`;
 
   const last = db.prepare(
     "SELECT kot_number FROM kots WHERE kot_number LIKE ? ORDER BY id DESC LIMIT 1"
   ).get(`${prefix}%`) as any;
 
   let seq = 1;
-  if (last) {
-    const parts = last.kot_number.split('-');
-    seq = parseInt(parts[2], 10) + 1;
+  if (last && last.kot_number) {
+    const match = last.kot_number.slice(prefix.length).match(/^(\d+)/);
+    if (match) {
+      const lastSeq = parseInt(match[1], 10);
+      if (!isNaN(lastSeq)) {
+        seq = lastSeq + 1;
+      }
+    }
   }
 
   return `${prefix}${seq.toString().padStart(3, '0')}`;
@@ -155,21 +167,40 @@ function getKotById(id: number): KOT | undefined {
   return mapKot(row, getKotItems(id));
 }
 
-function getKotItems(kotId: number): KOTItem[] {
+function batchLoadKotItems(kotIds: number[]): Map<number, KOTItem[]> {
+  const result = new Map<number, KOTItem[]>();
+  if (kotIds.length === 0) return result;
+
   const db = getDb();
+  const placeholders = kotIds.map(() => '?').join(',');
   const rows = db.prepare(`
     SELECT ki.*, oi.name as item_name, oi.notes, oi.quantity as oi_qty
     FROM kot_items ki
     JOIN order_items oi ON ki.order_item_id = oi.id
     JOIN kots k ON ki.kot_id = k.id AND oi.order_id = k.order_id
-    WHERE ki.kot_id = ?
-  `).all(kotId) as any[];
-  const getAddons = db.prepare('SELECT name FROM order_item_addons WHERE order_item_id = ?');
-  return rows.map((row) => {
-    const addons = row.order_item_id
-      ? (getAddons.all(row.order_item_id) as { name: string }[]).map((a) => a.name)
-      : [];
-    return {
+    WHERE ki.kot_id IN (${placeholders})
+    ORDER BY ki.id ASC
+  `).all(...kotIds) as any[];
+
+  const orderItemIds = Array.from(new Set(rows.map((r) => r.order_item_id).filter(Boolean)));
+  const addonsByOrderItem = new Map<number, string[]>();
+
+  if (orderItemIds.length > 0) {
+    const oiPlaceholders = orderItemIds.map(() => '?').join(',');
+    const addonRows = db.prepare(
+      `SELECT order_item_id, name FROM order_item_addons WHERE order_item_id IN (${oiPlaceholders})`
+    ).all(...orderItemIds) as { order_item_id: number; name: string }[];
+
+    for (const a of addonRows) {
+      const list = addonsByOrderItem.get(a.order_item_id);
+      if (list) list.push(a.name);
+      else addonsByOrderItem.set(a.order_item_id, [a.name]);
+    }
+  }
+
+  for (const row of rows) {
+    const addons = row.order_item_id ? addonsByOrderItem.get(row.order_item_id) : undefined;
+    const item: KOTItem = {
       id: row.id,
       kotId: row.kot_id,
       orderItemId: row.order_item_id,
@@ -178,9 +209,18 @@ function getKotItems(kotId: number): KOTItem[] {
       notes: row.notes ?? undefined,
       isNew: !!row.is_new,
       isCancelled: !!row.is_cancelled,
-      addons: addons.length > 0 ? addons : undefined,
+      addons: addons && addons.length > 0 ? addons : undefined,
     };
-  });
+    const list = result.get(row.kot_id);
+    if (list) list.push(item);
+    else result.set(row.kot_id, [item]);
+  }
+
+  return result;
+}
+
+function getKotItems(kotId: number): KOTItem[] {
+  return batchLoadKotItems([kotId]).get(kotId) ?? [];
 }
 
 function mapKot(row: any, items: KOTItem[]): KOT {

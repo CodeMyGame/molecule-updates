@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Search, Leaf, CircleDot, Loader2, TrendingUp, Star, Plus, Settings, Pencil, Trash2, Pin } from 'lucide-react';
+import { Search, CircleDot, Loader2, TrendingUp, Star, Plus, Settings, Pencil, Trash2, Pin } from 'lucide-react';
 import type { MenuCategory, MenuItem, Variation, Addon, AddonGroup } from '../../hooks/useMenu';
 import { formatCurrency } from '../../lib/formatters';
 import { ipc } from '../../lib/ipc';

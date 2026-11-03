@@ -3,6 +3,16 @@ import { app } from 'electron';
 import path from 'path';
 
 let db: Database.Database | null = null;
+let checkpointTimer: NodeJS.Timeout | null = null;
+
+export function checkpointWal(mode: 'PASSIVE' | 'FULL' | 'RESTART' | 'TRUNCATE' = 'PASSIVE'): void {
+  if (!db) return;
+  try {
+    db.pragma(`wal_checkpoint(${mode})`);
+  } catch {
+    // If database is busy or locked, back off safely
+  }
+}
 
 export function getDbPath(): string {
   try {
@@ -28,12 +38,28 @@ export function getDb(): Database.Database {
   db.pragma('busy_timeout = 5000');
   db.pragma('synchronous = NORMAL');
   db.pragma('cache_size = -64000');
+  db.pragma('wal_autocheckpoint = 1000');
+
+  // Periodic passive WAL checkpoint every 30 minutes to prevent WAL log bloat
+  if (!checkpointTimer) {
+    checkpointTimer = setInterval(() => {
+      checkpointWal('PASSIVE');
+    }, 30 * 60 * 1000);
+    checkpointTimer.unref?.();
+  }
 
   return db;
 }
 
 export function closeDb(): void {
+  if (checkpointTimer) {
+    clearInterval(checkpointTimer);
+    checkpointTimer = null;
+  }
   if (db) {
+    try {
+      db.pragma('wal_checkpoint(TRUNCATE)');
+    } catch {}
     db.close();
     db = null;
   }
