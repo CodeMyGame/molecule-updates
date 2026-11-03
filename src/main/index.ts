@@ -33,6 +33,7 @@ import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
 import * as settingsRepo from './db/repositories/settings.repo';
 import * as whatsappService from './services/whatsapp.service';
+import { getPastReleases, downloadAndRollback } from './services/rollback.service';
 import * as supabaseBackupService from './services/supabase-backup.service';
 import * as cloudSync from './services/cloud-sync.service';
 import * as kitchenServer from './services/kitchen-server.service';
@@ -323,6 +324,39 @@ function setupAutoUpdater(): void {
     }
   });
 
+  ipcMain.handle('updater:get-past-releases', async () => {
+    try {
+      const releases = await getPastReleases();
+      return { success: true, data: releases };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle('updater:rollback-to-version', async (_event, { downloadUrl, fileName }) => {
+    try {
+      // Pause automatic updates on rollback so app doesn't re-upgrade automatically
+      try {
+        settingsRepo.set('auto_update_enabled', 'false', 'system');
+      } catch {}
+
+      const result = await downloadAndRollback(downloadUrl, fileName, mainWindow);
+      return result;
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  ipcMain.handle('updater:get-auto-update', () => {
+    const val = settingsRepo.get('auto_update_enabled');
+    return val !== 'false';
+  });
+
+  ipcMain.handle('updater:set-auto-update', (_event, enabled: boolean) => {
+    settingsRepo.set('auto_update_enabled', String(enabled), 'system');
+    return true;
+  });
+
   if (is.dev) return; // skip in dev
 
   const updater = getAutoUpdater();
@@ -330,6 +364,7 @@ function setupAutoUpdater(): void {
 
   updater.autoDownload = false;
   updater.autoInstallOnAppQuit = true;
+  updater.allowDowngrade = true;
 
   updater.on('update-available', (info: any) => {
     mainWindow?.webContents.send('updater:update-available', info);
@@ -356,10 +391,13 @@ function setupAutoUpdater(): void {
     updater.quitAndInstall();
   });
 
-  // Automatically check for updates on app startup (in production)
-  updater.checkForUpdatesAndNotify().catch((err: any) => {
-    logger.error('Background auto-update check failed:', err);
-  });
+  // Automatically check for updates on app startup if auto-updates are enabled
+  const autoUpdateSetting = settingsRepo.get('auto_update_enabled');
+  if (autoUpdateSetting !== 'false') {
+    updater.checkForUpdatesAndNotify().catch((err: any) => {
+      logger.error('Background auto-update check failed:', err);
+    });
+  }
 }
 
 app.whenReady().then(async () => {

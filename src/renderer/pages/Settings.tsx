@@ -39,6 +39,7 @@ import {
   Eye,
   EyeOff,
   RotateCcw,
+  History,
   Image as ImageIcon,
   Cloud,
   Gift,
@@ -403,6 +404,16 @@ const Settings: React.FC = () => {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [updateError, setUpdateError] = useState('');
 
+  // Rollback to previous version state
+  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(true);
+  const [pastReleases, setPastReleases] = useState<any[]>([]);
+  const [loadingReleases, setLoadingReleases] = useState(false);
+  const [selectedRollbackVersion, setSelectedRollbackVersion] = useState<string>('');
+  const [showRollbackModal, setShowRollbackModal] = useState(false);
+  const [isRollingBack, setIsRollingBack] = useState(false);
+  const [rollbackProgress, setRollbackProgress] = useState<{ percent: number; downloaded: number; total: number } | null>(null);
+  const [rollbackError, setRollbackError] = useState<string | null>(null);
+
   // Fetch current version on mount
   useEffect(() => {
     const fetchVersion = async () => {
@@ -462,6 +473,83 @@ const Settings: React.FC = () => {
       }
     } catch (err: any) {
       setUpdateState('no-update');
+    }
+  };
+
+  // Fetch auto-update status and past releases when system update tab is opened
+  useEffect(() => {
+    if (activeSection !== 'system_update') return;
+
+    if (window.electronAPI?.updater) {
+      window.electronAPI.updater.getAutoUpdate?.()
+        .then((val: boolean) => setAutoUpdateEnabled(val !== false))
+        .catch(() => {});
+
+      setLoadingReleases(true);
+      window.electronAPI.updater.getPastReleases?.()
+        .then((res: any) => {
+          const list = res?.success && Array.isArray(res.data) ? res.data : [];
+          setPastReleases(list);
+          const firstOlder = list.find((r: any) => r.version !== appVersion && r.asset);
+          if (firstOlder) {
+            setSelectedRollbackVersion(firstOlder.version);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoadingReleases(false));
+    }
+  }, [activeSection, appVersion]);
+
+  // Listen for rollback progress
+  useEffect(() => {
+    if (!window.electronAPI?.updater) return;
+    const unsub = window.electronAPI.updater.onRollbackProgress?.((p: any) => {
+      setRollbackProgress(p);
+    });
+    return () => {
+      if (typeof unsub === 'function') unsub();
+    };
+  }, []);
+
+  const handleToggleAutoUpdate = async () => {
+    const nextVal = !autoUpdateEnabled;
+    setAutoUpdateEnabled(nextVal);
+    try {
+      await window.electronAPI.updater.setAutoUpdate?.(nextVal);
+      toast.success(
+        nextVal
+          ? t('settings.autoUpdateEnabled', 'Automatic updates enabled')
+          : t('settings.autoUpdateDisabled', 'Automatic updates paused')
+      );
+    } catch {
+      toast.error('Failed to update setting');
+    }
+  };
+
+  const handleStartRollback = async () => {
+    const targetRelease = pastReleases.find((r) => r.version === selectedRollbackVersion);
+    if (!targetRelease || !targetRelease.asset) {
+      toast.error(t('settings.noRollbackAsset', 'No installer found for this release version.'));
+      return;
+    }
+
+    setIsRollingBack(true);
+    setRollbackError(null);
+    setRollbackProgress({ percent: 0, downloaded: 0, total: targetRelease.asset.size || 0 });
+
+    try {
+      const res = await window.electronAPI.updater.rollbackToVersion({
+        downloadUrl: targetRelease.asset.downloadUrl,
+        fileName: targetRelease.asset.name,
+      });
+
+      if (!res?.success) {
+        setRollbackError(res?.error || 'Rollback download failed');
+        setIsRollingBack(false);
+      }
+    } catch (err: any) {
+      setRollbackError(err?.message || 'Rollback download failed');
+      setIsRollingBack(false);
     }
   };
 
@@ -3661,6 +3749,252 @@ const Settings: React.FC = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Automatic Updates Toggle Card */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm flex items-center justify-between">
+          <div className="space-y-0.5 max-w-xl">
+            <p className="text-sm font-semibold text-gray-900">
+              {t('settings.autoUpdateTitle', 'Automatic Updates')}
+            </p>
+            <p className="text-xs text-gray-500">
+              {t(
+                'settings.autoUpdateDesc',
+                'Automatically check and prepare stable releases on startup. Turn off to keep this POS terminal locked to its current installed version.'
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleAutoUpdate}
+            className="flex-shrink-0 transition-opacity hover:opacity-80 cursor-pointer"
+            aria-label={autoUpdateEnabled ? 'Disable automatic updates' : 'Enable automatic updates'}
+          >
+            {autoUpdateEnabled ? (
+              <ToggleRight size={32} className="text-blue-600" />
+            ) : (
+              <ToggleLeft size={32} className="text-gray-400" />
+            )}
+          </button>
+        </div>
+
+        {/* Rollback to Previous Version Card */}
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 flex-shrink-0 mt-0.5">
+                <RotateCcw size={20} />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <span>{t('settings.rollbackTitle', 'Rollback to Previous Version')}</span>
+                  <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                    {t('settings.safeRollbackBadge', 'Zero Data Loss')}
+                  </span>
+                </h3>
+                <p className="text-xs text-gray-500 max-w-2xl">
+                  {t(
+                    'settings.rollbackDesc',
+                    'If you experience any compatibility or operational issues with the current release, you can revert to an earlier stable version. All your business records, orders, menus, and license activations remain completely intact.'
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {loadingReleases ? (
+            <div className="flex items-center gap-3 text-xs text-gray-500 py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+              <Loader2 size={16} className="animate-spin text-amber-500" />
+              <span>{t('settings.loadingReleases', 'Fetching available releases from update archive...')}</span>
+            </div>
+          ) : pastReleases.filter((r) => r.version !== appVersion && r.asset).length === 0 ? (
+            <div className="text-xs text-gray-500 py-3 px-4 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-between">
+              <span>{t('settings.noPastReleases', 'No earlier release packages found.')}</span>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setLoadingReleases(true);
+                  window.electronAPI.updater.getPastReleases?.()
+                    .then((res: any) => {
+                      const list = res?.success && Array.isArray(res.data) ? res.data : [];
+                      setPastReleases(list);
+                    })
+                    .finally(() => setLoadingReleases(false));
+                }}
+              >
+                {t('common.retry', 'Retry')}
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
+                    {t('settings.selectVersionToRollback', 'Select Target Version')}
+                  </label>
+                  <select
+                    value={selectedRollbackVersion}
+                    onChange={(e) => setSelectedRollbackVersion(e.target.value)}
+                    className="w-full text-xs font-mono border border-gray-300 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-gray-800"
+                  >
+                    {pastReleases
+                      .filter((r) => r.version !== appVersion && r.asset)
+                      .map((r) => {
+                        const dateStr = r.publishedAt
+                          ? new Date(r.publishedAt).toLocaleDateString()
+                          : '';
+                        const sizeMb = r.asset?.size
+                          ? ` (~${(r.asset.size / (1024 * 1024)).toFixed(0)} MB)`
+                          : '';
+                        return (
+                          <option key={r.version} value={r.version}>
+                            v{r.version} {dateStr ? `— Released ${dateStr}` : ''}{sizeMb}
+                          </option>
+                        );
+                      })}
+                  </select>
+                </div>
+                <div className="sm:self-end">
+                  <Button
+                    variant="warning"
+                    onClick={() => setShowRollbackModal(true)}
+                    disabled={!selectedRollbackVersion || isRollingBack}
+                    icon={<RotateCcw size={15} />}
+                  >
+                    {t('settings.rollbackButton', 'Rollback to v{{version}}', { version: selectedRollbackVersion })}
+                  </Button>
+                </div>
+              </div>
+
+              {selectedRollbackVersion && (() => {
+                const target = pastReleases.find((r) => r.version === selectedRollbackVersion);
+                if (!target?.asset) return null;
+                return (
+                  <div className="p-3 bg-amber-50/60 border border-amber-200/70 rounded-lg text-xs text-amber-900 flex items-center justify-between">
+                    <div>
+                      <span className="font-semibold">Target Package:</span>{' '}
+                      <span className="font-mono">{target.asset.name}</span>
+                      <span className="ml-2 text-amber-700">
+                        ({(target.asset.size / (1024 * 1024)).toFixed(1)} MB)
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-amber-700">
+                      Current: v{appVersion || '...'}
+                    </span>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+
+        {/* Rollback Confirmation Modal */}
+        {showRollbackModal && (
+          <Modal
+            isOpen
+            onClose={() => !isRollingBack && setShowRollbackModal(false)}
+            title={t('settings.confirmRollbackTitle', 'Confirm Version Rollback')}
+            size="md"
+            footer={
+              <>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowRollbackModal(false)}
+                  disabled={isRollingBack}
+                >
+                  {t('common.cancel', 'Cancel')}
+                </Button>
+                <Button
+                  variant="warning"
+                  onClick={handleStartRollback}
+                  disabled={isRollingBack}
+                  loading={isRollingBack}
+                  icon={<RotateCcw size={15} />}
+                >
+                  {isRollingBack
+                    ? t('settings.rollingBack', 'Downloading & Installing...')
+                    : t('settings.confirmRollbackBtn', 'Yes, Rollback to v{{version}}', {
+                        version: selectedRollbackVersion,
+                      })}
+                </Button>
+              </>
+            }
+          >
+            <div className="space-y-4 py-1">
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-2">
+                <p className="font-semibold text-sm text-amber-950 flex items-center gap-1.5">
+                  <AlertCircle size={16} className="text-amber-600 flex-shrink-0" />
+                  <span>
+                    {t('settings.rollbackNoticeTitle', 'Reverting to v{{version}}', {
+                      version: selectedRollbackVersion,
+                    })}
+                  </span>
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-amber-800 ml-1">
+                  <li>
+                    {t(
+                      'settings.rollbackNoticeDb',
+                      'Your local database (%APPDATA%\\molecule), orders, items, and settings are 100% preserved.'
+                    )}
+                  </li>
+                  <li>
+                    {t(
+                      'settings.rollbackNoticeAutoUpdate',
+                      'Automatic updates will be temporarily paused on this device to keep it on v{{version}}.',
+                      { version: selectedRollbackVersion }
+                    )}
+                  </li>
+                  <li>
+                    {t(
+                      'settings.rollbackNoticeRelaunch',
+                      'The v{{version}} installer will be downloaded and launched, then Molecule POS will restart.',
+                      { version: selectedRollbackVersion }
+                    )}
+                  </li>
+                </ul>
+              </div>
+
+              {isRollingBack && (
+                <div className="space-y-2 pt-2">
+                  <div className="flex justify-between text-xs font-medium text-gray-700">
+                    <span>
+                      {rollbackProgress && rollbackProgress.percent >= 100
+                        ? t('settings.rollbackLaunching', 'Launching installer and restarting...')
+                        : t('settings.rollbackDownloading', 'Downloading installer... {{percent}}%', {
+                            percent: rollbackProgress?.percent ?? 0,
+                          })}
+                    </span>
+                    <span className="font-mono text-blue-600 font-semibold">
+                      {rollbackProgress?.percent ?? 0}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="bg-amber-500 h-2.5 rounded-full transition-all duration-200"
+                      style={{ width: `${rollbackProgress?.percent ?? 0}%` }}
+                    />
+                  </div>
+                  {rollbackProgress && rollbackProgress.total > 0 && (
+                    <p className="text-[11px] text-gray-400 text-right font-mono">
+                      {(rollbackProgress.downloaded / (1024 * 1024)).toFixed(1)} MB /{' '}
+                      {(rollbackProgress.total / (1024 * 1024)).toFixed(1)} MB
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {rollbackError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 flex items-start gap-2">
+                  <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold">{t('settings.rollbackFailed', 'Rollback failed')}</p>
+                    <p className="mt-0.5">{rollbackError}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Modal>
         )}
       </div>
     );

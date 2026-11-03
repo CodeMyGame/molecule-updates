@@ -275,6 +275,16 @@ const api = {
       return () => ipcRenderer.removeListener('updater:error', handler);
     },
     installNow: () => ipcRenderer.send('updater:install-now'),
+    getPastReleases: () => ipcRenderer.invoke('updater:get-past-releases'),
+    rollbackToVersion: (data: { downloadUrl: string; fileName: string }) =>
+      ipcRenderer.invoke('updater:rollback-to-version', data),
+    getAutoUpdate: () => ipcRenderer.invoke('updater:get-auto-update'),
+    setAutoUpdate: (enabled: boolean) => ipcRenderer.invoke('updater:set-auto-update', enabled),
+    onRollbackProgress: (cb: (progress: any) => void) => {
+      const handler = (_e: IpcRendererEvent, p: any) => cb(p);
+      ipcRenderer.on('updater:rollback-progress', handler);
+      return () => ipcRenderer.removeListener('updater:rollback-progress', handler);
+    },
   },
 
   whatsapp: {
