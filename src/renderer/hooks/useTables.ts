@@ -25,8 +25,10 @@ export function useTables(): UseTablesReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (isInitial = false) => {
+    if (isInitial) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const [floorData, tableData] = await Promise.all([
@@ -38,12 +40,14 @@ export function useTables(): UseTablesReturn {
     } catch (err: any) {
       setError(err.message ?? 'Failed to load tables');
     } finally {
-      setLoading(false);
+      if (isInitial) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
   }, [fetchData]);
 
   const tablesByFloor = useCallback(
@@ -162,6 +166,8 @@ export function useTables(): UseTablesReturn {
     createFloor,
     updateFloor,
     deleteFloor,
-    refetch: fetchData,
+    refetch: useCallback(async () => {
+      await fetchData(false);
+    }, [fetchData]),
   };
 }

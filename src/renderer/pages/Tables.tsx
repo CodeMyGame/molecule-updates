@@ -438,7 +438,34 @@ const Tables: React.FC = () => {
 
   // --- Handlers ---
 
-  const handleTableClick = (table: Table) => {
+  const lastTableClickTimeRef = React.useRef<number>(0);
+
+  const openAddTableModal = useCallback(() => {
+    setEditingTable(null);
+    setTableForm(defaultTableForm);
+    setShowTableModal(true);
+  }, []);
+
+  const openEditTableModal = useCallback((table: Table) => {
+    setEditingTable(table);
+    setTableForm({
+      name: table.name,
+      capacity: table.capacity,
+      shape: table.shape,
+      posX: table.posX,
+      posY: table.posY,
+    });
+    setShowTableModal(true);
+  }, []);
+
+  const handleTableClick = useCallback((table: Table) => {
+    const now = Date.now();
+    // Guard against rapid duplicate clicks (e.g. double-click or fast touch taps)
+    if (now - lastTableClickTimeRef.current < 300) {
+      return;
+    }
+    lastTableClickTimeRef.current = now;
+
     if (isEditMode) {
       openEditTableModal(table);
       return;
@@ -449,25 +476,13 @@ const Tables: React.FC = () => {
       fetchTableOrder(table.id);
     }
     setShowStatusModal(true);
-  };
+  }, [isEditMode, openEditTableModal, fetchTableOrder]);
 
-  const openAddTableModal = () => {
-    setEditingTable(null);
-    setTableForm(defaultTableForm);
-    setShowTableModal(true);
-  };
-
-  const openEditTableModal = (table: Table) => {
-    setEditingTable(table);
-    setTableForm({
-      name: table.name,
-      capacity: table.capacity,
-      shape: table.shape,
-      posX: table.posX,
-      posY: table.posY,
-    });
-    setShowTableModal(true);
-  };
+  const handleCloseStatusModal = useCallback(() => {
+    setShowStatusModal(false);
+    setSelectedTable(null);
+    setTableOrder(null);
+  }, []);
 
   const handleSaveTable = async () => {
     if (!currentFloorId) return;
@@ -830,10 +845,7 @@ const Tables: React.FC = () => {
       {/* === Table Status / Actions Modal === */}
       <Modal
         isOpen={showStatusModal}
-        onClose={() => {
-          setShowStatusModal(false);
-          setSelectedTable(null);
-        }}
+        onClose={handleCloseStatusModal}
         title={selectedTable?.name ?? t('tables.tableFallback')}
         size="sm"
       >

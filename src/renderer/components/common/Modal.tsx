@@ -1,4 +1,5 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -30,46 +31,62 @@ const Modal: React.FC<ModalProps> = ({
   footer,
   closeOnOverlay = true,
 }) => {
-  const handleEscape = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    },
-    [onClose]
-  );
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const mountTimeRef = useRef<number>(0);
 
   useEffect(() => {
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
+    if (!isOpen) return;
+
+    mountTimeRef.current = Date.now();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onCloseRef.current();
+      }
     };
-  }, [isOpen, handleEscape]);
+
+    document.addEventListener('keydown', handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  const handleOverlayClick = () => {
+    // Avoid closing if overlay received a click within 200ms of opening
+    // (prevents rapid double-clicks on table cards from immediately closing the modal)
+    if (Date.now() - mountTimeRef.current < 200) return;
+    if (closeOnOverlay) {
+      onCloseRef.current();
+    }
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/50 animate-fade-in"
-        onClick={closeOnOverlay ? onClose : undefined}
+        onClick={handleOverlayClick}
       />
 
       {/* Modal content */}
       <div
-        className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClasses[size]} mx-4 animate-slide-up flex flex-col max-h-[85vh]`}
+        onClick={(e) => e.stopPropagation()}
+        className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClasses[size]} mx-auto animate-slide-up flex flex-col max-h-[85vh] z-10`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -85,7 +102,8 @@ const Modal: React.FC<ModalProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
