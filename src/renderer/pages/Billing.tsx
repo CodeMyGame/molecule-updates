@@ -1626,14 +1626,14 @@ const Billing: React.FC = () => {
       {/* Active orders — portaled into header center slot */}
       {headerSlot && (activeOrders.length > 0 || ordersLoading) && createPortal(
         <>
-          <span className="text-xs font-medium text-gray-500 flex-shrink-0">
+          <span className="text-[10px] font-medium text-gray-400 flex-shrink-0 leading-none">
             {t('billing.ordersBarLabel')}
           </span>
           {ordersLoading && activeOrders.length === 0 ? (
-            <div className="flex items-center gap-1.5">
-              <div className="shimmer h-6 w-20 rounded-md" />
-              <div className="shimmer h-6 w-24 rounded-md" />
-              <div className="shimmer h-6 w-16 rounded-md" />
+            <div className="flex items-center gap-1">
+              <div className="shimmer h-4 w-12 rounded" />
+              <div className="shimmer h-4 w-14 rounded" />
+              <div className="shimmer h-4 w-10 rounded" />
             </div>
           ) : (
             activeOrders.map((order) => {
@@ -1642,10 +1642,10 @@ const Billing: React.FC = () => {
             const oType = (order as any).orderType ?? order.order_type;
             const TypeIcon = oType === 'dine_in' ? UtensilsCrossed : oType === 'takeaway' ? ShoppingBag : Truck;
             const typeBg = isCurrentOrder
-              ? 'bg-blue-600 text-white border-blue-600'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
               : isHeld
                 ? 'bg-amber-50 text-amber-800 border-amber-300'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100';
+                : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300';
 
             const orderItems = (order as any).items ?? [];
             const kotStatuses: string[] = orderItems.map((i: any) => i.kotStatus ?? i.kot_status ?? 'pending');
@@ -1697,18 +1697,18 @@ const Billing: React.FC = () => {
                     y: e.clientY,
                   });
                 }}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px]
-                  font-medium border transition-colors ${typeBg}`}
+                className={`flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]
+                  font-medium border leading-none transition-colors ${typeBg}`}
               >
-                <TypeIcon size={12} />
-                #{String(order.id).padStart(3, '0')}
+                <TypeIcon size={10} className="flex-shrink-0" />
+                <span className="font-mono">#{String(order.id).padStart(3, '0')}</span>
                 {isHeld && (
-                  <span className="px-1 py-0.5 rounded bg-amber-200 text-amber-800 text-[9px] uppercase">
+                  <span className="px-1 py-[1px] rounded bg-amber-200 text-amber-800 text-[8px] font-semibold leading-none uppercase">
                     {t('billing.orderHeldBadge')}
                   </span>
                 )}
                 {kotLabel && (
-                  <span className={`px-1 py-0.5 rounded text-[9px] uppercase ${kotColor}`}>
+                  <span className={`px-1 py-[1px] rounded text-[8px] font-semibold leading-none uppercase ${kotColor}`}>
                     {kotLabel}
                   </span>
                 )}
