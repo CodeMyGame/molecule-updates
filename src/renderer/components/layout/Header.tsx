@@ -213,7 +213,7 @@ const Header: React.FC = () => {
 
       {/* Center slot: pages can portal content here; fallback shows clock */}
       <div className="flex-1 flex items-center justify-center min-w-0">
-        <div id="header-center-slot" className="flex items-center gap-1 overflow-x-auto max-w-full" />
+        <div id="header-center-slot" className="flex items-center gap-1.5 overflow-x-auto max-w-full" />
         <div className={`flex items-center gap-3.5 ${slotHasContent ? 'hidden' : ''}`}>
           <div className="flex items-center gap-1 text-[11px] text-gray-600 leading-none">
             <Clock size={11} />

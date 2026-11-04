@@ -1626,7 +1626,7 @@ const Billing: React.FC = () => {
       {/* Active orders — portaled into header center slot */}
       {headerSlot && (activeOrders.length > 0 || ordersLoading) && createPortal(
         <>
-          <span className="text-[10px] font-medium text-gray-400 flex-shrink-0 leading-none">
+          <span className="text-[11px] font-medium text-gray-400 flex-shrink-0 leading-none">
             {t('billing.ordersBarLabel')}
           </span>
           {ordersLoading && activeOrders.length === 0 ? (
@@ -1639,8 +1639,6 @@ const Billing: React.FC = () => {
             activeOrders.map((order) => {
             const isCurrentOrder = currentOrderId === order.id;
             const isHeld = order.status === 'hold';
-            const oType = (order as any).orderType ?? order.order_type;
-            const TypeIcon = oType === 'dine_in' ? UtensilsCrossed : oType === 'takeaway' ? ShoppingBag : Truck;
             const typeBg = isCurrentOrder
               ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
               : isHeld
@@ -1697,18 +1695,17 @@ const Billing: React.FC = () => {
                     y: e.clientY,
                   });
                 }}
-                className={`flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px]
-                  font-medium border leading-none transition-colors ${typeBg}`}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px]
+                  font-semibold border leading-tight transition-colors ${typeBg}`}
               >
-                <TypeIcon size={10} className="flex-shrink-0" />
-                <span className="font-mono">#{String(order.id).padStart(3, '0')}</span>
+                <span className="font-mono tracking-tight">#{String(order.id).padStart(3, '0')}</span>
                 {isHeld && (
-                  <span className="px-1 py-[1px] rounded bg-amber-200 text-amber-800 text-[8px] font-semibold leading-none uppercase">
+                  <span className="px-1.5 py-0.5 rounded bg-amber-200 text-amber-800 text-[8.5px] font-bold leading-none uppercase">
                     {t('billing.orderHeldBadge')}
                   </span>
                 )}
                 {kotLabel && (
-                  <span className={`px-1 py-[1px] rounded text-[8px] font-semibold leading-none uppercase ${kotColor}`}>
+                  <span className={`px-1.5 py-0.5 rounded text-[8.5px] font-bold leading-none uppercase ${kotColor}`}>
                     {kotLabel}
                   </span>
                 )}
