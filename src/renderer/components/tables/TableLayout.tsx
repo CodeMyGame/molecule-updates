@@ -9,6 +9,7 @@ interface TableOrderInfo {
   grandTotal: number;
   itemCount: number;
   createdAt: string;
+  orderStatus?: string;
 }
 
 interface TableLayoutProps {
@@ -32,6 +33,9 @@ const TableLayout: React.FC<TableLayoutProps> = ({
   const { t } = useTranslation();
   const dineInCount = tables.filter((t) => t.status === TableStatus.OCCUPIED).length;
   const availableCount = tables.filter((t) => t.status === TableStatus.FREE).length;
+  const holdCount = tables.filter(
+    (t) => t.status === TableStatus.OCCUPIED && tableOrders?.get(t.id)?.orderStatus === 'hold'
+  ).length;
 
   const handleDragStart = (e: React.DragEvent, tableId: number) => {
     if (!isEditMode) return;
@@ -64,6 +68,13 @@ const TableLayout: React.FC<TableLayoutProps> = ({
           <span className="text-gray-600">{t('tables.statsDineIn')}</span>
           <span className="font-bold text-gray-900">{dineInCount}</span>
         </div>
+        {holdCount > 0 && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+            <span className="text-gray-600">{t('reports.statusHold', 'Hold')}</span>
+            <span className="font-bold text-amber-700">{holdCount}</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
           <span className="text-gray-600">{t('tables.statsAvailable')}</span>
@@ -81,6 +92,9 @@ const TableLayout: React.FC<TableLayoutProps> = ({
           </span>
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-xs bg-red-400" /> {t('tables.statusOccupied')}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-xs bg-amber-500" /> {t('reports.statusHold', 'Hold')}
           </span>
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-xs bg-yellow-400" /> {t('tables.statusReserved')}
@@ -105,28 +119,32 @@ const TableLayout: React.FC<TableLayoutProps> = ({
         ) : isEditMode ? (
           /* Edit mode: absolute positioning for drag & drop */
           <div className="relative w-full" style={{ minHeight: '450px' }}>
-            {tables.map((table) => (
-              <div
-                key={table.id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, table.id)}
-                className="absolute cursor-move transition-all duration-200"
-                style={{
-                  left: `${table.posX}%`,
-                  top: `${table.posY}%`,
-                }}
-              >
-                <TableCard
-                  table={table}
-                  onClick={onTableClick}
-                  onContextMenu={onTableContextMenu}
-                  isEditMode={isEditMode}
-                  orderTotal={tableOrders?.get(table.id)?.grandTotal}
-                  orderItemCount={tableOrders?.get(table.id)?.itemCount}
-                  orderStartedAt={tableOrders?.get(table.id)?.createdAt}
-                />
-              </div>
-            ))}
+            {tables.map((table) => {
+              const orderInfo = tableOrders?.get(table.id);
+              return (
+                <div
+                  key={table.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, table.id)}
+                  className="absolute cursor-move transition-all duration-200"
+                  style={{
+                    left: `${table.posX}%`,
+                    top: `${table.posY}%`,
+                  }}
+                >
+                  <TableCard
+                    table={table}
+                    onClick={onTableClick}
+                    onContextMenu={onTableContextMenu}
+                    isEditMode={isEditMode}
+                    orderTotal={orderInfo?.grandTotal}
+                    orderItemCount={orderInfo?.itemCount}
+                    orderStartedAt={orderInfo?.createdAt}
+                    orderStatus={orderInfo?.orderStatus}
+                  />
+                </div>
+              );
+            })}
           </div>
         ) : (
           /* Normal mode: grid layout */
@@ -143,6 +161,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
                   orderTotal={orderInfo?.grandTotal}
                   orderItemCount={orderInfo?.itemCount}
                   orderStartedAt={orderInfo?.createdAt}
+                  orderStatus={orderInfo?.orderStatus}
                 />
               );
             })}

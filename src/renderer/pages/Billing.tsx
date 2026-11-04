@@ -278,7 +278,7 @@ const Billing: React.FC = () => {
   const [floors, setFloors] = useState<Floor[]>([]);
   const [tablesLoading, setTablesLoading] = useState(true);
   const [billingFloorId, setBillingFloorId] = useState<number | null>(null);
-  const [tableOrdersMap, setTableOrdersMap] = useState<Map<number, { grandTotal: number; itemCount: number; createdAt: string }>>(new Map());
+  const [tableOrdersMap, setTableOrdersMap] = useState<Map<number, { grandTotal: number; itemCount: number; createdAt: string; orderStatus?: string }>>(new Map());
   const [showAddFloorDialog, setShowAddFloorDialog] = useState(false);
   const [newFloorName, setNewFloorName] = useState('');
   const [savingFloor, setSavingFloor] = useState(false);
@@ -397,7 +397,7 @@ const Billing: React.FC = () => {
   // changed, which left totals stale when the cashier or a waiter tablet
   // appended items to an existing order.)
   useEffect(() => {
-    const map = new Map<number, { grandTotal: number; itemCount: number; createdAt: string }>();
+    const map = new Map<number, { grandTotal: number; itemCount: number; createdAt: string; orderStatus?: string }>();
     for (const order of activeOrders) {
       const tableId = (order as any).tableId ?? (order as any).table_id;
       if (!tableId) continue;
@@ -405,6 +405,7 @@ const Billing: React.FC = () => {
         grandTotal: (order as any).grandTotal ?? 0,
         itemCount: ((order as any).items ?? []).length,
         createdAt: (order as any).createdAt ?? '',
+        orderStatus: order.status,
       });
     }
     setTableOrdersMap(map);
@@ -1847,6 +1848,7 @@ const Billing: React.FC = () => {
                               orderTotal={tableOrdersMap.get(table.id)?.grandTotal}
                               orderItemCount={tableOrdersMap.get(table.id)?.itemCount}
                               orderStartedAt={tableOrdersMap.get(table.id)?.createdAt}
+                              orderStatus={tableOrdersMap.get(table.id)?.orderStatus}
                             />
                           </div>
                         ))}

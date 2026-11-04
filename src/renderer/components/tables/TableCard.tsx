@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Users, Clock, Pin } from 'lucide-react';
+import { Users, Clock, Pin, Pause } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { currencySymbolForLanguage } from '../../lib/currencyLocale';
 import { TableStatus } from '../../../shared/enums';
@@ -16,6 +16,7 @@ interface TableCardProps {
   orderTotal?: number;
   orderItemCount?: number;
   compact?: boolean;
+  orderStatus?: string;
 }
 
 const STATUS_STYLES: Record<
@@ -73,6 +74,7 @@ const TableCard: React.FC<TableCardProps> = ({
   orderTotal,
   orderItemCount: _orderItemCount,
   compact = false,
+  orderStatus,
 }) => {
   const { t, i18n } = useTranslation();
 
@@ -96,15 +98,24 @@ const TableCard: React.FC<TableCardProps> = ({
   );
 
   const isOccupied = table.status === TableStatus.OCCUPIED;
+  const isHold = isOccupied && orderStatus === 'hold';
   const hasOrderInfo = isOccupied && orderTotal !== undefined;
   const elapsedMins = orderStartedAt ? getElapsedMinutes(orderStartedAt) : 0;
-  const waitColor = getWaitTimeColor(elapsedMins);
-  // Flag tables sitting for 2+ hours so the admin notices them at a glance.
-  const isLongHour = isOccupied && elapsedMins >= LONG_HOUR_MINUTES;
+  const waitColor = isHold ? { text: 'text-amber-600', bg: 'bg-amber-50' } : getWaitTimeColor(elapsedMins);
+  // Flag tables sitting for 2+ hours so the admin notices them at a glance (unless on hold)
+  const isLongHour = isOccupied && !isHold && elapsedMins >= LONG_HOUR_MINUTES;
 
-  const badgeLetter = config.label.length > 0
-    ? Array.from(config.label)[0]!.toUpperCase()
-    : '?';
+  const badgeBg = isHold ? 'bg-amber-500 text-white' : config.badge;
+  const badgeText = isHold ? t('reports.statusHold', 'Hold').toUpperCase() : config.label;
+  const badgeLetter = isHold ? 'H' : (config.label.length > 0 ? Array.from(config.label)[0]!.toUpperCase() : '?');
+
+  const cardBorderAndBg = isHold
+    ? 'border-amber-400 bg-amber-50 hover:bg-amber-100/70 hover:border-amber-500'
+    : isOccupied && elapsedMins >= 60
+      ? 'border-red-500 bg-red-50'
+      : isOccupied && elapsedMins >= 30
+        ? 'border-yellow-500 bg-yellow-50'
+        : `${config.border} ${config.bg}`;
 
   return (
     <button
@@ -115,7 +126,7 @@ const TableCard: React.FC<TableCardProps> = ({
         table-card relative flex flex-col items-center justify-center
         rounded-lg w-full border
         ${compact ? 'min-h-[68px] p-1.5' : 'min-h-[72px] p-1.5'}
-        ${isOccupied && elapsedMins >= 60 ? 'border-red-500 bg-red-50' : isOccupied && elapsedMins >= 30 ? 'border-yellow-500 bg-yellow-50' : `${config.border} ${config.bg}`}
+        ${cardBorderAndBg}
         ${isSelected ? '!border-blue-600 ring-2 ring-blue-600 shadow-md z-10' : ''}
         shadow-xs hover:shadow-sm
         transition-all duration-150
@@ -125,12 +136,13 @@ const TableCard: React.FC<TableCardProps> = ({
         ${isLongHour && !isSelected ? 'animate-long-hour' : ''}
         tap-target
       `}
-      title={isLongHour ? t('tables.longHourAlert', { defaultValue: 'Occupied over 2 hours' }) : undefined}
+      title={isHold ? t('reports.statusHold', 'Hold') : isLongHour ? t('tables.longHourAlert', { defaultValue: 'Occupied over 2 hours' }) : undefined}
     >
       <span
-        className={`absolute -top-1 -right-1 font-bold rounded-full ${config.badge} ${compact ? 'text-[8px] px-1 py-0' : 'text-[9px] px-1.5 py-0.2'}`}
+        className={`absolute -top-1 -right-1 font-bold rounded-full flex items-center justify-center gap-0.5 ${badgeBg} ${compact ? 'text-[8px] px-1 py-0' : 'text-[9px] px-1.5 py-0.2'}`}
       >
-        {compact ? badgeLetter : config.label}
+        {isHold && <Pause size={compact ? 6 : 7} className="fill-current shrink-0" />}
+        {compact ? badgeLetter : badgeText}
       </span>
 
       {table.isPinned && (
@@ -148,7 +160,7 @@ const TableCard: React.FC<TableCardProps> = ({
 
       {hasOrderInfo && (
         <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-1 gap-0.5'}`}>
-          <span className={`font-bold text-red-700 ${compact ? 'text-[10px]' : 'text-xs'}`}>
+          <span className={`font-bold ${isHold ? 'text-amber-800' : 'text-red-700'} ${compact ? 'text-[10px]' : 'text-xs'}`}>
             {formatPaise(orderTotal!)}
           </span>
           {orderStartedAt && (

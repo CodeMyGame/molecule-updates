@@ -143,7 +143,7 @@ const Tables: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   // Order summaries for all occupied tables (shown on cards)
-  const [tableOrdersMap, setTableOrdersMap] = useState<Map<number, { grandTotal: number; itemCount: number; createdAt: string }>>(new Map());
+  const [tableOrdersMap, setTableOrdersMap] = useState<Map<number, { grandTotal: number; itemCount: number; createdAt: string; orderStatus?: string }>>(new Map());
 
   // Fetch order summaries for all occupied tables
   const fetchAllTableOrders = useCallback(async () => {
@@ -152,7 +152,7 @@ const Tables: React.FC = () => {
       setTableOrdersMap(new Map());
       return;
     }
-    const map = new Map<number, { grandTotal: number; itemCount: number; createdAt: string }>();
+    const map = new Map<number, { grandTotal: number; itemCount: number; createdAt: string; orderStatus?: string }>();
     await Promise.all(
       occupiedTables.map(async (t) => {
         try {
@@ -162,6 +162,7 @@ const Tables: React.FC = () => {
               grandTotal: order.grandTotal ?? 0,
               itemCount: (order.items ?? []).length,
               createdAt: order.createdAt ?? '',
+              orderStatus: order.status,
             });
           }
         } catch { /* ignore */ }
@@ -852,11 +853,16 @@ const Tables: React.FC = () => {
         {selectedTable && (
           <div className="space-y-4">
             {/* Current status */}
-            <div className="text-sm text-gray-500">
-              {t('tables.statusLabel')}{' '}
+            <div className="text-sm text-gray-500 flex items-center gap-2">
+              <span>{t('tables.statusLabel')}</span>
               <span className="font-medium text-gray-800 capitalize">
                 {selectedTable.status}
               </span>
+              {tableOrder?.status === 'hold' && (
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wide border border-amber-300">
+                  {t('reports.statusHold', 'Hold')}
+                </span>
+              )}
             </div>
 
             {/* Quick actions based on status */}
