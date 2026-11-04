@@ -16,7 +16,7 @@ export interface ReleaseEntry {
 
 export const RELEASES: ReleaseEntry[] = [
   {
-    version: '1.1.22',
+    version: '1.1.21',
     title: 'High Performance, Version Rollback & Compact Billing',
     date: 'Latest Update',
     badge: 'Latest',
@@ -52,25 +52,11 @@ export const RELEASES: ReleaseEntry[] = [
         tag: 'New',
         icon: 'Sparkles',
       },
-    ],
-  },
-  {
-    version: '1.1.21',
-    title: 'Performance & System Stability',
-    date: 'November 2026',
-    summary: 'Enhanced terminal reliability with automated database maintenance and zero memory leaks on 24/7 POS terminals.',
-    highlights: [
       {
         title: 'Database Auto-Maintenance',
         description: 'Automated background SQLite checkpoints ensure lightning-fast database queries even after weeks of non-stop operation.',
         tag: 'Improved',
         icon: 'ShieldCheck',
-      },
-      {
-        title: 'Memory Leak Elimination',
-        description: 'Zero memory retention across long shifts, keeping POS terminals responsive on 2GB/4GB Windows 7 and Windows 10 devices.',
-        tag: 'Improved',
-        icon: 'Zap',
       },
     ],
   },
@@ -108,4 +94,4 @@ export const RELEASES: ReleaseEntry[] = [
   },
 ];
 
-export const LATEST_VERSION = RELEASES[0]?.version || '1.1.22';
+export const LATEST_VERSION = RELEASES[0]?.version || '1.1.21';
