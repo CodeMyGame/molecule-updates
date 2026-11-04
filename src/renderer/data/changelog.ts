@@ -16,10 +16,68 @@ export interface ReleaseEntry {
 
 export const RELEASES: ReleaseEntry[] = [
   {
-    version: '1.1.20',
-    title: 'Hold Orders, QR Payments & Faster Billing',
+    version: '1.1.22',
+    title: 'High Performance, Version Rollback & Compact Billing',
     date: 'Latest Update',
     badge: 'Latest',
+    summary: 'Instant staff unlocking, smooth 60 FPS billing, 1-click version rollback in settings, and a cleaner active orders bar.',
+    highlights: [
+      {
+        title: 'Blazing Fast Performance',
+        description: 'Instant lock-screen unlocking with zero freeze, optimized background cloud sync, and sub-millisecond cart updates during rush hours.',
+        tag: 'Improved',
+        icon: 'Zap',
+      },
+      {
+        title: 'Safe Version Rollback',
+        description: 'Easily revert to any of the last 3 stable releases directly from Settings with zero data loss or database risk.',
+        tag: 'New',
+        icon: 'ShieldCheck',
+      },
+      {
+        title: 'Cleaner Active Orders Bar',
+        description: 'Active order pills in the top header are now sleek, compact, and show real-time KOT statuses without cluttering your screen.',
+        tag: 'Improved',
+        icon: 'Sparkles',
+      },
+      {
+        title: 'Flexible Split Shifts',
+        description: 'Staff can now clock in and out multiple times per day (e.g. morning and evening shifts) seamlessly.',
+        tag: 'New',
+        icon: 'PackageCheck',
+      },
+      {
+        title: 'Smart Cart Refresh',
+        description: 'Order refresh button only appears when an order is placed, preventing accidental refreshes on new carts.',
+        tag: 'New',
+        icon: 'Sparkles',
+      },
+    ],
+  },
+  {
+    version: '1.1.21',
+    title: 'Performance & System Stability',
+    date: 'November 2026',
+    summary: 'Enhanced terminal reliability with automated database maintenance and zero memory leaks on 24/7 POS terminals.',
+    highlights: [
+      {
+        title: 'Database Auto-Maintenance',
+        description: 'Automated background SQLite checkpoints ensure lightning-fast database queries even after weeks of non-stop operation.',
+        tag: 'Improved',
+        icon: 'ShieldCheck',
+      },
+      {
+        title: 'Memory Leak Elimination',
+        description: 'Zero memory retention across long shifts, keeping POS terminals responsive on 2GB/4GB Windows 7 and Windows 10 devices.',
+        tag: 'Improved',
+        icon: 'Zap',
+      },
+    ],
+  },
+  {
+    version: '1.1.20',
+    title: 'Hold Orders, QR Payments & Faster Billing',
+    date: 'November 2026',
     summary: 'Easily pause and resume table orders, print clean UPI QR codes for instant payments, and enjoy a smoother checkout experience.',
     highlights: [
       {
@@ -50,4 +108,4 @@ export const RELEASES: ReleaseEntry[] = [
   },
 ];
 
-export const LATEST_VERSION = RELEASES[0]?.version || '1.1.20';
+export const LATEST_VERSION = RELEASES[0]?.version || '1.1.22';

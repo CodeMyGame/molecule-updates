@@ -25,7 +25,7 @@ import { RELEASES, ReleaseHighlight } from '../../data/changelog';
 
 export const WhatsNewModal: React.FC = () => {
   const { t } = useTranslation();
-  const { isOpen, closeWhatsNew } = useWhatsNewStore();
+  const { isOpen, closeWhatsNew, activeVersion } = useWhatsNewStore();
   const openTour = useTourStore((s) => s.openTour);
 
   // Handle escape key
@@ -40,7 +40,7 @@ export const WhatsNewModal: React.FC = () => {
 
   if (!isOpen) return null;
 
-  const currentRelease = RELEASES[0];
+  const currentRelease = RELEASES.find((r) => r.version === activeVersion) || RELEASES[0];
 
   const renderIcon = (iconName: ReleaseHighlight['icon']) => {
     switch (iconName) {
