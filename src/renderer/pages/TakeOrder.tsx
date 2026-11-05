@@ -11,7 +11,7 @@ import {
   type Table,
 } from '../lib/waiterApi';
 import { OrderType } from '../../shared/enums';
-import { formatCurrency } from '../lib/formatters';
+import { formatCurrency, compareTableNames } from '../lib/formatters';
 
 interface CartLine {
   uid: string; // unique per cart line so duplicates with diff variations/addons coexist
@@ -106,7 +106,7 @@ const TakeOrder: React.FC = () => {
     const refresh = () =>
       waiterApi.getTables().then(
         (rows) => {
-          setTables(rows);
+          setTables((rows || []).sort(compareTableNames));
           setTablesError(null);
         },
         (err) => {

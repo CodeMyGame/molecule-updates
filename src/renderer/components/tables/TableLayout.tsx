@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Armchair } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TableStatus } from '../../../shared/enums';
 import type { Table } from '../../../shared/types/table.types';
 import TableCard from './TableCard';
+import { compareTableNames } from '../../lib/formatters';
 
 interface TableOrderInfo {
   grandTotal: number;
@@ -36,6 +37,8 @@ const TableLayout: React.FC<TableLayoutProps> = ({
   const holdCount = tables.filter(
     (t) => t.status === TableStatus.OCCUPIED && tableOrders?.get(t.id)?.orderStatus === 'hold'
   ).length;
+
+  const sortedTables = useMemo(() => [...tables].sort(compareTableNames), [tables]);
 
   const handleDragStart = (e: React.DragEvent, tableId: number) => {
     if (!isEditMode) return;
@@ -149,7 +152,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
         ) : (
           /* Normal mode: grid layout */
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2.5">
-            {tables.map((table) => {
+            {sortedTables.map((table) => {
               const orderInfo = tableOrders?.get(table.id);
               return (
                 <TableCard

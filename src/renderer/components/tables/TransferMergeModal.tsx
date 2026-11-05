@@ -16,7 +16,7 @@ import {
 import type { Table } from '../../../shared/types/table.types';
 import { ipc } from '../../lib/ipc';
 import { useBillingStore } from '../../stores/billing.store';
-import { formatCurrency } from '../../lib/formatters';
+import { formatCurrency, compareTableNames } from '../../lib/formatters';
 
 export interface TransferMergeModalProps {
   isOpen: boolean;
@@ -98,7 +98,7 @@ const TransferMergeModal: React.FC<TransferMergeModalProps> = ({
 
   // Target tables excluding current source table
   const availableTargetTables = useMemo(() => {
-    return tables.filter((tb) => tb.id !== sourceTable.id);
+    return tables.filter((tb) => tb.id !== sourceTable.id).sort(compareTableNames);
   }, [tables, sourceTable.id]);
 
   const freeCount = useMemo(() => availableTargetTables.filter((tb) => tb.status !== 'occupied').length, [availableTargetTables]);

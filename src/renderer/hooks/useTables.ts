@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ipc } from '../lib/ipc';
 import { TableStatus } from '../../shared/enums';
+import { compareTableNames } from '../lib/formatters';
 import type { Table, Floor, CreateTableDTO, UpdateTableDTO } from '../../shared/types/table.types';
 
 interface UseTablesReturn {
@@ -36,7 +37,7 @@ export function useTables(): UseTablesReturn {
         ipc<Table[]>(window.electronAPI.tables.getAll()),
       ]);
       setFloors(floorData ?? []);
-      setTables(tableData ?? []);
+      setTables((tableData ?? []).sort(compareTableNames));
     } catch (err: any) {
       setError(err.message ?? 'Failed to load tables');
     } finally {
@@ -51,7 +52,7 @@ export function useTables(): UseTablesReturn {
   }, [fetchData]);
 
   const tablesByFloor = useCallback(
-    (floorId: number) => tables.filter((t) => t.floorId === floorId),
+    (floorId: number) => tables.filter((t) => t.floorId === floorId).sort(compareTableNames),
     [tables]
   );
 

@@ -2,24 +2,45 @@ import { getDb } from '../connection';
 import type { Table, Floor, CreateTableDTO, UpdateTableDTO } from '../../../shared/types/table.types';
 import { TableStatus } from '../../../shared/enums';
 
+export function compareTableNatural(
+  a: { name?: string | null; isPinned?: boolean },
+  b: { name?: string | null; isPinned?: boolean }
+): number {
+  if (!!a.isPinned !== !!b.isPinned) {
+    return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+  }
+  return (a.name || '').localeCompare(b.name || '', undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
+}
+
 export function getAll(): (Table & { floorName: string })[] {
   const db = getDb();
   const rows = db.prepare(`
     SELECT t.*, f.name AS floor_name
     FROM tables t
     JOIN floors f ON t.floor_id = f.id
-    ORDER BY f.name, t.is_pinned DESC, t.name
   `).all() as any[];
-  return rows.map((row) => ({
+  const tables = rows.map((row) => ({
     ...mapTable(row),
     floorName: row.floor_name,
   }));
+  return tables.sort((a, b) => {
+    const floorCmp = (a.floorName || '').localeCompare(b.floorName || '', undefined, {
+      numeric: true,
+      sensitivity: 'base',
+    });
+    if (floorCmp !== 0) return floorCmp;
+    return compareTableNatural(a, b);
+  });
 }
 
 export function getByFloor(floorId: number): Table[] {
   const db = getDb();
-  const rows = db.prepare('SELECT * FROM tables WHERE floor_id = ? ORDER BY is_pinned DESC, name').all(floorId) as any[];
-  return rows.map(mapTable);
+  const rows = db.prepare('SELECT * FROM tables WHERE floor_id = ?').all(floorId) as any[];
+  const tables = rows.map(mapTable);
+  return tables.sort(compareTableNatural);
 }
 
 export function create(data: CreateTableDTO): Table {

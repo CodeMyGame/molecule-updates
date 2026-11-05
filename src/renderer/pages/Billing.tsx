@@ -33,7 +33,7 @@ import { syncOrderDiscountToServer } from '../lib/syncOrderDiscount';
 import { useMenu } from '../hooks/useMenu';
 import { useOrders } from '../hooks/useOrders';
 import { ipc } from '../lib/ipc';
-import { formatCurrency } from '../lib/formatters';
+import { formatCurrency, compareTableNames } from '../lib/formatters';
 import { ORDER_TYPES } from '../lib/constants';
 import { useSettings } from '../hooks/useSettings';
 import MenuGrid from '../components/billing/MenuGrid';
@@ -1845,6 +1845,7 @@ const Billing: React.FC = () => {
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
                       {tables
                         .filter((t) => t.floorId === billingFloorId)
+                        .sort(compareTableNames)
                         .map((table) => (
                           <div
                             key={table.id}

@@ -68,3 +68,20 @@ export function formatOrderNumber(num: string): string {
   const padded = num.padStart(3, '0');
   return `#${padded}`;
 }
+
+/**
+ * Natural comparator for table names (e.g. "T1", "T2", "T3", ..., "T10").
+ * Pinned tables always sort before non-pinned tables.
+ */
+export function compareTableNames(
+  a: { name?: string | null; isPinned?: boolean },
+  b: { name?: string | null; isPinned?: boolean }
+): number {
+  if (!!a.isPinned !== !!b.isPinned) {
+    return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+  }
+  return (a.name || '').localeCompare(b.name || '', undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  });
+}

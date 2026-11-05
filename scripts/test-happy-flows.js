@@ -791,6 +791,35 @@ suite('4. Floor Plan & Table Layout Management', () => {
     assert(threw);
     db.prepare("UPDATE tables SET status = 'free' WHERE id = 3").run();
   });
+
+  test('TBL-06 Tables sort naturally (T1, T2, T3... T10) and honor pinned status', () => {
+    const list = [
+      { name: 'T10', isPinned: false },
+      { name: 'T1', isPinned: false },
+      { name: 'T3', isPinned: false },
+      { name: 'T2', isPinned: true },
+      { name: 'T20', isPinned: false },
+      { name: 'T2', isPinned: false },
+    ];
+    function compareTableNatural(a, b) {
+      if (!!a.isPinned !== !!b.isPinned) {
+        return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+      }
+      return (a.name || '').localeCompare(b.name || '', undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      });
+    }
+    const sorted = list.sort(compareTableNatural);
+    assertEqual(sorted[0].name, 'T2');
+    assertEqual(sorted[0].isPinned, true);
+    assertEqual(sorted[1].name, 'T1');
+    assertEqual(sorted[2].name, 'T2');
+    assertEqual(sorted[2].isPinned, false);
+    assertEqual(sorted[3].name, 'T3');
+    assertEqual(sorted[4].name, 'T10');
+    assertEqual(sorted[5].name, 'T20');
+  });
 });
 
 // -------------------------------------------------------------
