@@ -23,6 +23,7 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (payments: PaymentEntry[], tip: number, printBill: boolean, customer?: { phone: string }, sendWhatsApp?: boolean, coinsToRedeem?: number) => void;
+  isProcessing?: boolean;
 }
 
 interface PaymentEntry {
@@ -36,7 +37,7 @@ interface CoinSlab {
   coins: number;
 }
 
-const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete }) => {
+const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete, isProcessing = false }) => {
   const { t, i18n } = useTranslation();
   const { settings } = useSettings();
   const tipsEnabled = String(settings.enable_tips ?? 'true') !== 'false';
@@ -186,6 +187,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
   }, [coinsEnabled, coinSlabs, grandTotal]);
 
   const handleComplete = useCallback(() => {
+    if (isProcessing) return;
     // Validate phone length if entered
     const phone = customerPhone.trim();
     if (phone && phone.length !== 10) return; // blocked by inline error, don't proceed
@@ -198,7 +200,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
       reference: reference.trim() || undefined,
     };
     onComplete([entry], tip, printBill, customer, sendWhatsApp && whatsappAvailable ? true : undefined, parsedRedeemAmount > 0 ? parsedRedeemAmount : undefined);
-  }, [activeMode, totalWithTip, reference, tip, printBill, onComplete, customerPhone, parsedRedeemAmount, sendWhatsApp, whatsappAvailable]);
+  }, [activeMode, totalWithTip, reference, tip, printBill, onComplete, customerPhone, parsedRedeemAmount, sendWhatsApp, whatsappAvailable, isProcessing]);
 
   const handleClose = useCallback(() => {
     setReference('');
@@ -513,9 +515,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
           icon={<CheckCircle2 size={16} />}
           onClick={handleComplete}
           fullWidth
-          disabled={customerPhone.length > 0 && customerPhone.length < 10}
+          disabled={(customerPhone.length > 0 && customerPhone.length < 10) || isProcessing}
+          loading={isProcessing}
         >
-          {t('paymentModal.completePayment')}
+          {isProcessing ? t('paymentModal.processing', 'Processing...') : t('paymentModal.completePayment')}
         </Button>
       </div>
     </Modal>

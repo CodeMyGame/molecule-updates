@@ -58,7 +58,20 @@ export function update(id: number, data: Omit<UpdateTableDTO, 'id'>): Table | un
 
 export function deleteTable(id: number): void {
   const db = getDb();
-  db.prepare('DELETE FROM tables WHERE id = ?').run(id);
+  const table = db.prepare('SELECT status FROM tables WHERE id = ?').get(id) as any;
+  if (!table) return;
+  if (table.status !== TableStatus.FREE && table.status !== 'free') {
+    throw new Error('Cannot delete an occupied or billed table.');
+  }
+  const activeOrders = (db.prepare(
+    "SELECT COUNT(*) as c FROM orders WHERE table_id = ? AND status IN ('active', 'hold')"
+  ).get(id) as any)?.c ?? 0;
+  if (activeOrders > 0) {
+    throw new Error('Cannot delete an occupied or billed table.');
+  }
+
+  const tx = db.transaction(() => forceDeleteTableInner(db, id));
+  tx();
 }
 
 // Force-deletes a table by snapshotting its name into past orders, then nulling

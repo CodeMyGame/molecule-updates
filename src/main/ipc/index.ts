@@ -97,7 +97,11 @@ function handle<T>(channel: string, handler: (...args: any[]) => T): void {
       const data = await handler(...args);
       return { success: true, data };
     } catch (err: any) {
-      logger.error(`IPC error [${channel}]:`, err);
+      if (/FOREIGN KEY constraint failed/i.test(err?.message)) {
+        logger.warn(`IPC constraint [${channel}]: ${err.message}`);
+      } else {
+        logger.error(`IPC error [${channel}]:`, err);
+      }
       return { success: false, error: err.message || 'Unknown error' };
     }
   });

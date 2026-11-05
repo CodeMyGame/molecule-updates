@@ -185,6 +185,8 @@ function forceDeleteItemInner(db: ReturnType<typeof getDb>, id: number): void {
     ).run(...variationIds.map((v) => v.id));
   }
 
+  // Remove from combo_items if present
+  db.prepare('DELETE FROM combo_items WHERE menu_item_id = ?').run(id);
   db.prepare('UPDATE order_items SET menu_item_id = NULL WHERE menu_item_id = ?').run(id);
   db.prepare('DELETE FROM menu_items WHERE id = ?').run(id);
 }
@@ -319,7 +321,12 @@ export function deleteVariation(id: number): void {
   const db = getDb();
   // Get menuItemId before deleting
   const row = db.prepare('SELECT menu_item_id FROM item_variations WHERE id = ?').get(id) as any;
-  db.prepare('DELETE FROM item_variations WHERE id = ?').run(id);
+  const tx = db.transaction(() => {
+    // Nullify variation_id on past order items so FK constraint does not fail (item name already has variation text snapshotted)
+    db.prepare('UPDATE order_items SET variation_id = NULL WHERE variation_id = ?').run(id);
+    db.prepare('DELETE FROM item_variations WHERE id = ?').run(id);
+  });
+  tx();
   if (row) {
     syncItemBasePriceWithVariations(row.menu_item_id);
   }

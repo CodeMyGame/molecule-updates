@@ -17,16 +17,24 @@ export async function syncOrderDiscountToServer(
 ): Promise<void> {
   if (!window.electronAPI?.orders?.applyDiscount) return;
 
-  if (discount == null) {
-    await ipc(window.electronAPI.orders.applyDiscount(orderId, null));
-    return;
-  }
+  try {
+    if (discount == null) {
+      await ipc(window.electronAPI.orders.applyDiscount(orderId, null));
+      return;
+    }
 
-  await ipc(
-    window.electronAPI.orders.applyDiscount(orderId, {
-      type: discount.type === 'percent' ? 'percentage' : 'flat',
-      value: discount.value,
-      reason: discount.reason,
-    })
-  );
+    await ipc(
+      window.electronAPI.orders.applyDiscount(orderId, {
+        type: discount.type === 'percent' ? 'percentage' : 'flat',
+        value: discount.value,
+        reason: discount.reason,
+      })
+    );
+  } catch (err: any) {
+    // If order was already finalized or cancelled, discount sync is obsolete and safe to ignore
+    if (err?.message && /because its status is '(completed|cancelled)'/i.test(err.message)) {
+      return;
+    }
+    throw err;
+  }
 }

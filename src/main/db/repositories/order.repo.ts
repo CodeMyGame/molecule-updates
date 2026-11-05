@@ -963,7 +963,8 @@ export function applyDiscount(
     const order = db.prepare('SELECT subtotal, status FROM orders WHERE id = ?').get(orderId) as any;
     if (!order) return;
     if (order.status !== OrderStatus.ACTIVE && order.status !== OrderStatus.HOLD) {
-      throw new Error(`Cannot apply discount to order #${orderId} because its status is '${order.status}'`);
+      logger.warn(`Ignored discount update for order #${orderId} because status is '${order.status}'`);
+      return;
     }
 
     let discountAmount: number;
@@ -992,7 +993,8 @@ export function clearDiscount(orderId: number): Order | undefined {
     const order = db.prepare('SELECT status FROM orders WHERE id = ?').get(orderId) as any;
     if (!order) return;
     if (order.status !== OrderStatus.ACTIVE && order.status !== OrderStatus.HOLD) {
-      throw new Error(`Cannot clear discount on order #${orderId} because its status is '${order.status}'`);
+      logger.warn(`Ignored clear discount on order #${orderId} because its status is '${order.status}'`);
+      return;
     }
     db.prepare(`
       UPDATE orders

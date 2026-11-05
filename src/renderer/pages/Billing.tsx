@@ -147,6 +147,9 @@ const Billing: React.FC = () => {
 
   // Modals
   const [showPayment, setShowPayment] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const isPaymentSubmittingRef = useRef(false);
+  const [postPaymentOrderId, setPostPaymentOrderId] = useState<number | null>(null);
   const [showDiscount, setShowDiscount] = useState(false);
   const [showBillPreview, setShowBillPreview] = useState(false);
   const [billPreviewPostPayment, setBillPreviewPostPayment] = useState(false);
@@ -378,12 +381,14 @@ const Billing: React.FC = () => {
 
   // Keep server order totals in sync when discount changes on an existing order (auto-offers, etc.)
   useEffect(() => {
-    if (!currentOrderId) return;
+    if (!currentOrderId || billPreviewPostPayment) return;
     const timer = setTimeout(() => {
-      syncOrderDiscountToServer(currentOrderId, discount).catch(() => {});
+      if (!billPreviewPostPayment && useBillingStore.getState().currentOrderId === currentOrderId) {
+        syncOrderDiscountToServer(currentOrderId, discount).catch(() => {});
+      }
     }, 400);
     return () => clearTimeout(timer);
-  }, [discount, currentOrderId]);
+  }, [discount, currentOrderId, billPreviewPostPayment]);
 
   // Fetch tables
   const refreshTables = useCallback(() => {
@@ -1286,6 +1291,9 @@ const Billing: React.FC = () => {
       sendWhatsApp?: boolean,
       coinsToRedeem?: number
     ) => {
+      if (isPaymentSubmittingRef.current) return;
+      isPaymentSubmittingRef.current = true;
+      setIsProcessingPayment(true);
       try {
         let orderId = currentOrderId;
         if (!orderId) {
@@ -1348,6 +1356,7 @@ const Billing: React.FC = () => {
         setBillCustomerPhone(customer?.phone);
 
         if (printBill) {
+          setPostPaymentOrderId(orderId);
           setBillPreviewPostPayment(true);
           setShowBillPreview(true);
           // cart cleared when bill preview closes
@@ -1356,6 +1365,9 @@ const Billing: React.FC = () => {
         }
       } catch {
         toast.error(t('toast.paymentFailed'));
+      } finally {
+        isPaymentSubmittingRef.current = false;
+        setIsProcessingPayment(false);
       }
     },
     [currentOrderId, createOrder, fetchActiveOrders, clearCart, refreshTables, t, settings.whatsapp_enabled, taxTerms]
@@ -1911,6 +1923,7 @@ const Billing: React.FC = () => {
         isOpen={showPayment}
         onClose={() => setShowPayment(false)}
         onComplete={handlePaymentComplete}
+        isProcessing={isProcessingPayment}
       />
 
       {/* Custom item modal */}
@@ -2000,10 +2013,11 @@ const Billing: React.FC = () => {
             setBillPreviewPostPayment(false);
             clearCart();
           }
+          setPostPaymentOrderId(null);
           setBillCustomerPhone(undefined);
           setBillCoinInfo(undefined);
         }}
-        orderId={currentOrderId}
+        orderId={postPaymentOrderId ?? currentOrderId}
         customerPhone={billCustomerPhone}
         coinInfo={billCoinInfo}
       />

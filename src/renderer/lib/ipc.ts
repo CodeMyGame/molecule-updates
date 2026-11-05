@@ -69,12 +69,14 @@ export async function ipc<T>(promise: Promise<IPCResult<T> | T>): Promise<T> {
       const rawError = ipcResult.error ?? 'An unknown error occurred';
       try {
         if (typeof window !== 'undefined' && window.electronAPI?.logger?.logError) {
-          window.electronAPI.logger
-            .logError({
-              message: `UI IPC Error: ${rawError}`,
-              context: { rawError },
-            })
-            .catch(() => {});
+          if (!/FOREIGN KEY constraint failed|INVALID_PIN|LOCKOUT/i.test(rawError)) {
+            window.electronAPI.logger
+              .logError({
+                message: `UI IPC Error: ${rawError}`,
+                context: { rawError },
+              })
+              .catch(() => {});
+          }
         }
       } catch {
         // Ignore
