@@ -69,7 +69,17 @@
     "resizeMenuTable": "اسحب لإعادة الحجم",
     "resizeFloorSidebar": "اسحب لإعادة الحجم",
     "resizeCart": "اسحب لإعادة الحجم",
-    "customItemTooltip": "إضافة صنف غير مدرج أو سعر مخصص (Ctrl+T)"
+    "customItemTooltip": "إضافة صنف غير مدرج أو سعر مخصص (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ بدأ طلب سفري جديد! اختر أطباقاً من القائمة لإضافتها إلى السلة.",
+    "newParcelStartedPrompt": "اختر أطباقاً من القائمة",
+    "newParcelNextStep": "اضغط على أي صنف من القائمة لإضافته إلى هذا الطلب السفري.",
+    "newParcelTooltip": "بدء طلب سفري جديد",
+    "addQuickSelect": "+ إضافة",
+    "newPresetPlaceholder": "اسم الإعداد المسبق (مثل Magicpin)",
+    "saveToQuickSelect": "حفظ \"{{name}}\" في التحديد السريع",
+    "presetAdded": "تمت إضافة \"{{name}}\" إلى التحديد السريع!",
+    "presetExists": "التحديد السريع موجود بالفعل",
+    "presetRemoved": "تمت إزالة التحديد السريع"
   },
   "cart": {
     "empty": "السلة فارغة",
@@ -219,7 +229,16 @@
     "badgeTransfer": "تحويل",
     "badgeMerge": "دمج",
     "printKotAfterTransfer": "طباعة KOT للطاولة الوجهة بعد التحويل",
-    "transferredAndKotPrinted": "تم تحويل الطلب وطباعة KOT!"
+    "transferredAndKotPrinted": "تم تحويل الطلب وطباعة KOT!",
+    "newParcel": "+ طرد جديد",
+    "parcelShelfTitle": "الطلبات الخارجية والطرود",
+    "noActiveParcelsHint": "لا توجد طرود نشطة. انقر على \"+ طرد جديد\" لبدء طلب خارجي.",
+    "readyForPickup": "جاهز للاستلام",
+    "preparingInKitchen": "قيد التحضير",
+    "kotPending": "KOT قيد الانتظار",
+    "payNow": "دفع",
+    "walkInGuest": "زبون مباشر",
+    "itemsCount": "{{count}} عناصر"
   },
   "kitchen": {
     "title": "شاشة المطبخ",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "سجل الطلبات",
     "tableWise": "حسب الطاولة",
-    "dailySales": "المبيعات اليومية",
+    "dailySales": "ملخص المبيعات",
     "itemWise": "حسب العنصر",
     "categoryWise": "حسب الفئة",
     "payments": "المدفوعات",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "تنزيل جميع الطلبات (Excel)",
+    "exportingOrders": "جارٍ تصدير الطلبات…",
+    "exportOrdersSuccess": "تم تصدير {{count}} طلب بنجاح!",
+    "noOrdersToExport": "لم يتم العثور على طلبات لتصديرها.",
+    "exportOrdersFailed": "فشل تصدير الطلبات. يرجى المحاولة مرة أخرى.",
+    "or": "أو"
   },
   "paymentModal": {
     "title": "الدفع",
@@ -1092,8 +1117,6 @@
     "printerSetup": "إعداد الطابعة",
     "printerSetupDesc": "اضبط طابعات الفاتورة وKOT.",
     "printMode": "وضع الطباعة",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "وُجدت {{count}} طابعة",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "تصدير سجلات الطلبات",
+    "exportOrdersDesc": "تنزيل جميع بيانات المبيعات والطلبات السابقة في ملف CSV متوافق مع Excel."
   },
   "common": {
     "save": "حفظ",

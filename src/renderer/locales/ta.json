@@ -69,7 +69,17 @@
     "resizeMenuTable": "அளவை மாற்ற இழுக்கவும்",
     "resizeFloorSidebar": "அளவை மாற்ற இழுக்கவும்",
     "resizeCart": "அளவை மாற்ற இழுக்கவும்",
-    "customItemTooltip": "பட்டியலில் இல்லாத உணவு அல்லது தனிப்பயன் விலையைச் சேர்க்கவும் (Ctrl+T)"
+    "customItemTooltip": "பட்டியலில் இல்லாத உணவு அல்லது தனிப்பயன் விலையைச் சேர்க்கவும் (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ புதிய பார்சல் தொடங்கியது! கார்ட்டில் சேர்க்க மெனுவிலிருந்து உணவுகளைத் தேர்ந்தெடுக்கவும்.",
+    "newParcelStartedPrompt": "மெனுவிலிருந்து உணவுகளைத் தேர்ந்தெடுக்கவும்",
+    "newParcelNextStep": "இந்த பார்சல் ஆர்டரில் உணவுகளைச் சேர்க்க மெனுவில் உள்ள ஏதேனும் உணவைத் தட்டவும்.",
+    "newParcelTooltip": "புதிய பார்சல் ஆர்டரைத் தொடங்கவும்",
+    "addQuickSelect": "+ சேர்",
+    "newPresetPlaceholder": "முன்னமைவு பெயர் (எ.கா. Magicpin)",
+    "saveToQuickSelect": "\"{{name}}\" விரைவு தேர்வில் சேமி",
+    "presetAdded": "\"{{name}}\" விரைவு தேர்வில் சேர்க்கப்பட்டது!",
+    "presetExists": "விரைவு தேர்வு ஏற்கனவே உள்ளது",
+    "presetRemoved": "விரைவு தேர்வு நீக்கப்பட்டது"
   },
   "cart": {
     "empty": "கார்ட் காலியாக உள்ளது",
@@ -219,7 +229,16 @@
     "badgeTransfer": "மாற்றவும்",
     "badgeMerge": "இணைக்கவும்",
     "printKotAfterTransfer": "மாற்றத்திற்குப் பிறகு புதிய மேசைக்கான KOT-ஐ அச்சிடு",
-    "transferredAndKotPrinted": "ஆர்டர் மாற்றப்பட்டு KOT அச்சிடப்பட்டது!"
+    "transferredAndKotPrinted": "ஆர்டர் மாற்றப்பட்டு KOT அச்சிடப்பட்டது!",
+    "newParcel": "+ புதிய பார்சல்",
+    "parcelShelfTitle": "டேக்அவே மற்றும் பார்சல்கள்",
+    "noActiveParcelsHint": "செயலில் உள்ள பார்சல்கள் இல்லை. டேக்அவே ஆர்டரைத் தொடங்க \"+ புதிய பார்சல்\" என்பதைக் கிளிக் செய்யவும்.",
+    "readyForPickup": "பிக்கப்பிற்கு தயார்",
+    "preparingInKitchen": "தயாராகிறது",
+    "kotPending": "KOT நிலுவையில் உள்ளது",
+    "payNow": "செலுத்து",
+    "walkInGuest": "வாடிக்கையாளர்",
+    "itemsCount": "{{count}} பொருட்கள்"
   },
   "kitchen": {
     "title": "சமையலறை திரை",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "ஆர்டர் வரலாறு",
     "tableWise": "மேசை வாரியாக",
-    "dailySales": "தினசரி விற்பனை",
+    "dailySales": "விற்பனை சுருக்கம்",
     "itemWise": "பொருள் வாரியாக",
     "categoryWise": "வகை வாரியாக",
     "payments": "கொடுப்பனவுகள்",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "அனைத்து ஆர்டர்களையும் பதிவிறக்கவும் (Excel)",
+    "exportingOrders": "ஆர்டர்கள் ஏற்றுமதி செய்யப்படுகின்றன…",
+    "exportOrdersSuccess": "{{count}} ஆர்டர்கள் வெற்றிகரமாக ஏற்றுமதி செய்யப்பட்டன!",
+    "noOrdersToExport": "ஏற்றுமதி செய்ய எந்த ஆர்டர்களும் இல்லை.",
+    "exportOrdersFailed": "ஆர்டர்களை ஏற்றுமதி செய்ய முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+    "or": "அல்லது"
   },
   "paymentModal": {
     "title": "கட்டணம்",
@@ -1092,8 +1117,6 @@
     "printerSetup": "அச்சுப்பொறி அமைப்பு",
     "printerSetupDesc": "பில் மற்றும் KOT அச்சுப்பொறிகளை கட்டமைக்கவும்.",
     "printMode": "அச்சு முறை",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}} அச்சுப்பொறி கண்டறியப்பட்டது",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "ஆர்டர் பதிவுகளை ஏற்றுமதி செய்க",
+    "exportOrdersDesc": "அனைத்து வரலாற்று விற்பனை மற்றும் ஆர்டர் தரவையும் எக்செல்-இணக்கமான CSV கோப்பில் பதிவிறக்கவும்."
   },
   "common": {
     "save": "சேமி",

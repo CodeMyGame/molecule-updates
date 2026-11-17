@@ -25,6 +25,8 @@ import {
   ArrowUpZA,
   HelpCircle,
   Receipt,
+  Clock,
+  Banknote,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import TransferMergeModal from '../components/tables/TransferMergeModal';
@@ -43,6 +45,7 @@ import DiscountModal from '../components/billing/DiscountModal';
 import BillPreview from '../components/billing/BillPreview';
 import ShortcutsModal from '../components/billing/ShortcutsModal';
 import VoidReasonModal from '../components/billing/VoidReasonModal';
+import ParcelNameModal from '../components/billing/ParcelNameModal';
 import TableCard from '../components/tables/TableCard';
 import Tooltip from '../components/common/Tooltip';
 import { useTranslation } from 'react-i18next';
@@ -77,6 +80,72 @@ const ORDER_TYPE_KEYS = [
   { key: 'takeaway' as const, tKey: 'billing.takeaway', icon: ShoppingBag },
   { key: 'delivery' as const, tKey: 'billing.delivery', icon: Truck },
 ];
+
+function getElapsedMinutes(startedAt?: string): number {
+  if (!startedAt) return 0;
+  const ts = startedAt.endsWith('Z') ? startedAt : startedAt.replace(' ', 'T') + 'Z';
+  const mins = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
+  return Math.max(0, isNaN(mins) ? 0 : mins);
+}
+
+function getOrderStatusBadge(order: any, t: (key: string, options?: any) => string) {
+  if (order.status === 'hold') {
+    return {
+      label: t('billing.orderHeldBadge', { defaultValue: 'Held' }),
+      bg: 'bg-amber-100 text-amber-800 border-amber-300',
+      dot: 'bg-amber-500',
+    };
+  }
+  const items = order.items || [];
+  if (items.length === 0) {
+    return {
+      label: t('tables.statusOccupied', { defaultValue: 'Occupied' }),
+      bg: 'bg-rose-100 text-rose-800 border-rose-300',
+      dot: 'bg-rose-500',
+    };
+  }
+  const kotStatuses: string[] = items.map((i: any) => i.kotStatus ?? i.kot_status ?? 'pending');
+  const hasPending = kotStatuses.some((s) => s === 'pending');
+  const allServed = kotStatuses.length > 0 && kotStatuses.every((s) => s === 'served');
+  const allReady = kotStatuses.length > 0 && kotStatuses.every((s) => s === 'ready' || s === 'served');
+  const hasReady = kotStatuses.some((s) => s === 'ready');
+  const hasPreparing = kotStatuses.some((s) => s === 'preparing');
+
+  if (allReady || hasReady) {
+    return {
+      label: t('tables.readyForPickup', { defaultValue: 'Ready for Pickup' }),
+      bg: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold animate-pulse',
+      dot: 'bg-emerald-500',
+    };
+  }
+  if (hasPreparing) {
+    return {
+      label: t('tables.preparingInKitchen', { defaultValue: 'Preparing' }),
+      bg: 'bg-amber-100 text-amber-800 border-amber-300 font-semibold',
+      dot: 'bg-amber-500',
+    };
+  }
+  if (hasPending) {
+    return {
+      label: t('tables.kotPending', { defaultValue: 'KOT Pending' }),
+      bg: 'bg-orange-100 text-orange-800 border-orange-300 font-semibold',
+      dot: 'bg-orange-500',
+    };
+  }
+  if (allServed) {
+    return {
+      label: t('billing.kotServed', { defaultValue: 'Served' }),
+      bg: 'bg-gray-100 text-gray-700 border-gray-300',
+      dot: 'bg-gray-400',
+    };
+  }
+  return {
+    label: t('billing.kotSent', { defaultValue: 'Sent to Kitchen' }),
+    bg: 'bg-blue-100 text-blue-800 border-blue-300',
+    dot: 'bg-blue-500',
+  };
+}
+const getParcelStatusBadge = getOrderStatusBadge;
 
 const Billing: React.FC = () => {
   const location = useLocation();
@@ -272,8 +341,20 @@ const Billing: React.FC = () => {
 
   useEffect(() => {
     const el = document.getElementById('header-center-slot');
-    if (el) setHeaderSlot(el);
-    return () => { if (el) el.innerHTML = ''; };
+    if (el) {
+      setHeaderSlot(el);
+      const handleWheel = (e: WheelEvent) => {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY;
+        }
+      };
+      el.addEventListener('wheel', handleWheel, { passive: false });
+      return () => {
+        el.removeEventListener('wheel', handleWheel);
+        el.innerHTML = '';
+      };
+    }
   }, []);
 
   // Tables
@@ -281,7 +362,19 @@ const Billing: React.FC = () => {
   const [floors, setFloors] = useState<Floor[]>([]);
   const [tablesLoading, setTablesLoading] = useState(true);
   const [billingFloorId, setBillingFloorId] = useState<number | null>(null);
-  const [tableOrdersMap, setTableOrdersMap] = useState<Map<number, { grandTotal: number; itemCount: number; createdAt: string; orderStatus?: string }>>(new Map());
+  const [tableOrdersMap, setTableOrdersMap] = useState<
+    Map<
+      number,
+      {
+        grandTotal: number;
+        itemCount: number;
+        createdAt: string;
+        orderStatus?: string;
+        orderId?: number;
+        kotBadge?: { label: string; bg: string; dot: string };
+      }
+    >
+  >(new Map());
   const [showAddFloorDialog, setShowAddFloorDialog] = useState(false);
   const [newFloorName, setNewFloorName] = useState('');
   const [savingFloor, setSavingFloor] = useState(false);
@@ -402,7 +495,17 @@ const Billing: React.FC = () => {
   // changed, which left totals stale when the cashier or a waiter tablet
   // appended items to an existing order.)
   useEffect(() => {
-    const map = new Map<number, { grandTotal: number; itemCount: number; createdAt: string; orderStatus?: string }>();
+    const map = new Map<
+      number,
+      {
+        grandTotal: number;
+        itemCount: number;
+        createdAt: string;
+        orderStatus?: string;
+        orderId?: number;
+        kotBadge?: { label: string; bg: string; dot: string };
+      }
+    >();
     for (const order of activeOrders) {
       const tableId = (order as any).tableId ?? (order as any).table_id;
       if (!tableId) continue;
@@ -411,10 +514,47 @@ const Billing: React.FC = () => {
         itemCount: ((order as any).items ?? []).length,
         createdAt: (order as any).createdAt ?? '',
         orderStatus: order.status,
+        orderId: order.id,
+        kotBadge: getOrderStatusBadge(order, t),
       });
     }
     setTableOrdersMap(map);
+  }, [activeOrders, t]);
+
+  const activeParcels = useMemo(() => {
+    return activeOrders.filter(
+      (o: any) =>
+        (o.orderType === 'takeaway' || o.order_type === 'takeaway' || (!o.tableId && !o.table_id)) &&
+        (o.status === 'active' || o.status === 'hold')
+    );
   }, [activeOrders]);
+
+  const [showParcelModal, setShowParcelModal] = useState(false);
+
+  const handleNewParcel = useCallback(() => {
+    setShowParcelModal(true);
+  }, []);
+
+  const handleConfirmParcelName = useCallback(
+    (name: string | null) => {
+      useBillingStore.getState().resetForTakeaway(name);
+      if (name) {
+        toast.success(
+          t('billing.newNamedParcelStartedToast', {
+            defaultValue: `🛍️ New Parcel (${name}) started! Select dishes from menu.`,
+            name,
+          }),
+          { duration: 3500 }
+        );
+      } else {
+        toast.success(
+          t('billing.newParcelStartedToast', { defaultValue: '🛍️ New Parcel started! Select dishes from the menu.' }),
+          { duration: 3500 }
+        );
+      }
+    },
+    [t]
+  );
 
   // Fetch floors once
   useEffect(() => {
@@ -608,37 +748,44 @@ const Billing: React.FC = () => {
     async (tableId: number) => {
       const order = await ipc<any>(window.electronAPI.orders.getByTable(tableId));
       if (order) {
-        const cartItems = (order.items || []).map((oi: any) => ({
-          menuItem: {
-            id: oi.menuItemId ?? oi.menu_item_id ?? 0,
-            name: oi.name?.split(' (')[0] ?? oi.name,
-            basePrice: oi.unitPrice ?? oi.unit_price,
-            categoryId: 0,
-            taxRate: resolveOrderItemTaxRateFallback(
-              oi.taxRate ?? oi.tax_rate,
-              settings.default_tax_rate,
-              i18n.language
-            ),
-            isVeg: false,
-          },
-          variation: oi.variationId
-            ? { id: oi.variationId, name: oi.name?.match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
-            : undefined,
-          addons: (oi.addons ?? []).map((a: any) => ({
-            id: a.addonId,
+        const cartItems = (order.items || []).map((oi: any) => {
+          const addons = (oi.addons ?? []).map((a: any) => ({
+            id: a.addonId ?? a.addon_id ?? a.id,
             name: a.name,
             price: a.price,
-          })),
-          quantity: oi.quantity,
-          unitPrice: oi.unitPrice ?? oi.unit_price,
-          total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
-          notes: oi.notes,
-          sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
-          orderItemId: oi.id,
-          kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
-          kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
-          createdAt: oi.createdAt ?? oi.created_at ?? undefined,
-        }));
+          }));
+          const addonsTotal = addons.reduce((sum: number, a: any) => sum + (a.price ?? 0), 0);
+          const unitPrice = oi.unitPrice ?? oi.unit_price ?? 0;
+          const basePrice = Math.max(0, unitPrice - addonsTotal);
+
+          return {
+            menuItem: {
+              id: oi.menuItemId ?? oi.menu_item_id ?? 0,
+              name: oi.name?.split(' (')[0] ?? oi.name,
+              basePrice,
+              categoryId: 0,
+              taxRate: resolveOrderItemTaxRateFallback(
+                oi.taxRate ?? oi.tax_rate,
+                settings.default_tax_rate,
+                i18n.language
+              ),
+              isVeg: false,
+            },
+            variation: oi.variationId
+              ? { id: oi.variationId, name: oi.name?.match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
+              : undefined,
+            addons,
+            quantity: oi.quantity,
+            unitPrice,
+            total: unitPrice * oi.quantity,
+            notes: oi.notes,
+            sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
+            orderItemId: oi.id,
+            kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+            kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+            createdAt: oi.createdAt ?? oi.created_at ?? undefined,
+          };
+        });
         const orderDiscount = order.discountType
           ? { type: order.discountType === 'percentage' ? 'percent' : order.discountType, value: order.discountValue ?? 0, reason: order.discountReason }
           : null;
@@ -646,7 +793,7 @@ const Billing: React.FC = () => {
           splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
           splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
         };
-        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null);
+        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null);
       } else {
         resetForNewTable(tableId);
       }
@@ -1045,37 +1192,44 @@ const Billing: React.FC = () => {
     try {
       const fullOrder = await ipc<any>(window.electronAPI.orders.getById(orderId));
       if (fullOrder && fullOrder.items) {
-        const cartItems = fullOrder.items.map((oi: any) => ({
-          menuItem: {
-            id: oi.menuItemId ?? oi.menu_item_id ?? 0,
-            name: (oi.name ?? '').split(' (')[0],
-            basePrice: oi.unitPrice ?? oi.unit_price,
-            categoryId: 0,
-            taxRate: resolveOrderItemTaxRateFallback(
-              oi.taxRate ?? oi.tax_rate,
-              settings.default_tax_rate,
-              i18n.language
-            ),
-            isVeg: false,
-          },
-          variation: oi.variationId
-            ? { id: oi.variationId, name: (oi.name ?? '').match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
-            : undefined,
-          addons: (oi.addons ?? []).map((a: any) => ({
-            id: a.addonId,
+        const cartItems = fullOrder.items.map((oi: any) => {
+          const addons = (oi.addons ?? []).map((a: any) => ({
+            id: a.addonId ?? a.addon_id ?? a.id,
             name: a.name,
             price: a.price,
-          })),
-          quantity: oi.quantity,
-          unitPrice: oi.unitPrice ?? oi.unit_price,
-          total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
-          notes: oi.notes,
-          sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
-          orderItemId: oi.id,
-          kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
-          kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
-          createdAt: oi.createdAt ?? oi.created_at ?? undefined,
-        }));
+          }));
+          const addonsTotal = addons.reduce((sum: number, a: any) => sum + (a.price ?? 0), 0);
+          const unitPrice = oi.unitPrice ?? oi.unit_price ?? 0;
+          const basePrice = Math.max(0, unitPrice - addonsTotal);
+
+          return {
+            menuItem: {
+              id: oi.menuItemId ?? oi.menu_item_id ?? 0,
+              name: (oi.name ?? '').split(' (')[0],
+              basePrice,
+              categoryId: 0,
+              taxRate: resolveOrderItemTaxRateFallback(
+                oi.taxRate ?? oi.tax_rate,
+                settings.default_tax_rate,
+                i18n.language
+              ),
+              isVeg: false,
+            },
+            variation: oi.variationId
+              ? { id: oi.variationId, name: (oi.name ?? '').match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
+              : undefined,
+            addons,
+            quantity: oi.quantity,
+            unitPrice,
+            total: unitPrice * oi.quantity,
+            notes: oi.notes,
+            sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
+            orderItemId: oi.id,
+            kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+            kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+            createdAt: oi.createdAt ?? oi.created_at ?? undefined,
+          };
+        });
         const tableId = fullOrder.tableId ?? fullOrder.table_id ?? null;
         // Restore discount and notes from the loaded order
         const orderDiscount = fullOrder.discountType
@@ -1085,12 +1239,35 @@ const Billing: React.FC = () => {
           splitFromOrderId: fullOrder.splitFromOrderId ?? (fullOrder as any).split_from_order_id ?? null,
           splitFromOrderNumber: fullOrder.splitFromOrderNumber ?? (fullOrder as any).split_from_order_number ?? null,
         };
-        loadOrderIntoCart(orderId, tableId, cartItems, cartItems.length, fullOrder.orderType ?? fullOrder.order_type, orderDiscount, fullOrder.notes, fullOrder.kots ?? [], fullOrder.outboundTransfers ?? [], splitInfo, fullOrder.status, fullOrder.customerId ?? (fullOrder as any).customer_id ?? null);
+        loadOrderIntoCart(
+          orderId,
+          tableId,
+          cartItems,
+          cartItems.length,
+          fullOrder.orderType ?? fullOrder.order_type,
+          orderDiscount,
+          fullOrder.notes,
+          fullOrder.kots ?? [],
+          fullOrder.outboundTransfers ?? [],
+          splitInfo,
+          fullOrder.status,
+          fullOrder.customerId ?? (fullOrder as any).customer_id ?? null,
+          fullOrder.parcelName ?? fullOrder.parcel_name ?? null
+        );
       }
     } catch {
       toast.error(t('toast.loadOrderFailed'));
     }
   }, [loadOrderIntoCart, setOrderType, t, settings.default_tax_rate, i18n.language]);
+
+  const handlePayParcelOrder = useCallback(
+    async (orderId: number, e: React.MouseEvent) => {
+      e.stopPropagation();
+      await loadOrderById(orderId);
+      setShowPayment(true);
+    },
+    [loadOrderById]
+  );
 
   const handleUnholdOrder = useCallback(async () => {
     if (!currentOrderId) return;
@@ -1182,15 +1359,19 @@ const Billing: React.FC = () => {
       if (e.altKey && !e.ctrlKey && !e.metaKey) {
         if (e.key === '1') {
           e.preventDefault();
-          setOrderType('dine_in');
-          if (!useBillingStore.getState().selectedTableId) {
-            const firstFree = tables.find((tb) => tb.status === 'free');
-            if (firstFree) setTable(firstFree.id);
-          }
+          if (orderType !== 'dine_in') setOrderType('dine_in');
           return;
         }
-        if (e.key === '2') { e.preventDefault(); setOrderType('takeaway'); return; }
-        if (e.key === '3') { e.preventDefault(); setOrderType('delivery'); return; }
+        if (e.key === '2') {
+          e.preventDefault();
+          if (orderType !== 'takeaway') setOrderType('takeaway');
+          return;
+        }
+        if (e.key === '3') {
+          e.preventDefault();
+          if (orderType !== 'delivery') setOrderType('delivery');
+          return;
+        }
       }
 
       // Ctrl+T = Temp Item
@@ -1228,7 +1409,7 @@ const Billing: React.FC = () => {
         return;
       }
 
-      // Ctrl+Shift+K = Print KOT (digital + thermal)
+      // Ctrl+Shift+K = Print KOT (digital + receipt)
       if (e.ctrlKey && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
         e.preventDefault();
         if (cart.length > 0) handlePrintKot();
@@ -1380,39 +1561,46 @@ const Billing: React.FC = () => {
     } else if (currentOrderId) {
       const order = await ipc<any>(window.electronAPI.orders.getById(currentOrderId));
       if (order) {
-        const cartItems = (order.items || []).map((oi: any) => ({
-          menuItem: {
-            id: oi.menuItemId ?? oi.menu_item_id ?? 0,
-            name: oi.name?.split(' (')[0] ?? oi.name,
-            basePrice: oi.unitPrice ?? oi.unit_price,
-            categoryId: 0,
-            taxRate: resolveOrderItemTaxRateFallback(
-              oi.taxRate ?? oi.tax_rate,
-              settings.default_tax_rate,
-              i18n.language
-            ),
-            isVeg: false,
-          },
-          quantity: oi.quantity,
-          unitPrice: oi.unitPrice ?? oi.unit_price,
-          total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
-          notes: oi.notes ?? undefined,
-          variation: oi.variationId
-            ? { id: oi.variationId, name: oi.variationName ?? oi.name?.match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
-            : undefined,
-          addons: (oi.addons || []).map((a: any) => ({
+        const cartItems = (order.items || []).map((oi: any) => {
+          const addons = (oi.addons || []).map((a: any) => ({
             id: a.addonId ?? a.addon_id ?? a.id,
             name: a.name,
             price: a.price,
-          })),
-          isComplimentary: Boolean(oi.isComplimentary ?? oi.is_complimentary),
-          complimentaryReason: oi.complimentaryReason ?? oi.complimentary_reason,
-          sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
-          orderItemId: oi.id,
-          kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
-          kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
-          createdAt: oi.createdAt ?? oi.created_at ?? undefined,
-        }));
+          }));
+          const addonsTotal = addons.reduce((sum: number, a: any) => sum + (a.price ?? 0), 0);
+          const unitPrice = oi.unitPrice ?? oi.unit_price ?? 0;
+          const basePrice = Math.max(0, unitPrice - addonsTotal);
+
+          return {
+            menuItem: {
+              id: oi.menuItemId ?? oi.menu_item_id ?? 0,
+              name: oi.name?.split(' (')[0] ?? oi.name,
+              basePrice,
+              categoryId: 0,
+              taxRate: resolveOrderItemTaxRateFallback(
+                oi.taxRate ?? oi.tax_rate,
+                settings.default_tax_rate,
+                i18n.language
+              ),
+              isVeg: false,
+            },
+            quantity: oi.quantity,
+            unitPrice,
+            total: unitPrice * oi.quantity,
+            notes: oi.notes ?? undefined,
+            variation: oi.variationId
+              ? { id: oi.variationId, name: oi.variationName ?? oi.name?.match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
+              : undefined,
+            addons,
+            isComplimentary: Boolean(oi.isComplimentary ?? oi.is_complimentary),
+            complimentaryReason: oi.complimentaryReason ?? oi.complimentary_reason,
+            sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
+            orderItemId: oi.id,
+            kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+            kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+            createdAt: oi.createdAt ?? oi.created_at ?? undefined,
+          };
+        });
         const orderDiscount = order.discountType
           ? { type: order.discountType === 'percentage' ? 'percent' : order.discountType, value: order.discountValue ?? 0, reason: order.discountReason }
           : null;
@@ -1432,7 +1620,8 @@ const Billing: React.FC = () => {
           order.outboundTransfers ?? [],
           splitInfo,
           order.status,
-          order.customerId ?? (order as any).customer_id ?? null
+          order.customerId ?? (order as any).customer_id ?? null,
+          order.parcelName ?? order.parcel_name ?? null
         );
       }
     }
@@ -1463,29 +1652,38 @@ const Billing: React.FC = () => {
         <div className="flex items-center gap-2.5">
           {/* Order type selector */}
           <div className="flex bg-gray-100 rounded-md p-0.5 gap-0.5">
-            {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => (
-              <Tooltip key={key} text={t(tKey)} position="bottom">
-                <button
-                  onClick={() => {
-                    setOrderType(key);
-                    if (key === 'dine_in' && !useBillingStore.getState().selectedTableId) {
-                      const firstFree = tables.find((tb) => tb.status === 'free');
-                      if (firstFree) setTable(firstFree.id);
-                    }
-                  }}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold
-                    transition-colors select-none
-                    ${
-                      orderType === key
-                        ? 'bg-white text-blue-700 shadow-xs'
-                        : 'text-gray-600 hover:text-gray-800'
-                    }`}
-                >
-                  <Icon size={13} />
-                  {t(tKey)}
-                </button>
-              </Tooltip>
-            ))}
+            {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => {
+              const isTakeaway = key === 'takeaway';
+              const count = isTakeaway ? activeParcels.length : 0;
+              return (
+                <Tooltip key={key} text={t(tKey)} position="bottom">
+                  <button
+                    onClick={() => {
+                      if (orderType !== key) {
+                        setOrderType(key);
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold
+                      transition-colors select-none
+                      ${
+                        orderType === key
+                          ? 'bg-white text-blue-700 shadow-xs'
+                          : 'text-gray-600 hover:text-gray-800'
+                      }`}
+                  >
+                    <Icon size={13} className={isTakeaway && count > 0 ? 'text-emerald-600' : ''} />
+                    <span>{t(tKey)}</span>
+                    {isTakeaway && count > 0 && (
+                      <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                        orderType === 'takeaway' ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700'
+                      }`}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                </Tooltip>
+              );
+            })}
           </div>
 
           {/* Menu Items Name Sorting (A-Z / Z-A) */}
@@ -1570,6 +1768,18 @@ const Billing: React.FC = () => {
             >
               <PlusCircle size={13} />
               {t('billing.tempItem', 'Custom Item')}
+            </button>
+          </Tooltip>
+
+          {/* New Parcel button (moved next to Custom Item) */}
+          <Tooltip text={t('billing.newParcelTooltip', 'Start a new takeaway parcel order')} position="bottom">
+            <button
+              onClick={handleNewParcel}
+              className="flex items-center gap-1.5 px-3 py-1 text-xs text-emerald-700 bg-emerald-50
+                hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors font-semibold shadow-xs"
+            >
+              <ShoppingBag size={13} className="text-emerald-600" />
+              <span>{t('tables.newParcel', '+ New Parcel')}</span>
             </button>
           </Tooltip>
 
@@ -1862,6 +2072,7 @@ const Billing: React.FC = () => {
                               orderItemCount={tableOrdersMap.get(table.id)?.itemCount}
                               orderStartedAt={tableOrdersMap.get(table.id)?.createdAt}
                               orderStatus={tableOrdersMap.get(table.id)?.orderStatus}
+                              kotBadge={tableOrdersMap.get(table.id)?.kotBadge}
                             />
                           </div>
                         ))}
@@ -1880,6 +2091,112 @@ const Billing: React.FC = () => {
                     </div>
                   </div>
                 </>
+              )}
+            </div>
+            </>
+          )}
+
+          {/* Active parcels panel — takeaway only */}
+          {orderType === 'takeaway' && (
+            <>
+            {/* Horizontal resize handle */}
+            <div
+              className="group relative flex-shrink-0 h-1.5 -my-[3px] cursor-row-resize z-20 flex items-center justify-center select-none"
+              onMouseDown={onMenuTableHandleDown}
+              title={t('billing.resizeMenuTable', 'Drag to resize')}
+            >
+              {/* Sash hairline */}
+              <div className="h-[1px] w-full bg-gray-200 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
+
+              {/* VS Code micro grip indicator */}
+              <div className="absolute left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:w-8 transition-all" />
+            </div>
+            <div style={{ flex: `${100 - menuHeightPercent} 0 0%` }} className="min-h-0 bg-white flex flex-col p-2.5 overflow-y-auto" data-table-picker>
+              {activeParcels.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-gray-400 py-8">
+                  <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2">
+                    <ShoppingBag size={22} />
+                  </div>
+                  <p className="text-xs font-semibold text-gray-700">{t('tables.noActiveParcelsHint', { defaultValue: 'No active takeaway parcels' })}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">
+                    {t('billing.newParcelNextStep', { defaultValue: 'Tap any dish on the menu to add items to this parcel order.' })}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
+                  {/* Active parcel cards */}
+                  {activeParcels.map((parcel) => {
+                  const isSelected = currentOrderId === parcel.id;
+                  const statusBadge = getParcelStatusBadge(parcel, t);
+                  const parcelTime = (parcel as any).createdAt || (parcel as any).created_at || '';
+                  const elapsedMins = getElapsedMinutes(parcelTime);
+                  const parcelOrderNum = (parcel as any).orderNumber || (parcel as any).order_number || String(parcel.id).padStart(3, '0');
+                  const parcelTotal = (parcel as any).grandTotal ?? (parcel as any).grand_total ?? 0;
+                  const custName = (parcel as any).customerName || (parcel as any).customer_name;
+                  const custPhone = (parcel as any).customerPhone || (parcel as any).customer_phone;
+
+                  return (
+                    <div
+                      key={parcel.id}
+                      onClick={() => loadOrderById(parcel.id)}
+                      className={`relative flex flex-col justify-between p-2 rounded-xl border transition-all cursor-pointer min-h-[72px] ${
+                        isSelected
+                          ? 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-500/30 shadow-md'
+                          : 'border-emerald-200/80 bg-white hover:border-emerald-400 hover:shadow-xs'
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span className="font-bold text-xs text-gray-900 flex items-center gap-1 truncate">
+                            <span>🛍️</span>
+                            <span>#{parcelOrderNum}</span>
+                          </span>
+                          <span className="font-bold text-xs text-gray-900 font-mono">
+                            {formatCurrency(parcelTotal)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-gray-500">
+                          <span className="font-medium truncate max-w-[130px]" title={parcel.parcelName || (parcel as any).parcel_name || custName || custPhone}>
+                            {(parcel.parcelName || (parcel as any).parcel_name) ? (
+                              <span className="inline-flex items-center gap-1 text-emerald-800 font-bold bg-emerald-100/90 px-1.5 py-0.5 rounded border border-emerald-300 text-[10px] shadow-2xs">
+                                <span>🏷️</span>
+                                <span className="truncate max-w-[110px]">{parcel.parcelName || (parcel as any).parcel_name}</span>
+                              </span>
+                            ) : custName ? (
+                              <span className="text-gray-700 font-medium">👤 {custName}</span>
+                            ) : custPhone ? (
+                              <span className="text-gray-700 font-medium">📞 {custPhone}</span>
+                            ) : (
+                              <span className="text-gray-500 font-medium">{t('tables.walkInGuest', { defaultValue: 'Walk-in Guest' })}</span>
+                            )}
+                          </span>
+                          <span className="text-[10px] text-gray-400 flex items-center gap-0.5 shrink-0">
+                            <Clock size={9} />
+                            <span>{elapsedMins === 0 ? 'Now' : `${elapsedMins}m`}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-gray-100 gap-1">
+                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] border leading-tight ${statusBadge.bg}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusBadge.dot}`} />
+                          <span className="truncate max-w-[85px]">{statusBadge.label}</span>
+                        </span>
+
+                        <button
+                          onClick={(e) => handlePayParcelOrder(parcel.id, e)}
+                          className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors shrink-0 cursor-pointer"
+                          title="Quick Pay"
+                        >
+                          <Banknote size={10} />
+                          <span>{t('tables.payNow', { defaultValue: 'Pay' })}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                </div>
               )}
             </div>
             </>
@@ -1925,6 +2242,14 @@ const Billing: React.FC = () => {
         onClose={() => setShowPayment(false)}
         onComplete={handlePaymentComplete}
         isProcessing={isProcessingPayment}
+      />
+
+      {/* Parcel name / partner modal */}
+      <ParcelNameModal
+        isOpen={showParcelModal}
+        onClose={() => setShowParcelModal(false)}
+        onConfirm={handleConfirmParcelName}
+        currentName={useBillingStore.getState().parcelName}
       />
 
       {/* Custom item modal */}

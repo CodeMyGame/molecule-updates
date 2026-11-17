@@ -157,12 +157,25 @@ const Header: React.FC = () => {
     const el = document.getElementById('header-center-slot');
     if (!el) return;
     slotRef.current = el;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false });
+
     const observer = new MutationObserver(() => {
       setSlotHasContent(el.childNodes.length > 0);
     });
     observer.observe(el, { childList: true });
     setSlotHasContent(el.childNodes.length > 0);
-    return () => observer.disconnect();
+
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -205,16 +218,25 @@ const Header: React.FC = () => {
   return (
     <>
     <header className="pos-header">
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="text-xs font-bold text-gray-800 dark:text-gray-100 tracking-tight whitespace-nowrap leading-none">
+      <div className="flex items-center gap-2 shrink-0 mr-3 max-w-[200px]">
+        <span
+          className="text-xs font-bold text-gray-800 dark:text-gray-100 tracking-tight whitespace-nowrap truncate leading-none"
+          title={restaurantName}
+        >
           {restaurantName}
         </span>
       </div>
 
-      {/* Center slot: pages can portal content here; fallback shows clock */}
-      <div className="flex-1 flex items-center justify-center min-w-0">
-        <div id="header-center-slot" className="flex items-center gap-1.5 overflow-x-auto max-w-full" />
-        <div className={`flex items-center gap-3.5 ${slotHasContent ? 'hidden' : ''}`}>
+      {/* Center slot: fixed to remaining width with independent horizontal scroll */}
+      <div className="flex-1 min-w-0 h-full flex items-center overflow-hidden px-1">
+        <div
+          id="header-center-slot"
+          className={`w-full h-full flex items-center justify-start gap-1.5 overflow-x-auto ${
+            slotHasContent ? '' : 'hidden'
+          }`}
+          style={{ scrollbarWidth: 'thin' }}
+        />
+        <div className={`flex items-center justify-center gap-3.5 mx-auto ${slotHasContent ? 'hidden' : ''}`}>
           <div className="flex items-center gap-1 text-[11px] text-gray-600 leading-none">
             <Clock size={11} />
             <span>{formattedDate}</span>
@@ -229,7 +251,7 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 shrink-0 ml-3">
         {/* What's New Button */}
         <Tooltip text={t('whatsNew.button', "What's New")} position="bottom">
           <button

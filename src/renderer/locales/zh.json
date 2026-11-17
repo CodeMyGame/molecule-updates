@@ -69,7 +69,17 @@
     "resizeMenuTable": "拖动调整大小",
     "resizeFloorSidebar": "拖动调整大小",
     "resizeCart": "拖动调整大小",
-    "customItemTooltip": "添加菜单外菜品或自定义价格 (Ctrl+T)"
+    "customItemTooltip": "添加菜单外菜品或自定义价格 (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ 新外带打包已开始！请从菜单选择菜品加入购物车。",
+    "newParcelStartedPrompt": "从菜单选择菜品",
+    "newParcelNextStep": "点击菜单中的任何菜品以添加到此前打包订单。",
+    "newParcelTooltip": "开始新的外带打包订单",
+    "addQuickSelect": "+ 添加",
+    "newPresetPlaceholder": "快捷名称（如 Magicpin）",
+    "saveToQuickSelect": "保存 \"{{name}}\" 为快捷选项",
+    "presetAdded": "已将 \"{{name}}\" 添加到快捷选项！",
+    "presetExists": "快捷选项已存在",
+    "presetRemoved": "已移除快捷选项"
   },
   "cart": {
     "empty": "购物车为空",
@@ -219,7 +229,16 @@
     "badgeTransfer": "转移",
     "badgeMerge": "合并",
     "printKotAfterTransfer": "转移后为目标餐桌打印 KOT",
-    "transferredAndKotPrinted": "订单已转移并已打印 KOT！"
+    "transferredAndKotPrinted": "订单已转移并已打印 KOT！",
+    "newParcel": "+ 新打包单",
+    "parcelShelfTitle": "外带与打包",
+    "noActiveParcelsHint": "暂无进行中的打包订单。点击“+ 新打包单”以开始外带订单。",
+    "readyForPickup": "可自取",
+    "preparingInKitchen": "制作中",
+    "kotPending": "KOT待处理",
+    "payNow": "支付",
+    "walkInGuest": "散客",
+    "itemsCount": "{{count}} 项"
   },
   "kitchen": {
     "title": "厨房显示",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "订单历史",
     "tableWise": "按桌台",
-    "dailySales": "日销售",
+    "dailySales": "销售摘要",
     "itemWise": "按商品",
     "categoryWise": "按类别",
     "payments": "支付",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "下载所有订单 (Excel)",
+    "exportingOrders": "正在导出订单…",
+    "exportOrdersSuccess": "成功导出 {{count}} 笔订单！",
+    "noOrdersToExport": "未找到可导出的订单。",
+    "exportOrdersFailed": "导出订单失败。请重试。",
+    "or": "或"
   },
   "paymentModal": {
     "title": "收款",
@@ -1092,8 +1117,6 @@
     "printerSetup": "打印机设置",
     "printerSetupDesc": "配置账单与 KOT 打印机。",
     "printMode": "打印模式",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "找到 {{count}} 台打印机",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "导出订单记录",
+    "exportOrdersDesc": "将所有历史销售和订单数据下载为兼容 Excel 的 CSV 文件。"
   },
   "common": {
     "save": "保存",

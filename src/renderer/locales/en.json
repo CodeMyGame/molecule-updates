@@ -69,7 +69,17 @@
     "resizeMenuTable": "Drag to resize",
     "resizeFloorSidebar": "Drag to resize",
     "resizeCart": "Drag to resize",
-    "customItemTooltip": "Add an unlisted dish in order (Ctrl+T)"
+    "customItemTooltip": "Add an unlisted dish in order (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ New Parcel started! Select dishes from the menu to add to cart.",
+    "newParcelStartedPrompt": "Select dishes from the menu",
+    "newParcelNextStep": "Tap any dish on the menu to add items to this parcel order.",
+    "newParcelTooltip": "Start a new takeaway parcel order",
+    "addQuickSelect": "+ Add",
+    "newPresetPlaceholder": "Preset name (e.g. Magicpin, Direct)",
+    "saveToQuickSelect": "Save \"{{name}}\" to Quick Select",
+    "presetAdded": "Added \"{{name}}\" to quick select!",
+    "presetExists": "Quick select already exists",
+    "presetRemoved": "Removed quick select"
   },
   "cart": {
     "empty": "Cart is empty",
@@ -219,7 +229,16 @@
     "badgeTransfer": "Transfer",
     "badgeMerge": "Merge",
     "printKotAfterTransfer": "Print KOT for destination table after transfer",
-    "transferredAndKotPrinted": "Order transferred and KOT printed!"
+    "transferredAndKotPrinted": "Order transferred and KOT printed!",
+    "newParcel": "+ New Parcel",
+    "parcelShelfTitle": "Takeaway & Parcels",
+    "noActiveParcelsHint": "No active parcels. Click \"+ New Parcel\" to start a takeaway order.",
+    "readyForPickup": "Ready for Pickup",
+    "preparingInKitchen": "Preparing",
+    "kotPending": "KOT Pending",
+    "payNow": "Pay",
+    "walkInGuest": "Walk-in Guest",
+    "itemsCount": "{{count}} items"
   },
   "kitchen": {
     "title": "Kitchen Display",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "Order History",
     "tableWise": "Table-wise",
-    "dailySales": "Daily Sales",
+    "dailySales": "Sales Summary",
     "itemWise": "Item-wise",
     "categoryWise": "Category-wise",
     "payments": "Payments",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "Download All Orders (Excel)",
+    "exportingOrders": "Exporting Orders…",
+    "exportOrdersSuccess": "Exported {{count}} orders successfully!",
+    "noOrdersToExport": "No orders found to export.",
+    "exportOrdersFailed": "Failed to export orders. Please try again.",
+    "or": "or"
   },
   "paymentModal": {
     "title": "Payment",
@@ -1092,8 +1117,6 @@
     "printerSetup": "Printer Setup",
     "printerSetupDesc": "Configure bill and KOT printers.",
     "printMode": "Print Mode",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}} printer found",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "Export Order Records",
+    "exportOrdersDesc": "Download all historical sales and order data to an Excel-compatible CSV file."
   },
   "common": {
     "save": "Save",

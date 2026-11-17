@@ -69,7 +69,17 @@
     "resizeMenuTable": "ドラッグしてサイズ変更",
     "resizeFloorSidebar": "ドラッグしてサイズ変更",
     "resizeCart": "ドラッグしてサイズ変更",
-    "customItemTooltip": "メニュー外の商品やカスタム価格を追加 (Ctrl+T)"
+    "customItemTooltip": "メニュー外の商品やカスタム価格を追加 (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ 新規テイクアウトを開始しました！メニューから料理を選択してください。",
+    "newParcelStartedPrompt": "メニューから料理を選択",
+    "newParcelNextStep": "メニューをタップしてこのテイクアウト注文に商品を追加します。",
+    "newParcelTooltip": "新しいテイクアウト注文を開始",
+    "addQuickSelect": "+ 追加",
+    "newPresetPlaceholder": "プリセット名（例：Magicpin）",
+    "saveToQuickSelect": "\"{{name}}\" をクイック選択に保存",
+    "presetAdded": "\"{{name}}\" をクイック選択に追加しました！",
+    "presetExists": "クイック選択は既に存在します",
+    "presetRemoved": "クイック選択を削除しました"
   },
   "cart": {
     "empty": "カートは空です",
@@ -219,7 +229,16 @@
     "badgeTransfer": "移動",
     "badgeMerge": "統合",
     "printKotAfterTransfer": "移動後に移動先テーブルのKOTを印刷",
-    "transferredAndKotPrinted": "注文を移動し、KOTを印刷しました！"
+    "transferredAndKotPrinted": "注文を移動し、KOTを印刷しました！",
+    "newParcel": "+ 新規テイクアウト",
+    "parcelShelfTitle": "テイクアウトと小包",
+    "noActiveParcelsHint": "対応中のテイクアウトはありません。「+ 新規テイクアウト」をクリックして注文を開始してください。",
+    "readyForPickup": "受取可能",
+    "preparingInKitchen": "調理中",
+    "kotPending": "KOT保留中",
+    "payNow": "支払う",
+    "walkInGuest": "一般客",
+    "itemsCount": "{{count}} 点"
   },
   "kitchen": {
     "title": "キッチンディスプレイ",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "注文履歴",
     "tableWise": "テーブル別",
-    "dailySales": "日次売上",
+    "dailySales": "売上概要",
     "itemWise": "商品別",
     "categoryWise": "カテゴリ別",
     "payments": "支払い",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "すべての注文をダウンロード (Excel)",
+    "exportingOrders": "注文をエクスポート中…",
+    "exportOrdersSuccess": "{{count}} 件の注文を正常にエクスポートしました！",
+    "noOrdersToExport": "エクスポートする注文が見つかりませんでした。",
+    "exportOrdersFailed": "注文のエクスポートに失敗しました。もう一度お試しください。",
+    "or": "または"
   },
   "paymentModal": {
     "title": "お支払い",
@@ -1092,8 +1117,6 @@
     "printerSetup": "プリンター設定",
     "printerSetupDesc": "伝票用とKOT用プリンターを設定します。",
     "printMode": "印刷モード",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "プリンターが{{count}}台見つかりました",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "注文記録のエクスポート",
+    "exportOrdersDesc": "過去のすべての売上および注文データを Excel 対応の CSV ファイルにダウンロードします。"
   },
   "common": {
     "save": "保存",

@@ -69,7 +69,17 @@
     "resizeMenuTable": "വലിപ്പം മാറ്റാൻ വലിക്കുക",
     "resizeFloorSidebar": "വലിപ്പം മാറ്റാൻ വലിക്കുക",
     "resizeCart": "വലിപ്പം മാറ്റാൻ വലിക്കുക",
-    "customItemTooltip": "മെനുവിൽ ഇല്ലാത്ത വിഭവമോ ഇഷ്ടാനുസൃത വിലയോ ചേർക്കുക (Ctrl+T)"
+    "customItemTooltip": "മെനുവിൽ ഇല്ലാത്ത വിഭവമോ ഇഷ്ടാനുസൃത വിലയോ ചേർക്കുക (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ പുതിയ പാഴ്സൽ ആരംഭിച്ചു! കാർട്ടിലേക്ക് ചേർക്കാൻ മെനുവിൽ നിന്ന് വിഭവങ്ങൾ തിരഞ്ഞെടുക്കുക.",
+    "newParcelStartedPrompt": "മെനുവിൽ നിന്ന് വിഭവങ്ങൾ തിരഞ്ഞെടുക്കുക",
+    "newParcelNextStep": "ഈ പാഴ്സൽ ഓർഡറിലേക്ക് ഇനങ്ങൾ ചേർക്കാൻ മെനുവിലെ ഏതെങ്കിലും വിഭവത്തിൽ ടാപ്പ് ചെയ്യുക.",
+    "newParcelTooltip": "പുതിയ പാഴ്സൽ ഓർഡർ ആരംഭിക്കുക",
+    "addQuickSelect": "+ ചേർക്കുക",
+    "newPresetPlaceholder": "പ്രീസെറ്റ് പേര് (ഉദാ. Magicpin)",
+    "saveToQuickSelect": "\"{{name}}\" ദ്രുത തിരഞ്ഞെടുപ്പിൽ സംരക്ഷിക്കുക",
+    "presetAdded": "\"{{name}}\" ദ്രുത തിരഞ്ഞെടുപ്പിലേക്ക് ചേർത്തു!",
+    "presetExists": "ദ്രുത തിരഞ്ഞെടുപ്പ് ഇതിനകം നിലവിലുണ്ട്",
+    "presetRemoved": "ദ്രുത തിരഞ്ഞെടുപ്പ് നീക്കംചെയ്തു"
   },
   "cart": {
     "empty": "കാർട്ട് ശൂന്യമാണ്",
@@ -219,7 +229,16 @@
     "badgeTransfer": "മാറ്റുക",
     "badgeMerge": "ലയിപ്പിക്കുക",
     "printKotAfterTransfer": "മാറ്റിയ ശേഷം പുതിയ മേശയ്ക്കായി KOT പ്രിന്റ് ചെയ്യുക",
-    "transferredAndKotPrinted": "ഓർഡർ മാറ്റി KOT പ്രിന്റ് ചെയ്തു!"
+    "transferredAndKotPrinted": "ഓർഡർ മാറ്റി KOT പ്രിന്റ് ചെയ്തു!",
+    "newParcel": "+ പുതിയ പാർസൽ",
+    "parcelShelfTitle": "ടേക്ക്അവേ & പാർസലുകൾ",
+    "noActiveParcelsHint": "സജീവമായ പാർസലുകളൊന്നുമില്ല. ടേക്ക്അവേ ഓർഡർ ആരംഭിക്കാൻ \"+ പുതിയ പാർസൽ\" ക്ലിക്ക് ചെയ്യുക.",
+    "readyForPickup": "പിക്കപ്പിനായി തയ്യാറാണ്",
+    "preparingInKitchen": "തയ്യാറാകുന്നു",
+    "kotPending": "KOT ബാക്കിയുണ്ട്",
+    "payNow": "പണം നൽകുക",
+    "walkInGuest": "വാക്ക്-ഇൻ അതിഥി",
+    "itemsCount": "{{count}} ഇനങ്ങൾ"
   },
   "kitchen": {
     "title": "അടുക്കള ഡിസ്പ്ലേ",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "ഓർഡർ ചരിത്രം",
     "tableWise": "ടേബിൾ പ്രകാരം",
-    "dailySales": "ദൈനംദിന വിൽപ്പന",
+    "dailySales": "വിൽപ്പന സംഗ്രഹം",
     "itemWise": "ഇനം പ്രകാരം",
     "categoryWise": "വിഭാഗം പ്രകാരം",
     "payments": "പേയ്‌മെന്റുകൾ",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "എല്ലാ ഓർഡറുകളും ഡൗൺലോഡ് ചെയ്യുക (Excel)",
+    "exportingOrders": "ഓർഡറുകൾ കയറ്റുമതി ചെയ്യുന്നു…",
+    "exportOrdersSuccess": "{{count}} ഓർഡറുകൾ വിജയകരമായി കയറ്റുമതി ചെയ്തു!",
+    "noOrdersToExport": "കയറ്റുമതി ചെയ്യാൻ ഓർഡറുകളൊന്നും കണ്ടെത്തിയില്ല.",
+    "exportOrdersFailed": "ഓർഡറുകൾ കയറ്റുമതി ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+    "or": "അല്ലെങ്കിൽ"
   },
   "paymentModal": {
     "title": "പേയ്‌മെന്റ്",
@@ -1092,8 +1117,6 @@
     "printerSetup": "പ്രിന്റർ സെറ്റപ്പ്",
     "printerSetupDesc": "ബിൽ, KOT പ്രിന്ററുകൾ കോൺഫിഗർ ചെയ്യുക.",
     "printMode": "പ്രിന്റ് മോഡ്",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}} പ്രിന്റർ കണ്ടെത്തി",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "ഓർഡർ റെക്കോർഡുകൾ കയറ്റുമതി ചെയ്യുക",
+    "exportOrdersDesc": "എല്ലാ മുൻകാല വിൽപ്പനകളും ഓർഡർ ഡാറ്റയും Excel-അനുയോജ്യമായ CSV ഫയലിലേക്ക് ഡൗൺലോഡ് ചെയ്യുക."
   },
   "common": {
     "save": "സേവ്",

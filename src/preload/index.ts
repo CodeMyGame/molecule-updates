@@ -61,9 +61,11 @@ const api = {
     transferPartial: (sourceOrderId: number, tableId: number, items: { orderItemId: number; quantity: number }[]) =>
       ipcRenderer.invoke('orders:transferPartial', sourceOrderId, tableId, items),
     updateCustomer: (orderId: number, customerId: number) => ipcRenderer.invoke('orders:updateCustomer', orderId, customerId),
+    updateParcelName: (orderId: number, parcelName: string | null) => ipcRenderer.invoke('orders:updateParcelName', orderId, parcelName),
     getByCustomer: (customerId: number, limit?: number) => ipcRenderer.invoke('orders:getByCustomer', customerId, limit ?? 5),
     delete: (orderId: number) => ipcRenderer.invoke('orders:delete', orderId),
     deleteMany: (orderIds: number[]) => ipcRenderer.invoke('orders:deleteMany', orderIds),
+    exportAll: () => ipcRenderer.invoke('orders:exportAll'),
   },
 
   favorites: {

@@ -53,9 +53,11 @@ export const ORDERS = {
   transferOrder: 'orders:transferOrder',
   transferPartial: 'orders:transferPartial',
   updateCustomer: 'orders:updateCustomer',
+  updateParcelName: 'orders:updateParcelName',
   getByCustomer: 'orders:getByCustomer',
   delete: 'orders:delete',
   deleteMany: 'orders:deleteMany',
+  exportAll: 'orders:exportAll',
 } as const;
 
 export const FAVORITES = {

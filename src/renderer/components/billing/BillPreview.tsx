@@ -12,7 +12,7 @@ import { ipc } from '../../lib/ipc';
 import { useMenuTranslations } from '../../hooks/useMenuTranslations';
 import { useTaxTerminology } from '../../hooks/useTaxTerminology';
 import { mergeLayout, BILL_FIELD_DEFS, getFieldDef, ReceiptLayout, ReceiptFieldConfig, ReceiptFieldDef } from '../../../shared/receipt-layout';
-import { renderBillText, BillModel, ReceiptItemStyle, computePrintLineWidth, generateUpiUrl } from '../../../shared/receipt-render';
+import { renderBillText, BillModel, ReceiptItemStyle, computePrintLineWidth, generateUpiUrl, normalizePrintMode } from '../../../shared/receipt-render';
 import { renderQrDataUri, QrStyle } from '../../../shared/qr-render';
 
 interface BillPreviewProps {
@@ -73,6 +73,7 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
   const taxTerms = useTaxTerminology();
   const cart = useBillingStore((s) => s.cart);
   const orderType = useBillingStore((s) => s.orderType);
+  const parcelName = useBillingStore((s) => s.parcelName);
   const selectedTableId = useBillingStore((s) => s.selectedTableId);
   const discount = useBillingStore((s) => s.discount);
   const getSubtotal = useBillingStore((s) => s.getSubtotal);
@@ -87,7 +88,7 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
   const [tableName, setTableName] = useState<string | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [billItemStyle, setBillItemStyle] = useState<string>('name_qty');
-  const [printMode, setPrintMode] = useState<string>('thermal');
+  const [printMode, setPrintMode] = useState<'html' | 'raster'>('html');
   const [billLayout, setBillLayout] = useState<ReceiptLayout>(() => mergeLayout(null, BILL_FIELD_DEFS));
   // print-only state — does NOT affect the visual preview
   const [printLineWidth, setPrintLineWidth] = useState(42);
@@ -147,10 +148,11 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
       ipc<string | null>(window.electronAPI.settings.get('paper_width')),
       ipc<string | null>(window.electronAPI.settings.get('print_mode')),
       ipc<string | null>(window.electronAPI.settings.get('bill_font_size')),
-    ]).then(([paperVal, printMode, fontSize]) => {
-      setPrintMode(printMode ?? 'thermal');
-      setPrintLineWidth(computePrintLineWidth(paperVal, printMode, fontSize));
-      setRasterWordWrap(printMode === 'raster' && !!fontSize && fontSize !== 'small');
+    ]).then(([paperVal, savedPrintMode, fontSize]) => {
+      const mode = normalizePrintMode(savedPrintMode);
+      setPrintMode(mode);
+      setPrintLineWidth(computePrintLineWidth(paperVal, mode, fontSize));
+      setRasterWordWrap(mode === 'raster' && !!fontSize && fontSize !== 'small');
     }).catch(() => {});
   }, [isOpen, orderType, selectedTableId]);
 
@@ -241,7 +243,11 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
     orderNo: orderId ? String(orderId).padStart(3, '0') : undefined,
     date: formatDateTime(now),
     type: orderTypeLabels[orderType] ?? orderType,
-    table: (orderType === 'dine_in' && tableDisplay) ? tableDisplay : undefined,
+    table: (orderType === 'dine_in' && tableDisplay)
+      ? tableDisplay
+      : (orderType === 'takeaway' && parcelName)
+      ? parcelName
+      : undefined,
     cashier: currentUser ? currentUser.name : undefined,
     itemStyle: billItemStyle as ReceiptItemStyle,
     items: billGroups.map((g) => {

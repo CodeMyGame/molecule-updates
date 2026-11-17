@@ -69,7 +69,17 @@
     "resizeMenuTable": "আকার পরিবর্তন করতে টানুন",
     "resizeFloorSidebar": "আকার পরিবর্তন করতে টানুন",
     "resizeCart": "আকার পরিবর্তন করতে টানুন",
-    "customItemTooltip": "মেনুতে নেই এমন আইটেম বা কাস্টম মূল্য যোগ করুন (Ctrl+T)"
+    "customItemTooltip": "মেনুতে নেই এমন আইটেম বা কাস্টম মূল্য যোগ করুন (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ নতুন পার্সেল শুরু হয়েছে! কার্টে যোগ করতে মেনু থেকে খাবার নির্বাচন করুন।",
+    "newParcelStartedPrompt": "মেনু থেকে খাবার নির্বাচন করুন",
+    "newParcelNextStep": "এই পার্সেল অর্ডারে আইটেম যোগ করতে মেনুর যেকোনো খাবারে ট্যাপ করুন।",
+    "newParcelTooltip": "নতুন টেকঅ্যাওয়ে পার্সেল অর্ডার শুরু করুন",
+    "addQuickSelect": "+ যোগ করুন",
+    "newPresetPlaceholder": "প্রিসেট নাম (যেমন Magicpin)",
+    "saveToQuickSelect": "\"{{name}}\" দ্রুত নির্বাচনে সংরক্ষণ করুন",
+    "presetAdded": "\"{{name}}\" দ্রুত নির্বাচনে যোগ করা হয়েছে!",
+    "presetExists": "দ্রুত নির্বাচন ইতিমধ্যে বিদ্যমান",
+    "presetRemoved": "দ্রুত নির্বাচন সরানো হয়েছে"
   },
   "cart": {
     "empty": "কার্ট খালি",
@@ -219,7 +229,16 @@
     "badgeTransfer": "স্থানান্তর",
     "badgeMerge": "মার্জ",
     "printKotAfterTransfer": "স্থানান্তরের পর গন্তব্য টেবিলের জন্য KOT প্রিন্ট করুন",
-    "transferredAndKotPrinted": "অর্ডার স্থানান্তরিত হয়েছে এবং KOT প্রিন্ট হয়েছে!"
+    "transferredAndKotPrinted": "অর্ডার স্থানান্তরিত হয়েছে এবং KOT প্রিন্ট হয়েছে!",
+    "newParcel": "+ নতুন পার্সেল",
+    "parcelShelfTitle": "টেকঅ্যাওয়ে এবং পার্সেল",
+    "noActiveParcelsHint": "কোনো সক্রিয় পার্সেল নেই। টেকঅ্যাওয়ে অর্ডার শুরু করতে \"+ নতুন পার্সেল\" ক্লিক করুন।",
+    "readyForPickup": "পিকআপের জন্য প্রস্তুত",
+    "preparingInKitchen": "তৈরি হচ্ছে",
+    "kotPending": "KOT বাকি",
+    "payNow": "পরিশোধ",
+    "walkInGuest": "ওয়াক-ইন গ্রাহক",
+    "itemsCount": "{{count}}টি আইটেম"
   },
   "kitchen": {
     "title": "রান্নাঘর ডিসপ্লে",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "অর্ডার ইতিহাস",
     "tableWise": "টেবিল-অনুযায়ী",
-    "dailySales": "দৈনিক বিক্রয়",
+    "dailySales": "বিক্রয় সারাংশ",
     "itemWise": "আইটেম অনুযায়ী",
     "categoryWise": "বিভাগ অনুযায়ী",
     "payments": "পেমেন্ট",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "সমস্ত অর্ডার ডাউনলোড করুন (Excel)",
+    "exportingOrders": "অর্ডার রপ্তানি হচ্ছে…",
+    "exportOrdersSuccess": "সফলভাবে {{count}}টি অর্ডার রপ্তানি হয়েছে!",
+    "noOrdersToExport": "রপ্তানি করার মতো কোনো অর্ডার পাওয়া যায়নি।",
+    "exportOrdersFailed": "অর্ডার রপ্তানি করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "or": "অথবা"
   },
   "paymentModal": {
     "title": "পেমেন্ট",
@@ -1092,8 +1117,6 @@
     "printerSetup": "প্রিন্টার সেটআপ",
     "printerSetupDesc": "বিল ও KOT প্রিন্টার কনফিগার করুন।",
     "printMode": "প্রিন্ট মোড",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}}টি প্রিন্টার পাওয়া গেছে",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "অর্ডার রেকর্ড রপ্তানি করুন",
+    "exportOrdersDesc": "সমস্ত ঐতিহাসিক বিক্রয় এবং অর্ডার ডেটা একটি Excel-সামঞ্জস্যপূর্ণ CSV ফাইলে ডাউনলোড করুন।"
   },
   "common": {
     "save": "সংরক্ষণ",

@@ -28,6 +28,7 @@ import { addQrStyleSetting } from './db/migrations/022_add_qr_style_setting';
 import { allowMultipleAttendanceShifts } from './db/migrations/023_allow_multiple_attendance_shifts';
 import { addOrderItemAddonsPerfIndex } from './db/migrations/024_add_order_item_addons_perf_index';
 import { addMissingFkIndexes } from './db/migrations/025_add_missing_fk_indexes';
+import { addParcelNameToOrders } from './db/migrations/026_add_parcel_name_to_orders';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -152,6 +153,7 @@ function initializeDatabase(): void {
       allowMultipleAttendanceShifts,
       addOrderItemAddonsPerfIndex,
       addMissingFkIndexes,
+      addParcelNameToOrders,
     ]);
 
     // Seed default data

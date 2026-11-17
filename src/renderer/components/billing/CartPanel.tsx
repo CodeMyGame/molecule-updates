@@ -20,6 +20,7 @@ import {
   Split,
   RotateCw,
   Play,
+  ShoppingBag,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useBillingStore } from '../../stores/billing.store';
@@ -29,6 +30,7 @@ import Button from '../common/Button';
 import Modal from '../common/Modal';
 import Tooltip from '../common/Tooltip';
 import VoidReasonModal from './VoidReasonModal';
+import ParcelNameModal from './ParcelNameModal';
 import { useTranslation } from 'react-i18next';
 import { useMenuTranslations } from '../../hooks/useMenuTranslations';
 import { useTaxTerminology } from '../../hooks/useTaxTerminology';
@@ -147,6 +149,34 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const orderNotes = useBillingStore((s) => s.notes);
   const outboundTransfers = useBillingStore((s) => s.outboundTransfers);
   const currentOrderId = useBillingStore((s) => s.currentOrderId);
+  const orderType = useBillingStore((s) => s.orderType);
+  const parcelName = useBillingStore((s) => s.parcelName);
+  const setParcelName = useBillingStore((s) => s.setParcelName);
+  const [showParcelModal, setShowParcelModal] = useState(false);
+
+  const handleConfirmParcelName = useCallback(
+    async (name: string | null) => {
+      setParcelName(name);
+      if (currentOrderId) {
+        try {
+          await ipc(window.electronAPI.orders.updateParcelName(currentOrderId, name));
+          toast.success(
+            name
+              ? t('billing.parcelTaggedToast', { defaultValue: `🏷️ Tagged as "${name}"`, name })
+              : t('billing.parcelTagClearedToast', { defaultValue: 'Parcel tag cleared' })
+          );
+          if (onRefresh) {
+            await onRefresh();
+          }
+        } catch {
+          toast.error(t('toast.updateOrderFailed', { defaultValue: 'Failed to update order' }));
+        }
+      } else if (name) {
+        toast.success(t('billing.parcelTaggedToast', { defaultValue: `🏷️ Tagged as "${name}"`, name }));
+      }
+    },
+    [currentOrderId, setParcelName, onRefresh, t]
+  );
 
   // Helper to resolve an order number (e.g. "ORD-20261031-021") to a table name if known
   const resolveTableName = useCallback((nameOrOrder: string) => {
@@ -593,7 +623,11 @@ const CartPanel: React.FC<CartPanelProps> = ({
     if (group.isSynced) {
       // Sent KOT item: queue +1 in the new pending batch for the next KOT
       const rep = group.representative;
-      addToCart(rep.menuItem, rep.variation, rep.addons);
+      const addonsTotal = (rep.addons ?? []).reduce((sum, a) => sum + (a.price ?? 0), 0);
+      const normalizedBasePrice = (rep.unitPrice && rep.addons.length > 0 && rep.menuItem.basePrice >= rep.unitPrice)
+        ? Math.max(0, rep.unitPrice - addonsTotal)
+        : rep.menuItem.basePrice;
+      addToCart({ ...rep.menuItem, basePrice: normalizedBasePrice }, rep.variation, rep.addons);
       toast.success(t('cart.addedToNextKot', 'Added 1 to new items for next KOT'));
       return;
     }
@@ -626,11 +660,46 @@ const CartPanel: React.FC<CartPanelProps> = ({
         <div className="px-3 py-1.5 border-b border-gray-200">
           <div className="flex items-center justify-between">
           <h2 className="text-xs font-semibold text-gray-900">
-            {t('cart.currentOrder')}
-            {currentOrderId && (
-              <span className="ml-1.5 text-[10px] font-normal text-gray-500">
-                #{String(currentOrderId).padStart(3, '0')}
+            {orderType === 'takeaway' ? (
+              <span className="inline-flex items-center gap-1.5 text-emerald-700">
+                <ShoppingBag size={13} />
+                <span>
+                  {currentOrderId
+                    ? `Parcel #${String(currentOrderId).padStart(3, '0')}`
+                    : t('tables.parcelShelfTitle', { defaultValue: 'New Takeaway Parcel' })}
+                </span>
+                {parcelName ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowParcelModal(true)}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-colors cursor-pointer"
+                    title={t('billing.editParcelName', { defaultValue: 'Edit parcel tag' })}
+                  >
+                    <span>🏷️</span>
+                    <span className="max-w-[90px] truncate">{parcelName}</span>
+                    <Pencil size={8} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowParcelModal(true)}
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-dashed border-emerald-300 transition-colors cursor-pointer"
+                    title={t('billing.addParcelName', { defaultValue: 'Add parcel tag (e.g. Zomato, Swiggy)' })}
+                  >
+                    <Tag size={9} />
+                    <span>+ Tag</span>
+                  </button>
+                )}
               </span>
+            ) : (
+              <>
+                {t('cart.currentOrder')}
+                {currentOrderId && (
+                  <span className="ml-1.5 text-[10px] font-normal text-gray-500">
+                    #{String(currentOrderId).padStart(3, '0')}
+                  </span>
+                )}
+              </>
             )}
           </h2>
           <div className="flex items-center gap-1.5">
@@ -653,11 +722,28 @@ const CartPanel: React.FC<CartPanelProps> = ({
 
         {/* Empty state */}
         <div className="flex-1 flex flex-col items-center justify-center text-gray-400 px-4">
-          <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-            <ShoppingCart size={24} strokeWidth={1.5} />
-          </div>
-          <p className="text-xs font-medium text-gray-500">{t('cart.empty')}</p>
-          <p className="text-[10px] text-gray-400 mt-0.5 text-center">{t('cart.emptyDesc')}</p>
+          {orderType === 'takeaway' && !currentOrderId ? (
+            <div className="flex flex-col items-center text-center max-w-[220px]">
+              <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 shadow-xs">
+                <ShoppingBag size={26} strokeWidth={2} />
+              </div>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 mb-2">
+                🛍️ {parcelName ? `New Parcel (${parcelName})` : t('tables.parcelShelfTitle', { defaultValue: 'New Takeaway Parcel' })}
+              </span>
+              <p className="text-xs font-bold text-gray-800">{t('billing.newParcelStartedPrompt', { defaultValue: 'Select dishes from the menu' })}</p>
+              <p className="text-[11px] text-gray-500 mt-1 leading-snug">
+                {t('billing.newParcelNextStep', { defaultValue: 'Tap any dish on the menu to add items to this parcel order.' })}
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                <ShoppingCart size={24} strokeWidth={1.5} />
+              </div>
+              <p className="text-xs font-medium text-gray-500">{t('cart.empty')}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5 text-center">{t('cart.emptyDesc')}</p>
+            </>
+          )}
 
           {currentOrderId && (
             <Button
@@ -671,6 +757,12 @@ const CartPanel: React.FC<CartPanelProps> = ({
             </Button>
           )}
         </div>
+        <ParcelNameModal
+          isOpen={showParcelModal}
+          onClose={() => setShowParcelModal(false)}
+          currentName={parcelName}
+          onConfirm={handleConfirmParcelName}
+        />
       </div>
     );
   }
@@ -681,11 +773,46 @@ const CartPanel: React.FC<CartPanelProps> = ({
       <div className="px-3 py-1.5 border-b border-gray-200 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-semibold text-gray-900">
-            {t('cart.currentOrder')}
-            {currentOrderId && (
-              <span className="ml-1.5 text-[10px] font-normal text-gray-500">
-                #{String(currentOrderId).padStart(3, '0')}
+            {orderType === 'takeaway' ? (
+              <span className="inline-flex items-center gap-1.5 text-emerald-700">
+                <ShoppingBag size={13} />
+                <span>
+                  {currentOrderId
+                    ? `Parcel #${String(currentOrderId).padStart(3, '0')}`
+                    : t('tables.parcelShelfTitle', { defaultValue: 'Takeaway Parcel' })}
+                </span>
+                {parcelName ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowParcelModal(true)}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition-colors cursor-pointer"
+                    title={t('billing.editParcelName', { defaultValue: 'Edit parcel tag' })}
+                  >
+                    <span>🏷️</span>
+                    <span className="max-w-[90px] truncate">{parcelName}</span>
+                    <Pencil size={8} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowParcelModal(true)}
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-dashed border-emerald-300 transition-colors cursor-pointer"
+                    title={t('billing.addParcelName', { defaultValue: 'Add parcel tag (e.g. Zomato, Swiggy)' })}
+                  >
+                    <Tag size={9} />
+                    <span>+ Tag</span>
+                  </button>
+                )}
               </span>
+            ) : (
+              <>
+                {t('cart.currentOrder')}
+                {currentOrderId && (
+                  <span className="ml-1.5 text-[10px] font-normal text-gray-500">
+                    #{String(currentOrderId).padStart(3, '0')}
+                  </span>
+                )}
+              </>
             )}
           </h2>
           <div className="flex items-center gap-1.5">
@@ -1551,6 +1678,14 @@ const CartPanel: React.FC<CartPanelProps> = ({
               }
             : undefined
         }
+      />
+
+      {/* Parcel Name Tagging Modal */}
+      <ParcelNameModal
+        isOpen={showParcelModal}
+        onClose={() => setShowParcelModal(false)}
+        currentName={parcelName}
+        onConfirm={handleConfirmParcelName}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import { getDb } from '../connection';
 import { format } from 'date-fns';
 import { logger } from '../../utils/logger';
 import * as settingsRepo from './settings.repo';
-import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem, OrderKotSummary } from '../../../shared/types/order.types';
+import type { Order, OrderItem, OrderItemAddon, CreateOrderDTO, CartItem, OrderKotSummary, OrderExportRow } from '../../../shared/types/order.types';
 import { OrderStatus, KOTStatus, StockTransactionType } from '../../../shared/enums';
 
 function resolveItemTaxRate(itemRate?: number | null): number {
@@ -23,8 +23,8 @@ export function create(data: CreateOrderDTO): Order {
   const db = getDb();
 
   const insertOrder = db.prepare(`
-    INSERT INTO orders (order_number, order_type, table_id, table_name_snapshot, customer_id, staff_id, status, subtotal, discount_amount, discount_type, discount_value, discount_reason, tax_amount, grand_total, round_off, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO orders (order_number, order_type, table_id, table_name_snapshot, customer_id, staff_id, status, subtotal, discount_amount, discount_type, discount_value, discount_reason, tax_amount, grand_total, round_off, notes, parcel_name)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const getTableName = db.prepare('SELECT name FROM tables WHERE id = ?');
 
@@ -119,6 +119,7 @@ export function create(data: CreateOrderDTO): Order {
       grandTotal + roundOff,
       roundOff,
       data.notes ?? null,
+      data.parcelName && data.parcelName.trim().length > 0 ? data.parcelName.trim() : null,
     );
 
     const orderId = result.lastInsertRowid as number;
@@ -348,7 +349,17 @@ export function getById(id: number): (Order & { items: OrderItem[]; kots: OrderK
 
 export function getActive(): (Order & { items: OrderItem[]; kots: OrderKotSummary[] })[] {
   const db = getDb();
-  const rows = db.prepare("SELECT * FROM orders WHERE status IN (?, ?) ORDER BY created_at DESC").all(OrderStatus.ACTIVE, OrderStatus.HOLD) as any[];
+  const rows = db.prepare(`
+    SELECT o.*,
+      t.name AS table_name,
+      c.name AS customer_name,
+      c.phone AS customer_phone
+    FROM orders o
+    LEFT JOIN tables t ON o.table_id = t.id
+    LEFT JOIN customers c ON o.customer_id = c.id
+    WHERE o.status IN (?, ?)
+    ORDER BY o.created_at DESC
+  `).all(OrderStatus.ACTIVE, OrderStatus.HOLD) as any[];
   if (rows.length === 0) return [];
 
   const orderIds = rows.map((r) => r.id);
@@ -441,7 +452,14 @@ export function getActive(): (Order & { items: OrderItem[]; kots: OrderKotSummar
     const order = mapOrder(row);
     const items = itemsByOrderId.get(order.id) ?? [];
     const kots = kotsByOrderId.get(order.id) ?? [];
-    return { ...order, items, kots };
+    return {
+      ...order,
+      tableName: row.table_name ?? row.table_name_snapshot ?? undefined,
+      customerName: row.customer_name ?? undefined,
+      customerPhone: row.customer_phone ?? undefined,
+      items,
+      kots,
+    };
   });
 }
 
@@ -1321,6 +1339,8 @@ function mapOrder(row: any): Order {
     roundOff: row.round_off,
     grandTotal: row.grand_total,
     notes: row.notes ?? undefined,
+    parcelName: row.parcel_name ?? undefined,
+    parcel_name: row.parcel_name ?? undefined,
     mergedIntoOrderId: row.merged_into_order_id ?? undefined,
     mergedIntoOrderNumber: row.merged_into_order_number ?? undefined,
     splitFromOrderId: row.split_from_order_id ?? undefined,
@@ -1329,6 +1349,14 @@ function mapOrder(row: any): Order {
     updatedAt: row.updated_at,
     completedAt: row.completed_at ?? undefined,
   };
+}
+
+export function updateParcelName(orderId: number, parcelName: string | null): void {
+  const db = getDb();
+  db.prepare("UPDATE orders SET parcel_name = ?, updated_at = datetime('now') WHERE id = ?").run(
+    parcelName && parcelName.trim().length > 0 ? parcelName.trim() : null,
+    orderId
+  );
 }
 
 function mapOrderItemAddon(row: any): OrderItemAddon {
@@ -1340,3 +1368,103 @@ function mapOrderItemAddon(row: any): OrderItemAddon {
     price: row.price,
   };
 }
+
+export function exportAllOrders(): OrderExportRow[] {
+  const db = getDb();
+
+  const orders = db.prepare(`
+    SELECT o.*,
+      t.name AS table_name,
+      s.name AS staff_name,
+      c.name AS customer_name,
+      c.phone AS customer_phone,
+      COALESCE((SELECT SUM(ABS(lt.points)) * 100 FROM loyalty_transactions lt WHERE lt.order_id = o.id AND lt.points < 0), 0) AS coins_redeemed
+    FROM orders o
+    LEFT JOIN tables t ON o.table_id = t.id
+    LEFT JOIN staff s ON o.staff_id = s.id
+    LEFT JOIN customers c ON o.customer_id = c.id
+    ORDER BY o.created_at DESC
+  `).all() as any[];
+
+  if (orders.length === 0) return [];
+
+  // Batch fetch all items
+  const itemRows = db.prepare(`
+    SELECT order_id, name, quantity, unit_price, total
+    FROM order_items
+    ORDER BY id ASC
+  `).all() as any[];
+
+  const itemsByOrderId = new Map<number, { name: string; quantity: number; unitPrice: number; total: number }[]>();
+  for (const row of itemRows) {
+    const list = itemsByOrderId.get(row.order_id);
+    if (list) {
+      list.push(row);
+    } else {
+      itemsByOrderId.set(row.order_id, [row]);
+    }
+  }
+
+  // Batch fetch all payments
+  const paymentRows = db.prepare(`
+    SELECT order_id, payment_mode, amount
+    FROM payments
+    ORDER BY id ASC
+  `).all() as any[];
+
+  const paymentsByOrderId = new Map<number, { payment_mode: string; amount: number }[]>();
+  for (const row of paymentRows) {
+    const list = paymentsByOrderId.get(row.order_id);
+    if (list) {
+      list.push(row);
+    } else {
+      paymentsByOrderId.set(row.order_id, [row]);
+    }
+  }
+
+  return orders.map((o) => {
+    const items = itemsByOrderId.get(o.id) || [];
+    const payments = paymentsByOrderId.get(o.id) || [];
+
+    const itemCount = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const itemsSummary = items
+      .map((item) => `${item.quantity}x ${item.name} (₹${(item.total / 100).toFixed(2)})`)
+      .join('; ');
+
+    const paymentMethods = payments.length > 0
+      ? payments.map((p) => `${(p.payment_mode || 'OTHER').toUpperCase()}: ₹${(p.amount / 100).toFixed(2)}`).join('; ')
+      : '-';
+
+    const grandTotal = o.grand_total || 0;
+    const coinsRedeemed = o.coins_redeemed || 0;
+    const netAmount = Math.max(0, grandTotal - coinsRedeemed);
+
+    return {
+      id: o.id,
+      orderNumber: o.order_number,
+      orderType: o.order_type,
+      status: o.status,
+      tableName: o.table_name ?? o.table_name_snapshot ?? undefined,
+      customerName: o.customer_name ?? undefined,
+      customerPhone: o.customer_phone ?? undefined,
+      staffName: o.staff_name ?? undefined,
+      subtotal: o.subtotal || 0,
+      discountAmount: o.discount_amount || 0,
+      discountType: o.discount_type ?? undefined,
+      discountValue: o.discount_value ?? 0,
+      discountReason: o.discount_reason ?? undefined,
+      taxAmount: o.tax_amount || 0,
+      roundOff: o.round_off || 0,
+      grandTotal,
+      coinsRedeemed,
+      netAmount,
+      notes: o.notes ?? undefined,
+      createdAt: o.created_at,
+      completedAt: o.completed_at ?? undefined,
+      itemCount,
+      itemsSummary,
+      paymentMethods,
+    };
+  });
+}
+

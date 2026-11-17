@@ -69,7 +69,17 @@
     "resizeMenuTable": "పరిమాణాన్ని మార్చడానికి లాగండి",
     "resizeFloorSidebar": "పరిమాణాన్ని మార్చడానికి లాగండి",
     "resizeCart": "పరిమాణాన్ని మార్చడానికి లాగండి",
-    "customItemTooltip": "మెనూలో లేని వంటకం లేదా అనుకూల ధరను జోడించండి (Ctrl+T)"
+    "customItemTooltip": "మెనూలో లేని వంటకం లేదా అనుకూల ధరను జోడించండి (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ కొత్త పార్శిల్ ప్రారంభమైంది! కార్ట్‌కు జోడించడానికి మెనూ నుండి వంటకాలను ఎంచుకోండి.",
+    "newParcelStartedPrompt": "మెనూ నుండి వంటకాలను ఎంచుకోండి",
+    "newParcelNextStep": "ఈ పార్శిల్ ఆర్డర్‌కు ఐటెమ్‌లను జోడించడానికి మెనూలోని ఏదైనా వంటకంపై నొక్కండి.",
+    "newParcelTooltip": "కొత్త టేక్‌అవే పార్శిల్ ఆర్డర్‌ను ప్రారంభించండి",
+    "addQuickSelect": "+ జోడించు",
+    "newPresetPlaceholder": "ప్రీసెట్ పేరు (ఉదా. Magicpin)",
+    "saveToQuickSelect": "\"{{name}}\" శీఘ్ర ఎంపికలో సేవ్ చేయండి",
+    "presetAdded": "\"{{name}}\" శీఘ్ర ఎంపికలో చేర్చబడింది!",
+    "presetExists": "శీఘ్ర ఎంపిక ఇప్పటికే ఉంది",
+    "presetRemoved": "శీఘ్ర ఎంపిక తొలగించబడింది"
   },
   "cart": {
     "empty": "కార్ట్ ఖాళీగా ఉంది",
@@ -219,7 +229,16 @@
     "badgeTransfer": "బదిలీ",
     "badgeMerge": "కలపండి",
     "printKotAfterTransfer": "బదిలీ తర్వాత కొత్త టేబుల్ కోసం KOT ముద్రించండి",
-    "transferredAndKotPrinted": "ఆర్డర్ బదిలీ చేయబడింది మరియు KOT ముద్రించబడింది!"
+    "transferredAndKotPrinted": "ఆర్డర్ బదిలీ చేయబడింది మరియు KOT ముద్రించబడింది!",
+    "newParcel": "+ కొత్త పార్సెల్",
+    "parcelShelfTitle": "టేక్‌అవే & పార్సెల్స్",
+    "noActiveParcelsHint": "క్రియాశీల పార్సెల్‌లు లేవు. టేక్‌అవే ఆర్డర్‌ను ప్రారంభించడానికి \"+ కొత్త పార్సెల్\" క్లిక్ చేయండి.",
+    "readyForPickup": "పికప్ కోసం సిద్ధంగా ఉంది",
+    "preparingInKitchen": "సిద్ధమవుతోంది",
+    "kotPending": "KOT పెండింగ్‌లో ఉంది",
+    "payNow": "చెల్లించండి",
+    "walkInGuest": "వాక్-ఇన్ కస్టమర్",
+    "itemsCount": "{{count}} అంశాలు"
   },
   "kitchen": {
     "title": "వంటగది డిస్‌ప్లే",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "ఆర్డర్ చరిత్ర",
     "tableWise": "టేబుల్-వారీగా",
-    "dailySales": "రోజువారీ అమ్మకాలు",
+    "dailySales": "అమ్మకాల సారాంశం",
     "itemWise": "అంశం వారీగా",
     "categoryWise": "వర్గం వారీగా",
     "payments": "చెల్లింపులు",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "అన్ని ఆర్డర్‌లను డౌన్‌లోడ్ చేయండి (Excel)",
+    "exportingOrders": "ఆర్డర్‌లు ఎగుమతి చేయబడుతున్నాయి…",
+    "exportOrdersSuccess": "{{count}} ఆర్డర్‌లు విజయవంతంగా ఎగుమతి చేయబడ్డాయి!",
+    "noOrdersToExport": "ఎగుమతి చేయడానికి ఆర్డర్‌లు ఏవీ లేవు.",
+    "exportOrdersFailed": "ఆర్డర్‌లను ఎగుమతి చేయడంలో విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+    "or": "లేదా"
   },
   "paymentModal": {
     "title": "చెల్లింపు",
@@ -1092,8 +1117,6 @@
     "printerSetup": "ప్రింటర్ సెటప్",
     "printerSetupDesc": "బిల్ మరియు KOT ప్రింటర్లను కాన్ఫిగర్ చేయండి.",
     "printMode": "ప్రింట్ మోడ్",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}} ప్రింటర్ కనుగొనబడింది",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "ఆర్డర్ రికార్డులను ఎగుమతి చేయండి",
+    "exportOrdersDesc": "అన్ని చారిత్రక విక్రయాలు మరియు ఆర్డర్ డేటాను Excel-అనుకూల CSV ఫైల్‌కి డౌన్‌లోడ్ చేయండి."
   },
   "common": {
     "save": "సేవ్",

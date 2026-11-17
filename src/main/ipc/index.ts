@@ -44,14 +44,12 @@ import { OrderStatus } from '../../shared/enums';
 import { WHATSAPP_FEATURE_ENABLED } from '../../shared/featureFlags';
 import { mergeLayout, BILL_FIELD_DEFS, isFieldVisible } from '../../shared/receipt-layout';
 import QRCode from 'qrcode';
-import { renderBillText, buildSampleBillModel, DEFAULT_BILL_LABELS, ReceiptItemStyle, generateUpiUrl } from '../../shared/receipt-render';
+import { renderBillText, buildSampleBillModel, DEFAULT_BILL_LABELS, ReceiptItemStyle, generateUpiUrl, normalizePrintMode } from '../../shared/receipt-render';
 import { QrStyle, renderQrDataUri } from '../../shared/qr-render';
-import { renderQrPngBuffer } from '../services/qr-image.service';
 import * as billingService from '../services/billing.service';
 import * as inventoryService from '../services/inventory.service';
 import * as reportsService from '../services/reports.service';
 import * as kotPrintService from '../services/kot-print.service';
-import { createPrinter, sendRawToPrinter, VIRTUAL_PRINTER_NAME } from '../services/escpos-print.service';
 import * as whatsappService from '../services/whatsapp.service';
 import * as cloudSync from '../services/cloud-sync.service';
 import * as kitchenServer from '../services/kitchen-server.service';
@@ -207,6 +205,7 @@ export function registerAllHandlers(): void {
   );
   handle(ORDERS.delete, (orderId: number) => orderRepo.deleteOrder(orderId));
   handle(ORDERS.deleteMany, (orderIds: number[]) => orderRepo.deleteOrders(orderIds));
+  handle(ORDERS.exportAll, () => orderRepo.exportAllOrders());
   handle(ORDERS.getByCustomer, (customerId: number, limit: number) => {
     const db = getDb();
     const rows = db.prepare(`
@@ -232,6 +231,12 @@ export function registerAllHandlers(): void {
     const db = getDb();
     db.prepare("UPDATE orders SET customer_id = ?, updated_at = datetime('now') WHERE id = ?").run(customerId, orderId);
     return orderRepo.getById(orderId);
+  });
+
+  handle(ORDERS.updateParcelName, (orderId: number, parcelName: string | null) => {
+    orderRepo.updateParcelName(orderId, parcelName);
+    cloudSync.scheduleSync();
+    return true;
   });
 
   // ---- Favorites ----
@@ -518,7 +523,7 @@ export function registerAllHandlers(): void {
     try {
       const db = getDb();
       const kot = db.prepare(`
-        SELECT k.*, o.order_number, o.order_type, t.name as table_name
+        SELECT k.*, o.order_number, o.order_type, o.parcel_name, t.name as table_name
         FROM kots k
         LEFT JOIN orders o ON k.order_id = o.id
         LEFT JOIN tables t ON o.table_id = t.id
@@ -554,6 +559,7 @@ export function registerAllHandlers(): void {
         kotNumber: kot.kot_number,
         orderNumber: kot.order_number ?? '',
         tableName: kot.order_type === 'dine_in' ? (kot.table_name ?? undefined) : undefined,
+        parcelName: kot.order_type === 'takeaway' ? (kot.parcel_name ?? undefined) : undefined,
         orderType: kot.order_type ?? 'dine_in',
         items: items.map((i: any) => {
           const addons = i.order_item_id ? (getAddons.all(i.order_item_id) as { name: string }[]) : [];
@@ -577,8 +583,6 @@ export function registerAllHandlers(): void {
 
   // ---- Bill Print ----
 
-  type BillFontSize = 'small' | 'medium' | 'large';
-
   interface BillQrOptions {
     upiUrl?: string;
     amount?: number;
@@ -588,120 +592,6 @@ export function registerAllHandlers(): void {
     style?: QrStyle;
   }
 
-
-  function applyBillFont(p: any, size: BillFontSize): void {
-    switch (size) {
-      case 'small': p.setTextNormal(); break;
-      case 'medium': p.setTextDoubleHeight(); break;
-      case 'large': p.setTextQuadArea(); break;
-      default: p.setTextDoubleHeight(); break;
-    }
-  }
-
-  async function buildBillEscPos(receiptText: string, fontSize: BillFontSize = 'small', qrOptions?: BillQrOptions): Promise<Buffer> {
-    const paper = settingsRepo.get('paper_width') ?? '58mm';
-    const PAPER_CHAR_WIDTH: Record<string, number> = {
-      '58mm': 32, '72mm': 38, '76mm': 40, '80mm': 42, '112mm': 56,
-    };
-    const PAPER_PRINT_DOTS: Record<string, [number, number]> = {
-      '58mm': [0x80, 0x01], '72mm': [0x00, 0x02], '76mm': [0x18, 0x02],
-      '80mm': [0x40, 0x02], '112mm': [0x40, 0x03],
-    };
-    const baseWidth = PAPER_CHAR_WIDTH[paper] ?? 32;
-    const p = createPrinter(baseWidth);
-    const lines = receiptText.split('\n');
-    const W = p.getWidth();
-
-    // Ensure Font A, reset left margin to 0, and maximise print area
-    p.setTypeFontA();
-    p.add(Buffer.from([0x1d, 0x4c, 0x00, 0x00]));
-    const [nL, nH] = PAPER_PRINT_DOTS[paper] ?? [0x80, 0x01];
-    p.add(Buffer.from([0x1d, 0x57, nL, nH]));
-
-    // Apply chosen font size throughout
-    p.bold(true);
-    applyBillFont(p, fontSize);
-
-    let printedQr = false;
-    const printQrBlock = async () => {
-      if (printedQr || !qrOptions?.upiUrl) return;
-      printedQr = true;
-      p.setTextNormal();
-      p.drawLine('-');
-      p.alignCenter();
-      p.bold(true);
-      p.println('SCAN & PAY VIA UPI');
-      p.bold(false);
-      try {
-        const qrStyle = (qrOptions.style || settingsRepo.get('qr_style') || 'square') as QrStyle;
-        const targetWidth = paper === '58mm' ? 160 : 200;
-        const qrPngBuffer = renderQrPngBuffer(qrOptions.upiUrl, qrStyle, targetWidth);
-        await p.printImageBuffer(qrPngBuffer);
-      } catch (imgErr) {
-        console.warn('ESC/POS printImageBuffer error, trying printQR fallback:', imgErr);
-        try {
-          p.printQR(qrOptions.upiUrl, {
-            cellSize: paper === '58mm' ? 4 : 5,
-            correction: 'M',
-            model: 2,
-          });
-        } catch (qrErr) {
-          console.warn('ESC/POS printQR fallback error:', qrErr);
-        }
-      }
-      p.println('');
-      applyBillFont(p, fontSize);
-      p.alignLeft();
-    };
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const isThankYou = /thank\s*you/i.test(line);
-      if (isThankYou && qrOptions?.upiUrl && !printedQr) {
-        await printQrBlock();
-      }
-
-      const isSeparator = /^[=\-]{30,}$/.test(line.trim());
-      const isGrandTotal = /grand\s*total/i.test(line);
-
-      if (isSeparator) {
-        p.setTextNormal();
-        p.bold(true);
-        p.drawLine(line.trim()[0]);
-        applyBillFont(p, fontSize);
-        continue;
-      }
-
-      if (isGrandTotal) {
-        p.setTextDoubleHeight();
-        p.bold(true);
-        p.println(line.substring(0, W));
-        applyBillFont(p, fontSize);
-        p.bold(true);
-        continue;
-      }
-
-      const trimmed = line.trim();
-      const leadingSpaces = line.length - line.trimStart().length;
-      const isCentered = leadingSpaces > 4 && trimmed.length < W - 10;
-
-      if (isCentered && i < 10) {
-        p.alignCenter();
-        p.println(trimmed);
-        p.alignLeft();
-      } else {
-        p.println(line.substring(0, W));
-      }
-    }
-
-    if (qrOptions?.upiUrl && !printedQr) {
-      await printQrBlock();
-    }
-
-    p.setTextNormal();
-    p.cut();
-    return p.getBuffer();
-  }
 
   async function printBillViaHtml(receiptText: string, printerName: string | null, includeLogo = false, qrOptions?: BillQrOptions): Promise<void> {
     let logoHtml = '';
@@ -880,14 +770,8 @@ export function registerAllHandlers(): void {
 
   async function runBillPrint(receiptText: string, options?: BillQrOptions): Promise<void> {
     const savedPrinterName = settingsRepo.get('printer_bill') || settingsRepo.get('printer_kot');
-    const printMode = settingsRepo.get('print_mode') ?? 'thermal';
+    const printMode = normalizePrintMode(settingsRepo.get('print_mode'));
     const qrOptions = await resolveBillQrOptions(receiptText, options);
-
-    // If customer chose HTML mode, skip ESC/POS entirely
-    if (printMode === 'html') {
-      await printBillViaHtml(receiptText, savedPrinterName || null, false, qrOptions);
-      return;
-    }
 
     if (printMode === 'raster') {
       const billLayout = mergeLayout(settingsRepo.get('bill_layout'), BILL_FIELD_DEFS);
@@ -895,18 +779,6 @@ export function registerAllHandlers(): void {
       const showQr = isFieldVisible(billLayout, 'dynamicQr') || settingsRepo.get('dynamic_qr_bill') === 'true' || !!options?.upiUrl;
       await printBillViaHtml(receiptText, savedPrinterName || null, showLogo, showQr ? qrOptions : undefined);
       return;
-    }
-
-    // Thermal mode: try ESC/POS first, fallback to HTML on failure
-    if (savedPrinterName) {
-      try {
-        const billFontSize = (settingsRepo.get('bill_font_size') ?? 'small') as BillFontSize;
-        const escposBuffer = await buildBillEscPos(receiptText, billFontSize, qrOptions);
-        await sendRawToPrinter(savedPrinterName, escposBuffer);
-        return;
-      } catch (err) {
-        console.warn('ESC/POS bill print failed, falling back to HTML:', err);
-      }
     }
 
     await printBillViaHtml(receiptText, savedPrinterName || null, false, qrOptions);
@@ -920,7 +792,7 @@ export function registerAllHandlers(): void {
     const W = PAPER_CHAR_WIDTH[paper] ?? 32;
 
     // Raster mode honours the user's bill field layout (show/hide, reorder, rename).
-    if ((settingsRepo.get('print_mode') ?? 'thermal') === 'raster') {
+    if (normalizePrintMode(settingsRepo.get('print_mode')) === 'raster') {
       const layout = mergeLayout(settingsRepo.get('bill_layout'), BILL_FIELD_DEFS);
       const itemStyle = (settingsRepo.get('bill_item_style') ?? 'name_qty') as ReceiptItemStyle;
       const model = buildSampleBillModel(DEFAULT_BILL_LABELS, itemStyle);
@@ -1059,11 +931,7 @@ export function registerAllHandlers(): void {
           name: p.name, displayName: p.displayName ?? p.name, isDefault: p.isDefault,
         }))
       : [];
-    // Inject virtual thermal printer for testing without hardware
-    return [
-      { name: VIRTUAL_PRINTER_NAME, displayName: 'Virtual Thermal Printer (Preview)', isDefault: false },
-      ...systemPrinters,
-    ];
+    return systemPrinters;
   });
 
   // ---- Day Session ----

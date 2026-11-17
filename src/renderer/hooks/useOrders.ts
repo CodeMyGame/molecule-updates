@@ -7,18 +7,34 @@ import { useTranslation } from 'react-i18next';
 
 export interface Order {
   id: number;
-  order_number: string;
-  order_type: 'dine_in' | 'takeaway' | 'delivery';
+  order_number?: string;
+  orderNumber?: string;
+  order_type?: 'dine_in' | 'takeaway' | 'delivery';
+  orderType?: 'dine_in' | 'takeaway' | 'delivery';
   status: 'active' | 'completed' | 'cancelled' | 'hold';
-  table_id: number | null;
-  customer_id: number | null;
+  table_id?: number | null;
+  tableId?: number | null;
+  customer_id?: number | null;
+  customerId?: number | null;
+  customerName?: string;
+  customer_name?: string;
+  customerPhone?: string;
+  customer_phone?: string;
+  tableName?: string;
+  parcelName?: string;
+  parcel_name?: string;
   subtotal: number;
-  discount_amount: number;
-  tax_amount: number;
-  grand_total: number;
+  discount_amount?: number;
+  discountAmount?: number;
+  tax_amount?: number;
+  taxAmount?: number;
+  grand_total?: number;
+  grandTotal?: number;
   items: OrderItem[];
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  createdAt?: string;
+  updated_at?: string;
+  updatedAt?: string;
 }
 
 export interface OrderItem {
@@ -80,11 +96,12 @@ export function useOrders(): UseOrdersReturn {
   }, []);
 
   const createOrder = useCallback(async (): Promise<Order> => {
-    const { cart, orderType, selectedCustomerId, discount, notes } = billingStore;
+    const liveStore = useBillingStore.getState();
+    const { cart, orderType, selectedCustomerId, discount, notes } = liveStore;
     let tableId: number | null = null;
 
     if (orderType === 'dine_in') {
-      tableId = billingStore.selectedTableId;
+      tableId = liveStore.selectedTableId;
       if (!tableId) {
         const tables = await ipc<any[]>(window.electronAPI.tables.getAll());
         const freeTables = tables.filter((t) => t.status === 'free');
@@ -97,10 +114,14 @@ export function useOrders(): UseOrdersReturn {
       }
     } else {
       tableId = null;
-      if (billingStore.selectedTableId !== null) {
+      if (liveStore.selectedTableId !== null) {
         billingStore.setTable(null);
       }
     }
+
+    const effectiveParcelName = (orderType === 'takeaway' || liveStore.parcelName)
+      ? (liveStore.parcelName?.trim() || undefined)
+      : undefined;
 
     const orderData = {
       orderType: orderType,
@@ -111,6 +132,7 @@ export function useOrders(): UseOrdersReturn {
         return currentUser.id;
       })(),
       notes,
+      parcelName: effectiveParcelName,
       discount: discount
         ? { type: discount.type, value: discount.value, reason: discount.reason }
         : null,
@@ -140,8 +162,9 @@ export function useOrders(): UseOrdersReturn {
         })));
       }
     } catch { /* ignore — IDs will be set on next load */ }
+    await fetchActiveOrders();
     return order;
-  }, [billingStore, t]);
+  }, [billingStore, currentUser, fetchActiveOrders, t]);
 
   const holdOrder = useCallback(async () => {
     try {
@@ -318,33 +341,40 @@ export function useOrders(): UseOrdersReturn {
         try {
           const fullOrder = await ipc<any>(window.electronAPI.orders.getById(id));
           if (fullOrder?.items) {
-            const updatedCartItems = fullOrder.items.map((oi: any) => ({
-              menuItem: {
-                id: oi.menuItemId ?? oi.menu_item_id ?? 0,
-                name: (oi.name ?? '').split(' (')[0],
-                basePrice: oi.unitPrice ?? oi.unit_price,
-                categoryId: 0,
-                taxRate: oi.taxRate ?? oi.tax_rate ?? 0,
-                isVeg: false,
-              },
-              variation: oi.variationId
-                ? { id: oi.variationId, name: (oi.name ?? '').match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
-                : undefined,
-              addons: (oi.addons ?? []).map((a: any) => ({
+            const updatedCartItems = fullOrder.items.map((oi: any) => {
+              const addons = (oi.addons ?? []).map((a: any) => ({
                 id: a.addonId ?? a.addon_id ?? a.id,
                 name: a.name,
                 price: a.price,
-              })),
-              quantity: oi.quantity,
-              unitPrice: oi.unitPrice ?? oi.unit_price,
-              total: (oi.unitPrice ?? oi.unit_price) * oi.quantity,
-              notes: oi.notes,
-              sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
-              orderItemId: oi.id,
-              kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
-              kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
-              createdAt: oi.createdAt ?? oi.created_at ?? undefined,
-            }));
+              }));
+              const addonsTotal = addons.reduce((sum: number, a: any) => sum + (a.price ?? 0), 0);
+              const unitPrice = oi.unitPrice ?? oi.unit_price ?? 0;
+              const basePrice = Math.max(0, unitPrice - addonsTotal);
+
+              return {
+                menuItem: {
+                  id: oi.menuItemId ?? oi.menu_item_id ?? 0,
+                  name: (oi.name ?? '').split(' (')[0],
+                  basePrice,
+                  categoryId: 0,
+                  taxRate: oi.taxRate ?? oi.tax_rate ?? 0,
+                  isVeg: false,
+                },
+                variation: oi.variationId
+                  ? { id: oi.variationId, name: (oi.name ?? '').match(/\(([^)]+)\)/)?.[1] ?? '', priceDelta: 0 }
+                  : undefined,
+                addons,
+                quantity: oi.quantity,
+                unitPrice,
+                total: unitPrice * oi.quantity,
+                notes: oi.notes,
+                sourceTableName: oi.sourceTableName ?? oi.source_table_name ?? undefined,
+                orderItemId: oi.id,
+                kotNumber: oi.kotNumber ?? oi.kot_number ?? undefined,
+                kotStatus: oi.kotStatus ?? oi.kot_status ?? undefined,
+                createdAt: oi.createdAt ?? oi.created_at ?? undefined,
+              };
+            });
             const rawDiscountType = fullOrder.discountType ?? fullOrder.discount_type;
             const orderDiscount = rawDiscountType
               ? {
@@ -366,7 +396,10 @@ export function useOrders(): UseOrdersReturn {
               {
                 splitFromOrderId: fullOrder.splitFromOrderId ?? (fullOrder as any).split_from_order_id ?? null,
                 splitFromOrderNumber: fullOrder.splitFromOrderNumber ?? (fullOrder as any).split_from_order_number ?? null,
-              }
+              },
+              fullOrder.status ?? 'active',
+              fullOrder.customerId ?? (fullOrder as any).customer_id ?? null,
+              fullOrder.parcelName ?? fullOrder.parcel_name ?? null
             );
           }
         } catch { /* ignore fallback */ }

@@ -25,6 +25,7 @@ import {
   ShieldCheck,
   ShieldAlert,
   ShieldX,
+  FileSpreadsheet,
   Tag,
   Plus,
   Trash2,
@@ -61,6 +62,7 @@ import {
   GitFork,
 } from 'lucide-react';
 import { useLicenseStore } from '../stores/license.store';
+import { downloadAllOrdersAsExcel } from '../lib/orderExport';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import { formatCurrency, formatDateTime } from '../lib/formatters';
@@ -108,6 +110,7 @@ import {
   buildSampleKotModel,
   computePrintLineWidth,
   fontScale,
+  normalizePrintMode,
   type ReceiptItemStyle,
   generateUpiUrl,
 } from '../../shared/receipt-render';
@@ -247,6 +250,16 @@ const Settings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [restFormDirty, setRestFormDirty] = useState(false);
+  const [downloadingOrders, setDownloadingOrders] = useState(false);
+
+  const handleDownloadOrders = async () => {
+    setDownloadingOrders(true);
+    try {
+      await downloadAllOrdersAsExcel(t);
+    } finally {
+      setDownloadingOrders(false);
+    }
+  };
 
   // Restaurant form state
   const [restForm, setRestForm] = useState({
@@ -1087,7 +1100,7 @@ const Settings: React.FC = () => {
   // mode (not only raster).
   const renderLivePreview = () => {
     const paperWidth = settings.paper_width ?? '58mm';
-    const printMode = settings.print_mode ?? 'thermal';
+    const printMode = normalizePrintMode(settings.print_mode);
     const billLayout = mergeLayout(settings.bill_layout, BILL_FIELD_DEFS);
     const kotLayout = mergeLayout(settings.kot_layout, KOT_FIELD_DEFS);
 
@@ -1191,7 +1204,6 @@ const Settings: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsPage.printMode')}</label>
           <div className="flex gap-2">
             {([
-              { key: 'thermal', label: t('settingsPage.printModeThermal'), desc: t('settingsPage.printModeThermalDesc') },
               { key: 'html', label: t('settingsPage.printModeHtml'), desc: t('settingsPage.printModeHtmlDesc') },
               { key: 'raster', label: t('settingsPage.printModeRaster'), desc: t('settingsPage.printModeRasterDesc') },
             ] as const).map(({ key, label, desc }) => (
@@ -1199,13 +1211,13 @@ const Settings: React.FC = () => {
                 key={key}
                 onClick={() => handleUpdateSetting('print_mode', key)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  (settings.print_mode ?? 'thermal') === key
+                  normalizePrintMode(settings.print_mode) === key
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 {label}
-                <span className={`block text-[10px] font-normal ${(settings.print_mode ?? 'thermal') === key ? 'opacity-80' : 'opacity-60'}`}>{desc}</span>
+                <span className={`block text-[10px] font-normal ${normalizePrintMode(settings.print_mode) === key ? 'opacity-80' : 'opacity-60'}`}>{desc}</span>
               </button>
             ))}
           </div>
@@ -1617,7 +1629,7 @@ const Settings: React.FC = () => {
         {renderLivePreview()}
 
         {/* Receipt Fields editor (Raster mode only) */}
-        {(settings.print_mode ?? 'thermal') === 'raster' && (
+        {normalizePrintMode(settings.print_mode) === 'raster' && (
           <div className="lg:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">{t('settingsPage.receiptFields.title')}</label>
             <p className="text-xs text-gray-500 mb-2">{t('settingsPage.receiptFields.hint')}</p>
@@ -3063,6 +3075,22 @@ const Settings: React.FC = () => {
                 <p className="text-sm text-red-500 mt-1">{t('settingsPage.licContactVendor')}</p>
               )}
             </div>
+          </div>
+
+          <div className="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-800">{t('settingsPage.exportOrdersTitle', { defaultValue: 'Export Order Records' })}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('settingsPage.exportOrdersDesc', { defaultValue: 'Download all historical sales and order data to an Excel-compatible CSV file.' })}</p>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={downloadingOrders ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} className="text-emerald-600" />}
+              disabled={downloadingOrders}
+              onClick={handleDownloadOrders}
+            >
+              {downloadingOrders ? t('activate.exportingOrders', { defaultValue: 'Exporting Orders…' }) : t('activate.downloadAllOrders', { defaultValue: 'Download All Orders (Excel)' })}
+            </Button>
           </div>
         </div>
 

@@ -221,6 +221,20 @@
     max-height: 30px;
   }
 
+  #header-center-slot::-webkit-scrollbar {
+    height: 3px;
+  }
+  #header-center-slot::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  #header-center-slot::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.4);
+    border-radius: 4px;
+  }
+  #header-center-slot::-webkit-scrollbar-thumb:hover {
+    background: rgba(107, 114, 128, 0.7);
+  }
+
   /* Card component */
   .pos-card {
     @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4;

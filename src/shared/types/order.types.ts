@@ -7,6 +7,8 @@ export interface Order {
   tableId?: number;
   tableName?: string;
   customerId?: number;
+  customerName?: string;
+  customerPhone?: string;
   staffId: number;
   status: OrderStatus;
   subtotal: number;
@@ -18,6 +20,8 @@ export interface Order {
   roundOff: number;
   grandTotal: number;
   notes?: string;
+  parcelName?: string;
+  parcel_name?: string;
   mergedIntoOrderId?: number;
   mergedIntoOrderNumber?: string;
   splitFromOrderId?: number;
@@ -74,6 +78,7 @@ export interface CreateOrderDTO {
   staffId: number;
   items: CartItem[];
   notes?: string;
+  parcelName?: string;
   discount?: { type: 'percentage' | 'flat' | 'percent'; value: number; reason?: string } | null;
 }
 
@@ -97,3 +102,31 @@ export interface TaxBreakdown {
   totalTax: number;
   slabs: { rate: number; taxableAmount: number; cgst: number; sgst: number }[];
 }
+
+export interface OrderExportRow {
+  id: number;
+  orderNumber: string;
+  orderType: string;
+  status: string;
+  tableName?: string;
+  customerName?: string;
+  customerPhone?: string;
+  staffName?: string;
+  subtotal: number;
+  discountAmount: number;
+  discountType?: string;
+  discountValue?: number;
+  discountReason?: string;
+  taxAmount: number;
+  roundOff: number;
+  grandTotal: number;
+  coinsRedeemed: number;
+  netAmount: number;
+  notes?: string;
+  createdAt: string;
+  completedAt?: string;
+  itemCount: number;
+  itemsSummary: string;
+  paymentMethods: string;
+}
+

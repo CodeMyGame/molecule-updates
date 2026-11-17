@@ -69,7 +69,17 @@
     "resizeMenuTable": "Glisser pour redimensionner",
     "resizeFloorSidebar": "Glisser pour redimensionner",
     "resizeCart": "Glisser pour redimensionner",
-    "customItemTooltip": "Ajouter un plat hors menu ou un prix personnalisé (Ctrl+T)"
+    "customItemTooltip": "Ajouter un plat hors menu ou un prix personnalisé (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ Nouvelle commande à emporter commencée ! Sélectionnez des plats du menu.",
+    "newParcelStartedPrompt": "Sélectionnez des plats dans le menu",
+    "newParcelNextStep": "Touchez un plat du menu pour l'ajouter à cette commande à emporter.",
+    "newParcelTooltip": "Démarrer une nouvelle commande à emporter",
+    "addQuickSelect": "+ Ajouter",
+    "newPresetPlaceholder": "Nom du préréglage (ex. Magicpin, Direct)",
+    "saveToQuickSelect": "Enregistrer \"{{name}}\" dans la sélection rapide",
+    "presetAdded": "\"{{name}}\" ajouté à la sélection rapide !",
+    "presetExists": "La sélection rapide existe déjà",
+    "presetRemoved": "Sélection rapide supprimée"
   },
   "cart": {
     "empty": "Le panier est vide",
@@ -219,7 +229,16 @@
     "badgeTransfer": "Transférer",
     "badgeMerge": "Fusionner",
     "printKotAfterTransfer": "Imprimer le KOT pour la table de destination après le transfert",
-    "transferredAndKotPrinted": "Commande transférée et KOT imprimé !"
+    "transferredAndKotPrinted": "Commande transférée et KOT imprimé !",
+    "newParcel": "+ Nouveau colis",
+    "parcelShelfTitle": "À emporter et colis",
+    "noActiveParcelsHint": "Aucun colis actif. Cliquez sur \"+ Nouveau colis\" pour lancer une commande à emporter.",
+    "readyForPickup": "Prêt à être récupéré",
+    "preparingInKitchen": "En préparation",
+    "kotPending": "KOT en attente",
+    "payNow": "Payer",
+    "walkInGuest": "Client sans réservation",
+    "itemsCount": "{{count}} articles"
   },
   "kitchen": {
     "title": "Écran cuisine",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "Historique des commandes",
     "tableWise": "Par table",
-    "dailySales": "Ventes quotidiennes",
+    "dailySales": "Résumé des ventes",
     "itemWise": "Par article",
     "categoryWise": "Par catégorie",
     "payments": "Paiements",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "Télécharger toutes les commandes (Excel)",
+    "exportingOrders": "Exportation des commandes…",
+    "exportOrdersSuccess": "{{count}} commandes exportées avec succès !",
+    "noOrdersToExport": "Aucune commande trouvée à exporter.",
+    "exportOrdersFailed": "Échec de l'exportation des commandes. Veuillez réessayer.",
+    "or": "ou"
   },
   "paymentModal": {
     "title": "Paiement",
@@ -1092,8 +1117,6 @@
     "printerSetup": "Configuration imprimante",
     "printerSetupDesc": "Configurez les imprimantes de facture et KOT.",
     "printMode": "Mode d'impression",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}} imprimante trouvée",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "Exporter les enregistrements de commande",
+    "exportOrdersDesc": "Téléchargez toutes les données historiques de ventes et de commandes dans un fichier CSV compatible Excel."
   },
   "common": {
     "save": "Enregistrer",

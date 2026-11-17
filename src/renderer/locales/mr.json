@@ -69,7 +69,17 @@
     "resizeMenuTable": "आकार बदलण्यासाठी ड्रॅग करा",
     "resizeFloorSidebar": "आकार बदलण्यासाठी ड्रॅग करा",
     "resizeCart": "आकार बदलण्यासाठी ड्रॅग करा",
-    "customItemTooltip": "मेनूबाहेरील डिश किंवा कस्टम किंमत जोडा (Ctrl+T)"
+    "customItemTooltip": "मेनूबाहेरील डिश किंवा कस्टम किंमत जोडा (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ नवीन पार्सल सुरू झाले! कार्टमध्ये जोडण्यासाठी मेनूमधून पदार्थ निवडा.",
+    "newParcelStartedPrompt": "मेनूमधून पदार्थ निवडा",
+    "newParcelNextStep": "या पार्सल ऑर्डरमध्ये आयटम जोडण्यासाठी मेनूमधील कोणत्याही पदार्थावर टॅप करा.",
+    "newParcelTooltip": "नवीन टेकअवे पार्सल ऑर्डर सुरू करा",
+    "addQuickSelect": "+ जोडा",
+    "newPresetPlaceholder": "प्रीसेट नाव (उदा. Magicpin, Direct)",
+    "saveToQuickSelect": "\"{{name}}\" द्रुत निवडीमध्ये जतन करा",
+    "presetAdded": "\"{{name}}\" द्रुत निवडीमध्ये जोडले गेले!",
+    "presetExists": "द्रुत निवड आधीच अस्तित्वात आहे",
+    "presetRemoved": "द्रुत निवड काढली"
   },
   "cart": {
     "empty": "कार्ट रिकामी आहे",
@@ -219,7 +229,16 @@
     "badgeTransfer": "ट्रान्सफर",
     "badgeMerge": "मर्ज",
     "printKotAfterTransfer": "ट्रान्सफर केल्यानंतर गंतव्य टेबलसाठी KOT प्रिंट करा",
-    "transferredAndKotPrinted": "ऑर्डर ट्रान्सफर झाली आणि KOT प्रिंट झाली!"
+    "transferredAndKotPrinted": "ऑर्डर ट्रान्सफर झाली आणि KOT प्रिंट झाली!",
+    "newParcel": "+ नवीन पार्सल",
+    "parcelShelfTitle": "टेकअवे आणि पार्सल",
+    "noActiveParcelsHint": "कोणतेही सक्रिय पार्सल नाहीत. टेकअवे ऑर्डर सुरू करण्यासाठी \"+ नवीन पार्सल\" वर क्लिक करा.",
+    "readyForPickup": "पिकअपसाठी तयार",
+    "preparingInKitchen": "तयार होत आहे",
+    "kotPending": "KOT प्रलंबित",
+    "payNow": "पैसे द्या",
+    "walkInGuest": "वॉक-इन ग्राहक",
+    "itemsCount": "{{count}} आयटम"
   },
   "kitchen": {
     "title": "स्वयंपाकगृह प्रदर्शन",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "ऑर्डर इतिहास",
     "tableWise": "टेबल-निहाय",
-    "dailySales": "दैनिक विक्री",
+    "dailySales": "विक्री सारांश",
     "itemWise": "आयटमनुसार",
     "categoryWise": "श्रेणीनुसार",
     "payments": "पेमेंट्स",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "सर्व ऑर्डर्स डाउनलोड करा (Excel)",
+    "exportingOrders": "ऑर्डर्स निर्यात होत आहेत…",
+    "exportOrdersSuccess": "{{count}} ऑर्डर्स यशस्वीरित्या निर्यात केल्या!",
+    "noOrdersToExport": "निर्यात करण्यासाठी कोणतेही ऑर्डर्स सापडले नाहीत.",
+    "exportOrdersFailed": "ऑर्डर्स निर्यात करण्यात अयशस्वी. कृपया पुन्हा प्रयत्न करा.",
+    "or": "किंवा"
   },
   "paymentModal": {
     "title": "पेमेंट",
@@ -1092,8 +1117,6 @@
     "printerSetup": "प्रिंटर सेटअप",
     "printerSetupDesc": "बिल आणि KOT प्रिंटर कॉन्फिगर करा.",
     "printMode": "प्रिंट मोड",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}} प्रिंटर सापडला",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "ऑर्डर रेकॉर्ड निर्यात करा",
+    "exportOrdersDesc": "सर्व ऐतिहासिक विक्री आणि ऑर्डर डेटा Excel-सुसंगत CSV फाइलमध्ये डाउनलोड करा."
   },
   "common": {
     "save": "जतन",

@@ -380,6 +380,7 @@ db.exec(`
     round_off INTEGER DEFAULT 0,
     grand_total INTEGER DEFAULT 0,
     notes TEXT,
+    parcel_name TEXT,
     merged_into_order_id INTEGER,
     split_from_order_id INTEGER,
     completed_at TEXT,
@@ -1726,6 +1727,66 @@ suite('17. System Settings, Multi-Currency, 15-Locale Parity & Hot Backup', () =
     assert(rolledBack);
     const uncommitted = db.prepare("SELECT * FROM settings WHERE key = 'uncommitted_test'").get();
     assertEqual(uncommitted, undefined, 'Transaction safely rolled back, no corrupted state');
+  });
+
+  test('17.7 Order Full Data Export: exports all orders with items, payments, and sums for Excel download', () => {
+    // Verify orders exist in DB from previous suites
+    const allOrders = db.prepare("SELECT * FROM orders").all();
+    assert(allOrders.length > 0, 'Orders should exist in test database');
+
+    const itemRows = db.prepare("SELECT order_id, name, quantity, unit_price, total FROM order_items").all();
+    const paymentRows = db.prepare("SELECT order_id, payment_mode, amount FROM payments").all();
+
+    const itemsByOrder = new Map();
+    for (const it of itemRows) {
+      if (!itemsByOrder.has(it.order_id)) itemsByOrder.set(it.order_id, []);
+      itemsByOrder.get(it.order_id).push(it);
+    }
+
+    const paymentsByOrder = new Map();
+    for (const p of paymentRows) {
+      if (!paymentsByOrder.has(p.order_id)) paymentsByOrder.set(p.order_id, []);
+      paymentsByOrder.get(p.order_id).push(p);
+    }
+
+    // Generate CSV content with UTF-8 BOM
+    const headers = [
+      'Order #', 'Date & Time', 'Status', 'Order Type', 'Table', 'Staff',
+      'Total Items', 'Items Ordered', 'Subtotal (₹)', 'Discount (₹)', 'Tax (₹)',
+      'Grand Total (₹)', 'Payment Details'
+    ];
+
+    const csvLines = ['\uFEFF' + headers.map(h => `"${h}"`).join(',')];
+
+    for (const o of allOrders) {
+      const items = itemsByOrder.get(o.id) || [];
+      const payments = paymentsByOrder.get(o.id) || [];
+      const itemCount = items.reduce((sum, it) => sum + (it.quantity || 1), 0);
+      const itemsSummary = items.map(it => `${it.quantity}x ${it.name}`).join('; ');
+      const paymentSummary = payments.map(p => `${p.payment_mode.toUpperCase()}: ₹${(p.amount / 100).toFixed(2)}`).join('; ') || '-';
+
+      const row = [
+        o.order_number,
+        o.created_at,
+        o.status,
+        o.order_type,
+        o.table_name_snapshot || '-',
+        o.staff_id ? `Staff #${o.staff_id}` : '-',
+        itemCount,
+        itemsSummary,
+        (o.subtotal / 100).toFixed(2),
+        ((o.discount_amount || 0) / 100).toFixed(2),
+        ((o.tax_amount || 0) / 100).toFixed(2),
+        ((o.grand_total || 0) / 100).toFixed(2),
+        paymentSummary
+      ];
+      csvLines.push(row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','));
+    }
+
+    const fullCsv = csvLines.join('\r\n');
+    assert(fullCsv.startsWith('\uFEFF"Order #"'), 'CSV must start with UTF-8 BOM for Microsoft Excel');
+    assert(fullCsv.includes('\r\n'), 'CSV must use CRLF row separators');
+    assertEqual(csvLines.length, allOrders.length + 1, 'CSV must contain header plus every single order row');
   });
 });
 

@@ -69,7 +69,17 @@
     "resizeMenuTable": "ಗಾತ್ರ ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
     "resizeFloorSidebar": "ಗಾತ್ರ ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
     "resizeCart": "ಗಾತ್ರ ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
-    "customItemTooltip": "ಮೆನುವಿನಲ್ಲಿ ಇಲ್ಲದ ಖಾದ್ಯ ಅಥವಾ ಕಸ್ಟಮ್ ಬೆಲೆ ಸೇರಿಸಿ (Ctrl+T)"
+    "customItemTooltip": "ಮೆನುವಿನಲ್ಲಿ ಇಲ್ಲದ ಖಾದ್ಯ ಅಥವಾ ಕಸ್ಟಮ್ ಬೆಲೆ ಸೇರಿಸಿ (Ctrl+T)",
+    "newParcelStartedToast": "🛍️ ಹೊಸ ಪಾರ್ಸೆಲ್ ಪ್ರಾರಂಭವಾಗಿದೆ! ಕಾರ್ಟ್‌ಗೆ ಸೇರಿಸಲು ಮೆನುವಿನಿಂದ ಭಕ್ಷ್ಯಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "newParcelStartedPrompt": "ಮೆನುವಿನಿಂದ ಭಕ್ಷ್ಯಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "newParcelNextStep": "ಈ ಪಾರ್ಸೆಲ್ ಆರ್ಡರ್‌ಗೆ ಐಟಂಗಳನ್ನು ಸೇರಿಸಲು ಮೆನುವಿನಲ್ಲಿರುವ ಯಾವುದೇ ಭಕ್ಷ್ಯವನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ.",
+    "newParcelTooltip": "ಹೊಸ ಪಾರ್ಸೆಲ್ ಆದೇಶವನ್ನು ಪ್ರಾರಂಭಿಸಿ",
+    "addQuickSelect": "+ ಸೇರಿಸಿ",
+    "newPresetPlaceholder": "ಪೂರ್ವನಿಗದಿ ಹೆಸರು (ಉದಾ. Magicpin)",
+    "saveToQuickSelect": "\"{{name}}\" ತ್ವರಿತ ಆಯ್ಕೆಯಲ್ಲಿ ಉಳಿಸಿ",
+    "presetAdded": "\"{{name}}\" ತ್ವರಿತ ಆಯ್ಕೆಗೆ ಸೇರಿಸಲಾಗಿದೆ!",
+    "presetExists": "ತ್ವರಿತ ಆಯ್ಕೆ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ",
+    "presetRemoved": "ತ್ವರಿತ ಆಯ್ಕೆಯನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"
   },
   "cart": {
     "empty": "ಕಾರ್ಟ್ ಖಾಲಿಯಾಗಿದೆ",
@@ -219,7 +229,16 @@
     "badgeTransfer": "ವರ್ಗಾವಣೆ",
     "badgeMerge": "ವಿಲೀನ",
     "printKotAfterTransfer": "ವರ್ಗಾವಣೆಯ ನಂತರ ಹೊಸ ಟೇಬಲ್‌ಗಾಗಿ KOT ಮುದ್ರಿಸಿ",
-    "transferredAndKotPrinted": "ಆರ್ಡರ್ ವರ್ಗಾಯಿಸಲಾಗಿದೆ ಮತ್ತು KOT ಮುದ್ರಿಸಲಾಗಿದೆ!"
+    "transferredAndKotPrinted": "ಆರ್ಡರ್ ವರ್ಗಾಯಿಸಲಾಗಿದೆ ಮತ್ತು KOT ಮುದ್ರಿಸಲಾಗಿದೆ!",
+    "newParcel": "+ ಹೊಸ ಪಾರ್ಸೆಲ್",
+    "parcelShelfTitle": "ಟೇಕ್‌ಅವೇ ಮತ್ತು ಪಾರ್ಸೆಲ್‌ಗಳು",
+    "noActiveParcelsHint": "ಯಾವುದೇ ಸಕ್ರಿಯ ಪಾರ್ಸೆಲ್‌ಗಳಿಲ್ಲ. ಟೇಕ್‌ಅವೇ ಆರ್ಡರ್ ಪ್ರಾರಂಭಿಸಲು \"+ ಹೊಸ ಪಾರ್ಸೆಲ್\" ಕ್ಲಿಕ್ ಮಾಡಿ.",
+    "readyForPickup": "ಪಿಕಪ್‌ಗೆ ಸಿದ್ಧವಾಗಿದೆ",
+    "preparingInKitchen": "ಸಿದ್ಧವಾಗುತ್ತಿದೆ",
+    "kotPending": "KOT ಬಾಕಿ ಇದೆ",
+    "payNow": "ಪಾವತಿಸಿ",
+    "walkInGuest": "ವಾಕ್-ಇನ್ ಗ್ರಾಹಕ",
+    "itemsCount": "{{count}} ಐಟಂಗಳು"
   },
   "kitchen": {
     "title": "ಅಡುಗೆಮನೆ ಪ್ರದರ್ಶನ",
@@ -508,7 +527,7 @@
   "reports": {
     "orderHistory": "ಆದೇಶ ಇತಿಹಾಸ",
     "tableWise": "ಟೇಬಲ್-ವಾರು",
-    "dailySales": "ದೈನಂದಿನ ಮಾರಾಟ",
+    "dailySales": "ಮಾರಾಟ ಸಾರಾಂಶ",
     "itemWise": "ಐಟಂ ವಾರು",
     "categoryWise": "ವರ್ಗ ವಾರು",
     "payments": "ಪಾವತಿಗಳು",
@@ -937,7 +956,13 @@
     "errorExpired": "This license key has expired. Please contact your vendor for a renewal.",
     "errorDuplicate": "This key is already activated on another device.",
     "errorSignature": "The key you entered is not valid. Please check for typos.",
-    "errorNetwork": "Could not connect to verify your license. Please check your internet connection."
+    "errorNetwork": "Could not connect to verify your license. Please check your internet connection.",
+    "downloadAllOrders": "ಎಲ್ಲಾ ಆರ್ಡರ್‌ಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ (Excel)",
+    "exportingOrders": "ಆರ್ಡರ್‌ಗಳು ರಫ್ತಾಗುತ್ತಿವೆ…",
+    "exportOrdersSuccess": "{{count}} ಆರ್ಡರ್‌ಗಳನ್ನು ಯಶಸ್ವಿಯಾಗಿ ರಫ್ತು ಮಾಡಲಾಗಿದೆ!",
+    "noOrdersToExport": "ರಫ್ತು ಮಾಡಲು ಯಾವುದೇ ಆರ್ಡರ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    "exportOrdersFailed": "ಆರ್ಡರ್‌ಗಳನ್ನು ರಫ್ತು ಮಾಡಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "or": "ಅಥವಾ"
   },
   "paymentModal": {
     "title": "ಪಾವತಿ",
@@ -1092,8 +1117,6 @@
     "printerSetup": "ಪ್ರಿಂಟರ್ ಸೆಟಪ್",
     "printerSetupDesc": "ಬಿಲ್ ಮತ್ತು KOT ಪ್ರಿಂಟರ್‌ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ.",
     "printMode": "ಪ್ರಿಂಟ್ ಮೋಡ್",
-    "printModeThermal": "Thermal (Direct Print)",
-    "printModeThermalDesc": "High-speed direct receipt printing. Automatically switches to standard printing if needed.",
     "printModeHtml": "HTML",
     "printModeHtmlDesc": "Standard Windows printer printing.",
     "printersFound": "{{count}} ಪ್ರಿಂಟರ್ ಕಂಡುಬಂದಿದೆ",
@@ -1393,7 +1416,9 @@
       "rounded": "Modern Rounded",
       "dots": "Circular Dots",
       "classy": "Smooth Squircle"
-    }
+    },
+    "exportOrdersTitle": "ಆರ್ಡರ್ ದಾಖಲೆಗಳನ್ನು ರಫ್ತು ಮಾಡಿ",
+    "exportOrdersDesc": "ಎಲ್ಲಾ ಐತಿಹಾಸಿಕ ಮಾರಾಟ ಮತ್ತು ಆರ್ಡರ್ ಡೇಟಾವನ್ನು Excel-ಹೊಂದಾಣಿಕೆಯ CSV ಫೈಲ್‌ಗೆ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ."
   },
   "common": {
     "save": "ಉಳಿಸಿ",
