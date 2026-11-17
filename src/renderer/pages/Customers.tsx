@@ -367,17 +367,22 @@ const Customers: React.FC = () => {
                                       settings.default_tax_rate,
                                       i18n.language
                                     );
+                                    const addons = (oi.addons ?? []).map((a: any) => ({ id: a.addonId ?? a.id, name: a.name, price: a.price }));
+                                    const addonsTotal = addons.reduce((sum: number, a: any) => sum + (a.price ?? 0), 0);
+                                    const unitPrice = oi.unitPrice ?? oi.unit_price ?? 0;
+                                    const basePrice = Math.max(0, unitPrice - addonsTotal);
+
                                     addToCart(
                                       {
                                         id: oi.menuItemId ?? oi.menu_item_id,
                                         name: (oi.name ?? '').split(' (')[0],
-                                        basePrice: oi.unitPrice ?? oi.unit_price,
+                                        basePrice,
                                         categoryId: 0,
                                         taxRate,
                                         isVeg: false,
                                       },
                                       oi.variationId ? { id: oi.variationId, name: '', priceDelta: 0 } : undefined,
-                                      (oi.addons ?? []).map((a: any) => ({ id: a.addonId ?? a.id, name: a.name, price: a.price }))
+                                      addons
                                     );
                                   }
                                   navigate('/billing');

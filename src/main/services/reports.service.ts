@@ -20,7 +20,7 @@ function getCoinTotals(startDate: string, endDate: string): { coinsRedeemed: num
       COALESCE(SUM(CASE WHEN lt.points > 0 THEN lt.points ELSE 0 END), 0) AS coins_earned
     FROM loyalty_transactions lt
     JOIN orders o ON lt.order_id = o.id
-    WHERE lt.created_at >= ? AND lt.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE lt.created_at >= ? AND lt.created_at <= ? AND o.status = 'completed'
   `).get(startDate, endDate) as any;
   return { coinsRedeemed: row?.coins_redeemed ?? 0, coinsEarned: row?.coins_earned ?? 0 };
 }
@@ -34,7 +34,7 @@ function getCoinTotalsForDate(date: string): { coinsRedeemed: number; coinsEarne
       COALESCE(SUM(CASE WHEN lt.points > 0 THEN lt.points ELSE 0 END), 0) AS coins_earned
     FROM loyalty_transactions lt
     JOIN orders o ON lt.order_id = o.id
-    WHERE DATE(lt.created_at) = ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE DATE(lt.created_at) = ? AND o.status = 'completed'
   `).get(date) as any;
   return { coinsRedeemed: row?.coins_redeemed ?? 0, coinsEarned: row?.coins_earned ?? 0 };
 }
@@ -46,11 +46,11 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
   const rows = db.prepare(`
     SELECT
       DATE(created_at) AS date,
-      COUNT(CASE WHEN status NOT IN ('cancelled', 'merged') THEN 1 END) AS total_orders,
-      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN grand_total ELSE 0 END), 0) AS total_revenue,
-      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN discount_amount ELSE 0 END), 0) AS total_discount,
-      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN tax_amount ELSE 0 END), 0) AS total_tax,
-      COALESCE(SUM(CASE WHEN status NOT IN ('cancelled', 'merged') THEN (subtotal - discount_amount) ELSE 0 END), 0) AS net_revenue,
+      COUNT(CASE WHEN status = 'completed' THEN 1 END) AS total_orders,
+      COALESCE(SUM(CASE WHEN status = 'completed' THEN grand_total ELSE 0 END), 0) AS total_revenue,
+      COALESCE(SUM(CASE WHEN status = 'completed' THEN discount_amount ELSE 0 END), 0) AS total_discount,
+      COALESCE(SUM(CASE WHEN status = 'completed' THEN tax_amount ELSE 0 END), 0) AS total_tax,
+      COALESCE(SUM(CASE WHEN status = 'completed' THEN (subtotal - discount_amount) ELSE 0 END), 0) AS net_revenue,
       COUNT(CASE WHEN status = 'cancelled' THEN 1 END) AS cancelled_orders,
       COALESCE(SUM(CASE WHEN status = 'cancelled' THEN grand_total ELSE 0 END), 0) AS cancelled_revenue
     FROM orders
@@ -66,7 +66,7 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
         COUNT(*) AS count,
         COALESCE(SUM(grand_total), 0) AS revenue
       FROM orders
-      WHERE DATE(created_at) = ? AND status NOT IN ('cancelled', 'merged')
+      WHERE DATE(created_at) = ? AND status = 'completed'
       GROUP BY order_type
     `).all(row.date) as any[];
 
@@ -110,7 +110,7 @@ export function itemWiseSales(dateRange: DateRangeFilter): ItemSalesReport[] {
     JOIN orders o ON oi.order_id = o.id
     LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id
     LEFT JOIN menu_categories mc ON mi.category_id = mc.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status = 'completed'
     GROUP BY oi.menu_item_id, oi.name
     ORDER BY total_revenue DESC
   `).all(startDate, endDate) as any[];
@@ -140,7 +140,7 @@ export function categoryWiseSales(dateRange: DateRangeFilter): CategorySalesRepo
     JOIN orders o ON oi.order_id = o.id
     JOIN menu_items mi ON oi.menu_item_id = mi.id
     JOIN menu_categories mc ON mi.category_id = mc.id
-    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE o.created_at >= ? AND o.created_at <= ? AND o.status = 'completed'
     GROUP BY mc.id, mc.name
     ORDER BY total_revenue DESC
   `).all(startDate, endDate) as any[];
@@ -166,7 +166,7 @@ export function paymentSummary(dateRange: DateRangeFilter): PaymentSummaryReport
       SUM(p.tip_amount) AS tip_amount
     FROM payments p
     JOIN orders o ON p.order_id = o.id
-    WHERE p.created_at >= ? AND p.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE p.created_at >= ? AND p.created_at <= ? AND o.status = 'completed'
     GROUP BY p.payment_mode
     ORDER BY total_amount DESC
   `).all(startDate, endDate) as any[];
@@ -197,7 +197,7 @@ export function cashFlow(dateRange: DateRangeFilter): CashFlowReport {
     JOIN orders o ON p.order_id = o.id
     WHERE p.payment_mode = 'cash'
       AND p.created_at >= ? AND p.created_at <= ?
-      AND o.status NOT IN ('cancelled', 'merged')
+      AND o.status = 'completed'
   `).get(startDate, endDate) as any;
 
   const coins = getCoinTotals(startDate, endDate);
@@ -484,7 +484,7 @@ export function busyHours(dateRange: DateRangeFilter): BusyHoursReport {
         COUNT(*) AS orders,
         COALESCE(SUM(grand_total), 0) AS revenue
       FROM orders
-      WHERE created_at >= ? AND created_at <= ? AND status NOT IN ('cancelled', 'merged')
+      WHERE created_at >= ? AND created_at <= ? AND status = 'completed'
       GROUP BY bucket
       ORDER BY bucket
     `;
@@ -521,7 +521,7 @@ export function staffPerformance(dateRange: DateRangeFilter): {
     FROM staff s
     LEFT JOIN orders o ON s.id = o.staff_id
       AND o.created_at >= ? AND o.created_at <= ?
-      AND o.status NOT IN ('cancelled', 'merged')
+      AND o.status = 'completed'
     WHERE s.is_active = 1
     GROUP BY s.id, s.name
     ORDER BY total_revenue DESC
@@ -623,7 +623,7 @@ export function tableWiseSales(dateRange: { startDate: string; endDate: string }
     SELECT
       o.table_id,
       COALESCE(t.name, o.table_name_snapshot, 'Table ' || o.table_id) AS table_name,
-      COUNT(*) AS total_orders,
+      COUNT(CASE WHEN o.status = 'completed' THEN 1 END) AS total_orders,
       SUM(CASE WHEN o.status = 'completed' THEN 1 ELSE 0 END) AS completed_orders,
       SUM(CASE WHEN o.status = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_orders,
       SUM(CASE WHEN o.status = 'completed' THEN o.grand_total ELSE 0 END) AS revenue,

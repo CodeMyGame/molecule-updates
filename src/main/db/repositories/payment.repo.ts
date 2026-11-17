@@ -61,7 +61,7 @@ export function getReconciliation(dateRange: { startDate: string; endDate: strin
       SUM(p.tip_amount) AS tip_amount
     FROM payments p
     JOIN orders o ON p.order_id = o.id
-    WHERE p.created_at >= ? AND p.created_at <= ? AND o.status NOT IN ('cancelled', 'merged')
+    WHERE p.created_at >= ? AND p.created_at <= ? AND o.status = 'completed'
     GROUP BY p.payment_mode
     ORDER BY p.payment_mode
   `).all(startDate, endDate) as any[];

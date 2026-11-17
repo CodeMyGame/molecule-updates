@@ -470,7 +470,7 @@ const Reports: React.FC = () => {
   const getTabLabel = (key: ReportTab): string => {
     switch (key) {
       case 'order_history': return t('reports.orderHistory', 'Order History');
-      case 'daily_sales': return t('reports.dailySales');
+      case 'daily_sales': return t('reports.dailySales', 'Sales Summary');
       case 'item_sales': return t('reports.itemWise');
       case 'category_sales': return t('reports.categoryWise');
       case 'payment_summary': return t('reports.payments');
@@ -529,7 +529,7 @@ const Reports: React.FC = () => {
             </div>
             <div className="text-right">
               <p className="text-lg font-bold text-rose-800">
-                {t('reports.cancelledCountVal', { defaultValue: `${totalCancelledCount} order(s) — ${formatCurrency(totalCancelledValue)}`, count: totalCancelledCount, value: formatCurrency(totalCancelledValue) })}
+                {t('reports.cancelledCountVal', { defaultValue: `${totalCancelledCount} order(s) — ${formatCurrency(totalCancelledValue)}`, count: totalCancelledCount, amount: formatCurrency(totalCancelledValue), value: formatCurrency(totalCancelledValue) })}
               </p>
               <p className="text-xs text-rose-600 font-medium">{t('reports.cancelledValueOnly', 'Total Cancelled Value')}</p>
             </div>
