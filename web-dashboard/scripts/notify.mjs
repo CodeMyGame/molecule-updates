@@ -1,5 +1,8 @@
-import admin from 'firebase-admin';
-import webpush from 'web-push';
+import * as adminModule from 'firebase-admin';
+import * as webpushModule from 'web-push';
+
+const admin = adminModule.default || adminModule;
+const webpush = webpushModule.default || webpushModule;
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
