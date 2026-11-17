@@ -16,10 +16,54 @@ export interface ReleaseEntry {
 
 export const RELEASES: ReleaseEntry[] = [
   {
-    version: '1.1.21',
-    title: 'High Performance, Version Rollback & Compact Billing',
+    version: '1.1.22',
+    title: 'Takeaway Parcels, Partner Tags & Live KOT Table Status',
     date: 'Latest Update',
     badge: 'Latest',
+    summary: 'Dedicated Takeaway & Parcels shelf, custom delivery partner tags (Zomato, Swiggy, Blinkit), live KOT status on table cards, 1-click Excel order export, and high-contrast mode switcher.',
+    highlights: [
+      {
+        title: 'Takeaway Parcels & Partner Tagging',
+        description: 'Tag takeaway orders with delivery partner presets (Zomato, Swiggy, Blinkit, Dunzo, Direct) or create custom tags (+ Add). Parcels are cleanly numbered (Parcel #1, Parcel #2) instead of long IDs.',
+        tag: 'New',
+        icon: 'PackageCheck',
+      },
+      {
+        title: 'Takeaway Shelf on Tables View',
+        description: 'View and manage all active takeaway parcels directly on the Tables floor screen in a dedicated shelf with 1-tap Quick Pay and real-time status badges.',
+        tag: 'New',
+        icon: 'Move',
+      },
+      {
+        title: 'Live KOT Status on Table Cards',
+        description: 'Occupied tables now display live kitchen progress (KOT Sent, Preparing, Ready for Pickup, Served) so servers know order status at a glance.',
+        tag: 'New',
+        icon: 'Zap',
+      },
+      {
+        title: 'Full Order Data Export for Excel',
+        description: 'Download all historical sales, dish breakdowns, taxes, and split-tender payment methods into an Excel-compatible CSV file directly from Settings or Activation.',
+        tag: 'New',
+        icon: 'ShieldCheck',
+      },
+      {
+        title: 'High-Contrast Order Mode Switcher',
+        description: 'Crystal-clear visual contrast between Dine In and Takeaway tabs with vibrant solid colors and real-time active order count badges on both modes.',
+        tag: 'Improved',
+        icon: 'Sparkles',
+      },
+      {
+        title: 'Clean Mode Switching & Price Integrity',
+        description: 'Switching between Dine In and Takeaway cleanly isolates carts without cross-contamination. Re-ordering customer dishes with custom addons preserves exact base dish pricing.',
+        tag: 'Improved',
+        icon: 'ShieldCheck',
+      },
+    ],
+  },
+  {
+    version: '1.1.21',
+    title: 'High Performance, Version Rollback & Compact Billing',
+    date: 'November 2026',
     summary: 'Instant staff unlocking, smooth 60 FPS billing, 1-click version rollback in settings, and a cleaner active orders bar.',
     highlights: [
       {
@@ -94,4 +138,4 @@ export const RELEASES: ReleaseEntry[] = [
   },
 ];
 
-export const LATEST_VERSION = RELEASES[0]?.version || '1.1.21';
+export const LATEST_VERSION = RELEASES[0]?.version || '1.1.22';
