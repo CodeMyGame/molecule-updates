@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "Order transferred and KOT printed!",
     "newParcel": "+ New Parcel",
     "parcelShelfTitle": "Takeaway & Parcels",
+    "parcelCardTitle": "Parcel #{{number}}",
     "noActiveParcelsHint": "No active parcels. Click \"+ New Parcel\" to start a takeaway order.",
     "readyForPickup": "Ready for Pickup",
     "preparingInKitchen": "Preparing",

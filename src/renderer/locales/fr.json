@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "Commande transférée et KOT imprimé !",
     "newParcel": "+ Nouveau colis",
     "parcelShelfTitle": "À emporter et colis",
+    "parcelCardTitle": "Colis #{{number}}",
     "noActiveParcelsHint": "Aucun colis actif. Cliquez sur \"+ Nouveau colis\" pour lancer une commande à emporter.",
     "readyForPickup": "Prêt à être récupéré",
     "preparingInKitchen": "En préparation",

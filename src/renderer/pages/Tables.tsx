@@ -973,7 +973,7 @@ const Tables: React.FC = () => {
           </div>
 
           <div className="flex items-stretch gap-2 overflow-x-auto pb-1 no-scrollbar">
-            {activeParcels.map((parcel) => {
+            {activeParcels.map((parcel, index) => {
               const statusBadge = getParcelStatusBadge(parcel, t);
               const elapsedMins = getElapsedMinutes(parcel.createdAt);
 
@@ -987,9 +987,12 @@ const Tables: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1">
                       <div className="flex items-center gap-1.5 truncate">
-                        <span className="font-bold text-xs text-gray-900 group-hover:text-emerald-700 transition-colors flex items-center gap-1 truncate">
+                        <span
+                          className="font-bold text-xs text-gray-900 group-hover:text-emerald-700 transition-colors flex items-center gap-1 truncate"
+                          title={`Order #${parcel.orderNumber || (parcel as any).order_number || parcel.id}`}
+                        >
                           <span>🛍️</span>
-                          <span>#{parcel.orderNumber || String(parcel.id).padStart(3, '0')}</span>
+                          <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: index + 1 })}</span>
                         </span>
                       </div>
                       <span className="font-bold text-xs text-gray-900 font-mono">

@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "订单已转移并已打印 KOT！",
     "newParcel": "+ 新打包单",
     "parcelShelfTitle": "外带与打包",
+    "parcelCardTitle": "打包件 #{{number}}",
     "noActiveParcelsHint": "暂无进行中的打包订单。点击“+ 新打包单”以开始外带订单。",
     "readyForPickup": "可自取",
     "preparingInKitchen": "制作中",

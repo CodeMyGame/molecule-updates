@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "ஆர்டர் மாற்றப்பட்டு KOT அச்சிடப்பட்டது!",
     "newParcel": "+ புதிய பார்சல்",
     "parcelShelfTitle": "டேக்அவே மற்றும் பார்சல்கள்",
+    "parcelCardTitle": "பார்சல் #{{number}}",
     "noActiveParcelsHint": "செயலில் உள்ள பார்சல்கள் இல்லை. டேக்அவே ஆர்டரைத் தொடங்க \"+ புதிய பார்சல்\" என்பதைக் கிளிக் செய்யவும்.",
     "readyForPickup": "பிக்கப்பிற்கு தயார்",
     "preparingInKitchen": "தயாராகிறது",

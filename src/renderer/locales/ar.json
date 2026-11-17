@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "تم تحويل الطلب وطباعة KOT!",
     "newParcel": "+ طرد جديد",
     "parcelShelfTitle": "الطلبات الخارجية والطرود",
+    "parcelCardTitle": "طرد #{{number}}",
     "noActiveParcelsHint": "لا توجد طرود نشطة. انقر على \"+ طرد جديد\" لبدء طلب خارجي.",
     "readyForPickup": "جاهز للاستلام",
     "preparingInKitchen": "قيد التحضير",

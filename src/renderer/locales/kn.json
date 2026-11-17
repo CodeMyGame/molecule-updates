@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "ಆರ್ಡರ್ ವರ್ಗಾಯಿಸಲಾಗಿದೆ ಮತ್ತು KOT ಮುದ್ರಿಸಲಾಗಿದೆ!",
     "newParcel": "+ ಹೊಸ ಪಾರ್ಸೆಲ್",
     "parcelShelfTitle": "ಟೇಕ್‌ಅವೇ ಮತ್ತು ಪಾರ್ಸೆಲ್‌ಗಳು",
+    "parcelCardTitle": "ಪಾರ್ಸೆಲ್ #{{number}}",
     "noActiveParcelsHint": "ಯಾವುದೇ ಸಕ್ರಿಯ ಪಾರ್ಸೆಲ್‌ಗಳಿಲ್ಲ. ಟೇಕ್‌ಅವೇ ಆರ್ಡರ್ ಪ್ರಾರಂಭಿಸಲು \"+ ಹೊಸ ಪಾರ್ಸೆಲ್\" ಕ್ಲಿಕ್ ಮಾಡಿ.",
     "readyForPickup": "ಪಿಕಪ್‌ಗೆ ಸಿದ್ಧವಾಗಿದೆ",
     "preparingInKitchen": "ಸಿದ್ಧವಾಗುತ್ತಿದೆ",

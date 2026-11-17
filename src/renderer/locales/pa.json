@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "ਆਰਡਰ ਟ੍ਰਾਂਸਫਰ ਹੋ ਗਿਆ ਅਤੇ KOT ਪ੍ਰਿੰਟ ਹੋ ਗਿਆ!",
     "newParcel": "+ ਨਵਾਂ ਪਾਰਸਲ",
     "parcelShelfTitle": "ਟੇਕਅਵੇਅ ਅਤੇ ਪਾਰਸਲ",
+    "parcelCardTitle": "ਪਾਰਸਲ #{{number}}",
     "noActiveParcelsHint": "ਕੋਈ ਸਰਗਰਮ ਪਾਰਸਲ ਨਹੀਂ। ਟੇਕਅਵੇਅ ਆਰਡਰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ \"+ ਨਵਾਂ ਪਾਰਸਲ\" 'ਤੇ ਕਲਿੱਕ ਕਰੋ।",
     "readyForPickup": "ਪਿਕਅੱਪ ਲਈ ਤਿਆਰ",
     "preparingInKitchen": "ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ",

@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "注文を移動し、KOTを印刷しました！",
     "newParcel": "+ 新規テイクアウト",
     "parcelShelfTitle": "テイクアウトと小包",
+    "parcelCardTitle": "小包 #{{number}}",
     "noActiveParcelsHint": "対応中のテイクアウトはありません。「+ 新規テイクアウト」をクリックして注文を開始してください。",
     "readyForPickup": "受取可能",
     "preparingInKitchen": "調理中",

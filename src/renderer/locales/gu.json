@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "ઓર્ડર ટ્રાન્સફર થયો અને KOT પ્રિન્ટ થઈ ગયું!",
     "newParcel": "+ નવું પાર્સલ",
     "parcelShelfTitle": "ટેકઅવે અને પાર્સલ",
+    "parcelCardTitle": "પાર્સલ #{{number}}",
     "noActiveParcelsHint": "કોઈ સક્રિય પાર્સલ નથી. ટેકઅવે ઓર્ડર શરૂ કરવા માટે \"+ નવું પાર્સલ\" પર ક્લિક કરો.",
     "readyForPickup": "પિકઅપ માટે તૈયાર",
     "preparingInKitchen": "તૈયાર થઈ રહ્યું છે",

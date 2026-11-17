@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "¡Pedido transferido y KOT impreso!",
     "newParcel": "+ Nuevo paquete",
     "parcelShelfTitle": "Para llevar y paquetes",
+    "parcelCardTitle": "Paquete #{{number}}",
     "noActiveParcelsHint": "No hay paquetes activos. Haga clic en \"+ Nuevo paquete\" para iniciar un pedido para llevar.",
     "readyForPickup": "Listo para recoger",
     "preparingInKitchen": "En preparación",

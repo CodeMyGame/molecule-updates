@@ -2125,7 +2125,7 @@ const Billing: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
                   {/* Active parcel cards */}
-                  {activeParcels.map((parcel) => {
+                  {activeParcels.map((parcel, index) => {
                   const isSelected = currentOrderId === parcel.id;
                   const statusBadge = getParcelStatusBadge(parcel, t);
                   const parcelTime = (parcel as any).createdAt || (parcel as any).created_at || '';
@@ -2147,9 +2147,12 @@ const Billing: React.FC = () => {
                     >
                       <div>
                         <div className="flex items-center justify-between gap-1 mb-1">
-                          <span className="font-bold text-xs text-gray-900 flex items-center gap-1 truncate">
+                          <span
+                            className="font-bold text-xs text-gray-900 flex items-center gap-1 truncate"
+                            title={`Order #${parcelOrderNum}`}
+                          >
                             <span>🛍️</span>
-                            <span>#{parcelOrderNum}</span>
+                            <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: index + 1 })}</span>
                           </span>
                           <span className="font-bold text-xs text-gray-900 font-mono">
                             {formatCurrency(parcelTotal)}

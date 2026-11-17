@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "ഓർഡർ മാറ്റി KOT പ്രിന്റ് ചെയ്തു!",
     "newParcel": "+ പുതിയ പാർസൽ",
     "parcelShelfTitle": "ടേക്ക്അവേ & പാർസലുകൾ",
+    "parcelCardTitle": "പാഴ്സൽ #{{number}}",
     "noActiveParcelsHint": "സജീവമായ പാർസലുകളൊന്നുമില്ല. ടേക്ക്അവേ ഓർഡർ ആരംഭിക്കാൻ \"+ പുതിയ പാർസൽ\" ക്ലിക്ക് ചെയ്യുക.",
     "readyForPickup": "പിക്കപ്പിനായി തയ്യാറാണ്",
     "preparingInKitchen": "തയ്യാറാകുന്നു",

@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "অর্ডার স্থানান্তরিত হয়েছে এবং KOT প্রিন্ট হয়েছে!",
     "newParcel": "+ নতুন পার্সেল",
     "parcelShelfTitle": "টেকঅ্যাওয়ে এবং পার্সেল",
+    "parcelCardTitle": "পার্সেল #{{number}}",
     "noActiveParcelsHint": "কোনো সক্রিয় পার্সেল নেই। টেকঅ্যাওয়ে অর্ডার শুরু করতে \"+ নতুন পার্সেল\" ক্লিক করুন।",
     "readyForPickup": "পিকআপের জন্য প্রস্তুত",
     "preparingInKitchen": "তৈরি হচ্ছে",

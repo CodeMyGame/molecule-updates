@@ -232,6 +232,7 @@
     "transferredAndKotPrinted": "ఆర్డర్ బదిలీ చేయబడింది మరియు KOT ముద్రించబడింది!",
     "newParcel": "+ కొత్త పార్సెల్",
     "parcelShelfTitle": "టేక్‌అవే & పార్సెల్స్",
+    "parcelCardTitle": "పార్సెల్ #{{number}}",
     "noActiveParcelsHint": "క్రియాశీల పార్సెల్‌లు లేవు. టేక్‌అవే ఆర్డర్‌ను ప్రారంభించడానికి \"+ కొత్త పార్సెల్\" క్లిక్ చేయండి.",
     "readyForPickup": "పికప్ కోసం సిద్ధంగా ఉంది",
     "preparingInKitchen": "సిద్ధమవుతోంది",
