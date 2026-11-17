@@ -1,6 +1,5 @@
 import { BrowserWindow } from 'electron';
 import * as settingsRepo from '../db/repositories/settings.repo';
-import { createPrinter, sendRawToPrinter } from './escpos-print.service';
 import { mergeLayout, KOT_FIELD_DEFS } from '../../shared/receipt-layout';
 import {
   renderKotText,
@@ -8,12 +7,14 @@ import {
   DEFAULT_KOT_LABELS,
   formatKotItemLines,
   wrapText,
+  normalizePrintMode,
 } from '../../shared/receipt-render';
 
 interface KOTPrintData {
   kotNumber: string;
   orderNumber: string;
   tableName?: string;
+  parcelName?: string;
   orderType: string;
   items: { name: string; quantity: number; notes?: string; addons?: { name: string }[] }[];
   printedAt: string;
@@ -41,19 +42,7 @@ function formatDateTime(isoStr: string): string {
   }
 }
 
-type FontSize = 'regular' | 'small' | 'medium' | 'large';
-
-function applyFontSize(p: any, size: FontSize): void {
-  switch (size) {
-    case 'regular': p.setTextNormal(); break;
-    case 'small': p.setTextNormal(); break;
-    case 'medium': p.setTextDoubleHeight(); break;
-    case 'large': p.setTextQuadArea(); break;
-    default: p.setTextDoubleHeight(); break;
-  }
-}
-
-/** Character-width lookup for supported thermal-printer paper sizes */
+/** Character-width lookup for supported receipt paper sizes */
 const PAPER_CHAR_WIDTH: Record<string, number> = {
   '58mm': 32,
   '72mm': 38,
@@ -62,115 +51,13 @@ const PAPER_CHAR_WIDTH: Record<string, number> = {
   '112mm': 56,
 };
 
-/**
- * Maximum print-area width in dots for each paper size (203 DPI / 8 dots-per-mm).
- * GS W command (1D 57 nL nH) sets this; combined with GS L = 0 it maximises
- * the usable area — the remaining margins are hardware-imposed.
- */
-const PAPER_PRINT_DOTS: Record<string, [number, number]> = {
-  '58mm': [0x80, 0x01],   // 384 dots ≈ 48mm
-  '72mm': [0x00, 0x02],   // 512 dots ≈ 64mm
-  '76mm': [0x18, 0x02],   // 536 dots ≈ 67mm
-  '80mm': [0x40, 0x02],   // 576 dots ≈ 72mm
-  '112mm': [0x40, 0x03],  // 832 dots ≈ 104mm
-};
-
 /** Base character width derived from the paper_width setting */
 function getBaseCharWidth(): number {
   const paper = settingsRepo.get('paper_width') ?? '58mm';
   return PAPER_CHAR_WIDTH[paper] ?? 32;
 }
 
-/** Width multiplier: how many times wider than normal each font size prints */
-function getWidthMultiplier(size: FontSize): number {
-  switch (size) {
-    case 'regular': case 'small': case 'medium': return 1;
-    case 'large': return 2;
-    default: return 1;
-  }
-}
-
-function buildKotEscPos(data: KOTPrintData, style: ItemStyle, fontSize: FontSize): Buffer {
-  const paper = settingsRepo.get('paper_width') ?? '58mm';
-  const baseWidth = PAPER_CHAR_WIDTH[paper] ?? 32;
-  const p = createPrinter(baseWidth);
-  const effectiveWidth = Math.floor(baseWidth / getWidthMultiplier(fontSize));
-
-  // Ensure Font A, reset left margin to 0, and maximise print area
-  p.setTypeFontA();
-  p.add(Buffer.from([0x1d, 0x4c, 0x00, 0x00]));
-  const [nL, nH] = PAPER_PRINT_DOTS[paper] ?? [0x80, 0x01];
-  p.add(Buffer.from([0x1d, 0x57, nL, nH]));
-
-  const location = data.orderType === 'dine_in' && data.tableName
-    ? `Table: ${data.tableName}`
-    : `Type: ${data.orderType.replace('_', ' ')}`;
-
-  // Header — bold, double-height (not double-width to avoid cutoff), centered
-  p.alignCenter();
-  p.bold(true);
-  p.setTextDoubleHeight();
-  p.println('KOT');
-  if (data.station) {
-    p.setTextNormal();
-    p.bold(true);
-    const stationLabel = data.station.replace(/_/g, ' ').toUpperCase();
-    p.println(`[ ${stationLabel} ]`);
-  }
-  p.setTextNormal();
-  p.bold(true);
-  p.drawLine('=');
-
-  // Order info
-  p.alignLeft();
-  applyFontSize(p, fontSize);
-  p.println(location.substring(0, effectiveWidth));
-  if (data.kotCount != null) {
-    p.println(`KOT Count: ${data.kotCount}`.substring(0, effectiveWidth));
-  }
-  p.println(`Date: ${formatDateTime(data.printedAt)}`.substring(0, effectiveWidth));
-
-  // Items section
-  p.setTextNormal();
-  p.bold(true);
-  p.drawLine('-');
-  applyFontSize(p, fontSize);
-  if (style === 'name_qty' || style === 'sno_name_qty') {
-    p.println('Item'.padEnd(effectiveWidth - 3) + 'Qty'.padStart(3));
-  } else {
-    p.println('Items');
-  }
-  p.setTextNormal();
-  p.bold(true);
-  p.drawLine('-');
-
-  // Item lines
-  applyFontSize(p, fontSize);
-  data.items.forEach((item, idx) => {
-    formatKotItemLines(item.name, item.quantity, idx, style, effectiveWidth).forEach((l) => p.println(l));
-    if (item.addons?.length) {
-      for (const addon of item.addons) {
-        wrapText(`  + ${addon.name}`, effectiveWidth).forEach((l) => p.println(l));
-      }
-    }
-    if (item.notes) {
-      wrapText(`  * ${item.notes}`, effectiveWidth).forEach((l) => p.println(l));
-    }
-  });
-
-  // Footer
-  const totalItems = data.items.reduce((sum, i) => sum + i.quantity, 0);
-  p.setTextNormal();
-  p.bold(true);
-  p.drawLine('-');
-  applyFontSize(p, fontSize);
-  p.println(`Total Items: ${totalItems}`);
-  p.setTextNormal();
-
-  p.cut();
-  return p.getBuffer();
-}
-
+type FontSize = 'regular' | 'small' | 'medium' | 'large';
 const FONT_SIZE_MAP: Record<FontSize, string> = { small: '12px', regular: '14px', medium: '16px', large: '20px' };
 
 function buildKotModel(data: KOTPrintData, style: ItemStyle): KotModel {
@@ -178,6 +65,8 @@ function buildKotModel(data: KOTPrintData, style: ItemStyle): KotModel {
     title: 'KOT',
     location: data.orderType === 'dine_in' && data.tableName
       ? `Table: ${data.tableName}`
+      : data.orderType === 'takeaway' && data.parcelName
+      ? `Takeaway (${data.parcelName})`
       : `Type: ${data.orderType.replace('_', ' ')}`,
     kotCount: data.kotCount != null ? String(data.kotCount) : undefined,
     date: formatDateTime(data.printedAt),
@@ -363,32 +252,12 @@ export async function printKotReceipt(data: KOTPrintData): Promise<void> {
   const savedPrinterName = resolveKotPrinter(data.station);
   const style = (settingsRepo.get('kot_item_style') ?? 'name_qty') as ItemStyle;
   const fontSize = (settingsRepo.get('kot_font_size') ?? 'small') as FontSize;
-  const printMode = settingsRepo.get('print_mode') ?? 'thermal';
-
-  // If customer chose HTML mode, skip ESC/POS entirely
-  if (printMode === 'html') {
-    const html = generateKotHtml(data, style, fontSize);
-    await printViaHtml(html, savedPrinterName || null);
-    return;
-  }
+  const printMode = normalizePrintMode(settingsRepo.get('print_mode'));
 
   if (printMode === 'raster') {
     const html = generateKotHtml(data, style, fontSize, true);
     await printViaHtml(html, savedPrinterName || null);
     return;
-  }
-
-  // Thermal mode: try ESC/POS first, fallback to HTML on failure
-  if (savedPrinterName) {
-    try {
-      const escposBuffer = buildKotEscPos(data, style, fontSize);
-      await sendRawToPrinter(savedPrinterName, escposBuffer);
-      return;
-    } catch (err: any) {
-      console.warn('ESC/POS KOT print failed, falling back to HTML.');
-      console.warn('  Printer:', savedPrinterName);
-      console.warn('  Error:', err?.message ?? err);
-    }
   }
 
   const html = generateKotHtml(data, style, fontSize);

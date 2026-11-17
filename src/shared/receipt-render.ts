@@ -4,7 +4,7 @@
  * Used by the renderer (real bill + settings preview), the main process
  * (test bill + raster KOT). No electron / DOM imports.
  *
- * Only used for the Raster print mode; thermal/html keep their own builders.
+ * Used for the Raster print mode; HTML mode uses its own builder.
  */
 
 import {
@@ -18,6 +18,11 @@ import {
 } from './receipt-layout';
 
 export type ReceiptItemStyle = 'name_qty' | 'qty_x_name' | 'qty_name' | 'sno_name_qty';
+export type ReceiptPrintMode = 'html' | 'raster';
+
+export function normalizePrintMode(printMode?: string | null): ReceiptPrintMode {
+  return printMode === 'raster' ? 'raster' : 'html';
+}
 
 // ── paper / font sizing (shared by the real print path + settings preview) ─────
 
@@ -46,8 +51,7 @@ export function fontScale(fontSize?: string | null): number {
  * Characters-per-line for a given paper width + print mode + font size.
  *
  * In raster mode a larger font means wider character cells, so fewer
- * characters fit per line. Thermal / HTML modes keep the printer's base
- * character width (the firmware handles the font scaling).
+ * characters fit per line. HTML mode keeps the printer's base character width.
  *
  * Pass `forceFontScaling` to always apply the font scaling regardless of mode
  * — used by the settings preview so the user can see the effect of font size
@@ -350,7 +354,7 @@ function renderBillField(
       return out.length ? out : null;
     }
     case 'dynamicQr':
-      return null; // rendered via QR code image / ESC/POS printQR
+      return null; // rendered separately in the HTML print output
     case 'thankYou':
       return ['', centerText(labelFor(cfg, model.labels), W), ''];
     default:

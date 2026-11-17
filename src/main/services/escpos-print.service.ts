@@ -14,14 +14,14 @@ try {
 // Re-export node-thermal-printer for direct use by KOT and bill printers
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ntp = require('node-thermal-printer');
-export const ThermalPrinter: typeof import('node-thermal-printer').ThermalPrinter = ntp.printer;
-export const PrinterTypes: typeof import('node-thermal-printer').PrinterTypes = ntp.types;
+export const ThermalPrinter: any = ntp.printer;
+export const PrinterTypes: any = ntp.types;
 
 /**
  * Create a ThermalPrinter instance for buffer generation only.
  * Uses a dummy file interface — we never call execute(), only getBuffer().
  */
-export function createPrinter(width = 42): InstanceType<typeof import('node-thermal-printer').ThermalPrinter> {
+export function createPrinter(width = 42): any {
   return new ThermalPrinter({
     type: PrinterTypes.EPSON,
     interface: join(tmpdir(), 'molecule-dummy-printer'),

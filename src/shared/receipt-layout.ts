@@ -7,8 +7,8 @@
  *
  * The actual rendering of a layout into receipt text lives in receipt-render.ts.
  *
- * NOTE: The layout only affects output when print_mode === 'raster'. Thermal
- * (ESC/POS) and HTML modes keep their fixed layouts.
+ * NOTE: The layout only affects output when print_mode === 'raster'. HTML mode
+ * keeps its fixed layout.
  */
 
 export interface ReceiptFieldConfig {
