@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import {
   UtensilsCrossed,
   ShoppingBag,
-  Truck,
   FileText,
   Layers,
   CircleDot,
@@ -78,7 +77,6 @@ interface Floor {
 const ORDER_TYPE_KEYS = [
   { key: 'dine_in' as const, tKey: 'billing.dineIn', icon: UtensilsCrossed },
   { key: 'takeaway' as const, tKey: 'billing.takeaway', icon: ShoppingBag },
-  { key: 'delivery' as const, tKey: 'billing.delivery', icon: Truck },
 ];
 
 function getElapsedMinutes(startedAt?: string): number {
@@ -527,6 +525,14 @@ const Billing: React.FC = () => {
         (o.orderType === 'takeaway' || o.order_type === 'takeaway' || (!o.tableId && !o.table_id)) &&
         (o.status === 'active' || o.status === 'hold')
     );
+  }, [activeOrders]);
+
+  const activeDineInCount = useMemo(() => {
+    return activeOrders.filter(
+      (o: any) =>
+        (o.orderType === 'dine_in' || o.order_type === 'dine_in' || (o.tableId ?? o.table_id)) &&
+        (o.status === 'active' || o.status === 'hold')
+    ).length;
   }, [activeOrders]);
 
   const [showParcelModal, setShowParcelModal] = useState(false);
@@ -1355,7 +1361,7 @@ const Billing: React.FC = () => {
         }
       }
 
-      // Order Type Switchers (Alt+1 = Dine In, Alt+2 = Takeaway, Alt+3 = Delivery)
+      // Order Type Switchers (Alt+1 = Dine In, Alt+2 = Takeaway)
       if (e.altKey && !e.ctrlKey && !e.metaKey) {
         if (e.key === '1') {
           e.preventDefault();
@@ -1365,11 +1371,6 @@ const Billing: React.FC = () => {
         if (e.key === '2') {
           e.preventDefault();
           if (orderType !== 'takeaway') setOrderType('takeaway');
-          return;
-        }
-        if (e.key === '3') {
-          e.preventDefault();
-          if (orderType !== 'delivery') setOrderType('delivery');
           return;
         }
       }
@@ -1654,7 +1655,10 @@ const Billing: React.FC = () => {
           <div className="flex bg-gray-100 rounded-md p-0.5 gap-0.5">
             {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => {
               const isTakeaway = key === 'takeaway';
-              const count = isTakeaway ? activeParcels.length : 0;
+              const isDineIn = key === 'dine_in';
+              const count = isTakeaway ? activeParcels.length : isDineIn ? activeDineInCount : 0;
+              const isSelected = orderType === key;
+
               return (
                 <Tooltip key={key} text={t(tKey)} position="bottom">
                   <button
@@ -1666,17 +1670,34 @@ const Billing: React.FC = () => {
                     className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold
                       transition-colors select-none
                       ${
-                        orderType === key
+                        isSelected
                           ? 'bg-white text-blue-700 shadow-xs'
                           : 'text-gray-600 hover:text-gray-800'
                       }`}
                   >
-                    <Icon size={13} className={isTakeaway && count > 0 ? 'text-emerald-600' : ''} />
+                    <Icon
+                      size={13}
+                      className={
+                        isTakeaway && (isSelected || count > 0)
+                          ? 'text-emerald-600'
+                          : isDineIn && (isSelected || count > 0)
+                          ? 'text-blue-600'
+                          : ''
+                      }
+                    />
                     <span>{t(tKey)}</span>
-                    {isTakeaway && count > 0 && (
-                      <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                        orderType === 'takeaway' ? 'bg-emerald-600 text-white' : 'bg-emerald-100 text-emerald-700'
-                      }`}>
+                    {count > 0 && (
+                      <span
+                        className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                          isTakeaway
+                            ? isSelected
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-emerald-100 text-emerald-700'
+                            : isSelected
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-blue-100 text-blue-700'
+                        }`}
+                      >
                         {count}
                       </span>
                     )}

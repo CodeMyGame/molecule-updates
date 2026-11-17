@@ -105,11 +105,6 @@ const SHORTCUTS: ShortcutItem[] = [
     description: 'Switch to Takeaway Mode',
     category: 'modes',
   },
-  {
-    keys: ['Alt', '3'],
-    description: 'Switch to Delivery Mode',
-    category: 'modes',
-  },
 ];
 
 const CATEGORY_META = {
