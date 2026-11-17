@@ -1652,7 +1652,7 @@ const Billing: React.FC = () => {
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-1.5">
         <div className="flex items-center gap-2.5">
           {/* Order type selector */}
-          <div className="flex bg-gray-100 rounded-md p-0.5 gap-0.5">
+          <div className="flex bg-gray-200/90 rounded-lg p-0.5 gap-1 border border-gray-300/60 shadow-2xs">
             {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => {
               const isTakeaway = key === 'takeaway';
               const isDineIn = key === 'dine_in';
@@ -1667,35 +1667,29 @@ const Billing: React.FC = () => {
                         setOrderType(key);
                       }
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold
-                      transition-colors select-none
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold
+                      transition-all select-none cursor-pointer
                       ${
                         isSelected
-                          ? 'bg-white text-blue-700 shadow-xs'
-                          : 'text-gray-600 hover:text-gray-800'
+                          ? isTakeaway
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-blue-600 text-white shadow-xs'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-300/50'
                       }`}
                   >
                     <Icon
-                      size={13}
-                      className={
-                        isTakeaway && (isSelected || count > 0)
-                          ? 'text-emerald-600'
-                          : isDineIn && (isSelected || count > 0)
-                          ? 'text-blue-600'
-                          : ''
-                      }
+                      size={14}
+                      className={isSelected ? 'text-white' : 'text-gray-400'}
                     />
                     <span>{t(tKey)}</span>
                     {count > 0 && (
                       <span
-                        className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                          isTakeaway
-                            ? isSelected
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-emerald-100 text-emerald-700'
-                            : isSelected
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-blue-100 text-blue-700'
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none ${
+                          isSelected
+                            ? isTakeaway
+                              ? 'bg-white text-emerald-700 shadow-2xs'
+                              : 'bg-white text-blue-700 shadow-2xs'
+                            : 'bg-gray-300/80 text-gray-700'
                         }`}
                       >
                         {count}
