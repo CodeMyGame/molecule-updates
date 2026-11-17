@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Users, Clock, Pin, Pause } from 'lucide-react';
+import { Clock, Pin, Pause } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { currencySymbolForLanguage } from '../../lib/currencyLocale';
 import { TableStatus } from '../../../shared/enums';
@@ -17,6 +17,7 @@ interface TableCardProps {
   orderItemCount?: number;
   compact?: boolean;
   orderStatus?: string;
+  kotBadge?: { label: string; bg: string; dot: string };
 }
 
 const STATUS_STYLES: Record<
@@ -75,6 +76,7 @@ const TableCard: React.FC<TableCardProps> = ({
   orderItemCount: _orderItemCount,
   compact = false,
   orderStatus,
+  kotBadge,
 }) => {
   const { t, i18n } = useTranslation();
 
@@ -153,11 +155,6 @@ const TableCard: React.FC<TableCardProps> = ({
 
       <span className={`font-bold text-gray-800 px-1 truncate max-w-full text-center ${compact ? 'text-[11px] mb-0' : 'text-xs mb-0.5'}`}>{table.name}</span>
 
-      <span className={`flex items-center gap-0.5 text-gray-500 ${compact ? 'text-[9px]' : 'text-[10px]'}`}>
-        <Users size={compact ? 9 : 10} />
-        <span>{table.capacity}</span>
-      </span>
-
       {hasOrderInfo && (
         <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-1 gap-0.5'}`}>
           <span className={`font-bold ${isHold ? 'text-amber-800' : 'text-red-700'} ${compact ? 'text-[10px]' : 'text-xs'}`}>
@@ -176,6 +173,15 @@ const TableCard: React.FC<TableCardProps> = ({
         <span className={`flex items-center gap-0.5 font-medium mt-0.5 ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[9px]' : 'text-[9px]'}`}>
           <Clock size={compact ? 8 : 9} />
           {formatElapsedTime(elapsedMins)}
+        </span>
+      )}
+
+      {isOccupied && kotBadge && (
+        <span
+          className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full border mt-1 leading-tight font-medium ${kotBadge.bg} ${compact ? 'text-[8px]' : 'text-[9px]'}`}
+        >
+          <span className={`rounded-full shrink-0 ${kotBadge.dot} ${compact ? 'w-1 h-1' : 'w-1.5 h-1.5'}`} />
+          <span className="truncate max-w-[80px]">{kotBadge.label}</span>
         </span>
       )}
     </button>

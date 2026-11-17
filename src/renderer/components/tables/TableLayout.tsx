@@ -11,6 +11,8 @@ interface TableOrderInfo {
   itemCount: number;
   createdAt: string;
   orderStatus?: string;
+  orderId?: number;
+  kotBadge?: { label: string; bg: string; dot: string };
 }
 
 interface TableLayoutProps {
@@ -144,6 +146,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
                     orderItemCount={orderInfo?.itemCount}
                     orderStartedAt={orderInfo?.createdAt}
                     orderStatus={orderInfo?.orderStatus}
+                    kotBadge={orderInfo?.kotBadge}
                   />
                 </div>
               );
@@ -165,6 +168,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
                   orderItemCount={orderInfo?.itemCount}
                   orderStartedAt={orderInfo?.createdAt}
                   orderStatus={orderInfo?.orderStatus}
+                  kotBadge={orderInfo?.kotBadge}
                 />
               );
             })}
