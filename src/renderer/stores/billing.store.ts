@@ -112,7 +112,7 @@ interface BillingState {
   setCurrentOrderId: (orderId: number | null) => void;
   markItemsSynced: () => void;
   syncOrderItemIds: (orderItems: { id: number; menuItemId: number; name: string }[]) => void;
-  clearCart: () => void;
+  clearCart: (keepOrderType?: boolean) => void;
 
   // Computed getters
   getSubtotal: () => number;
@@ -484,15 +484,15 @@ export const useBillingStore = create<BillingState>((set, get) => ({
     return { cart: updatedCart };
   }),
 
-  clearCart: () =>
-    set({
+  clearCart: (keepOrderType: boolean = true) =>
+    set((state) => ({
       cart: [],
       currentOrderId: null,
       orderStatus: 'active',
       syncedItemCount: 0,
       syncedQuantities: [],
       kots: [],
-      orderType: 'dine_in',
+      orderType: keepOrderType ? state.orderType : 'dine_in',
       selectedTableId: null,
       selectedCustomerId: null,
       discount: null,
@@ -501,7 +501,7 @@ export const useBillingStore = create<BillingState>((set, get) => ({
       parcelNumber: null,
       splitFromOrderId: null,
       splitFromOrderNumber: null,
-    }),
+    })),
 
   getSubtotal: () => {
     const { cart, discount } = get();
