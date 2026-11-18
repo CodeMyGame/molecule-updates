@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "શોધો...",
     "clear": "નોંધ સાફ કરો",
     "clearFilter": "બધા બતાવો",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} માંથી {{count}} રેકોર્ડ દર્શાવવામાં આવી રહ્યા છે",
+    "loadMore": "વધુ લોડ કરો",
+    "scrollForMore": "વધુ માટે નીચે સ્ક્રોલ કરો",
+    "allLoaded": "બધા રેકોર્ડ લોડ થઈ ગયા છે"
   },
   "billingPage": {
     "failedToDelete": "કાઢી શકાયું નથી",

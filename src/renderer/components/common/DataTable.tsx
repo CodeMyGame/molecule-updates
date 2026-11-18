@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, ChevronsUpDown, Inbox } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, Inbox, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 
 interface Column<T> {
   header: string;
@@ -18,6 +19,9 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   keyExtractor?: (item: T, index: number) => string | number;
   className?: string;
+  enableInfiniteScroll?: boolean;
+  pageSize?: number;
+  initialPageSize?: number;
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -33,6 +37,9 @@ function DataTable<T extends Record<string, any>>({
   emptyMessage,
   keyExtractor,
   className = '',
+  enableInfiniteScroll = true,
+  pageSize = 40,
+  initialPageSize,
 }: DataTableProps<T>) {
   const { t } = useTranslation();
   const resolvedEmptyMessage = emptyMessage ?? t('common.noData');
@@ -97,6 +104,21 @@ function DataTable<T extends Record<string, any>>({
     }
   };
 
+  const isInfiniteScrollActive = enableInfiniteScroll !== false && sortedData.length > pageSize;
+
+  const {
+    visibleItems,
+    hasMore,
+    loadMore,
+    displayCount,
+    totalCount,
+    observerTarget,
+  } = useInfiniteScroll(sortedData, {
+    pageSize,
+    initialCount: initialPageSize ?? pageSize,
+    enabled: isInfiniteScrollActive,
+  });
+
   return (
     <div className={`overflow-x-auto rounded-lg border border-gray-200 ${className}`}>
       <table className="w-full text-sm">
@@ -133,7 +155,7 @@ function DataTable<T extends Record<string, any>>({
               </td>
             </tr>
           ) : (
-            sortedData.map((item, index) => (
+            visibleItems.map((item, index) => (
               <tr
                 key={keyExtractor ? keyExtractor(item, index) : index}
                 onClick={() => onRowClick?.(item, index)}
@@ -157,8 +179,49 @@ function DataTable<T extends Record<string, any>>({
               </tr>
             ))
           )}
+          {isInfiniteScrollActive && hasMore && (
+            <tr>
+              <td colSpan={columns.length} className="p-0 border-none">
+                <div
+                  ref={observerTarget}
+                  className="py-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5"
+                >
+                  <Loader2 size={13} className="animate-spin text-blue-500" />
+                  <span>{t('common.loading')}</span>
+                </div>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
+      {isInfiniteScrollActive && (
+        <div className="px-4 py-2.5 bg-gray-50/90 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between select-none">
+          <span>
+            {t('common.showingCount', {
+              count: displayCount,
+              total: totalCount,
+              defaultValue: `Showing ${displayCount} of ${totalCount} records`,
+            })}
+          </span>
+          <div className="flex items-center gap-2">
+            {hasMore ? (
+              <>
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  className="text-blue-600 hover:text-blue-700 font-medium hover:underline cursor-pointer"
+                >
+                  {t('common.loadMore', 'Load more')}
+                </button>
+                <span className="text-gray-300">•</span>
+                <span className="text-gray-400">{t('common.scrollForMore', 'Scroll down for more')}</span>
+              </>
+            ) : (
+              <span className="text-gray-400">{t('common.allLoaded', 'All records loaded')}</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

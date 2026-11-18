@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "Buscar...",
     "clear": "Borrar nota",
     "clearFilter": "Mostrar todo",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "Mostrando {{count}} de {{total}} registros",
+    "loadMore": "Cargar más",
+    "scrollForMore": "Desplácese hacia abajo para ver más",
+    "allLoaded": "Todos los registros cargados"
   },
   "billingPage": {
     "failedToDelete": "Error al eliminar",

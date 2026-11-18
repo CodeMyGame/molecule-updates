@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "தேடு...",
     "clear": "குறிப்பை நீக்கு",
     "clearFilter": "அனைத்தையும் காட்டு",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} பதிவுகளில் {{count}} காட்டப்படுகிறது",
+    "loadMore": "மேலும் ஏற்றுக",
+    "scrollForMore": "மேலும் காண கீழே ஸ்க்ரோல் செய்யவும்",
+    "allLoaded": "அனைத்துப் பதிவுகளும் ஏற்றப்பட்டன"
   },
   "billingPage": {
     "failedToDelete": "நீக்க முடியவில்லை",

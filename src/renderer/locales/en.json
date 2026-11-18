@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "Search...",
     "clear": "Clear Note",
     "clearFilter": "Show All",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "Showing {{count}} of {{total}} records",
+    "loadMore": "Load more",
+    "scrollForMore": "Scroll down for more",
+    "allLoaded": "All records loaded"
   },
   "billingPage": {
     "failedToDelete": "Failed to delete",

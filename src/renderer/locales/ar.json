@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "بحث...",
     "clear": "مسح الملاحظة",
     "clearFilter": "إظهار الكل",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "عرض {{count}} من إجمالي {{total}} سجل",
+    "loadMore": "تحميل المزيد",
+    "scrollForMore": "مرّر للأسفل للمزيد",
+    "allLoaded": "تم تحميل جميع السجلات"
   },
   "billingPage": {
     "failedToDelete": "فشل الحذف",

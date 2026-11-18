@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "ಹುಡುಕಿ...",
     "clear": "ಟಿಪ್ಪಣಿ ಅಳಿಸು",
     "clearFilter": "ಎಲ್ಲವನ್ನೂ ತೋರಿಸು",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} ರಲ್ಲಿ {{count}} ದಾಖಲೆಗಳನ್ನು ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "loadMore": "ಇನ್ನಷ್ಟು ಲೋಡ್ ಮಾಡಿ",
+    "scrollForMore": "ಹೆಚ್ಚಿನವಕ್ಕಾಗಿ ಕೆಳಗೆ ಸ್ಕ್ರೋಲ್ ಮಾಡಿ",
+    "allLoaded": "ಎಲ್ಲಾ ದಾಖಲೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಿದೆ"
   },
   "billingPage": {
     "failedToDelete": "ಅಳಿಸಲು ವಿಫಲವಾಗಿದೆ",

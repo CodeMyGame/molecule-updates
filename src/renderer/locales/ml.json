@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "തിരയുക...",
     "clear": "കുറിപ്പ് മായ്ക്കുക",
     "clearFilter": "എല്ലാം കാണിക്കുക",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} ൽ {{count}} റെക്കോർഡുകൾ കാണിക്കുന്നു",
+    "loadMore": "കൂടുതൽ ലോഡ് ചെയ്യുക",
+    "scrollForMore": "കൂടുതലിനായി താഴേക്ക് സ്ക്രോൾ ചെയ്യുക",
+    "allLoaded": "എല്ലാ റെക്കോർഡുകളും ലോഡ് ചെയ്തു"
   },
   "billingPage": {
     "failedToDelete": "ഇല്ലാതാക്കാൻ കഴിഞ്ഞില്ല",

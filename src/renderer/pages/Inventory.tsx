@@ -23,6 +23,7 @@ import {
   ChevronDown,
   ChevronRight,
   Filter,
+  Loader2,
 } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
@@ -31,6 +32,7 @@ import SearchInput from '../components/common/SearchInput';
 import { useInventory } from '../hooks/useInventory';
 import { useTaxTerminology } from '../hooks/useTaxTerminology';
 import { useMenu, type MenuItem } from '../hooks/useMenu';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { formatCurrency, formatDate } from '../lib/formatters';
 import { StockTransactionType, POStatus } from '../../shared/enums';
 import type {
@@ -874,20 +876,29 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
   const items = propItems ?? menuItems ?? [];
   const { t } = useTranslation();
   const [internalSelectedId, setInternalSelectedId] = useState<number | null>(null);
+  const [recipeMenuSearch, setRecipeMenuSearch] = useState('');
+
+  const filteredMenuItems = useMemo(() => {
+    if (!recipeMenuSearch.trim()) return items;
+    const q = recipeMenuSearch.toLowerCase();
+    return items.filter((i) => i.name.toLowerCase().includes(q));
+  }, [items, recipeMenuSearch]);
+
+  const menuScroll = useInfiniteScroll(filteredMenuItems, { pageSize: 30 });
 
   const selectedMenuItemId = propSelectedMenuItemId !== undefined ? propSelectedMenuItemId : internalSelectedId;
 
   // Auto-select first item on mount or when items change if none selected
   useEffect(() => {
-    if (selectedMenuItemId === null && items.length > 0) {
-      const firstId = items[0].id;
+    if (selectedMenuItemId === null && filteredMenuItems.length > 0) {
+      const firstId = filteredMenuItems[0].id;
       if (onSelectMenuItem) {
         onSelectMenuItem(firstId);
       } else {
         setInternalSelectedId(firstId);
       }
     }
-  }, [items, selectedMenuItemId, onSelectMenuItem]);
+  }, [filteredMenuItems, selectedMenuItemId, onSelectMenuItem]);
 
   const handleItemSelect = (id: number) => {
     if (onSelectMenuItem) {
@@ -927,9 +938,21 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Menu item selector */}
       <div className="space-y-2">
-        <h3 className="text-xs font-semibold text-gray-700">{t('inventory.menuItems')}</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-semibold text-gray-700">{t('inventory.menuItems')}</h3>
+          <span className="text-[10px] text-gray-400">({filteredMenuItems.length})</span>
+        </div>
+        {items.length > 10 && (
+          <input
+            type="text"
+            placeholder={t('common.searchPlaceholder', 'Search...')}
+            value={recipeMenuSearch}
+            onChange={(e) => setRecipeMenuSearch(e.target.value)}
+            className="w-full px-2.5 py-1 text-xs border border-gray-200 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        )}
         <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
-          {items.map((item) => {
+          {menuScroll.visibleItems.map((item) => {
             const hasRecipe = recipes.some((r) => (r.menuItemId ?? (r as any).menu_item_id) === item.id);
             return (
               <button
@@ -941,9 +964,9 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
                     : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
-                <span>{item.name}</span>
+                <span className="truncate pr-2">{item.name}</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ${
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium shrink-0 ${
                     hasRecipe
                       ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-400'
@@ -954,7 +977,33 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
               </button>
             );
           })}
+          {menuScroll.hasMore && (
+            <div ref={menuScroll.observerTarget} className="py-2.5 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5">
+              <Loader2 size={12} className="animate-spin text-blue-500" />
+              <span>{t('common.loading')}</span>
+            </div>
+          )}
         </div>
+        {filteredMenuItems.length > 30 && (
+          <div className="px-2 py-1 text-[11px] text-gray-500 flex items-center justify-between select-none">
+            <span>
+              {t('common.showingCount', {
+                count: menuScroll.displayCount,
+                total: menuScroll.totalCount,
+                defaultValue: `Showing ${menuScroll.displayCount} of ${menuScroll.totalCount} items`,
+              })}
+            </span>
+            {menuScroll.hasMore && (
+              <button
+                type="button"
+                onClick={menuScroll.loadMore}
+                className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+              >
+                {t('common.loadMore', 'Load more')}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Recipe details */}
@@ -1347,6 +1396,11 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
     return Array.from(map.values()).sort((a, b) => b.totalCost - a.totalCost);
   }, [filteredRecords]);
 
+  // Infinite scroll pagination for grouped consumption views
+  const itemScroll = useInfiniteScroll(itemGroups, { pageSize: 30 });
+  const dateScroll = useInfiniteScroll(dateGroups, { pageSize: 30 });
+  const ingredientScroll = useInfiniteScroll(ingredientGroups, { pageSize: 30 });
+
   // CSV Export
   const handleExportCSV = () => {
     if (filteredRecords.length === 0) return;
@@ -1540,7 +1594,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {itemGroups.map((g) => {
+                {itemScroll.visibleItems.map((g) => {
                   const isExpanded = expandedRows.has(g.menuItemName);
                   const avgCost = g.portionsSold > 0 ? Math.round(g.totalCost / g.portionsSold) : 0;
                   return (
@@ -1627,9 +1681,50 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                     </React.Fragment>
                   );
                 })}
+                {itemScroll.hasMore && (
+                  <tr>
+                    <td colSpan={6} className="p-0 border-none">
+                      <div
+                        ref={itemScroll.observerTarget}
+                        className="py-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5"
+                      >
+                        <Loader2 size={13} className="animate-spin text-blue-500" />
+                        <span>{t('common.loading')}</span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
+          {itemGroups.length > 30 && (
+            <div className="px-4 py-2 bg-gray-50/90 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between select-none">
+              <span>
+                {t('common.showingCount', {
+                  count: itemScroll.displayCount,
+                  total: itemScroll.totalCount,
+                  defaultValue: `Showing ${itemScroll.displayCount} of ${itemScroll.totalCount} records`,
+                })}
+              </span>
+              <div className="flex items-center gap-2">
+                {itemScroll.hasMore ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={itemScroll.loadMore}
+                      className="text-blue-600 hover:text-blue-700 font-medium hover:underline cursor-pointer"
+                    >
+                      {t('common.loadMore', 'Load more')}
+                    </button>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-gray-400">{t('common.scrollForMore', 'Scroll down for more')}</span>
+                  </>
+                ) : (
+                  <span className="text-gray-400">{t('common.allLoaded', 'All records loaded')}</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       ) : view === 'date' ? (
         /* ================== VIEW 2: DATE-WISE ================== */
@@ -1646,7 +1741,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {dateGroups.map((dg) => {
+                {dateScroll.visibleItems.map((dg) => {
                   const isExpanded = expandedRows.has(dg.date);
                   return (
                     <React.Fragment key={dg.date}>
@@ -1697,41 +1792,82 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                               </span>
                               <div className="space-y-1.5">
                                 {dg.dishes.map((dish) => (
-                                  <div
-                                    key={dish.menuItemName}
-                                    className="p-2 rounded bg-gray-50 border border-gray-100 flex items-center justify-between text-[11px]"
-                                  >
-                                    <div>
-                                      <span className="font-semibold text-gray-900">{dish.menuItemName}</span>
-                                      <span className="text-gray-500 ml-2">({dish.portionsSold} portions)</span>
-                                      <div className="flex flex-wrap gap-1 mt-1">
-                                        {dish.ingredients.map((ing) => (
-                                          <span
-                                            key={ing.name}
-                                            className="px-1.5 py-0.2 rounded bg-white text-blue-700 text-[10px] border border-blue-200 font-medium"
-                                          >
-                                            {ing.name}: {ing.qty} {ing.unit} ({formatCurrency(ing.cost)})
-                                          </span>
-                                        ))}
-                                      </div>
-                                    </div>
-                                    <div className="font-bold text-gray-900">
-                                      {formatCurrency(dish.cost)}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
+                                   <div
+                                     key={dish.menuItemName}
+                                     className="p-2 rounded bg-gray-50 border border-gray-100 flex items-center justify-between text-[11px]"
+                                   >
+                                     <div>
+                                       <span className="font-semibold text-gray-900">{dish.menuItemName}</span>
+                                       <span className="text-gray-500 ml-2">({dish.portionsSold} portions)</span>
+                                       <div className="flex flex-wrap gap-1 mt-1">
+                                         {dish.ingredients.map((ing) => (
+                                           <span
+                                             key={ing.name}
+                                             className="px-1.5 py-0.2 rounded bg-white text-blue-700 text-[10px] border border-blue-200 font-medium"
+                                           >
+                                             {ing.name}: {ing.qty} {ing.unit} ({formatCurrency(ing.cost)})
+                                           </span>
+                                         ))}
+                                       </div>
+                                     </div>
+                                     <div className="font-bold text-gray-900">
+                                       {formatCurrency(dish.cost)}
+                                     </div>
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+                           </td>
+                         </tr>
+                       )}
+                     </React.Fragment>
+                   );
+                 })}
+                {dateScroll.hasMore && (
+                  <tr>
+                    <td colSpan={5} className="p-0 border-none">
+                      <div
+                        ref={dateScroll.observerTarget}
+                        className="py-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5"
+                      >
+                        <Loader2 size={13} className="animate-spin text-blue-500" />
+                        <span>{t('common.loading')}</span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+               </tbody>
+             </table>
+           </div>
+          {dateGroups.length > 30 && (
+            <div className="px-4 py-2 bg-gray-50/90 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between select-none">
+              <span>
+                {t('common.showingCount', {
+                  count: dateScroll.displayCount,
+                  total: dateScroll.totalCount,
+                  defaultValue: `Showing ${dateScroll.displayCount} of ${dateScroll.totalCount} records`,
                 })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </span>
+              <div className="flex items-center gap-2">
+                {dateScroll.hasMore ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={dateScroll.loadMore}
+                      className="text-blue-600 hover:text-blue-700 font-medium hover:underline cursor-pointer"
+                    >
+                      {t('common.loadMore', 'Load more')}
+                    </button>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-gray-400">{t('common.scrollForMore', 'Scroll down for more')}</span>
+                  </>
+                ) : (
+                  <span className="text-gray-400">{t('common.allLoaded', 'All records loaded')}</span>
+                )}
+              </div>
+            </div>
+          )}
+         </div>
       ) : view === 'ingredient' ? (
         /* ================== VIEW 3: BY INGREDIENT ================== */
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -1747,7 +1883,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {ingredientGroups.map((ig) => {
+                {ingredientScroll.visibleItems.map((ig) => {
                   const key = String(ig.inventoryItemId);
                   const isExpanded = expandedRows.has(key);
                   return (
@@ -1828,9 +1964,50 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                     </React.Fragment>
                   );
                 })}
+                {ingredientScroll.hasMore && (
+                  <tr>
+                    <td colSpan={5} className="p-0 border-none">
+                      <div
+                        ref={ingredientScroll.observerTarget}
+                        className="py-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5"
+                      >
+                        <Loader2 size={13} className="animate-spin text-blue-500" />
+                        <span>{t('common.loading')}</span>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
+          {ingredientGroups.length > 30 && (
+            <div className="px-4 py-2 bg-gray-50/90 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between select-none">
+              <span>
+                {t('common.showingCount', {
+                  count: ingredientScroll.displayCount,
+                  total: ingredientScroll.totalCount,
+                  defaultValue: `Showing ${ingredientScroll.displayCount} of ${ingredientScroll.totalCount} records`,
+                })}
+              </span>
+              <div className="flex items-center gap-2">
+                {ingredientScroll.hasMore ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={ingredientScroll.loadMore}
+                      className="text-blue-600 hover:text-blue-700 font-medium hover:underline cursor-pointer"
+                    >
+                      {t('common.loadMore', 'Load more')}
+                    </button>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-gray-400">{t('common.scrollForMore', 'Scroll down for more')}</span>
+                  </>
+                ) : (
+                  <span className="text-gray-400">{t('common.allLoaded', 'All records loaded')}</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         /* ================== VIEW 4: DETAILED AUDIT LEDGER ================== */

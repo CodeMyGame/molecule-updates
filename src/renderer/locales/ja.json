@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "検索...",
     "clear": "メモを消去",
     "clearFilter": "すべて表示",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} 件中 {{count}} 件を表示中",
+    "loadMore": "さらに読み込む",
+    "scrollForMore": "下にスクロールしてさらに表示",
+    "allLoaded": "すべてのレコードを読み込みました"
   },
   "billingPage": {
     "failedToDelete": "削除に失敗しました",

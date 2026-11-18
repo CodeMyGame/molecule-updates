@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "搜索……",
     "clear": "清除备注",
     "clearFilter": "显示全部",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "显示 {{total}} 条记录中的 {{count}} 条",
+    "loadMore": "加载更多",
+    "scrollForMore": "向下滚动查看更多",
+    "allLoaded": "全部记录已加载"
   },
   "billingPage": {
     "failedToDelete": "删除失败",

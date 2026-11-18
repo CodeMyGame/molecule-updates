@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "ਖੋਜੋ...",
     "clear": "ਨੋਟ ਸਾਫ਼ ਕਰੋ",
     "clearFilter": "ਸਾਰੇ ਦਿਖਾਓ",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} ਵਿੱਚੋਂ {{count}} ਰਿਕਾਰਡ ਦਿਖਾਏ ਜਾ ਰਹੇ ਹਨ",
+    "loadMore": "ਹੋਰ ਲੋਡ ਕਰੋ",
+    "scrollForMore": "ਹੋਰ ਲਈ ਹੇਠਾਂ ਸਕ੍ਰੋਲ ਕਰੋ",
+    "allLoaded": "ਸਾਰੇ ਰਿਕਾਰਡ ਲੋਡ ਕੀਤੇ ਗਏ"
   },
   "billingPage": {
     "failedToDelete": "ਮਿਟਾਉਣ ਵਿੱਚ ਅਸਫਲ",

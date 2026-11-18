@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "शोधा...",
     "clear": "नोंद पुसा",
     "clearFilter": "सर्व दाखवा",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} पैकी {{count}} नोंदी दाखवत आहे",
+    "loadMore": "आणखी लोड करा",
+    "scrollForMore": "अधिकसाठी खाली स्क्रोल करा",
+    "allLoaded": "सर्व नोंदी लोड केल्या आहेत"
   },
   "billingPage": {
     "failedToDelete": "हटवण्यात अयशस्वी",

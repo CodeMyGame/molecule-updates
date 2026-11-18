@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "অনুসন্ধান...",
     "clear": "নোট মুছুন",
     "clearFilter": "সব দেখান",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} টির মধ্যে {{count}} টি রেকর্ড দেখানো হচ্ছে",
+    "loadMore": "আরও লোড করুন",
+    "scrollForMore": "আরও দেখতে নিচে স্ক্রল করুন",
+    "allLoaded": "সমস্ত রেকর্ড লোড করা হয়েছে"
   },
   "billingPage": {
     "failedToDelete": "মুছে ফেলা যায়নি",

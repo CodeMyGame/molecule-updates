@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "శోధించు...",
     "clear": "గమనికను తొలగించు",
     "clearFilter": "అన్నీ చూపు",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "{{total}} రికార్డులలో {{count}} చూపబడుతున్నాయి",
+    "loadMore": "మరింత లోడ్ చేయండి",
+    "scrollForMore": "మరిన్నింటి కోసం క్రిందికి స్క్రోల్ చేయండి",
+    "allLoaded": "అన్ని రికార్డులు లోడ్ చేయబడ్డాయి"
   },
   "billingPage": {
     "failedToDelete": "తొలగించడం విఫలమైంది",

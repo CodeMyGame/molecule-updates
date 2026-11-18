@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "खोजें...",
     "clear": "नोट हटाएं",
     "clearFilter": "सभी दिखाएं",
-    "copied": "डैशबोर्ड लिंक क्लिपबोर्ड पर कॉपी हो गया!"
+    "copied": "डैशबोर्ड लिंक क्लिपबोर्ड पर कॉपी हो गया!",
+    "showingCount": "{{total}} में से {{count}} रिकॉर्ड दिखाए जा रहे हैं",
+    "loadMore": "और लोड करें",
+    "scrollForMore": "अधिक के लिए नीचे स्क्रॉल करें",
+    "allLoaded": "सभी रिकॉर्ड लोड हो चुके हैं"
   },
   "billingPage": {
     "failedToDelete": "हटाने में विफल",

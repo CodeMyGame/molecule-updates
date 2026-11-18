@@ -1475,7 +1475,11 @@
     "searchPlaceholder": "Rechercher...",
     "clear": "Effacer la note",
     "clearFilter": "Afficher tout",
-    "copied": "Dashboard link copied to clipboard!"
+    "copied": "Dashboard link copied to clipboard!",
+    "showingCount": "Affichage de {{count}} sur {{total}} enregistrements",
+    "loadMore": "Charger plus",
+    "scrollForMore": "Faites défiler vers le bas pour en voir plus",
+    "allLoaded": "Tous les enregistrements sont chargés"
   },
   "billingPage": {
     "failedToDelete": "Échec de la suppression",
