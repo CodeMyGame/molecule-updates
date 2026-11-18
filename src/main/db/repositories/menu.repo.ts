@@ -596,29 +596,26 @@ export function replaceMenu(data: { categories: any[]; items: any[]; addonGroups
   const db = getDb();
   
   const tx = db.transaction(() => {
-    // 1. Create a special "Legacy Addon Group" and "Legacy Addon" to map past orders' addons to.
-    let legacyGroupId: number;
-    const existingGroup = db.prepare("SELECT id FROM addon_groups WHERE name = 'Legacy Addon Group'").get() as { id: number } | undefined;
-    if (existingGroup) {
-      legacyGroupId = existingGroup.id;
-    } else {
-      const res = db.prepare("INSERT INTO addon_groups (name, min_select, max_select, is_required) VALUES ('Legacy Addon Group', 0, 99, 0)").run();
-      legacyGroupId = res.lastInsertRowid as number;
-    }
-    
-    let legacyAddonId: number;
-    const existingAddon = db.prepare("SELECT id FROM addons WHERE name = 'Legacy Addon' AND addon_group_id = ?").get(legacyGroupId) as { id: number } | undefined;
-    if (existingAddon) {
-      legacyAddonId = existingAddon.id;
-    } else {
-      const res = db.prepare("INSERT INTO addons (addon_group_id, name, price) VALUES (?, 'Legacy Addon', 0)").run(legacyGroupId);
-      legacyAddonId = res.lastInsertRowid as number;
-    }
-    
+    // 1. Create a special "Legacy Addon Group" and "Legacy Addon" with high dedicated IDs (999999) to map past orders addons to without colliding with imported menu IDs.
+    const LEGACY_GROUP_ID = 999999;
+    const LEGACY_ADDON_ID = 999999;
+
+    db.prepare("PRAGMA defer_foreign_keys = ON").run();
+
+    db.prepare(`
+      INSERT OR IGNORE INTO addon_groups (id, name, min_select, max_select, is_required)
+      VALUES (?, 'Legacy Addon Group', 0, 99, 0)
+    `).run(LEGACY_GROUP_ID);
+
+    db.prepare(`
+      INSERT OR IGNORE INTO addons (id, addon_group_id, name, price)
+      VALUES (?, ?, 'Legacy Addon', 0)
+    `).run(LEGACY_ADDON_ID, LEGACY_GROUP_ID);
+
     // 2. Nullify all existing order references to items / variations so they are not orphaned
     db.prepare("UPDATE order_items SET menu_item_id = NULL, variation_id = NULL, combo_id = NULL").run();
-    db.prepare("UPDATE order_item_addons SET addon_id = ?").run(legacyAddonId);
-    
+    db.prepare("UPDATE order_item_addons SET addon_id = ?").run(LEGACY_ADDON_ID);
+
     // 3. Delete existing menu tables
     db.prepare("DELETE FROM combo_items").run();
     db.prepare("DELETE FROM combos").run();
@@ -627,8 +624,8 @@ export function replaceMenu(data: { categories: any[]; items: any[]; addonGroups
     db.prepare("DELETE FROM menu_items").run();
     db.prepare("DELETE FROM menu_categories").run();
     db.prepare("DELETE FROM addon_variation_prices").run();
-    db.prepare("DELETE FROM addons WHERE id != ?").run(legacyAddonId);
-    db.prepare("DELETE FROM addon_groups WHERE id != ?").run(legacyGroupId);
+    db.prepare("DELETE FROM addons WHERE id != ?").run(LEGACY_ADDON_ID);
+    db.prepare("DELETE FROM addon_groups WHERE id != ?").run(LEGACY_GROUP_ID);
     
     // 4. Insert new categories
     const insertCategory = db.prepare(`

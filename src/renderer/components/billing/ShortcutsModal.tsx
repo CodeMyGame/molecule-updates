@@ -25,7 +25,7 @@ interface ShortcutItem {
 const SHORTCUTS: ShortcutItem[] = [
   // Billing & Checkout
   {
-    keys: ['Space', 'or', 'Ctrl', 'P'],
+    keys: ['Ctrl', 'P', 'or', 'Ctrl', 'Enter'],
     description: 'Quick Pay / Open Checkout Modal',
     category: 'checkout',
   },

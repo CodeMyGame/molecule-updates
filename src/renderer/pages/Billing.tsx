@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   UtensilsCrossed,
   ShoppingBag,
@@ -147,6 +147,7 @@ const getParcelStatusBadge = getOrderStatusBadge;
 
 const Billing: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     categories,
     filteredItems,
@@ -748,13 +749,14 @@ const Billing: React.FC = () => {
     }
   }, [activeOrders, ordersLoading, t, tables, refreshTables]);
 
-  // Auto-open payment modal if navigated with ?action=pay
+  // Auto-open payment modal if navigated with ?action=pay, then clear it so subsequent table selects don't re-open it
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('action') === 'pay' && currentOrderId) {
       setShowPayment(true);
+      navigate(location.pathname, { replace: true });
     }
-  }, [location.search, currentOrderId]);
+  }, [location.search, currentOrderId, navigate, location.pathname]);
 
   // Helper to load a table's existing order into the cart
   const loadTableOrder = useCallback(
@@ -1396,17 +1398,10 @@ const Billing: React.FC = () => {
         return;
       }
 
-      // Ctrl+P = Pay / Checkout
-      if (e.ctrlKey && e.key === 'p') {
+      // Ctrl+P / Cmd+P or Ctrl+Enter = Pay / Checkout
+      if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') || (e.ctrlKey && e.key === 'Enter')) {
         e.preventDefault();
         if (cart.length > 0) setShowPayment(true);
-        return;
-      }
-
-      // Space = Quick Pay (when cart > 0 and not typing in text fields)
-      if (e.key === ' ' && !isInputActive && cart.length > 0) {
-        e.preventDefault();
-        setShowPayment(true);
         return;
       }
 
@@ -2275,7 +2270,13 @@ const Billing: React.FC = () => {
       {/* Payment modal */}
       <PaymentModal
         isOpen={showPayment}
-        onClose={() => setShowPayment(false)}
+        onClose={() => {
+          setShowPayment(false);
+          const params = new URLSearchParams(location.search);
+          if (params.get('action') === 'pay') {
+            navigate(location.pathname, { replace: true });
+          }
+        }}
         onComplete={handlePaymentComplete}
         isProcessing={isProcessingPayment}
       />
