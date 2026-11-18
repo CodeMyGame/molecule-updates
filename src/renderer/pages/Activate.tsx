@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KeyRound, ShieldCheck, AlertCircle, Loader2, FileSpreadsheet } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLicenseStore } from '../stores/license.store';
 import { downloadAllOrdersAsExcel } from '../lib/orderExport';
+import { ipc } from '../lib/ipc';
 import toast from 'react-hot-toast';
 
 function formatKeyInput(raw: string): string {
@@ -21,8 +22,17 @@ const Activate: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [ordersCount, setOrdersCount] = useState<number>(0);
   const { activate, status } = useLicenseStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (window.electronAPI?.orders?.count) {
+      ipc<number>(window.electronAPI.orders.count())
+        .then((count) => setOrdersCount(Number(count) || 0))
+        .catch(() => setOrdersCount(0));
+    }
+  }, []);
 
   const handleDownloadOrders = useCallback(async () => {
     setDownloading(true);
@@ -190,38 +200,42 @@ const Activate: React.FC = () => {
             )}
           </button>
 
-          <div className="relative my-4 flex items-center justify-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
-            </div>
-            <span className="relative bg-[#0d0e15] px-3 text-[11px] uppercase tracking-wider text-white/40">
-              {t('activate.or', { defaultValue: 'or' })}
-            </span>
-          </div>
+          {ordersCount > 0 && (
+            <>
+              <div className="relative my-4 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10" />
+                </div>
+                <span className="relative bg-[#0d0e15] px-3 text-[11px] uppercase tracking-wider text-white/40">
+                  {t('activate.or', { defaultValue: 'or' })}
+                </span>
+              </div>
 
-          <button
-            type="button"
-            onClick={handleDownloadOrders}
-            disabled={downloading}
-            className="w-full flex items-center justify-center gap-2.5 h-12 rounded-2xl
-              border border-white/15 bg-white/[0.05] hover:bg-white/[0.1]
-              text-white/90 hover:text-white text-sm font-medium
-              shadow-sm hover:border-emerald-500/30 hover:bg-emerald-500/[0.06]
-              transition-all duration-150 active:scale-[0.99]
-              disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {downloading ? (
-              <>
-                <Loader2 size={16} className="animate-spin text-white/70" />
-                <span>{t('activate.exportingOrders', { defaultValue: 'Exporting Orders…' })}</span>
-              </>
-            ) : (
-              <>
-                <FileSpreadsheet size={17} className="text-emerald-400" />
-                <span>{t('activate.downloadAllOrders', { defaultValue: 'Download All Orders (Excel)' })}</span>
-              </>
-            )}
-          </button>
+              <button
+                type="button"
+                onClick={handleDownloadOrders}
+                disabled={downloading}
+                className="w-full flex items-center justify-center gap-2.5 h-12 rounded-2xl
+                  border border-white/15 bg-white/[0.05] hover:bg-white/[0.1]
+                  text-white/90 hover:text-white text-sm font-medium
+                  shadow-sm hover:border-emerald-500/30 hover:bg-emerald-500/[0.06]
+                  transition-all duration-150 active:scale-[0.99]
+                  disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {downloading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin text-white/70" />
+                    <span>{t('activate.exportingOrders', { defaultValue: 'Exporting Orders…' })}</span>
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet size={17} className="text-emerald-400" />
+                    <span>{t('activate.downloadAllOrders', { defaultValue: 'Download All Orders (Excel)' })}</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
 
         <p className="text-center text-white/35 text-xs mt-6">{t('activate.footerHint')}</p>

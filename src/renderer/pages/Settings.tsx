@@ -251,6 +251,15 @@ const Settings: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [restFormDirty, setRestFormDirty] = useState(false);
   const [downloadingOrders, setDownloadingOrders] = useState(false);
+  const [orderCount, setOrderCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (window.electronAPI?.orders?.count) {
+      ipc<number>(window.electronAPI.orders.count())
+        .then((c) => setOrderCount(Number(c) || 0))
+        .catch(() => setOrderCount(0));
+    }
+  }, [activeSection]);
 
   const handleDownloadOrders = async () => {
     setDownloadingOrders(true);
@@ -3077,21 +3086,23 @@ const Settings: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-800">{t('settingsPage.exportOrdersTitle', { defaultValue: 'Export Order Records' })}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{t('settingsPage.exportOrdersDesc', { defaultValue: 'Download all historical sales and order data to an Excel-compatible CSV file.' })}</p>
+          {orderCount > 0 && (
+            <div className="mt-6 pt-5 border-t border-gray-100 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-800">{t('settingsPage.exportOrdersTitle', { defaultValue: 'Export Order Records' })}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('settingsPage.exportOrdersDesc', { defaultValue: 'Download all historical sales and order data to an Excel-compatible CSV file.' })}</p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={downloadingOrders ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} className="text-emerald-600" />}
+                disabled={downloadingOrders}
+                onClick={handleDownloadOrders}
+              >
+                {downloadingOrders ? t('activate.exportingOrders', { defaultValue: 'Exporting Orders…' }) : t('activate.downloadAllOrders', { defaultValue: 'Download All Orders (Excel)' })}
+              </Button>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              icon={downloadingOrders ? <Loader2 size={14} className="animate-spin" /> : <FileSpreadsheet size={14} className="text-emerald-600" />}
-              disabled={downloadingOrders}
-              onClick={handleDownloadOrders}
-            >
-              {downloadingOrders ? t('activate.exportingOrders', { defaultValue: 'Exporting Orders…' }) : t('activate.downloadAllOrders', { defaultValue: 'Download All Orders (Excel)' })}
-            </Button>
-          </div>
+          )}
         </div>
 
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-xs text-gray-400 space-y-1">

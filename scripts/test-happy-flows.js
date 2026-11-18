@@ -1733,6 +1733,8 @@ suite('17. System Settings, Multi-Currency, 15-Locale Parity & Hot Backup', () =
     // Verify orders exist in DB from previous suites
     const allOrders = db.prepare("SELECT * FROM orders").all();
     assert(allOrders.length > 0, 'Orders should exist in test database');
+    const orderCountRow = db.prepare("SELECT COUNT(*) as count FROM orders").get();
+    assert(Number(orderCountRow.count) === allOrders.length, 'Order count query must match total orders');
 
     const itemRows = db.prepare("SELECT order_id, name, quantity, unit_price, total FROM order_items").all();
     const paymentRows = db.prepare("SELECT order_id, payment_mode, amount FROM payments").all();

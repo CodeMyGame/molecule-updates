@@ -66,6 +66,7 @@ const api = {
     delete: (orderId: number) => ipcRenderer.invoke('orders:delete', orderId),
     deleteMany: (orderIds: number[]) => ipcRenderer.invoke('orders:deleteMany', orderIds),
     exportAll: () => ipcRenderer.invoke('orders:exportAll'),
+    count: () => ipcRenderer.invoke('orders:count'),
   },
 
   favorites: {

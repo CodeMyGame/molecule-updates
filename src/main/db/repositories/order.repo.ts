@@ -1468,3 +1468,9 @@ export function exportAllOrders(): OrderExportRow[] {
   });
 }
 
+export function getTotalCount(): number {
+  const db = getDb();
+  const row = db.prepare('SELECT COUNT(*) as count FROM orders').get() as { count?: number } | undefined;
+  return Number(row?.count ?? 0);
+}
+

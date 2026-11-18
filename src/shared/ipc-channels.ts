@@ -58,6 +58,7 @@ export const ORDERS = {
   delete: 'orders:delete',
   deleteMany: 'orders:deleteMany',
   exportAll: 'orders:exportAll',
+  count: 'orders:count',
 } as const;
 
 export const FAVORITES = {

@@ -206,6 +206,7 @@ export function registerAllHandlers(): void {
   handle(ORDERS.delete, (orderId: number) => orderRepo.deleteOrder(orderId));
   handle(ORDERS.deleteMany, (orderIds: number[]) => orderRepo.deleteOrders(orderIds));
   handle(ORDERS.exportAll, () => orderRepo.exportAllOrders());
+  handle(ORDERS.count, () => orderRepo.getTotalCount());
   handle(ORDERS.getByCustomer, (customerId: number, limit: number) => {
     const db = getDb();
     const rows = db.prepare(`
