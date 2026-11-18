@@ -22,6 +22,8 @@ export interface Order {
   notes?: string;
   parcelName?: string;
   parcel_name?: string;
+  parcelNumber?: number;
+  parcel_number?: number;
   mergedIntoOrderId?: number;
   mergedIntoOrderNumber?: string;
   splitFromOrderId?: number;
@@ -79,6 +81,7 @@ export interface CreateOrderDTO {
   items: CartItem[];
   notes?: string;
   parcelName?: string;
+  parcelNumber?: number;
   discount?: { type: 'percentage' | 'flat' | 'percent'; value: number; reason?: string } | null;
 }
 

@@ -207,6 +207,7 @@ export function registerAllHandlers(): void {
   handle(ORDERS.deleteMany, (orderIds: number[]) => orderRepo.deleteOrders(orderIds));
   handle(ORDERS.exportAll, () => orderRepo.exportAllOrders());
   handle(ORDERS.count, () => orderRepo.getTotalCount());
+  handle(ORDERS.getNextParcelNumber, () => orderRepo.generateNextParcelNumber());
   handle(ORDERS.getByCustomer, (customerId: number, limit: number) => {
     const db = getDb();
     const rows = db.prepare(`
@@ -524,7 +525,7 @@ export function registerAllHandlers(): void {
     try {
       const db = getDb();
       const kot = db.prepare(`
-        SELECT k.*, o.order_number, o.order_type, o.parcel_name, t.name as table_name
+        SELECT k.*, o.order_number, o.order_type, o.parcel_name, o.parcel_number, t.name as table_name
         FROM kots k
         LEFT JOIN orders o ON k.order_id = o.id
         LEFT JOIN tables t ON o.table_id = t.id
@@ -561,6 +562,7 @@ export function registerAllHandlers(): void {
         orderNumber: kot.order_number ?? '',
         tableName: kot.order_type === 'dine_in' ? (kot.table_name ?? undefined) : undefined,
         parcelName: kot.order_type === 'takeaway' ? (kot.parcel_name ?? undefined) : undefined,
+        parcelNumber: kot.order_type === 'takeaway' ? (kot.parcel_number ?? undefined) : undefined,
         orderType: kot.order_type ?? 'dine_in',
         items: items.map((i: any) => {
           const addons = i.order_item_id ? (getAddons.all(i.order_item_id) as { name: string }[]) : [];

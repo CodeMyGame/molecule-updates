@@ -23,6 +23,8 @@ export interface Order {
   tableName?: string;
   parcelName?: string;
   parcel_name?: string;
+  parcelNumber?: number;
+  parcel_number?: number;
   subtotal: number;
   discount_amount?: number;
   discountAmount?: number;
@@ -133,6 +135,7 @@ export function useOrders(): UseOrdersReturn {
       })(),
       notes,
       parcelName: effectiveParcelName,
+      parcelNumber: orderType === 'takeaway' ? (billingStore.parcelNumber || undefined) : undefined,
       discount: discount
         ? { type: discount.type, value: discount.value, reason: discount.reason }
         : null,
@@ -150,6 +153,9 @@ export function useOrders(): UseOrdersReturn {
 
     const order = await ipc<Order>(window.electronAPI.orders.create(orderData));
     billingStore.setCurrentOrderId(order.id);
+    if ((order as any).parcelNumber || (order as any).parcel_number) {
+      billingStore.setParcelNumber((order as any).parcelNumber || (order as any).parcel_number);
+    }
     billingStore.markItemsSynced();
     // Fetch full order to get orderItemIds for each cart item
     try {
@@ -160,6 +166,9 @@ export function useOrders(): UseOrdersReturn {
           menuItemId: oi.menuItemId ?? oi.menu_item_id,
           name: oi.name ?? '',
         })));
+      }
+      if (fullOrder?.parcelNumber || (fullOrder as any)?.parcel_number) {
+        billingStore.setParcelNumber(fullOrder.parcelNumber || (fullOrder as any).parcel_number);
       }
     } catch { /* ignore — IDs will be set on next load */ }
     await fetchActiveOrders();
@@ -399,7 +408,8 @@ export function useOrders(): UseOrdersReturn {
               },
               fullOrder.status ?? 'active',
               fullOrder.customerId ?? (fullOrder as any).customer_id ?? null,
-              fullOrder.parcelName ?? fullOrder.parcel_name ?? null
+              fullOrder.parcelName ?? fullOrder.parcel_name ?? null,
+              fullOrder.parcelNumber ?? (fullOrder as any).parcel_number ?? null
             );
           }
         } catch { /* ignore fallback */ }

@@ -152,7 +152,25 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const orderType = useBillingStore((s) => s.orderType);
   const parcelName = useBillingStore((s) => s.parcelName);
   const setParcelName = useBillingStore((s) => s.setParcelName);
+  const parcelNumber = useBillingStore((s) => s.parcelNumber);
+  const setParcelNumber = useBillingStore((s) => s.setParcelNumber);
+  const [draftParcelNumber, setDraftParcelNumber] = useState<number | null>(null);
   const [showParcelModal, setShowParcelModal] = useState(false);
+
+  useEffect(() => {
+    if (orderType === 'takeaway' && !currentOrderId && !parcelNumber) {
+      if (window.electronAPI?.orders?.getNextParcelNumber) {
+        ipc<number>(window.electronAPI.orders.getNextParcelNumber())
+          .then((num) => {
+            if (num) {
+              setDraftParcelNumber(num);
+              setParcelNumber(num);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [orderType, currentOrderId, parcelNumber, setParcelNumber]);
 
   const handleConfirmParcelName = useCallback(
     async (name: string | null) => {
@@ -664,8 +682,10 @@ const CartPanel: React.FC<CartPanelProps> = ({
               <span className="inline-flex items-center gap-1.5 text-emerald-700">
                 <ShoppingBag size={13} />
                 <span>
-                  {currentOrderId
-                    ? `Parcel #${String(currentOrderId).padStart(3, '0')}`
+                  {parcelNumber || draftParcelNumber
+                    ? `Parcel #${parcelNumber || draftParcelNumber}`
+                    : currentOrderId
+                    ? `Parcel #${currentOrderId}`
                     : t('tables.parcelShelfTitle', { defaultValue: 'New Takeaway Parcel' })}
                 </span>
                 {parcelName ? (
@@ -777,8 +797,10 @@ const CartPanel: React.FC<CartPanelProps> = ({
               <span className="inline-flex items-center gap-1.5 text-emerald-700">
                 <ShoppingBag size={13} />
                 <span>
-                  {currentOrderId
-                    ? `Parcel #${String(currentOrderId).padStart(3, '0')}`
+                  {parcelNumber || draftParcelNumber
+                    ? `Parcel #${parcelNumber || draftParcelNumber}`
+                    : currentOrderId
+                    ? `Parcel #${currentOrderId}`
                     : t('tables.parcelShelfTitle', { defaultValue: 'Takeaway Parcel' })}
                 </span>
                 {parcelName ? (

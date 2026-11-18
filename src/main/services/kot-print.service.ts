@@ -15,6 +15,7 @@ interface KOTPrintData {
   orderNumber: string;
   tableName?: string;
   parcelName?: string;
+  parcelNumber?: number;
   orderType: string;
   items: { name: string; quantity: number; notes?: string; addons?: { name: string }[] }[];
   printedAt: string;
@@ -65,8 +66,14 @@ function buildKotModel(data: KOTPrintData, style: ItemStyle): KotModel {
     title: 'KOT',
     location: data.orderType === 'dine_in' && data.tableName
       ? `Table: ${data.tableName}`
-      : data.orderType === 'takeaway' && data.parcelName
-      ? `Takeaway (${data.parcelName})`
+      : data.orderType === 'takeaway'
+      ? data.parcelNumber
+        ? data.parcelName
+          ? `Parcel #${data.parcelNumber} (${data.parcelName})`
+          : `Parcel #${data.parcelNumber}`
+        : data.parcelName
+        ? `Takeaway (${data.parcelName})`
+        : 'Takeaway'
       : `Type: ${data.orderType.replace('_', ' ')}`,
     kotCount: data.kotCount != null ? String(data.kotCount) : undefined,
     date: formatDateTime(data.printedAt),

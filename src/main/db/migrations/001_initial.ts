@@ -158,6 +158,7 @@ export const initialMigration: Migration = {
         grand_total INTEGER NOT NULL DEFAULT 0,
         notes TEXT,
         parcel_name TEXT,
+        parcel_number INTEGER,
         merged_into_order_id INTEGER REFERENCES orders(id),
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now')),

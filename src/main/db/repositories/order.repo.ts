@@ -23,8 +23,8 @@ export function create(data: CreateOrderDTO): Order {
   const db = getDb();
 
   const insertOrder = db.prepare(`
-    INSERT INTO orders (order_number, order_type, table_id, table_name_snapshot, customer_id, staff_id, status, subtotal, discount_amount, discount_type, discount_value, discount_reason, tax_amount, grand_total, round_off, notes, parcel_name)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO orders (order_number, order_type, table_id, table_name_snapshot, customer_id, staff_id, status, subtotal, discount_amount, discount_type, discount_value, discount_reason, tax_amount, grand_total, round_off, notes, parcel_name, parcel_number)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
   const getTableName = db.prepare('SELECT name FROM tables WHERE id = ?');
 
@@ -47,6 +47,10 @@ export function create(data: CreateOrderDTO): Order {
   const createInTransaction = db.transaction(() => {
     // Generate inside the transaction to prevent race conditions (SQLite serializes writes)
     const orderNumber = generateOrderNumber();
+    let parcelNumber = data.parcelNumber;
+    if (data.orderType === 'takeaway' && (!parcelNumber || parcelNumber <= 0)) {
+      parcelNumber = generateNextParcelNumber();
+    }
     let subtotal = 0;
     let taxAmount = 0;
 
@@ -120,6 +124,7 @@ export function create(data: CreateOrderDTO): Order {
       roundOff,
       data.notes ?? null,
       data.parcelName && data.parcelName.trim().length > 0 ? data.parcelName.trim() : null,
+      parcelNumber ?? null,
     );
 
     const orderId = result.lastInsertRowid as number;
@@ -1219,6 +1224,26 @@ export function generateOrderNumber(): string {
   return `${prefix}${seq.toString().padStart(3, '0')}`;
 }
 
+export function generateNextParcelNumber(): number {
+  const db = getDb();
+  const todayStr = format(new Date(), 'yyyyMMdd');
+  const row = db.prepare(`
+    SELECT
+      COALESCE(MAX(parcel_number), 0) AS max_num,
+      COUNT(*) AS total_today
+    FROM orders
+    WHERE order_type = 'takeaway'
+      AND (
+        order_number LIKE ?
+        OR date(created_at, 'localtime') = date('now', 'localtime')
+      )
+  `).get(`%-${todayStr}-%`) as { max_num: number; total_today: number } | undefined;
+
+  const maxNum = Math.max(row?.max_num ?? 0, row?.total_today ?? 0);
+  return maxNum + 1;
+}
+
+
 export function recalculateOrderTotals(orderId: number): void {
   const db = getDb();
   const items = db.prepare('SELECT id, unit_price, quantity, tax_rate FROM order_items WHERE order_id = ?').all(orderId) as any[];
@@ -1341,6 +1366,8 @@ function mapOrder(row: any): Order {
     notes: row.notes ?? undefined,
     parcelName: row.parcel_name ?? undefined,
     parcel_name: row.parcel_name ?? undefined,
+    parcelNumber: row.parcel_number ?? undefined,
+    parcel_number: row.parcel_number ?? undefined,
     mergedIntoOrderId: row.merged_into_order_id ?? undefined,
     mergedIntoOrderNumber: row.merged_into_order_number ?? undefined,
     splitFromOrderId: row.split_from_order_id ?? undefined,
@@ -1444,7 +1471,7 @@ export function exportAllOrders(): OrderExportRow[] {
       orderNumber: o.order_number,
       orderType: o.order_type,
       status: o.status,
-      tableName: o.table_name ?? o.table_name_snapshot ?? undefined,
+      tableName: o.table_name ?? o.table_name_snapshot ?? (o.order_type === 'takeaway' && o.parcel_number ? `Parcel #${o.parcel_number}${o.parcel_name ? ` (${o.parcel_name})` : ''}` : undefined),
       customerName: o.customer_name ?? undefined,
       customerPhone: o.customer_phone ?? undefined,
       staffName: o.staff_name ?? undefined,

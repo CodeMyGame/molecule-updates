@@ -74,6 +74,7 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
   const cart = useBillingStore((s) => s.cart);
   const orderType = useBillingStore((s) => s.orderType);
   const parcelName = useBillingStore((s) => s.parcelName);
+  const parcelNumber = useBillingStore((s) => s.parcelNumber);
   const selectedTableId = useBillingStore((s) => s.selectedTableId);
   const discount = useBillingStore((s) => s.discount);
   const getSubtotal = useBillingStore((s) => s.getSubtotal);
@@ -245,8 +246,10 @@ const BillPreview: React.FC<BillPreviewProps> = ({ isOpen, onClose, orderId, cus
     type: orderTypeLabels[orderType] ?? orderType,
     table: (orderType === 'dine_in' && tableDisplay)
       ? tableDisplay
-      : (orderType === 'takeaway' && parcelName)
-      ? parcelName
+      : (orderType === 'takeaway')
+      ? (parcelNumber
+          ? (parcelName ? `Parcel #${parcelNumber} (${parcelName})` : `Parcel #${parcelNumber}`)
+          : (parcelName || undefined))
       : undefined,
     cashier: currentUser ? currentUser.name : undefined,
     itemStyle: billItemStyle as ReceiptItemStyle,

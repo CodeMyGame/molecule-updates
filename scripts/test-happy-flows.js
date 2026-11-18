@@ -381,6 +381,7 @@ db.exec(`
     grand_total INTEGER DEFAULT 0,
     notes TEXT,
     parcel_name TEXT,
+    parcel_number INTEGER,
     merged_into_order_id INTEGER,
     split_from_order_id INTEGER,
     completed_at TEXT,
@@ -1455,15 +1456,47 @@ suite('13. Quick-Service Takeaway, Delivery & Customer CRM Khata', () => {
     assertEqual(customer.loyalty_points, 100);
   });
 
-  test('QSR-02 Takeaway counter order without assigning table', () => {
-    const orderNumber = generateOrderNumber();
-    const res = db.prepare("INSERT INTO orders (order_number, order_type, customer_id, staff_id, status, subtotal, tax_amount, grand_total) VALUES (?, 'takeaway', 1, 2, 'active', 15000, 750, 15800)").run(orderNumber);
-    takeawayOrderId = res.lastInsertRowid;
+  test('QSR-02 Takeaway counter order with daily parcel numbering (Parcel #1, #2, ... increment)', () => {
+    // 1. First takeaway order of the day gets parcel_number = 1
+    const orderNumber1 = generateOrderNumber();
+    const res1 = db.prepare("INSERT INTO orders (order_number, order_type, customer_id, staff_id, status, subtotal, tax_amount, grand_total, parcel_number, parcel_name) VALUES (?, 'takeaway', 1, 2, 'active', 15000, 750, 15800, 1, 'Zomato')").run(orderNumber1);
+    takeawayOrderId = res1.lastInsertRowid;
     db.prepare("INSERT INTO order_items (order_id, menu_item_id, name, quantity, unit_price, tax_rate, tax_amount, total) VALUES (?, 1, 'Classic Burger', 1, 15000, 5.0, 750, 15750)").run(takeawayOrderId);
 
+    // 2. Second takeaway order of the day gets parcel_number = 2 (+1 increment)
+    const orderNumber2 = generateOrderNumber();
+    const res2 = db.prepare("INSERT INTO orders (order_number, order_type, customer_id, staff_id, status, subtotal, tax_amount, grand_total, parcel_number, parcel_name) VALUES (?, 'takeaway', 1, 2, 'active', 20000, 1000, 21000, 2, 'Swiggy')").run(orderNumber2);
+    const takeawayOrderId2 = res2.lastInsertRowid;
+
+    // Verify parcel numbers in DB
+    const o1 = db.prepare('SELECT parcel_number, parcel_name FROM orders WHERE id = ?').get(takeawayOrderId);
+    assertEqual(o1.parcel_number, 1, 'First takeaway parcel is #1');
+    assertEqual(o1.parcel_name, 'Zomato');
+
+    const o2 = db.prepare('SELECT parcel_number, parcel_name FROM orders WHERE id = ?').get(takeawayOrderId2);
+    assertEqual(o2.parcel_number, 2, 'Second takeaway parcel increments to #2');
+    assertEqual(o2.parcel_name, 'Swiggy');
+
+    // 3. Settle / complete parcel #1
     db.prepare('INSERT INTO payments (order_id, amount, payment_mode) VALUES (?, 15800, ?)').run(takeawayOrderId, 'upi');
     db.prepare("UPDATE orders SET status = 'completed', completed_at = datetime('now') WHERE id = ?").run(takeawayOrderId);
     assertEqual(db.prepare('SELECT status FROM orders WHERE id = ?').get(takeawayOrderId).status, 'completed');
+
+    // 4. Verify parcel #2 STILL maintains parcel_number = 2 even after parcel #1 is completed
+    const o2After = db.prepare('SELECT parcel_number FROM orders WHERE id = ?').get(takeawayOrderId2);
+    assertEqual(o2After.parcel_number, 2, 'Parcel #2 retains #2 even after parcel #1 is completed');
+
+    // 5. Next parcel for today increments from MAX(parcel_number) -> 3
+    const maxRow = db.prepare("SELECT COALESCE(MAX(parcel_number), 0) as max_num FROM orders WHERE order_type = 'takeaway' AND date(created_at, 'localtime') = date('now', 'localtime')").get();
+    assertEqual(maxRow.max_num, 2, 'Highest parcel today is 2');
+    const nextParcelNum = maxRow.max_num + 1;
+    assertEqual(nextParcelNum, 3, 'Next parcel for today should be #3');
+
+    // 6. Simulate next calendar day reset
+    const nextDayDate = '2099-01-01 10:00:00';
+    const nextDayCount = db.prepare("SELECT COALESCE(MAX(parcel_number), 0) as max_num FROM orders WHERE order_type = 'takeaway' AND date(created_at) = date(?)").get(nextDayDate);
+    assertEqual(nextDayCount.max_num, 0, 'New calendar day starts from 0');
+    assertEqual(nextDayCount.max_num + 1, 1, 'First parcel of new calendar day starts from 1 like KOT');
   });
 
   test('QSR-03 Delivery order with packaging charge & delivery notes', () => {

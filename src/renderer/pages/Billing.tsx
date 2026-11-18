@@ -542,8 +542,14 @@ const Billing: React.FC = () => {
   }, []);
 
   const handleConfirmParcelName = useCallback(
-    (name: string | null) => {
-      useBillingStore.getState().resetForTakeaway(name);
+    async (name: string | null) => {
+      let nextNum: number | null = null;
+      try {
+        if (window.electronAPI?.orders?.getNextParcelNumber) {
+          nextNum = await ipc<number>(window.electronAPI.orders.getNextParcelNumber());
+        }
+      } catch {}
+      useBillingStore.getState().resetForTakeaway(name, nextNum);
       if (name) {
         toast.success(
           t('billing.newNamedParcelStartedToast', {
@@ -799,7 +805,7 @@ const Billing: React.FC = () => {
           splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
           splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
         };
-        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null);
+        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null, order.parcelNumber ?? (order as any).parcel_number ?? null);
       } else {
         resetForNewTable(tableId);
       }
@@ -1258,7 +1264,8 @@ const Billing: React.FC = () => {
           splitInfo,
           fullOrder.status,
           fullOrder.customerId ?? (fullOrder as any).customer_id ?? null,
-          fullOrder.parcelName ?? fullOrder.parcel_name ?? null
+          fullOrder.parcelName ?? fullOrder.parcel_name ?? null,
+          fullOrder.parcelNumber ?? (fullOrder as any).parcel_number ?? null
         );
       }
     } catch {
@@ -1622,7 +1629,8 @@ const Billing: React.FC = () => {
           splitInfo,
           order.status,
           order.customerId ?? (order as any).customer_id ?? null,
-          order.parcelName ?? order.parcel_name ?? null
+          order.parcelName ?? order.parcel_name ?? null,
+          order.parcelNumber ?? (order as any).parcel_number ?? null
         );
       }
     }
@@ -2164,10 +2172,10 @@ const Billing: React.FC = () => {
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span
                             className="font-bold text-xs text-gray-900 flex items-center gap-1 truncate"
-                            title={`Order #${parcelOrderNum}`}
+                            title={`Parcel #${parcel.parcelNumber || (parcel as any).parcel_number || (index + 1)} • Order #${parcelOrderNum}`}
                           >
                             <span>🛍️</span>
-                            <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: index + 1 })}</span>
+                            <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: parcel.parcelNumber || (parcel as any).parcel_number || (index + 1) })}</span>
                           </span>
                           <span className="font-bold text-xs text-gray-900 font-mono">
                             {formatCurrency(parcelTotal)}

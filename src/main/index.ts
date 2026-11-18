@@ -29,6 +29,7 @@ import { allowMultipleAttendanceShifts } from './db/migrations/023_allow_multipl
 import { addOrderItemAddonsPerfIndex } from './db/migrations/024_add_order_item_addons_perf_index';
 import { addMissingFkIndexes } from './db/migrations/025_add_missing_fk_indexes';
 import { addParcelNameToOrders } from './db/migrations/026_add_parcel_name_to_orders';
+import { addParcelNumberToOrders } from './db/migrations/027_add_parcel_number_to_orders';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -154,6 +155,7 @@ function initializeDatabase(): void {
       addOrderItemAddonsPerfIndex,
       addMissingFkIndexes,
       addParcelNameToOrders,
+      addParcelNumberToOrders,
     ]);
 
     // Seed default data

@@ -59,6 +59,7 @@ export const ORDERS = {
   deleteMany: 'orders:deleteMany',
   exportAll: 'orders:exportAll',
   count: 'orders:count',
+  getNextParcelNumber: 'orders:getNextParcelNumber',
 } as const;
 
 export const FAVORITES = {

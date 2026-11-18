@@ -464,7 +464,7 @@ const Tables: React.FC = () => {
             splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
             splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
           };
-          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null);
+          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null, order.parcelNumber ?? (order as any).parcel_number ?? null);
           billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
           navigate('/billing');
           return;
@@ -548,7 +548,8 @@ const Tables: React.FC = () => {
             splitInfo,
             fullOrder.status,
             fullOrder.customerId ?? (fullOrder as any).customer_id ?? null,
-            fullOrder.parcelName ?? fullOrder.parcel_name ?? null
+            fullOrder.parcelName ?? fullOrder.parcel_name ?? null,
+            fullOrder.parcelNumber ?? (fullOrder as any).parcel_number ?? null
           );
           billingStore.setCustomer(fullOrder.customerId ?? (fullOrder as any).customer_id ?? null);
           navigate('/billing');
@@ -577,8 +578,14 @@ const Tables: React.FC = () => {
   }, []);
 
   const handleConfirmParcelName = useCallback(
-    (name: string | null) => {
-      billingStore.resetForTakeaway(name);
+    async (name: string | null) => {
+      let nextNum: number | null = null;
+      try {
+        if (window.electronAPI?.orders?.getNextParcelNumber) {
+          nextNum = await ipc<number>(window.electronAPI.orders.getNextParcelNumber());
+        }
+      } catch {}
+      billingStore.resetForTakeaway(name, nextNum);
       navigate('/billing');
     },
     [billingStore, navigate]
@@ -657,7 +664,7 @@ const Tables: React.FC = () => {
           splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
           splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
         };
-        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null);
+        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null, order.parcelNumber ?? (order as any).parcel_number ?? null);
         billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
       }
     } catch {
@@ -989,10 +996,10 @@ const Tables: React.FC = () => {
                       <div className="flex items-center gap-1.5 truncate">
                         <span
                           className="font-bold text-xs text-gray-900 group-hover:text-emerald-700 transition-colors flex items-center gap-1 truncate"
-                          title={`Order #${parcel.orderNumber || (parcel as any).order_number || parcel.id}`}
+                          title={`Parcel #${parcel.parcelNumber || (parcel as any).parcel_number || (index + 1)} • Order #${parcel.orderNumber || (parcel as any).order_number || parcel.id}`}
                         >
                           <span>🛍️</span>
-                          <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: index + 1 })}</span>
+                          <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: parcel.parcelNumber || (parcel as any).parcel_number || (index + 1) })}</span>
                         </span>
                       </div>
                       <span className="font-bold text-xs text-gray-900 font-mono">
