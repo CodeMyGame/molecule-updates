@@ -110,7 +110,7 @@ interface UseInventoryReturn {
   receivePurchaseOrder: (id: number, data: ReceivePODTO) => Promise<PurchaseOrder>;
 
   // Recipes
-  getAllRecipes: () => Promise<Recipe[]>;
+  getAllRecipes: (menuItemIds?: number[]) => Promise<Recipe[]>;
   getRecipesByItem: (menuItemId: number) => Promise<Recipe[]>;
   createRecipe: (data: CreateRecipeDTO) => Promise<Recipe>;
   updateRecipe: (id: number, data: UpdateRecipeDTO) => Promise<Recipe>;
@@ -316,18 +316,61 @@ export function useInventory(): UseInventoryReturn {
 
   // ---------- Recipes ----------
 
-  const getAllRecipes = useCallback(async (): Promise<Recipe[]> => {
+  const getAllRecipes = useCallback(async (menuItemIds?: number[]): Promise<Recipe[]> => {
+    // 1. Try recipes.getAll() if supported
     try {
-      const result = await ipc<Recipe[]>(
-        window.electronAPI.recipes.getAll
-          ? window.electronAPI.recipes.getAll()
-          : window.electronAPI.recipes.getByItem()
-      );
-      return result ?? [];
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to get recipes');
-      return [];
+      if (window.electronAPI.recipes.getAll) {
+        const result = await ipc<Recipe[]>(window.electronAPI.recipes.getAll());
+        if (Array.isArray(result) && result.length > 0) return result;
+      }
+    } catch {
+      // Fallback
     }
+
+    // 2. Try recipes.getByItem() with no arguments (supported in newer main process)
+    try {
+      const result = await ipc<Recipe[]>(window.electronAPI.recipes.getByItem());
+      if (Array.isArray(result) && result.length > 0) return result;
+    } catch {
+      // Fallback
+    }
+
+    // 3. Fallback for older running main process: concurrent fetch for provided menuItemIds
+    if (menuItemIds && menuItemIds.length > 0) {
+      try {
+        const promises = menuItemIds.map(async (id) => {
+          try {
+            const list = await ipc<Recipe[]>(window.electronAPI.recipes.getByItem(id));
+            return Array.isArray(list) ? list : [];
+          } catch {
+            return [];
+          }
+        });
+        const results = await Promise.all(promises);
+        const flat = results.flat();
+        return flat.map((r: any) => ({
+          id: r.id,
+          menuItemId: r.menuItemId ?? r.menu_item_id,
+          inventoryItemId: r.inventoryItemId ?? r.inventory_item_id,
+          quantityUsed: r.quantityUsed ?? r.quantity_used,
+          unit: r.unit,
+          menu_item_id: r.menu_item_id ?? r.menuItemId,
+          inventory_item_id: r.inventory_item_id ?? r.inventoryItemId,
+          quantity_used: r.quantity_used ?? r.quantityUsed,
+          ingredientName: r.ingredientName ?? r.ingredient_name,
+          ingredient_name: r.ingredient_name ?? r.ingredientName,
+          ingredientUnit: r.ingredientUnit ?? r.ingredient_unit,
+          ingredient_unit: r.ingredient_unit ?? r.ingredientUnit,
+          costPerUnit: r.costPerUnit ?? r.cost_per_unit,
+          cost_per_unit: r.cost_per_unit ?? r.costPerUnit,
+        }));
+      } catch (err: any) {
+        setError(err.message ?? 'Failed to get recipes');
+        return [];
+      }
+    }
+
+    return [];
   }, []);
 
   const getRecipesByItem = useCallback(async (menuItemId: number): Promise<Recipe[]> => {

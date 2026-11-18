@@ -175,18 +175,21 @@ const Inventory: React.FC = () => {
   // Load all recipes when recipes tab is active
   const loadRecipes = useCallback(async () => {
     try {
-      const all = await inv.getAllRecipes();
-      setRecipes(all);
+      const itemIds = menu.items.map((i) => i.id);
+      const all = await inv.getAllRecipes(itemIds);
+      if (all && all.length > 0) {
+        setRecipes(all);
+      }
     } catch {
       // ignore
     }
-  }, [inv.getAllRecipes]);
+  }, [inv.getAllRecipes, menu.items]);
 
   useEffect(() => {
     if (activeTab === 'recipes') {
       loadRecipes();
     }
-  }, [activeTab, loadRecipes]);
+  }, [activeTab, loadRecipes, menu.items]);
 
   // Fetch / select recipe when menu item selected
   const handleSelectMenuItem = useCallback(
@@ -194,9 +197,15 @@ const Inventory: React.FC = () => {
       setSelectedMenuItemId(itemId);
       try {
         const r = await inv.getRecipesByItem(itemId);
+        const mapped = (r ?? []).map((item: any) => ({
+          ...item,
+          menuItemId: item.menuItemId ?? item.menu_item_id,
+          inventoryItemId: item.inventoryItemId ?? item.inventory_item_id,
+          quantityUsed: item.quantityUsed ?? item.quantity_used,
+        }));
         setRecipes((prev) => {
           const others = prev.filter((item) => (item.menuItemId ?? (item as any).menu_item_id) !== itemId);
-          return [...others, ...r];
+          return [...others, ...mapped];
         });
       } catch {
         // ignore
@@ -299,6 +308,7 @@ const Inventory: React.FC = () => {
             onDeleteRecipe={async (r) => {
               const id = typeof r === 'number' ? r : r.id;
               await inv.deleteRecipe(id);
+              setRecipes((prev) => prev.filter((rec) => rec.id !== id));
               await loadRecipes();
             }}
           />
@@ -429,6 +439,9 @@ const Inventory: React.FC = () => {
           onClose={() => setShowAddRecipe(false)}
           onSave={async (data) => {
             await inv.createRecipe(data);
+            if (selectedMenuItemId) {
+              await handleSelectMenuItem(selectedMenuItemId);
+            }
             await loadRecipes();
             setShowAddRecipe(false);
           }}
