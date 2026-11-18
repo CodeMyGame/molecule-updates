@@ -1660,7 +1660,7 @@ const Billing: React.FC = () => {
       <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-1.5">
         <div className="flex items-center gap-2.5">
           {/* Order type selector */}
-          <div className="flex bg-gray-200/90 rounded-lg p-0.5 gap-1 border border-gray-300/60 shadow-2xs">
+          <div className="flex bg-gray-200/90 rounded-md p-0.5 gap-0.5 border border-gray-300/60 shadow-2xs">
             {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => {
               const isTakeaway = key === 'takeaway';
               const isDineIn = key === 'dine_in';
@@ -1675,7 +1675,7 @@ const Billing: React.FC = () => {
                         setOrderType(key);
                       }
                     }}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold leading-none
                       transition-all select-none cursor-pointer
                       ${
                         isSelected
@@ -1686,13 +1686,13 @@ const Billing: React.FC = () => {
                       }`}
                   >
                     <Icon
-                      size={14}
+                      size={13}
                       className={isSelected ? 'text-white' : 'text-gray-400'}
                     />
                     <span>{t(tKey)}</span>
                     {count > 0 && (
                       <span
-                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold leading-none ${
+                        className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold leading-none ${
                           isSelected
                             ? isTakeaway
                               ? 'bg-white text-emerald-700 shadow-2xs'
