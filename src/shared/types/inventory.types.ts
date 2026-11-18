@@ -18,6 +18,15 @@ export interface Recipe {
   inventoryItemId: number;
   quantityUsed: number;
   unit: string;
+  ingredientName?: string;
+  ingredientUnit?: string;
+  costPerUnit?: number;
+  menu_item_id?: number;
+  inventory_item_id?: number;
+  quantity_used?: number;
+  ingredient_name?: string;
+  ingredient_unit?: string;
+  cost_per_unit?: number;
 }
 
 export interface Supplier {

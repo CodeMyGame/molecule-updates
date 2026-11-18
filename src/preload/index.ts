@@ -103,7 +103,8 @@ const api = {
   },
 
   recipes: {
-    getByItem: (itemId: number) => ipcRenderer.invoke('recipes:getByItem', itemId),
+    getAll: () => ipcRenderer.invoke('recipes:getAll'),
+    getByItem: (itemId?: number) => ipcRenderer.invoke('recipes:getByItem', itemId),
     create: (data: any) => ipcRenderer.invoke('recipes:create', data),
     update: (id: number, data: any) => ipcRenderer.invoke('recipes:update', id, data),
     delete: (id: number) => ipcRenderer.invoke('recipes:delete', id),

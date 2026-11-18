@@ -172,12 +172,35 @@ const Inventory: React.FC = () => {
     [inv.items]
   );
 
-  // Fetch recipes when menu item selected
+  // Load all recipes when recipes tab is active
+  const loadRecipes = useCallback(async () => {
+    try {
+      const all = await inv.getAllRecipes();
+      setRecipes(all);
+    } catch {
+      // ignore
+    }
+  }, [inv.getAllRecipes]);
+
+  useEffect(() => {
+    if (activeTab === 'recipes') {
+      loadRecipes();
+    }
+  }, [activeTab, loadRecipes]);
+
+  // Fetch / select recipe when menu item selected
   const handleSelectMenuItem = useCallback(
     async (itemId: number) => {
       setSelectedMenuItemId(itemId);
-      const r = await inv.getRecipesByItem(itemId);
-      setRecipes(r);
+      try {
+        const r = await inv.getRecipesByItem(itemId);
+        setRecipes((prev) => {
+          const others = prev.filter((item) => (item.menuItemId ?? (item as any).menu_item_id) !== itemId);
+          return [...others, ...r];
+        });
+      } catch {
+        // ignore
+      }
     },
     [inv.getRecipesByItem]
   );
@@ -276,7 +299,7 @@ const Inventory: React.FC = () => {
             onDeleteRecipe={async (r) => {
               const id = typeof r === 'number' ? r : r.id;
               await inv.deleteRecipe(id);
-              if (selectedMenuItemId) handleSelectMenuItem(selectedMenuItemId);
+              await loadRecipes();
             }}
           />
         )}
@@ -406,7 +429,7 @@ const Inventory: React.FC = () => {
           onClose={() => setShowAddRecipe(false)}
           onSave={async (data) => {
             await inv.createRecipe(data);
-            handleSelectMenuItem(selectedMenuItemId);
+            await loadRecipes();
             setShowAddRecipe(false);
           }}
         />
@@ -849,9 +872,13 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
   const itemRecipes = recipes.filter((r) => (r.menuItemId ?? (r as any).menu_item_id) === selectedMenuItemId);
 
   const totalCost = itemRecipes.reduce((sum, r) => {
-    const inv = inventoryItems.find((i) => i.id === (r.inventoryItemId ?? (r as any).inventory_item_id));
+    const invId = r.inventoryItemId ?? (r as any).inventory_item_id;
+    const inv = invId ? inventoryItems.find((i) => i.id === invId) : undefined;
     const qty = r.quantityUsed ?? (r as any).quantity_used ?? (r as any).quantity ?? 0;
-    const unitCost = inv ? (inv.costPerUnit ?? (inv as any).cost_per_unit ?? (inv as any).costPrice ?? 0) : 0;
+    const unitCost =
+      r.costPerUnit ??
+      (r as any).cost_per_unit ??
+      (inv ? (inv.costPerUnit ?? (inv as any).cost_per_unit ?? (inv as any).costPrice ?? 0) : 0);
     return sum + unitCost * qty;
   }, 0);
 
@@ -874,7 +901,7 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
         <h3 className="text-xs font-semibold text-gray-700">{t('inventory.menuItems')}</h3>
         <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
           {items.map((item) => {
-            const hasRecipe = recipes.some((r) => r.menuItemId === item.id);
+            const hasRecipe = recipes.some((r) => (r.menuItemId ?? (r as any).menu_item_id) === item.id);
             return (
               <button
                 key={item.id}
@@ -953,26 +980,37 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
                   header: t('inventory.ingredient'),
                   accessor: 'inventoryItemId',
                   render: (r: Recipe) => {
-                    const inv = getInvItem(r.inventoryItemId);
-                    return <span className="font-semibold text-gray-900">{inv?.name ?? `#${r.inventoryItemId}`}</span>;
+                    const invId = r.inventoryItemId ?? (r as any).inventory_item_id;
+                    const inv = invId ? getInvItem(invId) : undefined;
+                    const name =
+                      r.ingredientName ??
+                      (r as any).ingredient_name ??
+                      inv?.name ??
+                      (invId ? `#${invId}` : '—');
+                    return <span className="font-semibold text-gray-900">{name}</span>;
                   },
                 },
                 {
                   header: t('inventory.quantity'),
                   accessor: 'quantityUsed',
                   render: (r: Recipe) => {
-                    const inv = getInvItem(r.inventoryItemId ?? (r as any).inventory_item_id);
+                    const invId = r.inventoryItemId ?? (r as any).inventory_item_id;
+                    const inv = invId ? getInvItem(invId) : undefined;
                     const qty = r.quantityUsed ?? (r as any).quantity_used ?? (r as any).quantity ?? 0;
-                    return `${qty} ${r.unit || inv?.unit || ''}`;
+                    return `${qty} ${r.unit || r.ingredientUnit || (r as any).ingredient_unit || inv?.unit || ''}`;
                   },
                 },
                 {
                   header: t('inventory.cost'),
                   accessor: 'cost',
                   render: (r: Recipe) => {
-                    const inv = getInvItem(r.inventoryItemId ?? (r as any).inventory_item_id);
+                    const invId = r.inventoryItemId ?? (r as any).inventory_item_id;
+                    const inv = invId ? getInvItem(invId) : undefined;
                     const qty = r.quantityUsed ?? (r as any).quantity_used ?? (r as any).quantity ?? 0;
-                    const unitCost = inv ? (inv.costPerUnit ?? (inv as any).cost_per_unit ?? (inv as any).costPrice ?? 0) : 0;
+                    const unitCost =
+                      r.costPerUnit ??
+                      (r as any).cost_per_unit ??
+                      (inv ? (inv.costPerUnit ?? (inv as any).cost_per_unit ?? (inv as any).costPrice ?? 0) : 0);
                     return formatCurrency(unitCost * qty);
                   },
                 },

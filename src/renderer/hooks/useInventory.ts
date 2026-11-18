@@ -110,6 +110,7 @@ interface UseInventoryReturn {
   receivePurchaseOrder: (id: number, data: ReceivePODTO) => Promise<PurchaseOrder>;
 
   // Recipes
+  getAllRecipes: () => Promise<Recipe[]>;
   getRecipesByItem: (menuItemId: number) => Promise<Recipe[]>;
   createRecipe: (data: CreateRecipeDTO) => Promise<Recipe>;
   updateRecipe: (id: number, data: UpdateRecipeDTO) => Promise<Recipe>;
@@ -315,6 +316,20 @@ export function useInventory(): UseInventoryReturn {
 
   // ---------- Recipes ----------
 
+  const getAllRecipes = useCallback(async (): Promise<Recipe[]> => {
+    try {
+      const result = await ipc<Recipe[]>(
+        window.electronAPI.recipes.getAll
+          ? window.electronAPI.recipes.getAll()
+          : window.electronAPI.recipes.getByItem()
+      );
+      return result ?? [];
+    } catch (err: any) {
+      setError(err.message ?? 'Failed to get recipes');
+      return [];
+    }
+  }, []);
+
   const getRecipesByItem = useCallback(async (menuItemId: number): Promise<Recipe[]> => {
     try {
       const result = await ipc<Recipe[]>(window.electronAPI.recipes.getByItem(menuItemId));
@@ -396,6 +411,7 @@ export function useInventory(): UseInventoryReturn {
     updatePurchaseOrder,
     receivePurchaseOrder,
 
+    getAllRecipes,
     getRecipesByItem,
     createRecipe,
     updateRecipe,

@@ -1042,28 +1042,91 @@ export function registerAllHandlers(): void {
   });
 
   // ---- Recipes ----
-  handle(RECIPES.getByItem, (itemId: number) => {
+  function mapRecipe(row: any) {
+    if (!row) return null;
+    return {
+      id: row.id,
+      menuItemId: row.menu_item_id ?? row.menuItemId,
+      inventoryItemId: row.inventory_item_id ?? row.inventoryItemId,
+      quantityUsed: row.quantity_used ?? row.quantityUsed,
+      unit: row.unit,
+      menu_item_id: row.menu_item_id ?? row.menuItemId,
+      inventory_item_id: row.inventory_item_id ?? row.inventoryItemId,
+      quantity_used: row.quantity_used ?? row.quantityUsed,
+      ingredientName: row.ingredient_name ?? row.ingredientName,
+      ingredient_name: row.ingredient_name ?? row.ingredientName,
+      ingredientUnit: row.ingredient_unit ?? row.ingredientUnit,
+      ingredient_unit: row.ingredient_unit ?? row.ingredientUnit,
+      costPerUnit: row.cost_per_unit ?? row.costPerUnit,
+      cost_per_unit: row.cost_per_unit ?? row.costPerUnit,
+    };
+  }
+
+  handle(RECIPES.getAll, () => {
     const db = getDb();
-    return db.prepare(`
+    const rows = db.prepare(`
       SELECT r.*, ii.name as ingredient_name, ii.unit as ingredient_unit, ii.cost_per_unit
       FROM recipes r
-      JOIN inventory_items ii ON r.inventory_item_id = ii.id
-      WHERE r.menu_item_id = ?
-    `).all(itemId);
+      LEFT JOIN inventory_items ii ON r.inventory_item_id = ii.id
+      ORDER BY r.id
+    `).all();
+    return rows.map(mapRecipe);
+  });
+
+  handle(RECIPES.getByItem, (itemId?: number) => {
+    const db = getDb();
+    if (itemId != null) {
+      const rows = db.prepare(`
+        SELECT r.*, ii.name as ingredient_name, ii.unit as ingredient_unit, ii.cost_per_unit
+        FROM recipes r
+        LEFT JOIN inventory_items ii ON r.inventory_item_id = ii.id
+        WHERE r.menu_item_id = ?
+        ORDER BY r.id
+      `).all(itemId);
+      return rows.map(mapRecipe);
+    }
+    const rows = db.prepare(`
+      SELECT r.*, ii.name as ingredient_name, ii.unit as ingredient_unit, ii.cost_per_unit
+      FROM recipes r
+      LEFT JOIN inventory_items ii ON r.inventory_item_id = ii.id
+      ORDER BY r.id
+    `).all();
+    return rows.map(mapRecipe);
   });
 
   handle(RECIPES.create, (data: any) => {
     const db = getDb();
     const result = db.prepare(
       'INSERT INTO recipes (menu_item_id, inventory_item_id, quantity_used, unit) VALUES (?, ?, ?, ?)'
-    ).run(data.menuItemId ?? data.menu_item_id, data.inventoryItemId ?? data.inventory_item_id, data.quantityUsed ?? data.quantity_used, data.unit);
-    return db.prepare('SELECT * FROM recipes WHERE id = ?').get(result.lastInsertRowid);
+    ).run(
+      data.menuItemId ?? data.menu_item_id,
+      data.inventoryItemId ?? data.inventory_item_id,
+      data.quantityUsed ?? data.quantity_used,
+      data.unit
+    );
+    const row = db.prepare(`
+      SELECT r.*, ii.name as ingredient_name, ii.unit as ingredient_unit, ii.cost_per_unit
+      FROM recipes r
+      LEFT JOIN inventory_items ii ON r.inventory_item_id = ii.id
+      WHERE r.id = ?
+    `).get(result.lastInsertRowid);
+    return mapRecipe(row);
   });
 
   handle(RECIPES.update, (id: number, data: any) => {
     const db = getDb();
-    db.prepare('UPDATE recipes SET quantity_used = ?, unit = ? WHERE id = ?').run(data.quantityUsed ?? data.quantity_used, data.unit, id);
-    return db.prepare('SELECT * FROM recipes WHERE id = ?').get(id);
+    db.prepare('UPDATE recipes SET quantity_used = ?, unit = ? WHERE id = ?').run(
+      data.quantityUsed ?? data.quantity_used,
+      data.unit,
+      id
+    );
+    const row = db.prepare(`
+      SELECT r.*, ii.name as ingredient_name, ii.unit as ingredient_unit, ii.cost_per_unit
+      FROM recipes r
+      LEFT JOIN inventory_items ii ON r.inventory_item_id = ii.id
+      WHERE r.id = ?
+    `).get(id);
+    return mapRecipe(row);
   });
 
   handle(RECIPES.delete, (id: number) => {

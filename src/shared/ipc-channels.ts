@@ -95,6 +95,7 @@ export const INVENTORY = {
 } as const;
 
 export const RECIPES = {
+  getAll: 'recipes:getAll',
   getByItem: 'recipes:getByItem',
   create: 'recipes:create',
   update: 'recipes:update',

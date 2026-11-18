@@ -1613,6 +1613,63 @@ suite('14. Inventory Monitoring, Purchase Orders & Shrinkage', () => {
     const discrepancy = physicalCount - systemStock;
     assertEqual(discrepancy, -5, '5 units shortage variance');
   });
+
+  test('INV-06 Recipe mapping normalization and ingredient resolution without #undefined', () => {
+    // Helper function matching mapRecipe from IPC
+    function mapRecipe(row) {
+      if (!row) return null;
+      return {
+        id: row.id,
+        menuItemId: row.menu_item_id ?? row.menuItemId,
+        inventoryItemId: row.inventory_item_id ?? row.inventoryItemId,
+        quantityUsed: row.quantity_used ?? row.quantityUsed,
+        unit: row.unit,
+        menu_item_id: row.menu_item_id ?? row.menuItemId,
+        inventory_item_id: row.inventory_item_id ?? row.inventoryItemId,
+        quantity_used: row.quantity_used ?? row.quantityUsed,
+        ingredientName: row.ingredient_name ?? row.ingredientName,
+        ingredient_name: row.ingredient_name ?? row.ingredientName,
+        ingredientUnit: row.ingredient_unit ?? row.ingredientUnit,
+        ingredient_unit: row.ingredient_unit ?? row.ingredientUnit,
+        costPerUnit: row.cost_per_unit ?? row.costPerUnit,
+        cost_per_unit: row.cost_per_unit ?? row.costPerUnit,
+      };
+    }
+
+    const rows = db.prepare(`
+      SELECT r.*, ii.name as ingredient_name, ii.unit as ingredient_unit, ii.cost_per_unit
+      FROM recipes r
+      LEFT JOIN inventory_items ii ON r.inventory_item_id = ii.id
+      ORDER BY r.id
+    `).all();
+
+    const mapped = rows.map(mapRecipe);
+    assert(mapped.length > 0, 'Recipes must exist in database');
+
+    // Test recipe for menuItemId 1 (Burger)
+    const burgerRecipes = mapped.filter(r => (r.menuItemId ?? r.menu_item_id) === 1);
+    assertEqual(burgerRecipes.length, 2, 'Burger has 2 recipe ingredients (bun and patty)');
+
+    for (const r of burgerRecipes) {
+      // Must have both camelCase and snake_case properties
+      assert(r.menuItemId === 1, 'menuItemId must be defined and 1');
+      assert(r.inventoryItemId != null, 'inventoryItemId must be defined');
+      assert(r.quantityUsed != null, 'quantityUsed must be defined');
+      assert(r.ingredientName != null, 'ingredientName must be defined');
+
+      // Check ingredient name formatting logic from RecipesTab
+      const invId = r.inventoryItemId ?? r.inventory_item_id;
+      const name = r.ingredientName ?? r.ingredient_name ?? (invId ? `#${invId}` : '—');
+      assert(name !== '#undefined', 'Ingredient name must never be "#undefined"');
+      assert(['Burger Bun', 'Veg Patty'].includes(name), `Ingredient name should be Burger Bun or Veg Patty, got ${name}`);
+    }
+
+    // Recipe configured check across items
+    const hasBurgerRecipe = mapped.some(r => (r.menuItemId ?? r.menu_item_id) === 1);
+    const hasUnknownRecipe = mapped.some(r => (r.menuItemId ?? r.menu_item_id) === 9999);
+    assertEqual(hasBurgerRecipe, true, 'Burger must show as recipe configured');
+    assertEqual(hasUnknownRecipe, false, 'Non-existent item must show as no recipe');
+  });
 });
 
 // -------------------------------------------------------------
