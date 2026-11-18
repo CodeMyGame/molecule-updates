@@ -1092,42 +1092,32 @@ suite('8. Void Audit Logging, Post-Prep Wastage & Order Cancellations', () => {
     assertEqual(canCancelDirectly, false, 'Waiter cannot cancel billed order without admin override');
   });
 
-  test('VOD-05 Manager/Admin PIN verification for post-KOT item voids & cancellations', () => {
-    function verifyManagerPin(enteredPin) {
-      const allStaff = db.prepare('SELECT * FROM staff WHERE is_active = 1').all();
-      const matched = allStaff.find(s => bcrypt.compareSync(enteredPin, s.pin));
-      if (!matched) return { valid: false, error: 'INVALID_PIN' };
-      const role = (matched.role || '').toLowerCase();
-      if (role !== 'admin' && role !== 'manager') {
-        return { valid: false, error: 'NOT_AUTHORIZED' };
+  test('VOD-05 Security: Master password (zblack) required for post-KOT item voids & cancellations', () => {
+    function verifyVoidPassword(pwd) {
+      if (pwd !== 'zblack') {
+        return { valid: false, error: 'INCORRECT_PASSWORD' };
       }
-      return { valid: true, staff: matched };
+      return { valid: true };
     }
 
-    // Cashier attempt (5678) should be rejected
-    const cashierAuth = verifyManagerPin('5678');
-    assertEqual(cashierAuth.valid, false, 'Cashier cannot authorize void');
-    assertEqual(cashierAuth.error, 'NOT_AUTHORIZED');
+    // Wrong passwords should be rejected
+    assertEqual(verifyVoidPassword('1234').valid, false);
+    assertEqual(verifyVoidPassword('admin').valid, false);
+    assertEqual(verifyVoidPassword('5678').valid, false);
+    assertEqual(verifyVoidPassword('wrong').valid, false);
 
-    // Wrong PIN (9999) should be rejected
-    const wrongAuth = verifyManagerPin('9999');
-    assertEqual(wrongAuth.valid, false, 'Invalid PIN rejected');
-    assertEqual(wrongAuth.error, 'INVALID_PIN');
+    // Correct master password 'zblack' is authorized
+    const auth = verifyVoidPassword('zblack');
+    assertEqual(auth.valid, true, 'zblack master password accepted');
 
-    // Admin/Manager PIN (1234) should be authorized
-    const managerAuth = verifyManagerPin('1234');
-    assertEqual(managerAuth.valid, true, 'Manager PIN accepted');
-    assertEqual(managerAuth.staff.name, 'Admin Manager');
-
-    // Stamping void_items with authorized manager
+    // Stamping void_items with authorized record
     db.prepare(`
       INSERT INTO void_items (order_id, order_number, table_name, menu_item_id, item_name, quantity, unit_price, total_amount, reason, staff_id, staff_name)
-      VALUES (?, 'ORD-MGR-AUTH', 'Table 2', 1, 'Classic Burger', 1, 15000, 15000, 'Customer changed mind (Manager Approved)', ?, ?)
-    `).run(dineInOrderId, managerAuth.staff.id, managerAuth.staff.name);
+      VALUES (?, 'ORD-MGR-AUTH', 'Table 2', 1, 'Classic Burger', 1, 15000, 15000, 'Customer changed mind (zblack Authorized)', 1, 'Owner Authorized')
+    `).run(dineInOrderId);
 
     const loggedVoid = db.prepare("SELECT * FROM void_items WHERE order_number = 'ORD-MGR-AUTH'").get();
-    assertEqual(loggedVoid.staff_id, 1);
-    assertEqual(loggedVoid.staff_name, 'Admin Manager');
+    assertEqual(loggedVoid.staff_name, 'Owner Authorized');
   });
 });
 
