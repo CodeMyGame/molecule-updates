@@ -100,6 +100,7 @@ const api = {
     adjustStock: (id: number, adjustment: any) => ipcRenderer.invoke('inventory:adjustStock', id, adjustment),
     getLowStock: () => ipcRenderer.invoke('inventory:getLowStock'),
     getTransactions: (itemId?: number) => ipcRenderer.invoke('inventory:getTransactions', itemId),
+    getConsumptionReport: (filters?: any) => ipcRenderer.invoke('inventory:getConsumptionReport', filters),
   },
 
   recipes: {
@@ -175,6 +176,7 @@ const api = {
     paymentSummary: (filters?: any) => ipcRenderer.invoke('reports:paymentSummary', filters),
     cashFlow: (filters?: any) => ipcRenderer.invoke('reports:cashFlow', filters),
     inventoryConsumption: (filters?: any) => ipcRenderer.invoke('reports:inventoryConsumption', filters),
+    itemStockConsumption: (filters?: any) => ipcRenderer.invoke('reports:itemStockConsumption', filters),
     gstReport: (filters?: any) => ipcRenderer.invoke('reports:gstReport', filters),
     staffPerformance: (filters?: any) => ipcRenderer.invoke('reports:staffPerformance', filters),
     dayEndSummary: (filters?: any) => ipcRenderer.invoke('reports:dayEndSummary', filters),

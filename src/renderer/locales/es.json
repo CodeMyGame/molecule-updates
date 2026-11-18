@@ -523,7 +523,8 @@
     "cost": "Coste",
     "noIngredientsConfigured": "No hay ingredientes configurados para esta receta",
     "selectItemForRecipe": "Seleccione un artículo del menú para ver o configurar su receta",
-    "notes": "Notas"
+    "notes": "Notas",
+    "consumption": "Informe de consumo"
   },
   "reports": {
     "orderHistory": "Historial de pedidos",

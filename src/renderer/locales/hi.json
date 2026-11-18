@@ -523,7 +523,8 @@
     "cost": "लागत",
     "noIngredientsConfigured": "इस रेसिपी के लिए कोई सामग्री कॉन्फ़िगर नहीं है",
     "selectItemForRecipe": "रेसिपी देखने या कॉन्फ़िगर करने के लिए एक मेनू आइटम चुनें",
-    "notes": "नोट्स"
+    "notes": "नोट्स",
+    "consumption": "खपत रिपोर्ट"
   },
   "reports": {
     "orderHistory": "ऑर्डर इतिहास",

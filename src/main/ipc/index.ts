@@ -282,6 +282,9 @@ export function registerAllHandlers(): void {
   handle(INVENTORY.getTransactions, (itemId?: number, dateRange?) =>
     inventoryRepo.getTransactions(itemId, dateRange)
   );
+  handle(INVENTORY.getConsumptionReport, (filters) =>
+    reportsService.itemStockConsumption(filters)
+  );
 
   // ---- Staff ----
   handle(STAFF.getAll, () => staffRepo.getAll());
@@ -897,6 +900,7 @@ export function registerAllHandlers(): void {
   handle(REPORTS.paymentSummary, (dateRange) => reportsService.paymentSummary(dateRange));
   handle(REPORTS.cashFlow, (dateRange) => reportsService.cashFlow(dateRange));
   handle(REPORTS.inventoryConsumption, (dateRange) => reportsService.inventoryConsumption(dateRange));
+  handle(REPORTS.itemStockConsumption, (dateRange) => reportsService.itemStockConsumption(dateRange));
   handle(REPORTS.gstReport, (dateRange) => reportsService.gstReport(dateRange));
   handle(REPORTS.staffPerformance, (dateRange) => reportsService.staffPerformance(dateRange));
   handle(REPORTS.dayEndSummary, (dateRange) => reportsService.dayEndSummary(dateRange));

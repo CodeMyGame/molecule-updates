@@ -523,7 +523,8 @@
     "cost": "ખર્ચ",
     "noIngredientsConfigured": "આ રેસિપી માટે કોઈ સામગ્રી ગોઠવેલ નથી",
     "selectItemForRecipe": "તેની રેસિપી જોવા અથવા ગોઠવવા માટે મેનુ વસ્તુ પસંદ કરો",
-    "notes": "નોંધ"
+    "notes": "નોંધ",
+    "consumption": "વપરાશ રિપોર્ટ"
   },
   "reports": {
     "orderHistory": "ઓર્ડર ઇતિહાસ",

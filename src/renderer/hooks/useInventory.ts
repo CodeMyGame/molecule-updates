@@ -8,7 +8,8 @@ import type {
   StockTransaction,
   Recipe,
 } from '../../shared/types/inventory.types';
-import type { StockTransactionType } from '../../shared/enums';
+import type { ItemStockConsumptionRecord } from '../../shared/types/report.types';
+import { StockTransactionType } from '../../shared/enums';
 
 // ---------- DTOs ----------
 
@@ -115,6 +116,9 @@ interface UseInventoryReturn {
   createRecipe: (data: CreateRecipeDTO) => Promise<Recipe>;
   updateRecipe: (id: number, data: UpdateRecipeDTO) => Promise<Recipe>;
   deleteRecipe: (id: number) => Promise<void>;
+
+  // Consumption Reports
+  getItemStockConsumption: (filters?: { startDate?: string; endDate?: string }) => Promise<ItemStockConsumptionRecord[]>;
 
   // Refresh all
   refetch: () => Promise<void>;
@@ -410,6 +414,81 @@ export function useInventory(): UseInventoryReturn {
     }
   }, []);
 
+  // ---------- Stock Consumption Reports ----------
+
+  const getItemStockConsumption = useCallback(
+    async (filters?: { startDate?: string; endDate?: string }): Promise<ItemStockConsumptionRecord[]> => {
+      // 1. Try dedicated IPC channel if available
+      try {
+        if (window.electronAPI.inventory?.getConsumptionReport) {
+          const res = await ipc<ItemStockConsumptionRecord[]>(
+            window.electronAPI.inventory.getConsumptionReport(filters)
+          );
+          if (Array.isArray(res) && res.length > 0) return res;
+        }
+      } catch {}
+
+      try {
+        if (window.electronAPI.reports?.itemStockConsumption) {
+          const res = await ipc<ItemStockConsumptionRecord[]>(
+            window.electronAPI.reports.itemStockConsumption(filters)
+          );
+          if (Array.isArray(res) && res.length > 0) return res;
+        }
+      } catch {}
+
+      // 2. Client-side fallback from getTransactions():
+      try {
+        const txns = await getTransactions();
+        const consumptionTxns = txns.filter(
+          (t) => t.transactionType === StockTransactionType.CONSUMPTION
+        );
+
+        // Filter by date range if provided
+        const filtered = consumptionTxns.filter((t) => {
+          if (!t.createdAt) return true;
+          const dt = t.createdAt.split('T')[0].split(' ')[0];
+          if (filters?.startDate && dt < filters.startDate) return false;
+          if (filters?.endDate && dt > filters.endDate) return false;
+          return true;
+        });
+
+        return filtered.map((t) => {
+          const invItem = items.find((i) => i.id === t.inventoryItemId);
+          const note = t.notes || '';
+          const orderMatch = note.match(/order\s*#?(\d+)/i);
+          const itemMatch = note.match(/\(([^)]+)\)/);
+          const menuItemName = itemMatch ? itemMatch[1] : 'Manual Consumption';
+          const orderNumber = orderMatch ? `#${orderMatch[1]}` : undefined;
+          const date = t.createdAt ? t.createdAt.split('T')[0].split(' ')[0] : '';
+          const unit = invItem?.unit || 'units';
+          const costPerUnit = invItem?.costPerUnit ?? (invItem as any)?.cost_per_unit ?? 0;
+          const totalCost = Math.round(t.quantity * costPerUnit);
+
+          return {
+            transactionId: t.id,
+            date,
+            timestamp: t.createdAt,
+            orderNumber,
+            menuItemName,
+            categoryName: invItem?.category || 'General',
+            portionsSold: 1,
+            inventoryItemId: t.inventoryItemId,
+            ingredientName: invItem?.name || `#${t.inventoryItemId}`,
+            unit,
+            quantityConsumed: t.quantity,
+            costPerUnit,
+            totalCost,
+          };
+        });
+      } catch (err: any) {
+        setError(err.message ?? 'Failed to load stock consumption');
+        return [];
+      }
+    },
+    [getTransactions, items]
+  );
+
   // ---------- Fetch all on mount ----------
 
   const refetch = useCallback(async () => {
@@ -459,6 +538,7 @@ export function useInventory(): UseInventoryReturn {
     createRecipe,
     updateRecipe,
     deleteRecipe,
+    getItemStockConsumption,
 
     refetch,
   };

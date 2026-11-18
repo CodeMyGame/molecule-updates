@@ -523,7 +523,8 @@
     "cost": "التكلفة",
     "noIngredientsConfigured": "لم يتم تكوين مكونات لهذه الوصفة",
     "selectItemForRecipe": "حدد عنصراً من القائمة لعرض وصفته أو تكوينها",
-    "notes": "ملاحظات"
+    "notes": "ملاحظات",
+    "consumption": "تقرير الاستهلاك"
   },
   "reports": {
     "orderHistory": "سجل الطلبات",

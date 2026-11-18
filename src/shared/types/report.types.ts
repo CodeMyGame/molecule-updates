@@ -103,3 +103,21 @@ export interface VoidReportSummary {
   items: VoidItemReport[];
 }
 
+export interface ItemStockConsumptionRecord {
+  transactionId: number;
+  date: string;
+  timestamp: string;
+  orderId?: number;
+  orderNumber?: string;
+  menuItemId?: number;
+  menuItemName: string;
+  categoryName: string;
+  portionsSold: number;
+  inventoryItemId: number;
+  ingredientName: string;
+  unit: string;
+  quantityConsumed: number;
+  costPerUnit: number;
+  totalCost: number;
+}
+

@@ -523,7 +523,8 @@
     "cost": "ਲਾਗਤ",
     "noIngredientsConfigured": "ਇਸ ਵਿਅੰਜਨ ਲਈ ਕੋਈ ਸਮੱਗਰੀ ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ",
     "selectItemForRecipe": "ਇਸਦੀ ਵਿਅੰਜਨ ਦੇਖਣ ਜਾਂ ਕੌਂਫਿਗਰ ਕਰਨ ਲਈ ਇੱਕ ਮੀਨੂ ਆਈਟਮ ਚੁਣੋ",
-    "notes": "ਨੋਟਸ"
+    "notes": "ਨੋਟਸ",
+    "consumption": "ਖਪਤ ਰਿਪੋਰਟ"
   },
   "reports": {
     "orderHistory": "ਆਰਡਰ ਇਤਿਹਾਸ",

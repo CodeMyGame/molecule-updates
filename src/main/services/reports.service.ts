@@ -1,5 +1,5 @@
 import { getDb } from '../db/connection';
-import type { DateRangeFilter, DailySalesReport, ItemSalesReport, CategorySalesReport, PaymentSummaryReport, CashFlowReport, GSTReport, BusyBucket, BusyHoursReport, VoidReportSummary, VoidItemReport } from '../../shared/types/report.types';
+import type { DateRangeFilter, DailySalesReport, ItemSalesReport, CategorySalesReport, PaymentSummaryReport, CashFlowReport, GSTReport, BusyBucket, BusyHoursReport, VoidReportSummary, VoidItemReport, ItemStockConsumptionRecord } from '../../shared/types/report.types';
 import type { PaymentMode } from '../../shared/enums';
 
 /** Normalize date range so endDate includes the full day (appends 23:59:59) */
@@ -647,6 +647,84 @@ export function tableWiseSales(dateRange: { startDate: string; endDate: string }
     discount: Number(r.discount) || 0,
     tax: Number(r.tax) || 0,
   }));
+}
+
+export function itemStockConsumption(filters?: { startDate?: string; endDate?: string }): ItemStockConsumptionRecord[] {
+  const db = getDb();
+  const hasMenuCat = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='menu_categories'").get();
+  const catTable = hasMenuCat ? 'menu_categories' : 'categories';
+
+  let query = `
+    SELECT
+      st.id AS transaction_id,
+      date(st.created_at) AS date,
+      st.created_at AS timestamp,
+      st.inventory_item_id,
+      ii.name AS ingredient_name,
+      ii.unit AS ingredient_unit,
+      COALESCE(ii.cost_per_unit, 0) AS cost_per_unit,
+      st.quantity AS quantity_consumed,
+      ROUND(st.quantity * COALESCE(ii.cost_per_unit, 0)) AS total_cost,
+      oi.id AS order_item_id,
+      oi.order_id,
+      o.order_number,
+      COALESCE(oi.menu_item_id, mi.id) AS menu_item_id,
+      COALESCE(mi.name, oi.name) AS menu_item_name,
+      COALESCE(mc.name, 'General') AS category_name,
+      COALESCE(oi.quantity, 1) AS portions_sold,
+      st.notes
+    FROM stock_transactions st
+    JOIN inventory_items ii ON st.inventory_item_id = ii.id
+    LEFT JOIN order_items oi ON st.reference_type = 'order_item' AND st.reference_id = oi.id
+    LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id
+    LEFT JOIN ${catTable} mc ON mi.category_id = mc.id
+    LEFT JOIN orders o ON oi.order_id = o.id
+    WHERE st.transaction_type = 'consumption'
+  `;
+
+  const params: any[] = [];
+  if (filters?.startDate) {
+    const start = filters.startDate.includes(' ') ? filters.startDate : `${filters.startDate} 00:00:00`;
+    query += ` AND st.created_at >= ?`;
+    params.push(start);
+  }
+  if (filters?.endDate) {
+    const end = filters.endDate.includes(' ') ? filters.endDate : `${filters.endDate} 23:59:59`;
+    query += ` AND st.created_at <= ?`;
+    params.push(end);
+  }
+
+  query += ` ORDER BY st.created_at DESC, st.id DESC`;
+
+  const rows = db.prepare(query).all(...params) as any[];
+
+  return rows.map((r) => {
+    let resolvedItemName = r.menu_item_name;
+    if (!resolvedItemName && r.notes) {
+      const match = r.notes.match(/\(([^)]+)\)/);
+      if (match && match[1]) {
+        resolvedItemName = match[1];
+      }
+    }
+
+    return {
+      transactionId: r.transaction_id,
+      date: r.date,
+      timestamp: r.timestamp,
+      orderId: r.order_id ?? undefined,
+      orderNumber: r.order_number ? `#${r.order_number}` : (r.order_id ? `#${r.order_id}` : undefined),
+      menuItemId: r.menu_item_id ?? undefined,
+      menuItemName: resolvedItemName || 'Manual / Direct Consumption',
+      categoryName: r.category_name || 'General',
+      portionsSold: Number(r.portions_sold) || 1,
+      inventoryItemId: r.inventory_item_id,
+      ingredientName: r.ingredient_name,
+      unit: r.ingredient_unit,
+      quantityConsumed: Number(r.quantity_consumed) || 0,
+      costPerUnit: Number(r.cost_per_unit) || 0,
+      totalCost: Number(r.total_cost) || 0,
+    };
+  });
 }
 
 

@@ -1670,6 +1670,66 @@ suite('14. Inventory Monitoring, Purchase Orders & Shrinkage', () => {
     assertEqual(hasBurgerRecipe, true, 'Burger must show as recipe configured');
     assertEqual(hasUnknownRecipe, false, 'Non-existent item must show as no recipe');
   });
+
+  test('INV-07 Menu item stock consumption reporting (date-wise and item-wise)', () => {
+    // Insert test consumption transactions linked to order items
+    const today = new Date().toISOString().split('T')[0];
+    db.prepare(`
+      INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes, created_at)
+      VALUES (1, 'consumption', 4.0, 'order_item', 1, 'Auto-deducted for order #1, item #1 (Veggie Burger)', datetime('now'))
+    `).run();
+    db.prepare(`
+      INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes, created_at)
+      VALUES (2, 'consumption', 4.0, 'order_item', 1, 'Auto-deducted for order #1, item #1 (Veggie Burger)', datetime('now'))
+    `).run();
+
+    // Query using the same logic as reportsService.itemStockConsumption
+    const hasMenuCat = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='menu_categories'").get();
+    const catTable = hasMenuCat ? 'menu_categories' : 'categories';
+
+    const rows = db.prepare(`
+      SELECT
+        st.id AS transaction_id,
+        date(st.created_at) AS date,
+        st.created_at AS timestamp,
+        st.inventory_item_id,
+        ii.name AS ingredient_name,
+        ii.unit AS ingredient_unit,
+        COALESCE(ii.cost_per_unit, 0) AS cost_per_unit,
+        st.quantity AS quantity_consumed,
+        ROUND(st.quantity * COALESCE(ii.cost_per_unit, 0)) AS total_cost,
+        oi.id AS order_item_id,
+        oi.order_id,
+        COALESCE(oi.menu_item_id, mi.id) AS menu_item_id,
+        COALESCE(mi.name, oi.name) AS menu_item_name,
+        COALESCE(mc.name, 'General') AS category_name,
+        COALESCE(oi.quantity, 1) AS portions_sold,
+        st.notes
+      FROM stock_transactions st
+      JOIN inventory_items ii ON st.inventory_item_id = ii.id
+      LEFT JOIN order_items oi ON st.reference_type = 'order_item' AND st.reference_id = oi.id
+      LEFT JOIN menu_items mi ON oi.menu_item_id = mi.id
+      LEFT JOIN ${catTable} mc ON mi.category_id = mc.id
+      LEFT JOIN orders o ON oi.order_id = o.id
+      WHERE st.transaction_type = 'consumption'
+      ORDER BY st.created_at DESC
+    `).all();
+
+    assert(rows.length >= 2, 'Should have at least 2 consumption rows');
+
+    // Aggregate by menu item
+    const itemMap = new Map();
+    for (const r of rows) {
+      const name = r.menu_item_name || (r.notes && r.notes.match(/\(([^)]+)\)/)?.[1]) || 'Other';
+      const curr = itemMap.get(name) || { totalCost: 0, ingredients: [] };
+      curr.totalCost += r.total_cost;
+      curr.ingredients.push({ name: r.ingredient_name, qty: r.quantity_consumed });
+      itemMap.set(name, curr);
+    }
+
+    assert(itemMap.size > 0, 'Must aggregate by menu item');
+    assert(rows.every(r => r.date === today), 'Dates must match consumption date');
+  });
 });
 
 // -------------------------------------------------------------

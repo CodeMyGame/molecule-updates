@@ -523,7 +523,8 @@
     "cost": "Coût",
     "noIngredientsConfigured": "Aucun ingrédient configuré pour cette recette",
     "selectItemForRecipe": "Sélectionnez un article du menu pour afficher ou configurer sa recette",
-    "notes": "Remarques"
+    "notes": "Remarques",
+    "consumption": "Rapport de consommation"
   },
   "reports": {
     "orderHistory": "Historique des commandes",

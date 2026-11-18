@@ -92,6 +92,7 @@ export const INVENTORY = {
   adjustStock: 'inventory:adjustStock',
   getLowStock: 'inventory:getLowStock',
   getTransactions: 'inventory:getTransactions',
+  getConsumptionReport: 'inventory:getConsumptionReport',
 } as const;
 
 export const RECIPES = {
@@ -167,6 +168,7 @@ export const REPORTS = {
   paymentSummary: 'reports:paymentSummary',
   cashFlow: 'reports:cashFlow',
   inventoryConsumption: 'reports:inventoryConsumption',
+  itemStockConsumption: 'reports:itemStockConsumption',
   gstReport: 'reports:gstReport',
   staffPerformance: 'reports:staffPerformance',
   dayEndSummary: 'reports:dayEndSummary',

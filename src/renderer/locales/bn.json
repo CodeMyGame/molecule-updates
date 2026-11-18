@@ -523,7 +523,8 @@
     "cost": "খরচ",
     "noIngredientsConfigured": "এই রেসিপির জন্য কোনো উপকরণ কনফিগার করা হয়নি",
     "selectItemForRecipe": "রেসিপি দেখতে বা কনফিগার করতে একটি মেনু আইটেম নির্বাচন করুন",
-    "notes": "নোট"
+    "notes": "নোট",
+    "consumption": "ব্যবহারের রিপোর্ট"
   },
   "reports": {
     "orderHistory": "অর্ডার ইতিহাস",

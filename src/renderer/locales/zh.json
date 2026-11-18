@@ -523,7 +523,8 @@
     "cost": "成本",
     "noIngredientsConfigured": "此配方未配置任何原料",
     "selectItemForRecipe": "选择一个菜单菜品以查看或配置其原料配方",
-    "notes": "备注"
+    "notes": "备注",
+    "consumption": "消耗报告"
   },
   "reports": {
     "orderHistory": "订单历史",

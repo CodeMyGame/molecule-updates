@@ -16,6 +16,13 @@ import {
   CheckCircle2,
   XCircle,
   UtensilsCrossed,
+  BarChart2,
+  Calendar,
+  Download,
+  Layers,
+  ChevronDown,
+  ChevronRight,
+  Filter,
 } from 'lucide-react';
 import DataTable from '../components/common/DataTable';
 import Button from '../components/common/Button';
@@ -34,6 +41,7 @@ import type {
   StockTransaction,
   Recipe,
 } from '../../shared/types/inventory.types';
+import type { ItemStockConsumptionRecord } from '../../shared/types/report.types';
 import type {
   CreateInventoryItemDTO,
   UpdateInventoryItemDTO,
@@ -45,7 +53,7 @@ import type {
 
 // ---------- Tab definitions ----------
 
-type TabKey = 'stock' | 'purchaseOrders' | 'suppliers' | 'recipes' | 'wastage';
+type TabKey = 'stock' | 'purchaseOrders' | 'suppliers' | 'recipes' | 'consumption' | 'wastage';
 
 // ---------- Stock status helpers ----------
 
@@ -104,6 +112,7 @@ const Inventory: React.FC = () => {
     { key: 'purchaseOrders', label: t('inventory.purchaseOrders'), icon: <Truck size={18} /> },
     { key: 'suppliers', label: t('inventory.suppliers'), icon: <Users size={18} /> },
     { key: 'recipes', label: t('inventory.recipes'), icon: <BookOpen size={18} /> },
+    { key: 'consumption', label: t('inventory.consumption', 'Consumption Report'), icon: <BarChart2 size={18} /> },
     { key: 'wastage', label: t('inventory.wastage'), icon: <TrendingDown size={18} /> },
   ];
 
@@ -311,6 +320,13 @@ const Inventory: React.FC = () => {
               setRecipes((prev) => prev.filter((rec) => rec.id !== id));
               await loadRecipes();
             }}
+          />
+        )}
+
+        {activeTab === 'consumption' && (
+          <ConsumptionTab
+            getItemStockConsumption={inv.getItemStockConsumption}
+            inventoryItems={inv.items}
           />
         )}
 
@@ -1055,6 +1071,836 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
           </div>
         )}
       </div>
+    </div>
+  );
+};
+
+// ==========================================
+// ---------- Stock Consumption Tab ----------
+// ==========================================
+
+interface ConsumptionTabProps {
+  getItemStockConsumption: (filters?: { startDate?: string; endDate?: string }) => Promise<ItemStockConsumptionRecord[]>;
+  inventoryItems: InventoryItem[];
+}
+
+type ConsumptionView = 'item' | 'date' | 'ingredient' | 'ledger';
+type DatePreset = 'today' | 'yesterday' | 'last7' | 'thisMonth' | 'all' | 'custom';
+
+const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption }) => {
+  const { t } = useTranslation();
+  const [datePreset, setDatePreset] = useState<DatePreset>('today');
+  const [customStart, setCustomStart] = useState(() => new Date().toISOString().split('T')[0]);
+  const [customEnd, setCustomEnd] = useState(() => new Date().toISOString().split('T')[0]);
+  const [view, setView] = useState<ConsumptionView>('item');
+  const [records, setRecords] = useState<ItemStockConsumptionRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      let range: { startDate?: string; endDate?: string } = {};
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+
+      if (datePreset === 'today') {
+        range = { startDate: todayStr, endDate: todayStr };
+      } else if (datePreset === 'yesterday') {
+        const y = new Date(now);
+        y.setDate(y.getDate() - 1);
+        const yStr = y.toISOString().split('T')[0];
+        range = { startDate: yStr, endDate: yStr };
+      } else if (datePreset === 'last7') {
+        const d7 = new Date(now);
+        d7.setDate(d7.getDate() - 6);
+        range = { startDate: d7.toISOString().split('T')[0], endDate: todayStr };
+      } else if (datePreset === 'thisMonth') {
+        const mStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+        range = { startDate: mStart, endDate: todayStr };
+      } else if (datePreset === 'custom') {
+        range = { startDate: customStart, endDate: customEnd };
+      }
+
+      const data = await getItemStockConsumption(range);
+      setRecords(data ?? []);
+    } catch {
+      setRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [datePreset, customStart, customEnd, getItemStockConsumption]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Filter records by search
+  const filteredRecords = useMemo(() => {
+    if (!search.trim()) return records;
+    const q = search.toLowerCase();
+    return records.filter(
+      (r) =>
+        r.menuItemName.toLowerCase().includes(q) ||
+        r.ingredientName.toLowerCase().includes(q) ||
+        r.categoryName.toLowerCase().includes(q) ||
+        (r.orderNumber && r.orderNumber.toLowerCase().includes(q))
+    );
+  }, [records, search]);
+
+  // Summary Metrics
+  const metrics = useMemo(() => {
+    const totalCost = filteredRecords.reduce((sum, r) => sum + r.totalCost, 0);
+    const totalPortions = filteredRecords.reduce((sum, r) => sum + (r.portionsSold || 1), 0);
+    const uniqueIngredients = new Set(filteredRecords.map((r) => r.inventoryItemId)).size;
+
+    // Top consuming dish
+    const dishMap = new Map<string, number>();
+    for (const r of filteredRecords) {
+      dishMap.set(r.menuItemName, (dishMap.get(r.menuItemName) || 0) + r.totalCost);
+    }
+    let topDish = '—';
+    let topCost = 0;
+    for (const [dish, cost] of dishMap.entries()) {
+      if (cost > topCost) {
+        topCost = cost;
+        topDish = dish;
+      }
+    }
+
+    return { totalCost, totalPortions, uniqueIngredients, topDish, topCost };
+  }, [filteredRecords]);
+
+  // Grouping: By Menu Item (Which menu item consumed how many stock)
+  const itemGroups = useMemo(() => {
+    const map = new Map<string, {
+      menuItemId?: number;
+      menuItemName: string;
+      categoryName: string;
+      portionsSold: number;
+      totalCost: number;
+      ingredients: {
+        inventoryItemId: number;
+        ingredientName: string;
+        unit: string;
+        quantityConsumed: number;
+        costPerUnit: number;
+        totalCost: number;
+      }[];
+      ordersCount: number;
+    }>();
+
+    for (const r of filteredRecords) {
+      const key = r.menuItemName;
+      let g = map.get(key);
+      if (!g) {
+        g = {
+          menuItemId: r.menuItemId,
+          menuItemName: r.menuItemName,
+          categoryName: r.categoryName,
+          portionsSold: 0,
+          totalCost: 0,
+          ingredients: [],
+          ordersCount: 0,
+        };
+        map.set(key, g);
+      }
+      g.totalCost += r.totalCost;
+      g.portionsSold += (r.portionsSold || 1);
+      g.ordersCount += 1;
+
+      const ing = g.ingredients.find((i) => i.inventoryItemId === r.inventoryItemId);
+      if (ing) {
+        ing.quantityConsumed += r.quantityConsumed;
+        ing.totalCost += r.totalCost;
+      } else {
+        g.ingredients.push({
+          inventoryItemId: r.inventoryItemId,
+          ingredientName: r.ingredientName,
+          unit: r.unit,
+          quantityConsumed: r.quantityConsumed,
+          costPerUnit: r.costPerUnit,
+          totalCost: r.totalCost,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.totalCost - a.totalCost);
+  }, [filteredRecords]);
+
+  // Grouping: Date-Wise
+  const dateGroups = useMemo(() => {
+    const map = new Map<string, {
+      date: string;
+      totalCost: number;
+      totalPortions: number;
+      dishes: {
+        menuItemName: string;
+        categoryName: string;
+        portionsSold: number;
+        cost: number;
+        ingredients: { name: string; qty: number; unit: string; cost: number }[];
+      }[];
+    }>();
+
+    for (const r of filteredRecords) {
+      const d = r.date || 'Unknown Date';
+      let g = map.get(d);
+      if (!g) {
+        g = {
+          date: d,
+          totalCost: 0,
+          totalPortions: 0,
+          dishes: [],
+        };
+        map.set(d, g);
+      }
+      g.totalCost += r.totalCost;
+      g.totalPortions += (r.portionsSold || 1);
+
+      let dDish = g.dishes.find((item) => item.menuItemName === r.menuItemName);
+      if (!dDish) {
+        dDish = {
+          menuItemName: r.menuItemName,
+          categoryName: r.categoryName,
+          portionsSold: 0,
+          cost: 0,
+          ingredients: [],
+        };
+        g.dishes.push(dDish);
+      }
+      dDish.portionsSold += (r.portionsSold || 1);
+      dDish.cost += r.totalCost;
+
+      const dIng = dDish.ingredients.find((i) => i.name === r.ingredientName);
+      if (dIng) {
+        dIng.qty += r.quantityConsumed;
+        dIng.cost += r.totalCost;
+      } else {
+        dDish.ingredients.push({
+          name: r.ingredientName,
+          qty: r.quantityConsumed,
+          unit: r.unit,
+          cost: r.totalCost,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.date.localeCompare(a.date));
+  }, [filteredRecords]);
+
+  // Grouping: By Ingredient
+  const ingredientGroups = useMemo(() => {
+    const map = new Map<number, {
+      inventoryItemId: number;
+      ingredientName: string;
+      unit: string;
+      costPerUnit: number;
+      totalQuantity: number;
+      totalCost: number;
+      dishes: {
+        menuItemName: string;
+        categoryName: string;
+        quantity: number;
+        cost: number;
+      }[];
+    }>();
+
+    for (const r of filteredRecords) {
+      let g = map.get(r.inventoryItemId);
+      if (!g) {
+        g = {
+          inventoryItemId: r.inventoryItemId,
+          ingredientName: r.ingredientName,
+          unit: r.unit,
+          costPerUnit: r.costPerUnit,
+          totalQuantity: 0,
+          totalCost: 0,
+          dishes: [],
+        };
+        map.set(r.inventoryItemId, g);
+      }
+      g.totalQuantity += r.quantityConsumed;
+      g.totalCost += r.totalCost;
+
+      const d = g.dishes.find((item) => item.menuItemName === r.menuItemName);
+      if (d) {
+        d.quantity += r.quantityConsumed;
+        d.cost += r.totalCost;
+      } else {
+        g.dishes.push({
+          menuItemName: r.menuItemName,
+          categoryName: r.categoryName,
+          quantity: r.quantityConsumed,
+          cost: r.totalCost,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.totalCost - a.totalCost);
+  }, [filteredRecords]);
+
+  // CSV Export
+  const handleExportCSV = () => {
+    if (filteredRecords.length === 0) return;
+    const headers = [
+      'Date',
+      'Order #',
+      'Menu Item',
+      'Category',
+      'Portions Sold',
+      'Ingredient',
+      'Quantity Consumed',
+      'Unit',
+      'Cost per Unit',
+      'Total Cost',
+    ];
+    const rows = filteredRecords.map((r) => [
+      r.date,
+      r.orderNumber || '',
+      `"${r.menuItemName.replace(/"/g, '""')}"`,
+      `"${r.categoryName.replace(/"/g, '""')}"`,
+      r.portionsSold,
+      `"${r.ingredientName.replace(/"/g, '""')}"`,
+      r.quantityConsumed,
+      r.unit,
+      (r.costPerUnit / 100).toFixed(2),
+      (r.totalCost / 100).toFixed(2),
+    ]);
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute(
+      'download',
+      `inventory_consumption_${datePreset}_${new Date().toISOString().split('T')[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="space-y-3.5">
+      {/* Metric Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+        <div className="bg-white p-3 rounded-lg border border-gray-200">
+          <span className="text-[10px] text-gray-500 block">Total Stock Cost</span>
+          <span className="text-base font-bold text-gray-900 block mt-0.5">{formatCurrency(metrics.totalCost)}</span>
+          <span className="text-[10px] text-gray-400 mt-0.5 block">Ingredients value consumed</span>
+        </div>
+        <div className="bg-white p-3 rounded-lg border border-gray-200">
+          <span className="text-[10px] text-gray-500 block">Portions Prepared</span>
+          <span className="text-base font-bold text-blue-600 block mt-0.5">{metrics.totalPortions}</span>
+          <span className="text-[10px] text-gray-400 mt-0.5 block">Menu items ordered</span>
+        </div>
+        <div className="bg-white p-3 rounded-lg border border-gray-200">
+          <span className="text-[10px] text-gray-500 block">Ingredients Utilized</span>
+          <span className="text-base font-bold text-emerald-600 block mt-0.5">{metrics.uniqueIngredients} items</span>
+          <span className="text-[10px] text-gray-400 mt-0.5 block">Distinct raw items used</span>
+        </div>
+        <div className="bg-white p-3 rounded-lg border border-gray-200">
+          <span className="text-[10px] text-gray-500 block">Top Consuming Dish</span>
+          <span className="text-xs font-bold text-amber-600 truncate block mt-0.5" title={metrics.topDish}>
+            {metrics.topDish}
+          </span>
+          <span className="text-[10px] text-gray-400 mt-0.5 block">{formatCurrency(metrics.topCost)} consumed</span>
+        </div>
+      </div>
+
+      {/* Control Bar */}
+      <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          {/* Date range presets */}
+          <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-xs font-semibold">
+            {[
+              { key: 'today', label: 'Today' },
+              { key: 'yesterday', label: 'Yesterday' },
+              { key: 'last7', label: 'Last 7 Days' },
+              { key: 'thisMonth', label: 'This Month' },
+              { key: 'all', label: 'All Time' },
+              { key: 'custom', label: 'Custom' },
+            ].map((p) => (
+              <button
+                key={p.key}
+                onClick={() => setDatePreset(p.key as DatePreset)}
+                className={`px-2.5 py-1 rounded text-xs transition-all ${
+                  datePreset === p.key
+                    ? 'bg-white text-blue-600 shadow-xs font-bold'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Export CSV */}
+          <button
+            onClick={handleExportCSV}
+            disabled={filteredRecords.length === 0}
+            className="flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <Download size={12} className="text-gray-500" />
+            <span>Export CSV</span>
+          </button>
+        </div>
+
+        {/* Custom date range inputs */}
+        {datePreset === 'custom' && (
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100 text-xs">
+            <span className="text-gray-500 font-medium">From:</span>
+            <input
+              type="date"
+              value={customStart}
+              onChange={(e) => setCustomStart(e.target.value)}
+              className="px-2 py-0.5 border border-gray-200 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <span className="text-gray-500 font-medium">To:</span>
+            <input
+              type="date"
+              value={customEnd}
+              onChange={(e) => setCustomEnd(e.target.value)}
+              className="px-2 py-0.5 border border-gray-200 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <Button size="sm" onClick={loadData}>Apply</Button>
+          </div>
+        )}
+
+        {/* Sub-bar: View Switcher and Search */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-gray-500 mr-1">View:</span>
+            {[
+              { key: 'item', label: 'By Menu Item' },
+              { key: 'date', label: 'Date-Wise' },
+              { key: 'ingredient', label: 'By Ingredient' },
+              { key: 'ledger', label: 'Detailed Log' },
+            ].map((v) => (
+              <button
+                key={v.key}
+                onClick={() => setView(v.key as ConsumptionView)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                  view === v.key
+                    ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="w-56">
+            <SearchInput
+              placeholder="Search dish or stock..."
+              onChange={setSearch}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      {loading ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-xs text-gray-500">
+          Loading consumption data...
+        </div>
+      ) : filteredRecords.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">
+          <BarChart2 size={32} className="mx-auto mb-2 text-gray-300" />
+          <p className="text-xs font-semibold text-gray-700">No stock consumption recorded</p>
+          <p className="text-[11px] text-gray-400 mt-1 max-w-sm mx-auto">
+            Stock consumption is automatically tracked when menu items with configured recipes are ordered.
+          </p>
+        </div>
+      ) : view === 'item' ? (
+        /* ================== VIEW 1: BY MENU ITEM ================== */
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 font-semibold">
+                <tr>
+                  <th className="py-2.5 px-3">Menu Item</th>
+                  <th className="py-2.5 px-3">Category</th>
+                  <th className="py-2.5 px-3">Portions Sold</th>
+                  <th className="py-2.5 px-3">Stock Consumed (Ingredients)</th>
+                  <th className="py-2.5 px-3 text-right">Total Stock Cost</th>
+                  <th className="py-2.5 px-3 text-right">Avg / Portion</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {itemGroups.map((g) => {
+                  const isExpanded = expandedRows.has(g.menuItemName);
+                  const avgCost = g.portionsSold > 0 ? Math.round(g.totalCost / g.portionsSold) : 0;
+                  return (
+                    <React.Fragment key={g.menuItemName}>
+                      <tr
+                        onClick={() => toggleExpand(g.menuItemName)}
+                        className="hover:bg-blue-50/40 cursor-pointer transition-colors"
+                      >
+                        <td className="py-2.5 px-3 font-semibold text-gray-900">
+                          <div className="flex items-center gap-1.5">
+                            {isExpanded ? (
+                              <ChevronDown size={14} className="text-blue-600 shrink-0" />
+                            ) : (
+                              <ChevronRight size={14} className="text-gray-400 shrink-0" />
+                            )}
+                            <span>{g.menuItemName}</span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
+                            {g.categoryName}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-gray-700">
+                          {g.portionsSold} portions
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {g.ingredients.map((ing) => (
+                              <span
+                                key={ing.inventoryItemId}
+                                className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-medium border border-blue-100"
+                              >
+                                {ing.ingredientName}: {ing.quantityConsumed} {ing.unit}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-gray-900 text-right">
+                          {formatCurrency(g.totalCost)}
+                        </td>
+                        <td className="py-2.5 px-3 text-gray-500 text-right font-medium">
+                          {formatCurrency(avgCost)}
+                        </td>
+                      </tr>
+                      {/* Expanded Ingredient Breakdown Table */}
+                      {isExpanded && (
+                        <tr className="bg-gray-50/70">
+                          <td colSpan={6} className="py-2.5 px-6 border-b border-gray-100">
+                            <div className="bg-white rounded-md border border-gray-200 p-2.5 space-y-1.5 shadow-2xs">
+                              <span className="text-[11px] font-bold text-gray-700 block">
+                                Recipe Stock Breakdown for &ldquo;{g.menuItemName}&rdquo;
+                              </span>
+                              <table className="w-full text-left text-[11px]">
+                                <thead>
+                                  <tr className="border-b border-gray-100 text-gray-500 font-medium">
+                                    <th className="py-1">Raw Ingredient</th>
+                                    <th className="py-1">Total Quantity Consumed</th>
+                                    <th className="py-1 text-right">Cost per Unit</th>
+                                    <th className="py-1 text-right">Total Ingredient Cost</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                  {g.ingredients.map((ing) => (
+                                    <tr key={ing.inventoryItemId}>
+                                      <td className="py-1 font-semibold text-gray-800">{ing.ingredientName}</td>
+                                      <td className="py-1 text-gray-700">
+                                        {ing.quantityConsumed} {ing.unit}
+                                      </td>
+                                      <td className="py-1 text-right text-gray-500">
+                                        {formatCurrency(ing.costPerUnit)} / {ing.unit}
+                                      </td>
+                                      <td className="py-1 text-right font-bold text-blue-600">
+                                        {formatCurrency(ing.totalCost)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : view === 'date' ? (
+        /* ================== VIEW 2: DATE-WISE ================== */
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 font-semibold">
+                <tr>
+                  <th className="py-2.5 px-3">Date</th>
+                  <th className="py-2.5 px-3">Menu Items Prepared</th>
+                  <th className="py-2.5 px-3">Total Portions</th>
+                  <th className="py-2.5 px-3">Stock Consumed Summary</th>
+                  <th className="py-2.5 px-3 text-right">Day Stock Cost</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {dateGroups.map((dg) => {
+                  const isExpanded = expandedRows.has(dg.date);
+                  return (
+                    <React.Fragment key={dg.date}>
+                      <tr
+                        onClick={() => toggleExpand(dg.date)}
+                        className="hover:bg-blue-50/40 cursor-pointer transition-colors"
+                      >
+                        <td className="py-2.5 px-3 font-semibold text-gray-900">
+                          <div className="flex items-center gap-1.5">
+                            {isExpanded ? (
+                              <ChevronDown size={14} className="text-blue-600 shrink-0" />
+                            ) : (
+                              <ChevronRight size={14} className="text-gray-400 shrink-0" />
+                            )}
+                            <Calendar size={13} className="text-gray-400" />
+                            <span>{formatDate(dg.date)}</span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-gray-700">
+                          {dg.dishes.length} distinct dishes
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-gray-700">
+                          {dg.totalPortions} portions
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {dg.dishes.map((dish) => (
+                              <span
+                                key={dish.menuItemName}
+                                className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-medium"
+                              >
+                                {dish.menuItemName} ({dish.portionsSold})
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-gray-900 text-right">
+                          {formatCurrency(dg.totalCost)}
+                        </td>
+                      </tr>
+                      {/* Expanded Date Details */}
+                      {isExpanded && (
+                        <tr className="bg-gray-50/70">
+                          <td colSpan={5} className="py-2.5 px-6 border-b border-gray-100">
+                            <div className="bg-white rounded-md border border-gray-200 p-2.5 space-y-2 shadow-2xs">
+                              <span className="text-[11px] font-bold text-gray-700 block">
+                                Dishes Prepared on {formatDate(dg.date)}
+                              </span>
+                              <div className="space-y-1.5">
+                                {dg.dishes.map((dish) => (
+                                  <div
+                                    key={dish.menuItemName}
+                                    className="p-2 rounded bg-gray-50 border border-gray-100 flex items-center justify-between text-[11px]"
+                                  >
+                                    <div>
+                                      <span className="font-semibold text-gray-900">{dish.menuItemName}</span>
+                                      <span className="text-gray-500 ml-2">({dish.portionsSold} portions)</span>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {dish.ingredients.map((ing) => (
+                                          <span
+                                            key={ing.name}
+                                            className="px-1.5 py-0.2 rounded bg-white text-blue-700 text-[10px] border border-blue-200 font-medium"
+                                          >
+                                            {ing.name}: {ing.qty} {ing.unit} ({formatCurrency(ing.cost)})
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    <div className="font-bold text-gray-900">
+                                      {formatCurrency(dish.cost)}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : view === 'ingredient' ? (
+        /* ================== VIEW 3: BY INGREDIENT ================== */
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 font-semibold">
+                <tr>
+                  <th className="py-2.5 px-3">Raw Ingredient</th>
+                  <th className="py-2.5 px-3">Unit Cost Rate</th>
+                  <th className="py-2.5 px-3">Total Quantity Consumed</th>
+                  <th className="py-2.5 px-3">Consumed by Dishes</th>
+                  <th className="py-2.5 px-3 text-right">Total Ingredient Cost</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {ingredientGroups.map((ig) => {
+                  const key = String(ig.inventoryItemId);
+                  const isExpanded = expandedRows.has(key);
+                  return (
+                    <React.Fragment key={ig.inventoryItemId}>
+                      <tr
+                        onClick={() => toggleExpand(key)}
+                        className="hover:bg-blue-50/40 cursor-pointer transition-colors"
+                      >
+                        <td className="py-2.5 px-3 font-semibold text-gray-900">
+                          <div className="flex items-center gap-1.5">
+                            {isExpanded ? (
+                              <ChevronDown size={14} className="text-blue-600 shrink-0" />
+                            ) : (
+                              <ChevronRight size={14} className="text-gray-400 shrink-0" />
+                            )}
+                            <Package size={13} className="text-gray-400" />
+                            <span>{ig.ingredientName}</span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-gray-600">
+                          {formatCurrency(ig.costPerUnit)} / {ig.unit}
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-gray-800">
+                          {ig.totalQuantity} {ig.unit}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-wrap gap-1">
+                            {ig.dishes.map((d) => (
+                              <span
+                                key={d.menuItemName}
+                                className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-100"
+                              >
+                                {d.menuItemName}: {d.quantity} {ig.unit}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 font-bold text-gray-900 text-right">
+                          {formatCurrency(ig.totalCost)}
+                        </td>
+                      </tr>
+                      {/* Expanded Ingredient Breakdown */}
+                      {isExpanded && (
+                        <tr className="bg-gray-50/70">
+                          <td colSpan={5} className="py-2.5 px-6 border-b border-gray-100">
+                            <div className="bg-white rounded-md border border-gray-200 p-2.5 space-y-1.5 shadow-2xs">
+                              <span className="text-[11px] font-bold text-gray-700 block">
+                                Menu Items Consuming &ldquo;{ig.ingredientName}&rdquo;
+                              </span>
+                              <table className="w-full text-left text-[11px]">
+                                <thead>
+                                  <tr className="border-b border-gray-100 text-gray-500 font-medium">
+                                    <th className="py-1">Menu Item</th>
+                                    <th className="py-1">Category</th>
+                                    <th className="py-1">Stock Consumed</th>
+                                    <th className="py-1 text-right">Value Consumed</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                  {ig.dishes.map((d) => (
+                                    <tr key={d.menuItemName}>
+                                      <td className="py-1 font-semibold text-gray-800">{d.menuItemName}</td>
+                                      <td className="py-1 text-gray-500">{d.categoryName}</td>
+                                      <td className="py-1 font-medium text-gray-700">
+                                        {d.quantity} {ig.unit}
+                                      </td>
+                                      <td className="py-1 text-right font-bold text-emerald-600">
+                                        {formatCurrency(d.cost)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        /* ================== VIEW 4: DETAILED AUDIT LEDGER ================== */
+        <DataTable
+          columns={[
+            {
+              header: 'Date & Time',
+              accessor: 'timestamp',
+              render: (r: ItemStockConsumptionRecord) => (
+                <div>
+                  <span className="font-semibold text-gray-900 block">{formatDate(r.date)}</span>
+                  <span className="text-[10px] text-gray-400 block">{r.timestamp?.split(' ')[1] || ''}</span>
+                </div>
+              ),
+            },
+            {
+              header: 'Order #',
+              accessor: 'orderNumber',
+              render: (r: ItemStockConsumptionRecord) => (
+                <span className="font-mono text-xs text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded">
+                  {r.orderNumber || '—'}
+                </span>
+              ),
+            },
+            {
+              header: 'Menu Item',
+              accessor: 'menuItemName',
+              render: (r: ItemStockConsumptionRecord) => (
+                <div>
+                  <span className="font-semibold text-gray-900 block">{r.menuItemName}</span>
+                  <span className="text-[10px] text-gray-400">{r.categoryName}</span>
+                </div>
+              ),
+            },
+            {
+              header: 'Portions Sold',
+              accessor: 'portionsSold',
+              render: (r: ItemStockConsumptionRecord) => (
+                <span className="text-gray-700 font-medium">{r.portionsSold}</span>
+              ),
+            },
+            {
+              header: 'Ingredient',
+              accessor: 'ingredientName',
+              render: (r: ItemStockConsumptionRecord) => (
+                <span className="font-semibold text-gray-900">{r.ingredientName}</span>
+              ),
+            },
+            {
+              header: 'Quantity Consumed',
+              accessor: 'quantityConsumed',
+              render: (r: ItemStockConsumptionRecord) => (
+                <span className="font-bold text-gray-800">
+                  {r.quantityConsumed} {r.unit}
+                </span>
+              ),
+            },
+            {
+              header: 'Total Cost',
+              accessor: 'totalCost',
+              render: (r: ItemStockConsumptionRecord) => (
+                <span className="font-bold text-gray-900">{formatCurrency(r.totalCost)}</span>
+              ),
+            },
+          ]}
+          data={filteredRecords}
+          keyExtractor={(r) => r.transactionId}
+          emptyMessage="No stock consumption records found"
+        />
+      )}
     </div>
   );
 };

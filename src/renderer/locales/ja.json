@@ -523,7 +523,8 @@
     "cost": "原価",
     "noIngredientsConfigured": "このレシピには原材料が設定されていません",
     "selectItemForRecipe": "レシピの確認または設定を行うメニュー商品を選択してください",
-    "notes": "備考"
+    "notes": "備考",
+    "consumption": "消費レポート"
   },
   "reports": {
     "orderHistory": "注文履歴",
