@@ -146,7 +146,13 @@ const Inventory: React.FC = () => {
   useEffect(() => {
     if (activeTab === 'wastage') {
       inv.getTransactions().then((txns) => {
-        setWastageHistory(txns.filter((t) => t.transactionType === StockTransactionType.WASTAGE));
+        setWastageHistory(
+          txns.filter(
+            (t) =>
+              t.transactionType === StockTransactionType.WASTAGE ||
+              (t.transactionType as string) === 'waste'
+          )
+        );
       });
     }
   }, [activeTab, inv.getTransactions]);
@@ -188,9 +194,7 @@ const Inventory: React.FC = () => {
     try {
       const itemIds = menu.items.map((i) => i.id);
       const all = await inv.getAllRecipes(itemIds);
-      if (all && all.length > 0) {
-        setRecipes(all);
-      }
+      setRecipes(all ?? []);
     } catch {
       // ignore
     }
@@ -444,7 +448,13 @@ const Inventory: React.FC = () => {
             });
             setShowWastageLog(false);
             const txns = await inv.getTransactions();
-            setWastageHistory(txns.filter((t) => t.transactionType === StockTransactionType.WASTAGE));
+            setWastageHistory(
+              txns.filter(
+                (t) =>
+                  t.transactionType === StockTransactionType.WASTAGE ||
+                  (t.transactionType as string) === 'waste'
+              )
+            );
           }}
         />
       )}
@@ -798,7 +808,7 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
       header: t('inventory.status'),
       accessor: 'isActive',
       render: (s: Supplier) =>
-        s.isActive ? (
+        (s.isActive ?? (s as any).is_active === 1) ? (
           <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
             {t('common.active')}
           </span>
@@ -1099,7 +1109,11 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
                   width: '60px',
                   render: (r: Recipe) => (
                     <button
-                      onClick={() => onDeleteRecipe(r.id)}
+                      onClick={() => {
+                        if (confirm(t('inventory.deleteRecipeConfirm', 'Remove this ingredient from recipe?'))) {
+                          onDeleteRecipe(r.id);
+                        }
+                      }}
                       className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                       title={t('common.delete')}
                     >
@@ -2090,7 +2104,7 @@ interface WastageTabProps {
   onLogWastage: () => void;
 }
 
-const WastageTab: React.FC<WastageTabProps> = ({ items: _items, history, onLogWastage }) => {
+const WastageTab: React.FC<WastageTabProps> = ({ items, history, onLogWastage }) => {
   const { t } = useTranslation();
 
   const columns = [
@@ -2102,25 +2116,31 @@ const WastageTab: React.FC<WastageTabProps> = ({ items: _items, history, onLogWa
     {
       header: t('inventory.item'),
       accessor: 'itemName',
-      render: (tx: StockTransaction) => (
-        <span className="font-semibold text-gray-900">{tx.itemName ?? `#${tx.inventoryItemId}`}</span>
-      ),
+      render: (tx: StockTransaction) => {
+        const item = items.find((i) => i.id === tx.inventoryItemId);
+        const name = item?.name ?? tx.itemName ?? `#${tx.inventoryItemId}`;
+        return <span className="font-semibold text-gray-900">{name}</span>;
+      },
     },
     {
       header: t('inventory.quantity'),
       accessor: 'quantity',
-      render: (tx: StockTransaction) => (
-        <span className="font-semibold text-red-600">
-          -{tx.quantity} {tx.unit ?? ''}
-        </span>
-      ),
+      render: (tx: StockTransaction) => {
+        const item = items.find((i) => i.id === tx.inventoryItemId);
+        const unit = item?.unit ?? tx.unit ?? '';
+        return (
+          <span className="font-semibold text-red-600">
+            -{tx.quantity} {unit}
+          </span>
+        );
+      },
     },
     {
       header: t('inventory.reason'),
       accessor: 'reason',
       render: (tx: StockTransaction) => (
         <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-red-100 text-red-700">
-          {tx.reason || t('inventory.wastage')}
+          {t('inventory.wastage')}
         </span>
       ),
     },
@@ -2271,7 +2291,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, onClose, 
               onChange={(e) => setCurrentStock(e.target.value)}
               className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
-              step="0.5"
+              step="any"
             />
           </div>
           <div>
@@ -2284,7 +2304,7 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, onClose, 
               onChange={(e) => setMinStock(e.target.value)}
               className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
-              step="0.5"
+              step="any"
             />
           </div>
           <div>
@@ -2382,6 +2402,7 @@ const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
               onChange={(e) => setQuantity(e.target.value)}
               className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.quantityAdjustPlaceholder')}
+              step="any"
             />
           </div>
           <div>
@@ -2926,7 +2947,7 @@ const WastageLogModal: React.FC<WastageLogModalProps> = ({ items, onClose, onSav
             onChange={(e) => setQuantity(e.target.value)}
             className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             min="0"
-            step="0.5"
+            step="any"
           />
         </div>
         <div>
@@ -2970,9 +2991,13 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
   // Auto-fill unit from selected inventory item
   const selectedInvItem = inventoryItems.find((i) => i.id === Number(selectedItemId));
 
-  const handleItemChange = (id: number) => {
+  const handleItemChange = (id: number | '') => {
     setSelectedItemId(id);
-    const inv = inventoryItems.find((i) => i.id === id);
+    if (!id) {
+      setUnit('');
+      return;
+    }
+    const inv = inventoryItems.find((i) => i.id === Number(id));
     if (inv) setUnit(inv.unit);
   };
 
@@ -3015,7 +3040,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
           </label>
           <select
             value={selectedItemId}
-            onChange={(e) => handleItemChange(Number(e.target.value))}
+            onChange={(e) => handleItemChange(Number(e.target.value) || '')}
             className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectIngredientOption')}</option>
@@ -3029,7 +3054,7 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">
-              {t('inventory.quantityUsed')} *
+              {t('inventory.quantityUsed')} * {selectedInvItem ? `(${selectedInvItem.unit})` : ''}
             </label>
             <input
               type="number"
@@ -3037,15 +3062,16 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
               onChange={(e) => setQuantityUsed(e.target.value)}
               className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
-              step="0.01"
+              step="any"
+              placeholder={selectedInvItem ? `e.g. 0.25 ${selectedInvItem.unit}` : 'Quantity'}
             />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.unit')}</label>
             <input
-              value={unit}
-              onChange={(e) => setUnit(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={unit || selectedInvItem?.unit || ''}
+              readOnly
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
               placeholder={t('inventory.unitPlaceholder')}
             />
           </div>

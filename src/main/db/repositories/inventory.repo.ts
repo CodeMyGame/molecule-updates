@@ -64,20 +64,35 @@ export function adjustStock(
   const db = getDb();
 
   const adjustInTransaction = db.transaction(() => {
-    // PURCHASE and ADJUSTMENT add stock; CONSUMPTION and WASTAGE subtract
-    const addsStock = type === StockTransactionType.PURCHASE || type === StockTransactionType.ADJUSTMENT;
-    const adjustedQty = addsStock ? quantity : -quantity;
+    const rawQty = Number(quantity) || 0;
+    // For wastage and consumption, always deduct regardless of signed input
+    // For purchase, always add regardless of signed input
+    // For adjustment, preserve direction (positive adds, negative subtracts)
+    let adjustedQty: number;
+    let loggedQty: number;
+
+    if (type === StockTransactionType.PURCHASE) {
+      adjustedQty = Math.abs(rawQty);
+      loggedQty = Math.abs(rawQty);
+    } else if (type === StockTransactionType.WASTAGE || type === StockTransactionType.CONSUMPTION) {
+      adjustedQty = -Math.abs(rawQty);
+      loggedQty = Math.abs(rawQty);
+    } else {
+      // ADJUSTMENT
+      adjustedQty = rawQty;
+      loggedQty = Math.abs(rawQty);
+    }
 
     db.prepare(`
       UPDATE inventory_items
-      SET current_stock = current_stock + ?, updated_at = datetime('now')
+      SET current_stock = MAX(0, current_stock + ?), updated_at = datetime('now')
       WHERE id = ?
     `).run(adjustedQty, id);
 
     db.prepare(`
       INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
       VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, type, quantity, referenceType ?? null, referenceId ?? null, notes ?? null);
+    `).run(id, type, loggedQty, referenceType ?? null, referenceId ?? null, notes ?? null);
   });
 
   adjustInTransaction();
@@ -101,24 +116,32 @@ export function getTransactions(
   const params: unknown[] = [];
 
   if (itemId !== undefined) {
-    conditions.push('inventory_item_id = ?');
+    conditions.push('st.inventory_item_id = ?');
     params.push(itemId);
   }
   if (dateRange?.startDate) {
-    conditions.push('created_at >= ?');
+    conditions.push('st.created_at >= ?');
     params.push(dateRange.startDate);
   }
   if (dateRange?.endDate) {
-    conditions.push('created_at <= ?');
+    conditions.push('st.created_at <= ?');
     params.push(dateRange.endDate);
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-  const rows = db.prepare(`SELECT * FROM stock_transactions ${where} ORDER BY created_at DESC`).all(...params) as any[];
+  const rows = db.prepare(`
+    SELECT st.*, ii.name as item_name, ii.unit
+    FROM stock_transactions st
+    LEFT JOIN inventory_items ii ON st.inventory_item_id = ii.id
+    ${where}
+    ORDER BY st.created_at DESC
+  `).all(...params) as any[];
 
   return rows.map((row) => ({
     id: row.id,
     inventoryItemId: row.inventory_item_id,
+    itemName: row.item_name ?? undefined,
+    unit: row.unit ?? undefined,
     transactionType: row.transaction_type as StockTransactionType,
     quantity: row.quantity,
     referenceType: row.reference_type ?? undefined,

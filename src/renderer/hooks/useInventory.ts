@@ -325,7 +325,7 @@ export function useInventory(): UseInventoryReturn {
     try {
       if (window.electronAPI.recipes.getAll) {
         const result = await ipc<Recipe[]>(window.electronAPI.recipes.getAll());
-        if (Array.isArray(result) && result.length > 0) return result;
+        if (Array.isArray(result)) return result;
       }
     } catch {
       // Fallback
@@ -334,7 +334,7 @@ export function useInventory(): UseInventoryReturn {
     // 2. Try recipes.getByItem() with no arguments (supported in newer main process)
     try {
       const result = await ipc<Recipe[]>(window.electronAPI.recipes.getByItem());
-      if (Array.isArray(result) && result.length > 0) return result;
+      if (Array.isArray(result)) return result;
     } catch {
       // Fallback
     }

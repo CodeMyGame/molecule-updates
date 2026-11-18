@@ -11,9 +11,11 @@ export function deductForOrder(orderId: number): void {
     SELECT oi.id, oi.menu_item_id, oi.combo_id, oi.quantity, oi.name
     FROM order_items oi
     WHERE oi.order_id = ?
-      AND oi.id NOT IN (
-        SELECT reference_id FROM stock_transactions
-        WHERE reference_type = 'order_item' AND transaction_type = 'consumption'
+      AND NOT EXISTS (
+        SELECT 1 FROM stock_transactions st
+        WHERE st.reference_type = 'order_item'
+          AND st.reference_id = oi.id
+          AND st.transaction_type = 'consumption'
       )
   `).all(orderId) as any[];
 

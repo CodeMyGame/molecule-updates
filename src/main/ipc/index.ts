@@ -275,9 +275,26 @@ export function registerAllHandlers(): void {
   handle(INVENTORY.getItem, (id: number) => inventoryRepo.getById(id));
   handle(INVENTORY.create, (data) => inventoryRepo.create(data));
   handle(INVENTORY.update, (id: number, data) => inventoryRepo.update(id, data));
-  handle(INVENTORY.adjustStock, (id: number, quantity, type, refType?, refId?, notes?) =>
-    inventoryRepo.adjustStock(id, quantity, type, refType, refId, notes)
-  );
+  handle(INVENTORY.adjustStock, (id: number, quantityOrAdjustment: any, type?: any, refType?: string, refId?: number, notes?: string) => {
+    let q: number;
+    let t: any;
+    let rt = refType;
+    let ri = refId;
+    let n = notes;
+
+    if (typeof quantityOrAdjustment === 'object' && quantityOrAdjustment !== null) {
+      q = Number(quantityOrAdjustment.quantity ?? quantityOrAdjustment.qty) || 0;
+      t = quantityOrAdjustment.transactionType ?? quantityOrAdjustment.type;
+      rt = quantityOrAdjustment.referenceType ?? refType;
+      ri = quantityOrAdjustment.referenceId ?? refId;
+      n = quantityOrAdjustment.notes ?? notes;
+    } else {
+      q = Number(quantityOrAdjustment) || 0;
+      t = type;
+    }
+
+    return inventoryRepo.adjustStock(id, q, t, rt, ri, n);
+  });
   handle(INVENTORY.getLowStock, () => inventoryRepo.getLowStock());
   handle(INVENTORY.getTransactions, (itemId?: number, dateRange?) =>
     inventoryRepo.getTransactions(itemId, dateRange)
@@ -528,6 +545,14 @@ export function registerAllHandlers(): void {
     if (firstKot) {
       (firstKot as any).kotIds = kots.map((k) => k.id);
     }
+
+    // Ensure all items dispatched to kitchen have their recipe inventory deducted
+    try {
+      inventoryService.deductForOrder(orderId);
+    } catch (err) {
+      logger.error('Inventory deduction failed on KOT creation:', err, { orderId });
+    }
+
     return firstKot;
   });
   handle(KOT.getActive, () => kotRepo.getActive());
@@ -1100,20 +1125,35 @@ export function registerAllHandlers(): void {
 
   handle(RECIPES.create, (data: any) => {
     const db = getDb();
-    const result = db.prepare(
-      'INSERT INTO recipes (menu_item_id, inventory_item_id, quantity_used, unit) VALUES (?, ?, ?, ?)'
-    ).run(
-      data.menuItemId ?? data.menu_item_id,
-      data.inventoryItemId ?? data.inventory_item_id,
-      data.quantityUsed ?? data.quantity_used,
-      data.unit
-    );
+    const menuItemId = data.menuItemId ?? data.menu_item_id;
+    const inventoryItemId = data.inventoryItemId ?? data.inventory_item_id;
+    const quantityUsed = data.quantityUsed ?? data.quantity_used;
+    const unit = data.unit;
+
+    // Check if recipe entry already exists for this menu item and ingredient
+    const existing = db.prepare(
+      'SELECT id FROM recipes WHERE menu_item_id = ? AND inventory_item_id = ?'
+    ).get(menuItemId, inventoryItemId) as any;
+
+    let recipeId: number;
+    if (existing) {
+      db.prepare(
+        'UPDATE recipes SET quantity_used = ?, unit = ? WHERE id = ?'
+      ).run(quantityUsed, unit, existing.id);
+      recipeId = existing.id;
+    } else {
+      const result = db.prepare(
+        'INSERT INTO recipes (menu_item_id, inventory_item_id, quantity_used, unit) VALUES (?, ?, ?, ?)'
+      ).run(menuItemId, inventoryItemId, quantityUsed, unit);
+      recipeId = Number(result.lastInsertRowid);
+    }
+
     const row = db.prepare(`
       SELECT r.*, ii.name as ingredient_name, ii.unit as ingredient_unit, ii.cost_per_unit
       FROM recipes r
       LEFT JOIN inventory_items ii ON r.inventory_item_id = ii.id
       WHERE r.id = ?
-    `).get(result.lastInsertRowid);
+    `).get(recipeId);
     return mapRecipe(row);
   });
 
@@ -1141,7 +1181,16 @@ export function registerAllHandlers(): void {
   // ---- Suppliers ----
   handle(SUPPLIERS.getAll, () => {
     const db = getDb();
-    return db.prepare('SELECT * FROM suppliers WHERE is_active = 1 ORDER BY name').all();
+    const rows = db.prepare('SELECT * FROM suppliers WHERE is_active = 1 ORDER BY name').all() as any[];
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      phone: r.phone ?? undefined,
+      email: r.email ?? undefined,
+      address: r.address ?? undefined,
+      gstin: r.gstin ?? undefined,
+      isActive: r.isActive !== undefined ? !!r.isActive : (r.is_active === 1 || r.is_active === true),
+    }));
   });
 
   handle(SUPPLIERS.create, (data: any) => {
@@ -1149,15 +1198,43 @@ export function registerAllHandlers(): void {
     const result = db.prepare(
       'INSERT INTO suppliers (name, phone, email, address, gstin) VALUES (?, ?, ?, ?, ?)'
     ).run(data.name, data.phone ?? null, data.email ?? null, data.address ?? null, data.gstin ?? null);
-    return db.prepare('SELECT * FROM suppliers WHERE id = ?').get(result.lastInsertRowid);
+    const r = db.prepare('SELECT * FROM suppliers WHERE id = ?').get(result.lastInsertRowid) as any;
+    return {
+      id: r.id,
+      name: r.name,
+      phone: r.phone ?? undefined,
+      email: r.email ?? undefined,
+      address: r.address ?? undefined,
+      gstin: r.gstin ?? undefined,
+      isActive: r.is_active === 1,
+    };
   });
 
   handle(SUPPLIERS.update, (id: number, data: any) => {
     const db = getDb();
+    const existing = db.prepare('SELECT * FROM suppliers WHERE id = ?').get(id) as any;
+    if (!existing) throw new Error(`Supplier #${id} not found`);
+
+    const name = data.name ?? existing.name;
+    const phone = data.phone !== undefined ? (data.phone || null) : existing.phone;
+    const email = data.email !== undefined ? (data.email || null) : existing.email;
+    const address = data.address !== undefined ? (data.address || null) : existing.address;
+    const gstin = data.gstin !== undefined ? (data.gstin || null) : existing.gstin;
+    const isActive = data.isActive !== undefined ? (data.isActive ? 1 : 0) : (data.is_active !== undefined ? (data.is_active ? 1 : 0) : existing.is_active);
+
     db.prepare(
-      'UPDATE suppliers SET name = ?, phone = ?, email = ?, address = ?, gstin = ? WHERE id = ?'
-    ).run(data.name, data.phone ?? null, data.email ?? null, data.address ?? null, data.gstin ?? null, id);
-    return db.prepare('SELECT * FROM suppliers WHERE id = ?').get(id);
+      'UPDATE suppliers SET name = ?, phone = ?, email = ?, address = ?, gstin = ?, is_active = ? WHERE id = ?'
+    ).run(name, phone, email, address, gstin, isActive, id);
+    const updated = db.prepare('SELECT * FROM suppliers WHERE id = ?').get(id) as any;
+    return {
+      id: updated.id,
+      name: updated.name,
+      phone: updated.phone ?? undefined,
+      email: updated.email ?? undefined,
+      address: updated.address ?? undefined,
+      gstin: updated.gstin ?? undefined,
+      isActive: updated.is_active === 1,
+    };
   });
 
   // ---- Purchase Orders ----
@@ -1165,8 +1242,8 @@ export function registerAllHandlers(): void {
     id: item.id,
     poId: item.po_id,
     inventoryItemId: item.inventory_item_id,
-    itemName: item.item_name,
-    unit: item.unit,
+    itemName: item.item_name ?? 'Item',
+    unit: item.unit ?? '',
     quantity: item.quantity,
     unitCost: item.unit_cost,
     receivedQty: item.received_qty ?? 0,
@@ -1176,7 +1253,7 @@ export function registerAllHandlers(): void {
     const po = db.prepare(`
       SELECT po.*, s.name as supplier_name
       FROM purchase_orders po
-      JOIN suppliers s ON po.supplier_id = s.id
+      LEFT JOIN suppliers s ON po.supplier_id = s.id
       WHERE po.id = ?
     `).get(id) as any;
 
@@ -1185,7 +1262,7 @@ export function registerAllHandlers(): void {
     const items = db.prepare(`
       SELECT poi.*, ii.name as item_name, ii.unit
       FROM purchase_order_items poi
-      JOIN inventory_items ii ON poi.inventory_item_id = ii.id
+      LEFT JOIN inventory_items ii ON poi.inventory_item_id = ii.id
       WHERE poi.po_id = ?
     `).all(id) as any[];
 
@@ -1193,7 +1270,7 @@ export function registerAllHandlers(): void {
       id: po.id,
       poNumber: po.po_number,
       supplierId: po.supplier_id,
-      supplierName: po.supplier_name,
+      supplierName: po.supplier_name ?? undefined,
       status: po.status,
       totalAmount: po.total_amount,
       notes: po.notes ?? undefined,
@@ -1209,14 +1286,14 @@ export function registerAllHandlers(): void {
     const pos = db.prepare(`
       SELECT po.*, s.name as supplier_name
       FROM purchase_orders po
-      JOIN suppliers s ON po.supplier_id = s.id
+      LEFT JOIN suppliers s ON po.supplier_id = s.id
       ORDER BY po.created_at DESC
     `).all() as any[];
 
     const allItems = db.prepare(`
       SELECT poi.*, ii.name as item_name, ii.unit
       FROM purchase_order_items poi
-      JOIN inventory_items ii ON poi.inventory_item_id = ii.id
+      LEFT JOIN inventory_items ii ON poi.inventory_item_id = ii.id
     `).all() as any[];
 
     const itemsByPoId = new Map<number, any[]>();
