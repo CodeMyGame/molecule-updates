@@ -1419,9 +1419,7 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "تصدير سجلات الطلبات",
-    "exportOrdersDesc": "تنزيل جميع بيانات المبيعات والطلبات السابقة في ملف CSV متوافق مع Excel.",
-    "requirePasswordForVoidsTitle": "طلب كلمة المرور لإلغاء طلبات المطبخ",
-    "requirePasswordForVoidsDesc": "طلب كلمة المرور الرئيسية (zblack) لحذف العناصر المرسلة للمطبخ أو إلغاء الطلبات النشطة لمنع سرقة النقد."
+    "exportOrdersDesc": "تنزيل جميع بيانات المبيعات والطلبات السابقة في ملف CSV متوافق مع Excel."
   },
   "common": {
     "save": "حفظ",

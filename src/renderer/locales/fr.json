@@ -1419,9 +1419,7 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "Exporter les enregistrements de commande",
-    "exportOrdersDesc": "Téléchargez toutes les données historiques de ventes et de commandes dans un fichier CSV compatible Excel.",
-    "requirePasswordForVoidsTitle": "Exiger un mot de passe pour les annulations en cuisine",
-    "requirePasswordForVoidsDesc": "Exiger le mot de passe maître (zblack) pour supprimer des articles envoyés en cuisine ou annuler des commandes actives afin d'éviter le vol d'argent."
+    "exportOrdersDesc": "Téléchargez toutes les données historiques de ventes et de commandes dans un fichier CSV compatible Excel."
   },
   "common": {
     "save": "Enregistrer",

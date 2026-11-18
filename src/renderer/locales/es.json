@@ -1419,9 +1419,7 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "Exportar registros de pedidos",
-    "exportOrdersDesc": "Descargue todos los datos históricos de ventas y pedidos en un archivo CSV compatible con Excel.",
-    "requirePasswordForVoidsTitle": "Requerir contraseña para anulaciones y cancelaciones de cocina",
-    "requirePasswordForVoidsDesc": "Requerir contraseña maestra (zblack) para eliminar artículos ya enviados a cocina o cancelar pedidos activos para evitar robos."
+    "exportOrdersDesc": "Descargue todos los datos históricos de ventas y pedidos en un archivo CSV compatible con Excel."
   },
   "common": {
     "save": "Guardar",
