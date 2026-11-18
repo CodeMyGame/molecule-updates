@@ -1419,7 +1419,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "导出订单记录",
-    "exportOrdersDesc": "将所有历史销售和订单数据下载为兼容 Excel 的 CSV 文件。"
+    "exportOrdersDesc": "将所有历史销售和订单数据下载为兼容 Excel 的 CSV 文件。",
+    "requirePasswordForVoidsTitle": "后厨退菜与订单取消需要密码",
+    "requirePasswordForVoidsDesc": "删除已送厨菜品或取消有效订单需输入主密码（zblack），有效防止现金流失与作弊。"
   },
   "common": {
     "save": "保存",

@@ -1419,7 +1419,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "ઓર્ડર રેકોર્ડ નિકાસ કરો",
-    "exportOrdersDesc": "તમામ ઐતિહાસિક વેચાણ અને ઓર્ડર ડેટાને Excel-સુસંગત CSV ફાઇલમાં ડાઉનલોડ કરો."
+    "exportOrdersDesc": "તમામ ઐતિહાસિક વેચાણ અને ઓર્ડર ડેટાને Excel-સુસંગત CSV ફાઇલમાં ડાઉનલોડ કરો.",
+    "requirePasswordForVoidsTitle": "કિચન આઇટમ રદ કરવા માટે પાસવર્ડ જરૂરી કરો",
+    "requirePasswordForVoidsDesc": "રોકડ ચોરી રોકવા માટે રસોડામાં મોકલેલી વસ્તુઓ રદ કરવા અથવા સક્રિય ઓર્ડર રદ કરવા માટે માસ્ટર પાસવર્ડ (zblack) જરૂરી કરો."
   },
   "common": {
     "save": "સાચવો",

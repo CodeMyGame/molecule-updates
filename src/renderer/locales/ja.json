@@ -1419,7 +1419,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "注文記録のエクスポート",
-    "exportOrdersDesc": "過去のすべての売上および注文データを Excel 対応の CSV ファイルにダウンロードします。"
+    "exportOrdersDesc": "過去のすべての売上および注文データを Excel 対応の CSV ファイルにダウンロードします。",
+    "requirePasswordForVoidsTitle": "厨房送信後の取消・キャンセルにパスワードを要求",
+    "requirePasswordForVoidsDesc": "厨房送信済み商品の削除や進行中の注文キャンセルにマスターパスワード（zblack）を要求し、不正を防ぎます。"
   },
   "common": {
     "save": "保存",

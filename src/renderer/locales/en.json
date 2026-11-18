@@ -1419,7 +1419,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "Export Order Records",
-    "exportOrdersDesc": "Download all historical sales and order data to an Excel-compatible CSV file."
+    "exportOrdersDesc": "Download all historical sales and order data to an Excel-compatible CSV file.",
+    "requirePasswordForVoidsTitle": "Require Password for Kitchen Voids & Cancellations",
+    "requirePasswordForVoidsDesc": "Require master password (zblack) to delete items already sent to kitchen or cancel active orders to prevent cash theft."
   },
   "common": {
     "save": "Save",

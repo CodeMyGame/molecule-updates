@@ -1419,7 +1419,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "ऑर्डर रिकॉर्ड निर्यात करें",
-    "exportOrdersDesc": "सभी ऐतिहासिक बिक्री और ऑर्डर डेटा को Excel-संगत CSV फ़ाइल में डाउनलोड करें।"
+    "exportOrdersDesc": "सभी ऐतिहासिक बिक्री और ऑर्डर डेटा को Excel-संगत CSV फ़ाइल में डाउनलोड करें।",
+    "requirePasswordForVoidsTitle": "रसोई आइटम हटाने और रद्द करने के लिए पासवर्ड आवश्यक करें",
+    "requirePasswordForVoidsDesc": "नकद चोरी रोकने के लिए रसोई में भेजे गए आइटम हटाने या सक्रिय ऑर्डर रद्द करने हेतु मास्टर पासवर्ड (zblack) आवश्यक करें।"
   },
   "common": {
     "save": "सहेजें",
