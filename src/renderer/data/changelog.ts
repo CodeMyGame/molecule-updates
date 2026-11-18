@@ -2,7 +2,7 @@ export interface ReleaseHighlight {
   title: string;
   description: string;
   tag: 'New' | 'Improved' | 'Fix';
-  icon: 'QrCode' | 'Atom' | 'Palette' | 'Printer' | 'Languages' | 'ShieldCheck' | 'Move' | 'PackageCheck' | 'Sparkles' | 'Coins' | 'Zap';
+  icon: 'QrCode' | 'Atom' | 'Palette' | 'Printer' | 'Languages' | 'ShieldCheck' | 'Move' | 'PackageCheck' | 'Sparkles' | 'Coins' | 'Zap' | 'BarChart3' | 'Lock';
 }
 
 export interface ReleaseEntry {
@@ -17,26 +17,44 @@ export interface ReleaseEntry {
 export const RELEASES: ReleaseEntry[] = [
   {
     version: '1.1.22',
-    title: 'Takeaway Parcels, Partner Tags & Live KOT Table Status',
+    title: 'Inventory Analytics, Master Security & High-Performance Operations',
     date: 'Latest Update',
     badge: 'Latest',
-    summary: 'Dedicated Takeaway & Parcels shelf, custom delivery partner tags (Zomato, Swiggy, Blinkit), live KOT status on table cards, 1-click Excel order export, and high-contrast mode switcher.',
+    summary: 'Comprehensive menu item stock consumption reports, master password protection for kitchen voids, infinite scroll pagination for large datasets, automated inventory restocking on cancellations, takeaway parcels with partner tags, and live KOT table cards.',
     highlights: [
       {
-        title: 'Takeaway Parcels & Partner Tagging',
-        description: 'Tag takeaway orders with delivery partner presets (Zomato, Swiggy, Blinkit, Dunzo, Direct) or create custom tags (+ Add). Parcels are cleanly numbered (Parcel #1, Parcel #2) instead of long IDs.',
+        title: 'Menu Item Stock Consumption Reports',
+        description: 'Track exact raw ingredient consumption date-wise and item-wise. Inspect portions sold, ingredient quantities used, and total raw material cost across your full menu catalog.',
         tag: 'New',
+        icon: 'BarChart3',
+      },
+      {
+        title: 'Master Security for Kitchen Voids',
+        description: 'Post-KOT item voids and order cancellations are securely protected behind the master password (zblack) to eliminate kitchen shrinkage and unauthorized cancellations.',
+        tag: 'New',
+        icon: 'Lock',
+      },
+      {
+        title: 'Infinite Scroll for Large Datasets',
+        description: 'Blazing fast infinite scroll pagination across recipes, inventory lists, stock transactions, consumption ledgers, and billing tables with zero lag or pagination clicks.',
+        tag: 'New',
+        icon: 'Sparkles',
+      },
+      {
+        title: 'Automated Inventory Restocking',
+        description: 'Cancelling an order or removing an item post-KOT automatically restores all deducted ingredients back into live inventory with an audit ledger trail entry.',
+        tag: 'Improved',
         icon: 'PackageCheck',
       },
       {
-        title: 'Takeaway Shelf on Tables View',
-        description: 'View and manage all active takeaway parcels directly on the Tables floor screen in a dedicated shelf with 1-tap Quick Pay and real-time status badges.',
+        title: 'Takeaway Parcels & Partner Tagging',
+        description: 'Sequential daily parcel numbering (Parcel #1, Parcel #2) with delivery partner presets (Zomato, Swiggy, Blinkit, Dunzo, Direct) and a dedicated Takeaway Shelf on the Tables floor screen.',
         tag: 'New',
         icon: 'Move',
       },
       {
         title: 'Live KOT Status on Table Cards',
-        description: 'Occupied tables now display live kitchen progress (KOT Sent, Preparing, Ready for Pickup, Served) so servers know order status at a glance.',
+        description: 'Occupied dining tables display real-time kitchen progress badges (KOT Sent, Preparing, Ready for Pickup, Served) so servers know order status at a glance.',
         tag: 'New',
         icon: 'Zap',
       },
@@ -47,16 +65,10 @@ export const RELEASES: ReleaseEntry[] = [
         icon: 'ShieldCheck',
       },
       {
-        title: 'High-Contrast Order Mode Switcher',
-        description: 'Crystal-clear visual contrast between Dine In and Takeaway tabs with vibrant solid colors and real-time active order count badges on both modes.',
+        title: 'Natural Table Sorting & Contrast Tabs',
+        description: 'Tables sort naturally (T1, T2... T10) while preserving pinned order, paired with high-contrast Dine In and Takeaway tabs with real-time active order count badges.',
         tag: 'Improved',
-        icon: 'Sparkles',
-      },
-      {
-        title: 'Clean Mode Switching & Price Integrity',
-        description: 'Switching between Dine In and Takeaway cleanly isolates carts without cross-contamination. Re-ordering customer dishes with custom addons preserves exact base dish pricing.',
-        tag: 'Improved',
-        icon: 'ShieldCheck',
+        icon: 'Palette',
       },
     ],
   },

@@ -17,6 +17,8 @@ import {
   CheckCircle2,
   Calendar,
   Layers,
+  BarChart3,
+  Lock,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useWhatsNewStore } from '../../stores/whatsNew.store';
@@ -64,6 +66,10 @@ export const WhatsNewModal: React.FC = () => {
         return <Coins size={18} className="text-amber-500" />;
       case 'Zap':
         return <Zap size={18} className="text-yellow-500" />;
+      case 'BarChart3':
+        return <BarChart3 size={18} className="text-blue-600" />;
+      case 'Lock':
+        return <Lock size={18} className="text-rose-600" />;
       case 'Sparkles':
       default:
         return <Sparkles size={18} className="text-blue-600" />;
