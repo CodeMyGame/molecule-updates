@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, Trash2, Check } from 'lucide-react';
+import { AlertTriangle, Trash2, Check, Lock, ShieldCheck, KeyRound } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
+import { useAuthStore } from '../../stores/auth.store';
 
 interface VoidReasonModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (reason: string) => void;
+  onConfirm: (reason: string, staffId?: number) => void;
   title?: string;
   itemInfo?: {
     name: string;
@@ -33,17 +34,74 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
   itemInfo,
 }) => {
   const { t } = useTranslation();
+  const currentUser = useAuthStore((s) => s.currentUser);
+  const isManagerOrAdmin =
+    currentUser?.role?.toLowerCase() === 'admin' ||
+    currentUser?.role?.toLowerCase() === 'manager';
+
   const [selectedReason, setSelectedReason] = useState<string>('Customer Changed Mind');
   const [customReason, setCustomReason] = useState('');
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedReason('Customer Changed Mind');
+      setCustomReason('');
+      setPin('');
+      setPinError('');
+      setIsVerifying(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const reason = customReason.trim() ? customReason.trim() : selectedReason;
-    onConfirm(reason);
-    setSelectedReason('Customer Changed Mind');
-    setCustomReason('');
+    if (!reason) return;
+
+    if (isManagerOrAdmin) {
+      onConfirm(reason, currentUser?.id);
+      return;
+    }
+
+    // Require manager PIN
+    if (!pin || pin.length < 4) {
+      setPinError(t('voidModal.pinTooShort', 'Please enter a 4-digit Manager PIN'));
+      return;
+    }
+
+    setIsVerifying(true);
+    setPinError('');
+    try {
+      const res = await window.electronAPI.staff.verifyPin(pin);
+      if (!res || !res.valid) {
+        if (res?.error === 'INVALID_PIN') {
+          setPinError(t('voidModal.invalidPin', 'Invalid PIN. Only a Manager or Admin can authorize.'));
+        } else if (res?.error === 'NOT_AUTHORIZED') {
+          setPinError(t('voidModal.notAuthorized', 'This staff member is not an Admin or Manager.'));
+        } else if (res?.error?.startsWith('LOCKOUT:')) {
+          const secs = res.error.split(':')[1] || '30';
+          setPinError(t('voidModal.lockoutMsg', `Too many failed attempts. Please wait ${secs} seconds.`));
+        } else {
+          setPinError(res?.error || t('voidModal.invalidPin', 'Invalid PIN. Only a Manager or Admin can authorize.'));
+        }
+        setPin('');
+        setIsVerifying(false);
+        return;
+      }
+
+      setIsVerifying(false);
+      onConfirm(reason, res.staff?.id);
+    } catch (err: any) {
+      setIsVerifying(false);
+      setPinError(err.message || t('voidModal.authFailed', 'Verification failed'));
+    }
   };
+
+  const hasReason = !!selectedReason || !!customReason.trim();
+  const canConfirm = hasReason && (isManagerOrAdmin || pin.length >= 4) && !isVerifying;
 
   return (
     <Modal
@@ -53,7 +111,7 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
       size="md"
       footer={
         <div className="flex items-center justify-end gap-2 w-full">
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onClose} disabled={isVerifying}>
             {t('common.cancel', 'Cancel')}
           </Button>
           <Button
@@ -61,9 +119,11 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
             size="sm"
             icon={<Trash2 size={13} />}
             onClick={handleConfirm}
-            disabled={!selectedReason && !customReason.trim()}
+            disabled={!canConfirm}
           >
-            {t('voidModal.confirmVoid', 'Confirm Cancellation')}
+            {isVerifying
+              ? t('common.verifying', 'Verifying...')
+              : t('voidModal.confirmVoid', 'Confirm Cancellation')}
           </Button>
         </div>
       }
@@ -139,6 +199,68 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
             className="w-full text-xs px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-400"
           />
         </div>
+
+        {/* Role Authorization Section */}
+        {isManagerOrAdmin ? (
+          <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg flex items-center justify-between">
+            <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200 text-xs">
+              <ShieldCheck size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span>
+                <span className="font-semibold">{t('voidModal.authorizedAs', 'Authorized as')}</span>{' '}
+                {currentUser?.name}
+              </span>
+            </div>
+            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300">
+              {currentUser?.role}
+            </span>
+          </div>
+        ) : (
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg space-y-2">
+            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-semibold text-xs">
+              <Lock size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              <span>{t('voidModal.managerAuthRequired', 'Manager / Admin Authorization Required')}</span>
+            </div>
+            <p className="text-[11px] text-amber-800 dark:text-amber-300">
+              {t('voidModal.managerAuthNotice', 'Items or orders sent to the kitchen require a Manager or Admin PIN to cancel.')}
+            </p>
+
+            <div>
+              <div className="relative">
+                <KeyRound size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="password"
+                  maxLength={8}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={pin}
+                  onChange={(e) => {
+                    setPin(e.target.value.replace(/\D/g, ''));
+                    setPinError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && canConfirm) {
+                      e.preventDefault();
+                      handleConfirm();
+                    }
+                  }}
+                  placeholder={t('voidModal.enterPinPlaceholder', 'Enter 4-digit Manager PIN')}
+                  className={`w-full pl-9 pr-3 py-2 text-center tracking-[0.3em] font-mono text-sm font-bold border rounded-lg focus:outline-none focus:ring-2 bg-white dark:bg-gray-800 ${
+                    pinError
+                      ? 'border-red-500 focus:ring-red-400 text-red-600 dark:text-red-400'
+                      : 'border-amber-300 dark:border-amber-700 focus:ring-amber-400 focus:border-amber-500 text-gray-900 dark:text-white'
+                  }`}
+                  autoFocus
+                />
+              </div>
+              {pinError && (
+                <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1.5 flex items-center gap-1">
+                  <AlertTriangle size={13} className="shrink-0" />
+                  {pinError}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </Modal>
   );

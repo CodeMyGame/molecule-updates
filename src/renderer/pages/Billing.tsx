@@ -228,6 +228,7 @@ const Billing: React.FC = () => {
   const [showTempItemModal, setShowTempItemModal] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showCancelOrderModal, setShowCancelOrderModal] = useState(false);
+  const [orderToCancelId, setOrderToCancelId] = useState<number | null>(null);
   const [tempItemName, setTempItemName] = useState('');
   const [tempItemPrice, setTempItemPrice] = useState('');
 
@@ -1148,19 +1149,25 @@ const Billing: React.FC = () => {
 
   const handleFreeTable = useCallback(async () => {
     if (!transferMenu) return;
-    try {
-      await ipc(window.electronAPI.orders.updateStatus(transferMenu.orderId, 'cancelled'));
-      if (selectedTableId === transferMenu.sourceTableId) {
-        resetForNewTable(transferMenu.sourceTableId);
+    const ordId = transferMenu.orderId;
+    const srcTableId = transferMenu.sourceTableId;
+    setTransferMenu(null);
+    if (ordId) {
+      setOrderToCancelId(ordId);
+      setShowCancelOrderModal(true);
+    } else if (srcTableId) {
+      try {
+        await ipc(window.electronAPI.tables.updateStatus(srcTableId, 'free'));
+        if (selectedTableId === srcTableId) {
+          resetForNewTable(srcTableId);
+        }
+        toast.success(t('billingPage.tableFreedAndCancelled'));
+        refreshTables();
+      } catch (err: any) {
+        toast.error(err?.message ?? t('billingPage.failedToFreeTable'));
       }
-      toast.success(t('billingPage.tableFreedAndCancelled'));
-      refreshTables();
-    } catch (err: any) {
-      toast.error(err?.message ?? t('billingPage.failedToFreeTable'));
-    } finally {
-      setTransferMenu(null);
     }
-  }, [transferMenu, selectedTableId, resetForNewTable, refreshTables]);
+  }, [transferMenu, selectedTableId, resetForNewTable, refreshTables, t]);
 
   const handleSplitBillNext = useCallback(() => {
     if (!splitModal) return;
@@ -1449,6 +1456,7 @@ const Billing: React.FC = () => {
 
   const handleCancelOrder = useCallback(async () => {
     if (currentOrderId) {
+      setOrderToCancelId(currentOrderId);
       setShowCancelOrderModal(true);
     } else {
       clearCart();
@@ -1457,18 +1465,20 @@ const Billing: React.FC = () => {
   }, [currentOrderId, clearCart, t]);
 
   const handleConfirmCancelOrder = useCallback(
-    async (reason: string) => {
-      if (!currentOrderId) return;
+    async (reason: string, staffId?: number) => {
+      const targetOrderId = orderToCancelId || currentOrderId;
+      if (!targetOrderId) return;
       try {
-        await cancelOrder(currentOrderId, reason);
+        await cancelOrder(targetOrderId, reason, staffId);
         toast.success(t('toast.orderCancelled'));
         setShowCancelOrderModal(false);
+        setOrderToCancelId(null);
         refreshTables();
       } catch {
         toast.error(t('toast.cancelOrderFailed'));
       }
     },
-    [currentOrderId, cancelOrder, refreshTables, t]
+    [orderToCancelId, currentOrderId, cancelOrder, refreshTables, t]
   );
 
   const handlePaymentComplete = useCallback(
@@ -2920,7 +2930,10 @@ const Billing: React.FC = () => {
       {/* Cancel Order Void Reason Modal */}
       <VoidReasonModal
         isOpen={showCancelOrderModal}
-        onClose={() => setShowCancelOrderModal(false)}
+        onClose={() => {
+          setShowCancelOrderModal(false);
+          setOrderToCancelId(null);
+        }}
         onConfirm={handleConfirmCancelOrder}
         title={t('voidModal.cancelOrderTitle', 'Cancel Order — Select Reason')}
       />

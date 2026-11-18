@@ -70,7 +70,7 @@ interface UseOrdersReturn {
   createOrder: () => Promise<Order>;
   holdOrder: () => Promise<void>;
   unholdOrder: (orderId?: number) => Promise<void>;
-  cancelOrder: (orderId: number, reason?: string) => Promise<void>;
+  cancelOrder: (orderId: number, reason?: string, staffId?: number) => Promise<void>;
   completePayment: (data: PaymentData) => Promise<void>;
   printKot: (orderId?: number, shouldPrint?: boolean) => Promise<void>;
 }
@@ -246,9 +246,9 @@ export function useOrders(): UseOrdersReturn {
   );
 
   const cancelOrder = useCallback(
-    async (orderId: number, reason?: string) => {
+    async (orderId: number, reason?: string, staffId?: number) => {
       try {
-        await ipc(window.electronAPI.orders.updateStatus(orderId, 'cancelled', reason, currentUser?.id));
+        await ipc(window.electronAPI.orders.updateStatus(orderId, 'cancelled', reason, staffId ?? currentUser?.id));
         billingStore.clearCart();
         await fetchActiveOrders();
       } catch (err: any) {

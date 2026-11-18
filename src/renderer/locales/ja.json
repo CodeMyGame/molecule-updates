@@ -1666,7 +1666,16 @@
     "selectReason": "理由を選択:",
     "otherReason": "またはカスタム理由を入力:",
     "customPlaceholder": "例: アレルギーによる変更、テーブル4で再注文作成...",
-    "cancelOrderTitle": "注文キャンセル — 理由を選択"
+    "cancelOrderTitle": "注文キャンセル — 理由を選択",
+    "authorizedAs": "認証済み",
+    "managerAuthRequired": "マネージャー / 管理者の承認が必要です",
+    "managerAuthNotice": "厨房に送信済みの品目または注文をキャンセルするには、マネージャーまたは管理者のPINが必要です。",
+    "enterPinPlaceholder": "4桁のマネージャーPINを入力",
+    "pinTooShort": "4桁のマネージャーPINを入力してください",
+    "invalidPin": "無効なPINです。マネージャーまたは管理者のみが承認できます。",
+    "notAuthorized": "このスタッフは管理者またはマネージャーではありません。",
+    "lockoutMsg": "試行回数が多すぎます。{{seconds}}秒お待ちください。",
+    "authFailed": "認証に失敗しました"
   },
   "whatsNew": {
     "title": "Molecule POS の新機能",

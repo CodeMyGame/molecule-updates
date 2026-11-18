@@ -1666,7 +1666,16 @@
     "selectReason": "اختر السبب:",
     "otherReason": "أو اكتب توضيحاً مخصصاً:",
     "customPlaceholder": "مثال: حساسية طعام لدى الضيف، تمت إعادة الطلب على طاولة 4...",
-    "cancelOrderTitle": "إلغاء الطلب — اختيار السبب"
+    "cancelOrderTitle": "إلغاء الطلب — اختيار السبب",
+    "authorizedAs": "مخول بصفتك",
+    "managerAuthRequired": "مطلوب تفويض المدير / المشرف",
+    "managerAuthNotice": "تتطلب العناصر أو الطلبات المرسلة إلى المطبخ رمز PIN للمدير أو المشرف لإلغائها.",
+    "enterPinPlaceholder": "أدخل رمز PIN للمدير المكون من 4 أرقام",
+    "pinTooShort": "الرجاء إدخال رمز PIN للمدير المكون من 4 أرقام",
+    "invalidPin": "رمز PIN غير صالح. يمكن للمدير أو المشرف فقط التفويض.",
+    "notAuthorized": "هذا الموظف ليس مشرفًا أو مديرًا.",
+    "lockoutMsg": "محاولات فاشلة كثيرة جدًا. يرجى الانتظار {{seconds}} ثانية.",
+    "authFailed": "فشل التحقق"
   },
   "whatsNew": {
     "title": "ما الجديد في Molecule POS",

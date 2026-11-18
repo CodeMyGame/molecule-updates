@@ -1666,7 +1666,16 @@
     "selectReason": "选择原因：",
     "otherReason": "或输入自定义原因：",
     "customPlaceholder": "例如：顾客对食物过敏，已在4号桌重新下单...",
-    "cancelOrderTitle": "取消订单 — 选择原因"
+    "cancelOrderTitle": "取消订单 — 选择原因",
+    "authorizedAs": "授权身份",
+    "managerAuthRequired": "需要经理 / 管理员授权",
+    "managerAuthNotice": "已送至后厨的菜品或订单需要经理或管理员 PIN 码方可取消。",
+    "enterPinPlaceholder": "输入 4 位经理 PIN 码",
+    "pinTooShort": "请输入 4 位经理 PIN 码",
+    "invalidPin": "PIN 码无效。仅限经理或管理员授权。",
+    "notAuthorized": "该员工不是管理员或经理。",
+    "lockoutMsg": "失败尝试过多。请等待 {{seconds}} 秒。",
+    "authFailed": "验证失败"
   },
   "whatsNew": {
     "title": "Molecule POS 新功能",

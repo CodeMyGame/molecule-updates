@@ -1666,7 +1666,16 @@
     "selectReason": "Sélectionner un motif :",
     "otherReason": "Ou saisissez une explication personnalisée :",
     "customPlaceholder": "Ex. Client allergique, commande recréée sur table 4...",
-    "cancelOrderTitle": "Annuler la commande — Choisir un motif"
+    "cancelOrderTitle": "Annuler la commande — Choisir un motif",
+    "authorizedAs": "Autorisé en tant que",
+    "managerAuthRequired": "Autorisation du responsable / administrateur requise",
+    "managerAuthNotice": "Les articles ou commandes envoyés en cuisine nécessitent le code PIN d'un responsable ou administrateur pour être annulés.",
+    "enterPinPlaceholder": "Entrez le code PIN responsable à 4 chiffres",
+    "pinTooShort": "Veuillez entrer un code PIN responsable à 4 chiffres",
+    "invalidPin": "Code PIN invalide. Seul un responsable ou administrateur peut autoriser.",
+    "notAuthorized": "Ce membre du personnel n'est ni administrateur ni responsable.",
+    "lockoutMsg": "Trop de tentatives infructueuses. Veuillez patienter {{seconds}} secondes.",
+    "authFailed": "Échec de la vérification"
   },
   "whatsNew": {
     "title": "Nouveautés de Molecule POS",

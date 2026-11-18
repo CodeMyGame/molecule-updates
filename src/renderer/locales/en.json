@@ -1666,7 +1666,16 @@
     "selectReason": "Select Reason:",
     "otherReason": "Or Type Custom Explanation:",
     "customPlaceholder": "e.g., Guest had food allergy, order recreated on table 4...",
-    "cancelOrderTitle": "Cancel Order — Select Reason"
+    "cancelOrderTitle": "Cancel Order — Select Reason",
+    "authorizedAs": "Authorized as",
+    "managerAuthRequired": "Manager / Admin Authorization Required",
+    "managerAuthNotice": "Items or orders sent to the kitchen require a Manager or Admin PIN to cancel.",
+    "enterPinPlaceholder": "Enter 4-digit Manager PIN",
+    "pinTooShort": "Please enter a 4-digit Manager PIN",
+    "invalidPin": "Invalid PIN. Only a Manager or Admin can authorize.",
+    "notAuthorized": "This staff member is not an Admin or Manager.",
+    "lockoutMsg": "Too many failed attempts. Please wait {{seconds}} seconds.",
+    "authFailed": "Verification failed"
   },
   "whatsNew": {
     "title": "What's New in Molecule POS",

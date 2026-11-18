@@ -36,6 +36,7 @@ import TableLayout from '../components/tables/TableLayout';
 import Button from '../components/common/Button';
 import Modal from '../components/common/Modal';
 import ParcelNameModal from '../components/billing/ParcelNameModal';
+import VoidReasonModal from '../components/billing/VoidReasonModal';
 
 type TableFormData = {
   name: string;
@@ -326,12 +327,32 @@ const Tables: React.FC = () => {
     }
   };
 
-  const handleFreeTable = async (table: Table, orderId: number) => {
+  const [tableToCancel, setTableToCancel] = useState<{ table: Table; orderId: number } | null>(null);
+
+  const handleFreeTable = (table: Table, orderId?: number) => {
     setTableContextMenu(null);
     setShowStatusModal(false);
+    if (orderId) {
+      setTableToCancel({ table, orderId });
+    } else {
+      ipc(window.electronAPI.tables.updateStatus(table.id, TableStatus.FREE))
+        .then(() => {
+          toast.success(t('billingPage.tableFreedAndCancelled'));
+          refetch();
+          fetchAllTableOrders();
+        })
+        .catch((err: any) => {
+          toast.error(err?.message ?? t('billingPage.failedToFreeTable'));
+        });
+    }
+  };
+
+  const handleConfirmCancelTableOrder = async (reason: string, staffId?: number) => {
+    if (!tableToCancel) return;
     try {
-      await ipc(window.electronAPI.orders.updateStatus(orderId, 'cancelled'));
+      await ipc(window.electronAPI.orders.updateStatus(tableToCancel.orderId, 'cancelled', reason, staffId));
       toast.success(t('billingPage.tableFreedAndCancelled'));
+      setTableToCancel(null);
       await refetch();
       await fetchAllTableOrders();
     } catch (err: any) {
@@ -1739,6 +1760,14 @@ const Tables: React.FC = () => {
         onClose={() => setShowParcelModal(false)}
         onConfirm={handleConfirmParcelName}
         currentName={useBillingStore.getState().parcelName}
+      />
+
+      {/* Cancel Order Void Reason Modal */}
+      <VoidReasonModal
+        isOpen={!!tableToCancel}
+        onClose={() => setTableToCancel(null)}
+        onConfirm={handleConfirmCancelTableOrder}
+        title={t('voidModal.cancelOrderTitle', 'Cancel Order — Select Reason')}
       />
     </div>
   );

@@ -1091,6 +1091,44 @@ suite('8. Void Audit Logging, Post-Prep Wastage & Order Cancellations', () => {
     const canCancelDirectly = !isBilled || staffRole === 'admin';
     assertEqual(canCancelDirectly, false, 'Waiter cannot cancel billed order without admin override');
   });
+
+  test('VOD-05 Manager/Admin PIN verification for post-KOT item voids & cancellations', () => {
+    function verifyManagerPin(enteredPin) {
+      const allStaff = db.prepare('SELECT * FROM staff WHERE is_active = 1').all();
+      const matched = allStaff.find(s => bcrypt.compareSync(enteredPin, s.pin));
+      if (!matched) return { valid: false, error: 'INVALID_PIN' };
+      const role = (matched.role || '').toLowerCase();
+      if (role !== 'admin' && role !== 'manager') {
+        return { valid: false, error: 'NOT_AUTHORIZED' };
+      }
+      return { valid: true, staff: matched };
+    }
+
+    // Cashier attempt (5678) should be rejected
+    const cashierAuth = verifyManagerPin('5678');
+    assertEqual(cashierAuth.valid, false, 'Cashier cannot authorize void');
+    assertEqual(cashierAuth.error, 'NOT_AUTHORIZED');
+
+    // Wrong PIN (9999) should be rejected
+    const wrongAuth = verifyManagerPin('9999');
+    assertEqual(wrongAuth.valid, false, 'Invalid PIN rejected');
+    assertEqual(wrongAuth.error, 'INVALID_PIN');
+
+    // Admin/Manager PIN (1234) should be authorized
+    const managerAuth = verifyManagerPin('1234');
+    assertEqual(managerAuth.valid, true, 'Manager PIN accepted');
+    assertEqual(managerAuth.staff.name, 'Admin Manager');
+
+    // Stamping void_items with authorized manager
+    db.prepare(`
+      INSERT INTO void_items (order_id, order_number, table_name, menu_item_id, item_name, quantity, unit_price, total_amount, reason, staff_id, staff_name)
+      VALUES (?, 'ORD-MGR-AUTH', 'Table 2', 1, 'Classic Burger', 1, 15000, 15000, 'Customer changed mind (Manager Approved)', ?, ?)
+    `).run(dineInOrderId, managerAuth.staff.id, managerAuth.staff.name);
+
+    const loggedVoid = db.prepare("SELECT * FROM void_items WHERE order_number = 'ORD-MGR-AUTH'").get();
+    assertEqual(loggedVoid.staff_id, 1);
+    assertEqual(loggedVoid.staff_name, 'Admin Manager');
+  });
 });
 
 // -------------------------------------------------------------

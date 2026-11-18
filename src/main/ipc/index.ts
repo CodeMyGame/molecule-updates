@@ -298,6 +298,35 @@ export function registerAllHandlers(): void {
     clearPinFailures();
     return staff;
   });
+  handle(STAFF.verifyPin, async (pin: string) => {
+    try {
+      checkPinRateLimit();
+    } catch (err: any) {
+      return { valid: false, error: err.message };
+    }
+    const trimmedPin = typeof pin === 'string' ? pin.trim() : '';
+    if (!trimmedPin) {
+      return { valid: false, error: 'PIN_REQUIRED' };
+    }
+    const staff = await staffRepo.findByPinAsync(trimmedPin);
+    if (!staff) {
+      recordPinFailure();
+      return { valid: false, error: 'INVALID_PIN' };
+    }
+    const roleName = staff.role?.name?.toLowerCase();
+    if (roleName !== 'admin' && roleName !== 'manager') {
+      return { valid: false, error: 'NOT_AUTHORIZED' };
+    }
+    clearPinFailures();
+    return {
+      valid: true,
+      staff: {
+        id: staff.id,
+        name: staff.name,
+        role: staff.role?.name,
+      },
+    };
+  });
   handle(STAFF.clockIn, (staffId: number) => staffRepo.clockIn(staffId));
   handle(STAFF.clockOut, (staffId: number) => staffRepo.clockOut(staffId));
   handle(STAFF.getAttendance, (staffId?: number, dateRange?) =>

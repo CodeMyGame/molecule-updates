@@ -572,21 +572,21 @@ const CartPanel: React.FC<CartPanelProps> = ({
   const clearCart = useBillingStore((s) => s.clearCart);
 
   // Remove item: if it's already saved to the DB order, delete it there with reason
-  const handleRemove = useCallback(async (index: number, reason?: string) => {
+  const handleRemove = useCallback(async (index: number, reason?: string, staffId?: number) => {
     const item = cart[index];
     if (currentOrderId && index < syncedItemCount && item.orderItemId) {
       try {
-        await ipc(window.electronAPI.orders.removeItem(currentOrderId, item.orderItemId, reason));
+        await ipc(window.electronAPI.orders.removeItem(currentOrderId, item.orderItemId, reason, staffId));
       } catch {
         // DB removal failed — still remove from local cart to stay consistent
       }
     }
 
-    // Check if this is the last item — if so, delete the entire order
+    // Check if this is the last item — if so, cancel the entire order
     const isLastItem = cart.length === 1;
     if (isLastItem && currentOrderId) {
       try {
-        await ipc(window.electronAPI.orders.delete(currentOrderId));
+        await ipc(window.electronAPI.orders.updateStatus(currentOrderId, 'cancelled', reason, staffId));
       } catch { /* ignore */ }
       clearCart();
       onItemRemoved?.();
@@ -597,10 +597,10 @@ const CartPanel: React.FC<CartPanelProps> = ({
     onItemRemoved?.();
   }, [cart, currentOrderId, syncedItemCount, removeFromCart, clearCart, onItemRemoved]);
 
-  const handleConfirmVoid = useCallback(async (reason: string) => {
+  const handleConfirmVoid = useCallback(async (reason: string, staffId?: number) => {
     if (!pendingVoid) return;
     for (const idx of [...pendingVoid.indices].sort((a, b) => b - a)) {
-      await handleRemove(idx, reason);
+      await handleRemove(idx, reason, staffId);
     }
     setPendingVoid(null);
   }, [pendingVoid, handleRemove]);

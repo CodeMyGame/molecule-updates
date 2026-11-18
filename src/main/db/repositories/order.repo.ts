@@ -600,6 +600,12 @@ export function updateStatus(
         if (order) {
           const tableName = order.table_name_snapshot || order.table_name || 'Counter';
           const voidReason = reason || 'Order Cancelled';
+          const effectiveStaffId = staffId ?? order.staff_id ?? null;
+          let effectiveStaffName = order.staff_name;
+          if (!effectiveStaffName && effectiveStaffId) {
+            const sRow = db.prepare('SELECT name FROM staff WHERE id = ?').get(effectiveStaffId) as any;
+            if (sRow) effectiveStaffName = sRow.name;
+          }
           const items = db.prepare(`
             SELECT oi.*, v.name as variation_name
             FROM order_items oi
@@ -625,8 +631,8 @@ export function updateStatus(
               item.unit_price,
               item.total,
               voidReason,
-              staffId ?? order.staff_id ?? null,
-              order.staff_name ?? null
+              effectiveStaffId,
+              effectiveStaffName ?? null
             );
 
             // Restock inventory for each cancelled item if it was previously deducted
@@ -901,6 +907,12 @@ export function removeItem(
     try {
       const tableName = item.table_name_snapshot || item.table_name || 'Counter';
       const voidReason = reason || 'Item Removed / Cancelled';
+      const effectiveStaffId = staffId ?? item.order_staff_id ?? null;
+      let effectiveStaffName = item.staff_name;
+      if (!effectiveStaffName && effectiveStaffId) {
+        const sRow = db.prepare('SELECT name FROM staff WHERE id = ?').get(effectiveStaffId) as any;
+        if (sRow) effectiveStaffName = sRow.name;
+      }
       db.prepare(`
         INSERT INTO void_items (
           order_id, order_number, table_name, menu_item_id, item_name,
@@ -918,8 +930,8 @@ export function removeItem(
         item.unit_price,
         item.total,
         voidReason,
-        staffId ?? item.order_staff_id ?? null,
-        item.staff_name ?? null
+        effectiveStaffId,
+        effectiveStaffName ?? null
       );
     } catch (err) {
       logger.error('Failed to log void item on removeItem:', err, { orderId: item.order_id, orderItemId });

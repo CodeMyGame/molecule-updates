@@ -120,6 +120,7 @@ export const STAFF = {
   update: 'staff:update',
   delete: 'staff:delete',
   login: 'staff:login',
+  verifyPin: 'staff:verifyPin',
   clockIn: 'staff:clockIn',
   clockOut: 'staff:clockOut',
   getAttendance: 'staff:getAttendance',

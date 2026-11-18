@@ -128,6 +128,7 @@ const api = {
     update: (id: number, data: any) => ipcRenderer.invoke('staff:update', id, data),
     delete: (id: number) => ipcRenderer.invoke('staff:delete', id),
     login: (pin: string) => ipcRenderer.invoke('staff:login', pin),
+    verifyPin: (pin: string) => ipcRenderer.invoke('staff:verifyPin', pin),
     clockIn: (staffId: number) => ipcRenderer.invoke('staff:clockIn', staffId),
     clockOut: (staffId: number) => ipcRenderer.invoke('staff:clockOut', staffId),
     getAttendance: (staffId?: number, filters?: any) => ipcRenderer.invoke('staff:getAttendance', staffId, filters),

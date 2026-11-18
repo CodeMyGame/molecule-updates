@@ -1666,7 +1666,16 @@
     "selectReason": "Seleccionar motivo:",
     "otherReason": "O escriba una explicación personalizada:",
     "customPlaceholder": "Ej. El cliente tenía alergia, pedido recreado en mesa 4...",
-    "cancelOrderTitle": "Cancelar pedido — Seleccionar motivo"
+    "cancelOrderTitle": "Cancelar pedido — Seleccionar motivo",
+    "authorizedAs": "Autorizado como",
+    "managerAuthRequired": "Se requiere autorización de Gerente / Administrador",
+    "managerAuthNotice": "Los artículos o pedidos enviados a la cocina requieren el PIN de un Gerente o Administrador para cancelarse.",
+    "enterPinPlaceholder": "Ingrese el PIN de Gerente de 4 dígitos",
+    "pinTooShort": "Por favor ingrese un PIN de Gerente de 4 dígitos",
+    "invalidPin": "PIN no válido. Solo un Gerente o Administrador puede autorizar.",
+    "notAuthorized": "Este miembro del personal no es Administrador ni Gerente.",
+    "lockoutMsg": "Demasiados intentos fallidos. Espere {{seconds}} segundos.",
+    "authFailed": "Error de verificación"
   },
   "whatsNew": {
     "title": "Novedades en Molecule POS",
