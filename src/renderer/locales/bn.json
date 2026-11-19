@@ -11,7 +11,8 @@
     "settings": "সেটিংস",
     "logout": "লগ আউট",
     "collapseSidebar": "সাইডবার সংকুচিত করুন",
-    "expandSidebar": "সাইডবার প্রসারিত করুন"
+    "expandSidebar": "সাইডবার প্রসারিত করুন",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "দিন খোলা",
@@ -239,7 +240,8 @@
     "kotPending": "KOT বাকি",
     "payNow": "পরিশোধ",
     "walkInGuest": "ওয়াক-ইন গ্রাহক",
-    "itemsCount": "{{count}}টি আইটেম"
+    "itemsCount": "{{count}}টি আইটেম",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "রান্নাঘর ডিসপ্লে",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "আপলোড করা ফাইল দিয়ে মেনু সফলভাবে প্রতিস্থাপিত হয়েছে!",
-    "station": "স্টেশন"
+    "station": "স্টেশন",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "বিল প্রিভিউ",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "একটি নতুন সফটওয়্যার সংস্করণ উপলব্ধ। ডাউনলোড শুরু করতে নিচে ক্লিক করুন।",
-    "downloadUpdate": "আপডেট ডাউনলোড করুন"
+    "downloadUpdate": "আপডেট ডাউনলোড করুন",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "অঞ্চল ও ভাষা",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "রিলিজ",
     "gotIt": "বুঝেছি, চলুন!",
     "explorePos": "পিওএস এক্সপ্লোর করুন"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

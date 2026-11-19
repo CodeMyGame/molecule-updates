@@ -1,0 +1,1582 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Burger",
+      "sortOrder": 1,
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "name": "Pizza",
+      "sortOrder": 2,
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "name": "Snacks",
+      "sortOrder": 3,
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "name": "Momos",
+      "sortOrder": 4,
+      "isActive": true
+    },
+    {
+      "id": 5,
+      "name": "Maggie",
+      "sortOrder": 5,
+      "isActive": true
+    },
+    {
+      "id": 6,
+      "name": "Pasta",
+      "sortOrder": 6,
+      "isActive": true
+    },
+    {
+      "id": 7,
+      "name": "Wrap",
+      "sortOrder": 7,
+      "isActive": true
+    },
+    {
+      "id": 8,
+      "name": "Garlic Bread",
+      "sortOrder": 8,
+      "isActive": true
+    },
+    {
+      "id": 9,
+      "name": "Sandwich",
+      "sortOrder": 9,
+      "isActive": true
+    },
+    {
+      "id": 10,
+      "name": "Spring Roll",
+      "sortOrder": 10,
+      "isActive": true
+    },
+    {
+      "id": 11,
+      "name": "Veg. Kabab",
+      "sortOrder": 11,
+      "isActive": true
+    },
+    {
+      "id": 12,
+      "name": "Hot & Cold Drinks",
+      "sortOrder": 12,
+      "isActive": true
+    },
+    {
+      "id": 13,
+      "name": "Mocktails",
+      "sortOrder": 13,
+      "isActive": true
+    },
+    {
+      "id": 14,
+      "name": "Shakes",
+      "sortOrder": 14,
+      "isActive": true
+    },
+    {
+      "id": 15,
+      "name": "Dessert",
+      "sortOrder": 15,
+      "isActive": true
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "name": "OB Street",
+      "shortCode": "OBST",
+      "categoryId": 1,
+      "basePrice": 5000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 2,
+      "name": "OB Amazing Street",
+      "shortCode": "OAST",
+      "categoryId": 1,
+      "basePrice": 7000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 3,
+      "name": "OB Amazing",
+      "shortCode": "OBAM",
+      "categoryId": 1,
+      "basePrice": 10000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 4,
+      "name": "OB Peppery",
+      "shortCode": "OBPB",
+      "categoryId": 1,
+      "basePrice": 11000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 5,
+      "name": "OB Nachos",
+      "shortCode": "OBNC",
+      "categoryId": 1,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 6,
+      "name": "OB Onion Ring",
+      "shortCode": "OBOR",
+      "categoryId": 1,
+      "basePrice": 13000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 7,
+      "name": "OB Cheese Corn",
+      "shortCode": "OBCC",
+      "categoryId": 1,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 8,
+      "name": "OB Paneer Jalapeno",
+      "shortCode": "OBPJ",
+      "categoryId": 1,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 9,
+      "name": "OB Punjabi Masala",
+      "shortCode": "OBPM",
+      "categoryId": 1,
+      "basePrice": 17000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 9,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Paneer Makhani",
+      "shortCode": "OPMB",
+      "categoryId": 1,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 10,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Paneer BBQ",
+      "shortCode": "OPBB",
+      "categoryId": 1,
+      "basePrice": 18000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 11,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroupIds": [
+        101
+      ]
+    },
+    {
+      "id": 12,
+      "name": "OB Cheese Pizza",
+      "shortCode": "OBCP",
+      "categoryId": 2,
+      "basePrice": 11000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 11000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 20000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 13,
+      "name": "OB Classic Pizza",
+      "shortCode": "OBCL",
+      "categoryId": 2,
+      "basePrice": 15000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 15000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 23000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 14,
+      "name": "OB Paneer Peppery",
+      "shortCode": "OPPP",
+      "categoryId": 2,
+      "basePrice": 18000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 18000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 27000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 15,
+      "name": "OB Triple Cheeee Margherita Pizza",
+      "shortCode": "OTCM",
+      "categoryId": 2,
+      "basePrice": 18000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 18000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 27000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 16,
+      "name": "OB Veggie Corn",
+      "shortCode": "OBVC",
+      "categoryId": 2,
+      "basePrice": 19000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 19000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 28000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Paneer Makhani",
+      "shortCode": "OPMP",
+      "categoryId": 2,
+      "basePrice": 21000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 21000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 30000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 18,
+      "name": "OB Cheese Mushroom",
+      "shortCode": "OCMP",
+      "categoryId": 2,
+      "basePrice": 21000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 21000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 31000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 19,
+      "name": "OB Maxican Delight",
+      "shortCode": "OBMD",
+      "categoryId": 2,
+      "basePrice": 22000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 22000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 31000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 20,
+      "name": "OB Exotica Spicy",
+      "shortCode": "OBES",
+      "categoryId": 2,
+      "basePrice": 25000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 9,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 25000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 36000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 21,
+      "name": "OB Farm House",
+      "shortCode": "OBFH",
+      "categoryId": 2,
+      "basePrice": 27000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 10,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 27000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 36000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 22,
+      "name": "OB Mushroom Peri Peri",
+      "shortCode": "OBMP",
+      "categoryId": 2,
+      "basePrice": 29000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 11,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 29000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 38000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 23,
+      "name": "OB Paneer BBQ Pizza",
+      "shortCode": "OPBP",
+      "categoryId": 2,
+      "basePrice": 32000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 12,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "name": "Small",
+          "price": 32000,
+          "isDefault": true
+        },
+        {
+          "name": "Large",
+          "price": 41000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": [
+        102
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Crazy Masala Fries",
+      "shortCode": "CMFR",
+      "categoryId": 3,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Snacks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 25,
+      "name": "Crazy Fries With Sauce",
+      "shortCode": "CFWS",
+      "categoryId": 3,
+      "basePrice": 15000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Snacks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 26,
+      "name": "Peri Peri Fries",
+      "shortCode": "PPFR",
+      "categoryId": 3,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Snacks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 27,
+      "name": "Cheesy Fries",
+      "shortCode": "CHFR",
+      "categoryId": 3,
+      "basePrice": 17000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Snacks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 28,
+      "name": "Cheesy Nachos",
+      "shortCode": "CHNC",
+      "categoryId": 3,
+      "basePrice": 19000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Snacks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 29,
+      "name": "Veg. Fry Momos",
+      "shortCode": "VFMO",
+      "categoryId": 4,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Momos",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 30,
+      "name": "Veg. Steam Momos",
+      "shortCode": "VSMO",
+      "categoryId": 4,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Momos",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 31,
+      "name": "OB Masala Maggie",
+      "shortCode": "OBMM",
+      "categoryId": 5,
+      "basePrice": 10000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Maggie",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 32,
+      "name": "OB Cheese Maggie",
+      "shortCode": "OBCM",
+      "categoryId": 5,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Maggie",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 33,
+      "name": "OB Corn Maggie",
+      "shortCode": "OBCN",
+      "categoryId": 5,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Maggie",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 34,
+      "name": "OB Spicy Cottage",
+      "shortCode": "OSCP",
+      "categoryId": 6,
+      "basePrice": 15000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 35,
+      "name": "OB Cheese Pasta",
+      "shortCode": "OCPA",
+      "categoryId": 6,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 36,
+      "name": "OB Spicy Cheese Cottage",
+      "shortCode": "OSCC",
+      "categoryId": 6,
+      "basePrice": 18000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 37,
+      "name": "Tandoori Paneer Pasta",
+      "shortCode": "TPPA",
+      "categoryId": 6,
+      "basePrice": 20000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 38,
+      "name": "OB Cheese Potato Wrap",
+      "shortCode": "OCPW",
+      "categoryId": 7,
+      "basePrice": 15000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Wrap",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 39,
+      "name": "OB Paneer Wrap",
+      "shortCode": "OBPW",
+      "categoryId": 7,
+      "basePrice": 17000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Wrap",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 40,
+      "name": "OB Paneer Exotica Wrap",
+      "shortCode": "OPEW",
+      "categoryId": 7,
+      "basePrice": 18000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Wrap",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 41,
+      "name": "OB Cheese Garlic Bread",
+      "shortCode": "OCGB",
+      "categoryId": 8,
+      "basePrice": 13000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 42,
+      "name": "OB Cheese Corn",
+      "shortCode": "OCCB",
+      "categoryId": 8,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 43,
+      "name": "OB Classic Garlic Bread",
+      "shortCode": "OCLG",
+      "categoryId": 8,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 44,
+      "name": "Stuffed Cheese Garlic Bread",
+      "shortCode": "SCGB",
+      "categoryId": 8,
+      "basePrice": 18000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 45,
+      "name": "OB Cheese Cottage",
+      "shortCode": "OCCS",
+      "categoryId": 9,
+      "basePrice": 11000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 46,
+      "name": "OB Paneer Peppery",
+      "shortCode": "OPPS",
+      "categoryId": 9,
+      "basePrice": 13000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 47,
+      "name": "OB Veggie Spanish",
+      "shortCode": "OVSS",
+      "categoryId": 9,
+      "basePrice": 15000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 48,
+      "name": "Veg. Spring Roll",
+      "shortCode": "VSPR",
+      "categoryId": 10,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Spring Roll",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 49,
+      "name": "Veg. Kabab",
+      "shortCode": "VKAB",
+      "categoryId": 11,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Veg. Kabab",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 50,
+      "name": "Coke / Sprite",
+      "shortCode": "COKS",
+      "categoryId": 12,
+      "basePrice": 4500,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Hot & Cold Drinks",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "name": "Coke",
+          "price": 4500,
+          "isDefault": true
+        },
+        {
+          "name": "Sprite",
+          "price": 4500,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": []
+    },
+    {
+      "id": 51,
+      "name": "Regular Tea",
+      "shortCode": "RGTE",
+      "categoryId": 12,
+      "basePrice": 5000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Hot & Cold Drinks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 52,
+      "name": "Hot Coffee",
+      "shortCode": "HTCF",
+      "categoryId": 12,
+      "basePrice": 5000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Hot & Cold Drinks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 53,
+      "name": "Ice Tea Lemon",
+      "shortCode": "ITLM",
+      "categoryId": 12,
+      "basePrice": 10000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Hot & Cold Drinks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 54,
+      "name": "Cold Coffee",
+      "shortCode": "CLDC",
+      "categoryId": 12,
+      "basePrice": 13000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Hot & Cold Drinks",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 55,
+      "name": "Mojito",
+      "shortCode": "CLMJ",
+      "categoryId": 13,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Mocktails",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 56,
+      "name": "Pan mint Mojito",
+      "shortCode": "PMMJ",
+      "categoryId": 13,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Mocktails",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 57,
+      "name": "Green apple",
+      "shortCode": "GAMK",
+      "categoryId": 13,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Mocktails",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 58,
+      "name": "Blue Lagoon",
+      "shortCode": "BLMK",
+      "categoryId": 13,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Mocktails",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 59,
+      "name": "Mango Shake",
+      "shortCode": "MNGS",
+      "categoryId": 14,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 60,
+      "name": "Strawberry Shake",
+      "shortCode": "STRS",
+      "categoryId": 14,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 61,
+      "name": "Pineapple Shake",
+      "shortCode": "PINS",
+      "categoryId": 14,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 62,
+      "name": "American Nuts Shake",
+      "shortCode": "ANSS",
+      "categoryId": 14,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 63,
+      "name": "Butter Scotch Shake",
+      "shortCode": "BTSS",
+      "categoryId": 14,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 64,
+      "name": "Chocolate Shake",
+      "shortCode": "CHCS",
+      "categoryId": 14,
+      "basePrice": 14000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 65,
+      "name": "Oreo Shake",
+      "shortCode": "ORSS",
+      "categoryId": 14,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 66,
+      "name": "Kitkat Shake",
+      "shortCode": "KTSS",
+      "categoryId": 14,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 67,
+      "name": "Nutella Shake",
+      "shortCode": "NTSS",
+      "categoryId": 14,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 9,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 68,
+      "name": "Chocolate Brownie Shake",
+      "shortCode": "CBSS",
+      "categoryId": 14,
+      "basePrice": 16000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 10,
+      "isPinned": false,
+      "categoryName": "Shakes",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 69,
+      "name": "Ice Cream",
+      "shortCode": "ICRM",
+      "categoryId": 15,
+      "basePrice": 5000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Dessert",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 70,
+      "name": "Waffle",
+      "shortCode": "WAFL",
+      "categoryId": 15,
+      "basePrice": 12000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Dessert",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "name": "Oreo Waffle",
+          "price": 12000,
+          "isDefault": true
+        },
+        {
+          "name": "Kitkat Waffle",
+          "price": 12000,
+          "isDefault": false
+        },
+        {
+          "name": "Chocolate Nutella Waffle",
+          "price": 12000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": []
+    },
+    {
+      "id": 71,
+      "name": "Chocolate Brownie Sundae",
+      "shortCode": "CBNS",
+      "categoryId": 15,
+      "basePrice": 18000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Dessert",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroupIds": []
+    },
+    {
+      "id": 72,
+      "name": "Choco Lava Cake",
+      "shortCode": "CLCK",
+      "categoryId": 15,
+      "basePrice": 7000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Dessert",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "name": "Regular",
+          "price": 7000,
+          "isDefault": true
+        },
+        {
+          "name": "with Ice Cream",
+          "price": 10000,
+          "isDefault": false
+        }
+      ],
+      "addonGroupIds": []
+    }
+  ],
+  "addonGroups": [
+    {
+      "id": 101,
+      "name": "Burger Add-ons",
+      "minSelect": 0,
+      "maxSelect": 1,
+      "isRequired": false,
+      "addons": [
+        {
+          "id": 1001,
+          "addonGroupId": 101,
+          "name": "Cheese Slice",
+          "price": 3000
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "name": "Pizza Add-ons",
+      "minSelect": 0,
+      "maxSelect": 2,
+      "isRequired": false,
+      "addons": [
+        {
+          "id": 1002,
+          "addonGroupId": 102,
+          "name": "Extra Cheese",
+          "price": 5000,
+          "variationPrices": {
+            "Small": 5000,
+            "Large": 8000
+          }
+        },
+        {
+          "id": 1003,
+          "addonGroupId": 102,
+          "name": "Cheese Burst",
+          "price": 5000,
+          "variationPrices": {
+            "Small": 5000,
+            "Large": 8000
+          }
+        }
+      ]
+    }
+  ]
+}

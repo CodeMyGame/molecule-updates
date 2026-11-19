@@ -11,7 +11,8 @@
     "settings": "ਸੈਟਿੰਗਾਂ",
     "logout": "ਲਾਗ ਆਉਟ",
     "collapseSidebar": "ਸਾਈਡਬਾਰ ਸਮੇਟੋ",
-    "expandSidebar": "ਸਾਈਡਬਾਰ ਫੈਲਾਓ"
+    "expandSidebar": "ਸਾਈਡਬਾਰ ਫੈਲਾਓ",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "ਦਿਨ ਖੁੱਲ੍ਹਾ",
@@ -239,7 +240,8 @@
     "kotPending": "KOT ਬਕਾਇਆ",
     "payNow": "ਭੁਗਤਾਨ",
     "walkInGuest": "ਵਾਕ-ਇਨ ਗਾਹਕ",
-    "itemsCount": "{{count}} ਆਈਟਮਾਂ"
+    "itemsCount": "{{count}} ਆਈਟਮਾਂ",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "ਰਸੋਈ ਡਿਸਪਲੇ",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "ਅੱਪਲੋਡ ਕੀਤੀ ਫ਼ਾਈਲ ਨਾਲ ਮੀਨੂ ਸਫਲਤਾਪੂਰਵਕ ਬਦਲਿਆ ਗਿਆ!",
-    "station": "ਸਟੇਸ਼ਨ"
+    "station": "ਸਟੇਸ਼ਨ",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "ਬਿੱਲ ਪੂਰਵਦਰਸ਼ਨ",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "ਇੱਕ ਨਵਾਂ ਸਾਫਟਵੇਅਰ ਸੰਸਕਰਣ ਉਪਲਬਧ ਹੈ। ਡਾਊਨਲੋਡ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਹੇਠਾਂ ਕਲਿੱਕ ਕਰੋ।",
-    "downloadUpdate": "ਅਪਡੇਟ ਡਾਊਨਲੋਡ ਕਰੋ"
+    "downloadUpdate": "ਅਪਡੇਟ ਡਾਊਨਲੋਡ ਕਰੋ",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "ਖੇਤਰ ਅਤੇ ਭਾਸ਼ਾ",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "ਰੀਲੀਜ਼",
     "gotIt": "ਸਮਝ ਗਿਆ, ਚੱਲੋ!",
     "explorePos": "ਪੀਓਐਸ ਐਕਸਪਲੋਰ ਕਰੋ"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

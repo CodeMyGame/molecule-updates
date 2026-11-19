@@ -1,0 +1,1507 @@
+{
+  "restaurant": {
+    "name": "Kapil Cafe",
+    "address": "123 Main Street",
+    "phone": "9690148808",
+    "currency": "₹",
+    "currencyCode": "INR"
+  },
+  "settings": {
+    "subtitle": "Scan to browse our digital menu",
+    "tableCardTitle": "Scan for Digital Menu",
+    "tableCardSubtitle": "Point phone camera at QR code to view live menu & specials",
+    "wifiSsid": "",
+    "wifiPassword": "",
+    "theme": "noir"
+  },
+  "categories": [
+    {
+      "id": 1,
+      "name": "Cold Coffee",
+      "sortOrder": 1
+    },
+    {
+      "id": 2,
+      "name": "Burger",
+      "sortOrder": 2
+    },
+    {
+      "id": 3,
+      "name": "Veg Hot Dog",
+      "sortOrder": 3
+    },
+    {
+      "id": 4,
+      "name": "Maggi",
+      "sortOrder": 4
+    },
+    {
+      "id": 5,
+      "name": "Fries",
+      "sortOrder": 5
+    },
+    {
+      "id": 6,
+      "name": "Pasta",
+      "sortOrder": 6
+    },
+    {
+      "id": 7,
+      "name": "Sandwich",
+      "sortOrder": 7
+    },
+    {
+      "id": 8,
+      "name": "Waffle",
+      "sortOrder": 8
+    },
+    {
+      "id": 9,
+      "name": "Pizza",
+      "sortOrder": 9
+    },
+    {
+      "id": 10,
+      "name": "Garlic Bread",
+      "sortOrder": 10
+    },
+    {
+      "id": 11,
+      "name": "Milk Shake",
+      "sortOrder": 11
+    },
+    {
+      "id": 12,
+      "name": "Brownie",
+      "sortOrder": 12
+    },
+    {
+      "id": 13,
+      "name": "Mocktail",
+      "sortOrder": 13
+    },
+    {
+      "id": 14,
+      "name": "Wrap",
+      "sortOrder": 14
+    },
+    {
+      "id": 15,
+      "name": "Chinese",
+      "sortOrder": 15
+    },
+    {
+      "id": 16,
+      "name": "Hot & Cold",
+      "sortOrder": 16
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "name": "Cold coffee",
+      "categoryId": 1,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "CLCF",
+      "variations": []
+    },
+    {
+      "id": 2,
+      "name": "Chocolate cold coffee",
+      "categoryId": 1,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "CHCC",
+      "variations": []
+    },
+    {
+      "id": 3,
+      "name": "Crispy burger",
+      "categoryId": 2,
+      "basePrice": 3900,
+      "isVeg": 1,
+      "shortCode": "CRBR",
+      "variations": []
+    },
+    {
+      "id": 4,
+      "name": "Spicy alloo tikki burger",
+      "categoryId": 2,
+      "basePrice": 4900,
+      "isVeg": 1,
+      "shortCode": "SATB",
+      "variations": []
+    },
+    {
+      "id": 5,
+      "name": "Schezwan burger",
+      "categoryId": 2,
+      "basePrice": 4900,
+      "isVeg": 1,
+      "shortCode": "SZBR",
+      "variations": []
+    },
+    {
+      "id": 6,
+      "name": "Cheesy burger",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "CHBR",
+      "variations": []
+    },
+    {
+      "id": 7,
+      "name": "Fries burger",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "FRBR",
+      "variations": []
+    },
+    {
+      "id": 8,
+      "name": "Supremo burger",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "SPBR",
+      "variations": []
+    },
+    {
+      "id": 9,
+      "name": "Mexican burger",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "MXBR",
+      "variations": []
+    },
+    {
+      "id": 10,
+      "name": "Crispy nachos burger",
+      "categoryId": 2,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "CNBR",
+      "variations": []
+    },
+    {
+      "id": 11,
+      "name": "Baked burger",
+      "categoryId": 2,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "BKBR",
+      "variations": []
+    },
+    {
+      "id": 12,
+      "name": "BKB Burger",
+      "categoryId": 2,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "BBBR",
+      "variations": []
+    },
+    {
+      "id": 13,
+      "name": "BKB Cheese Burger",
+      "categoryId": 2,
+      "basePrice": 12900,
+      "isVeg": 1,
+      "shortCode": "BCBR",
+      "variations": []
+    },
+    {
+      "id": 14,
+      "name": "Paneer crispy burger",
+      "categoryId": 2,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "PCBR",
+      "variations": []
+    },
+    {
+      "id": 15,
+      "name": "Veg Treat Hot Dog",
+      "categoryId": 3,
+      "basePrice": 5900,
+      "isVeg": 1,
+      "shortCode": "VTHD",
+      "variations": []
+    },
+    {
+      "id": 16,
+      "name": "Veg spicy Hot Dog",
+      "categoryId": 3,
+      "basePrice": 5900,
+      "isVeg": 1,
+      "shortCode": "VSHD",
+      "variations": []
+    },
+    {
+      "id": 17,
+      "name": "Veg Schezwan Hot Dog",
+      "categoryId": 3,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "VSZH",
+      "variations": []
+    },
+    {
+      "id": 18,
+      "name": "Veg cheesy Hot Dog",
+      "categoryId": 3,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "VCHD",
+      "variations": []
+    },
+    {
+      "id": 19,
+      "name": "Veg cheesy Schezwan Hot Dog",
+      "categoryId": 3,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "VCSH",
+      "variations": []
+    },
+    {
+      "id": 20,
+      "name": "Masala maggi",
+      "categoryId": 4,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "MSMG",
+      "variations": []
+    },
+    {
+      "id": 21,
+      "name": "Masala Cheese maggi",
+      "categoryId": 4,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "MCMG",
+      "variations": []
+    },
+    {
+      "id": 22,
+      "name": "Schezwan maggi",
+      "categoryId": 4,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "SZMG",
+      "variations": []
+    },
+    {
+      "id": 23,
+      "name": "Mexican maggi",
+      "categoryId": 4,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "MXMG",
+      "variations": []
+    },
+    {
+      "id": 24,
+      "name": "Italian maggi",
+      "categoryId": 4,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "ITMG",
+      "variations": []
+    },
+    {
+      "id": 25,
+      "name": "Fries",
+      "categoryId": 5,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "FRIS",
+      "variations": []
+    },
+    {
+      "id": 26,
+      "name": "Fries wit piri piri",
+      "categoryId": 5,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "FPPP",
+      "variations": []
+    },
+    {
+      "id": 27,
+      "name": "Fries with meyo",
+      "categoryId": 5,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "FWMY",
+      "variations": []
+    },
+    {
+      "id": 28,
+      "name": "Fries with cheese",
+      "categoryId": 5,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "FWCH",
+      "variations": []
+    },
+    {
+      "id": 29,
+      "name": "Meyo cheesy fries",
+      "categoryId": 5,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "MCFR",
+      "variations": []
+    },
+    {
+      "id": 30,
+      "name": "Cheese nachos",
+      "categoryId": 5,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "CHNS",
+      "variations": []
+    },
+    {
+      "id": 31,
+      "name": "Mexican nachos",
+      "categoryId": 5,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "MXNS",
+      "variations": []
+    },
+    {
+      "id": 32,
+      "name": "White sause pasta",
+      "categoryId": 6,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "WSPA",
+      "variations": []
+    },
+    {
+      "id": 33,
+      "name": "Arabiata pasta (red pasta)",
+      "categoryId": 6,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "ARPA",
+      "variations": []
+    },
+    {
+      "id": 34,
+      "name": "Pink pasta (red&white)",
+      "categoryId": 6,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "PKPA",
+      "variations": []
+    },
+    {
+      "id": 35,
+      "name": "Exotic pasta",
+      "categoryId": 6,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "EXPA",
+      "variations": []
+    },
+    {
+      "id": 36,
+      "name": "Bread Butter Cheese Sandwich",
+      "categoryId": 7,
+      "basePrice": 4900,
+      "isVeg": 1,
+      "shortCode": "BBCS",
+      "variations": []
+    },
+    {
+      "id": 37,
+      "name": "Bread butter jam (3 layer)",
+      "categoryId": 7,
+      "basePrice": 4900,
+      "isVeg": 1,
+      "shortCode": "BBJS",
+      "variations": []
+    },
+    {
+      "id": 38,
+      "name": "Schezwan meyo grill Sandwich",
+      "categoryId": 7,
+      "basePrice": 5900,
+      "isVeg": 1,
+      "shortCode": "SMGS",
+      "variations": []
+    },
+    {
+      "id": 39,
+      "name": "White cheese grill Sandwich",
+      "categoryId": 7,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "WCGS",
+      "variations": []
+    },
+    {
+      "id": 40,
+      "name": "Exotic grill Sandwich",
+      "categoryId": 7,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "EXGS",
+      "variations": []
+    },
+    {
+      "id": 41,
+      "name": "Chilly grill Sandwich",
+      "categoryId": 7,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "CHGS",
+      "variations": []
+    },
+    {
+      "id": 42,
+      "name": "Cheesy corn Sandwich",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "CCNS",
+      "variations": []
+    },
+    {
+      "id": 43,
+      "name": "Pasta sandwich",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "PSAS",
+      "variations": []
+    },
+    {
+      "id": 44,
+      "name": "Paneer chilly grill Sandwich",
+      "categoryId": 7,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "PCGS",
+      "variations": []
+    },
+    {
+      "id": 45,
+      "name": "Schezwan meyo cheese grill Sandwich",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "SMCG",
+      "variations": []
+    },
+    {
+      "id": 46,
+      "name": "Tandoori paneer Sandwich",
+      "categoryId": 7,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "TDPS",
+      "variations": []
+    },
+    {
+      "id": 47,
+      "name": "Chocolate grill Sandwich",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "CGSS",
+      "variations": []
+    },
+    {
+      "id": 48,
+      "name": "Cheesy club Sandwich",
+      "categoryId": 7,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "CCLS",
+      "variations": []
+    },
+    {
+      "id": 49,
+      "name": "Chesse bake Sandwich",
+      "categoryId": 7,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "CBKS",
+      "variations": []
+    },
+    {
+      "id": 50,
+      "name": "Chocolate Waffle",
+      "categoryId": 8,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "CHWF",
+      "variations": [
+        {
+          "id": 1,
+          "name": "2 Pieces",
+          "priceDelta": 0,
+          "basePrice": 7900
+        },
+        {
+          "id": 2,
+          "name": "4 Pieces",
+          "priceDelta": 6000,
+          "basePrice": 13900
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "name": "Butter scotch Waffle",
+      "categoryId": 8,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "BSWF",
+      "variations": [
+        {
+          "id": 3,
+          "name": "2 Pieces",
+          "priceDelta": 0,
+          "basePrice": 7900
+        },
+        {
+          "id": 4,
+          "name": "4 Pieces",
+          "priceDelta": 6000,
+          "basePrice": 13900
+        }
+      ]
+    },
+    {
+      "id": 52,
+      "name": "Chocolate kit-kat Waffle",
+      "categoryId": 8,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "KKWF",
+      "variations": [
+        {
+          "id": 5,
+          "name": "2 Pieces",
+          "priceDelta": 0,
+          "basePrice": 10900
+        },
+        {
+          "id": 6,
+          "name": "4 Pieces",
+          "priceDelta": 9000,
+          "basePrice": 19900
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "name": "Double delight Waffle",
+      "categoryId": 8,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "DDWF",
+      "variations": [
+        {
+          "id": 7,
+          "name": "2 Pieces",
+          "priceDelta": 0,
+          "basePrice": 10900
+        },
+        {
+          "id": 8,
+          "name": "4 Pieces",
+          "priceDelta": 9000,
+          "basePrice": 19900
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "name": "Chocolate Oreo Waffle",
+      "categoryId": 8,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "ORWF",
+      "variations": [
+        {
+          "id": 9,
+          "name": "2 Pieces",
+          "priceDelta": 0,
+          "basePrice": 10900
+        },
+        {
+          "id": 10,
+          "name": "4 Pieces",
+          "priceDelta": 9000,
+          "basePrice": 19900
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "name": "Nutella Chocolate Waffle",
+      "categoryId": 8,
+      "basePrice": 12900,
+      "isVeg": 1,
+      "shortCode": "NTWF",
+      "variations": [
+        {
+          "id": 11,
+          "name": "2 Pieces",
+          "priceDelta": 0,
+          "basePrice": 12900
+        },
+        {
+          "id": 12,
+          "name": "4 Pieces",
+          "priceDelta": 11000,
+          "basePrice": 23900
+        }
+      ]
+    },
+    {
+      "id": 56,
+      "name": "Margarita Pizza",
+      "categoryId": 9,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "MGPZ",
+      "variations": [
+        {
+          "id": 13,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 9900
+        },
+        {
+          "id": 14,
+          "name": "Medium",
+          "priceDelta": 6000,
+          "basePrice": 15900
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "name": "Fresh farm pizza",
+      "categoryId": 9,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "FFPZ",
+      "variations": [
+        {
+          "id": 15,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 11900
+        },
+        {
+          "id": 16,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 16900
+        }
+      ]
+    },
+    {
+      "id": 58,
+      "name": "Veg Supremo Pizza",
+      "categoryId": 9,
+      "basePrice": 13900,
+      "isVeg": 1,
+      "shortCode": "VSPZ",
+      "variations": [
+        {
+          "id": 17,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 13900
+        },
+        {
+          "id": 18,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 18900
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "name": "Mexican pizza",
+      "categoryId": 9,
+      "basePrice": 13900,
+      "isVeg": 1,
+      "shortCode": "MXPZ",
+      "variations": [
+        {
+          "id": 19,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 13900
+        },
+        {
+          "id": 20,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 18900
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "name": "Indian spicy Pizza",
+      "categoryId": 9,
+      "basePrice": 13900,
+      "isVeg": 1,
+      "shortCode": "ISPZ",
+      "variations": [
+        {
+          "id": 21,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 13900
+        },
+        {
+          "id": 22,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 18900
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "name": "Masala paneer pizza",
+      "categoryId": 9,
+      "basePrice": 15900,
+      "isVeg": 1,
+      "shortCode": "MPPZ",
+      "variations": [
+        {
+          "id": 23,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 15900
+        },
+        {
+          "id": 24,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 20900
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "name": "Corn delight Pizza",
+      "categoryId": 9,
+      "basePrice": 12900,
+      "isVeg": 1,
+      "shortCode": "CDPZ",
+      "variations": [
+        {
+          "id": 25,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 12900
+        },
+        {
+          "id": 26,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 17900
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "name": "Veggie triangle Pizza",
+      "categoryId": 9,
+      "basePrice": 12900,
+      "isVeg": 1,
+      "shortCode": "VTPZ",
+      "variations": [
+        {
+          "id": 27,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 12900
+        },
+        {
+          "id": 28,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 17900
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "name": "Triple Spicy pizza",
+      "categoryId": 9,
+      "basePrice": 13900,
+      "isVeg": 1,
+      "shortCode": "TSPZ",
+      "variations": [
+        {
+          "id": 29,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 13900
+        },
+        {
+          "id": 30,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 18900
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "name": "Fries pizza",
+      "categoryId": 9,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "FRPZ",
+      "variations": [
+        {
+          "id": 31,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 11900
+        },
+        {
+          "id": 32,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 16900
+        }
+      ]
+    },
+    {
+      "id": 66,
+      "name": "Tandoori paneer pizza",
+      "categoryId": 9,
+      "basePrice": 15900,
+      "isVeg": 1,
+      "shortCode": "TPPZ",
+      "variations": [
+        {
+          "id": 33,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 15900
+        },
+        {
+          "id": 34,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 20900
+        }
+      ]
+    },
+    {
+      "id": 67,
+      "name": "Crowded pizza",
+      "categoryId": 9,
+      "basePrice": 15900,
+      "isVeg": 1,
+      "shortCode": "CRPZ",
+      "variations": [
+        {
+          "id": 35,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 15900
+        },
+        {
+          "id": 36,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 20900
+        }
+      ]
+    },
+    {
+      "id": 68,
+      "name": "Veggie Americano Pizza",
+      "categoryId": 9,
+      "basePrice": 15900,
+      "isVeg": 1,
+      "shortCode": "VAPZ",
+      "variations": [
+        {
+          "id": 37,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 15900
+        },
+        {
+          "id": 38,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 20900
+        }
+      ]
+    },
+    {
+      "id": 69,
+      "name": "Pasta Pizza",
+      "categoryId": 9,
+      "basePrice": 15900,
+      "isVeg": 1,
+      "shortCode": "PAPZ",
+      "variations": [
+        {
+          "id": 39,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 15900
+        },
+        {
+          "id": 40,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "basePrice": 20900
+        }
+      ]
+    },
+    {
+      "id": 70,
+      "name": "Cheese garlic bread",
+      "categoryId": 10,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "CGGB",
+      "variations": [
+        {
+          "id": 41,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 7900
+        },
+        {
+          "id": 42,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "basePrice": 10900
+        }
+      ]
+    },
+    {
+      "id": 71,
+      "name": "Onion chilly garlic bread",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "OCGB",
+      "variations": [
+        {
+          "id": 43,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 8900
+        },
+        {
+          "id": 44,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "basePrice": 11900
+        }
+      ]
+    },
+    {
+      "id": 72,
+      "name": "Tomato chilly garlic bread",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "TCGB",
+      "variations": [
+        {
+          "id": 45,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 8900
+        },
+        {
+          "id": 46,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "basePrice": 11900
+        }
+      ]
+    },
+    {
+      "id": 73,
+      "name": "Sweet corn garlic bread",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "SCGB",
+      "variations": [
+        {
+          "id": 47,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 8900
+        },
+        {
+          "id": 48,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "basePrice": 11900
+        }
+      ]
+    },
+    {
+      "id": 74,
+      "name": "Jalapeno garlic bread",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "JPGB",
+      "variations": [
+        {
+          "id": 49,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 8900
+        },
+        {
+          "id": 50,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "basePrice": 11900
+        }
+      ]
+    },
+    {
+      "id": 75,
+      "name": "Supremo garlic bread",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "SMGB",
+      "variations": [
+        {
+          "id": 51,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 8900
+        },
+        {
+          "id": 52,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "basePrice": 11900
+        }
+      ]
+    },
+    {
+      "id": 76,
+      "name": "Triple spice garlic bread",
+      "categoryId": 10,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "TSGB",
+      "variations": [
+        {
+          "id": 53,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 9900
+        },
+        {
+          "id": 54,
+          "name": "Medium",
+          "priceDelta": 4000,
+          "basePrice": 13900
+        }
+      ]
+    },
+    {
+      "id": 77,
+      "name": "Peri Peri paneer garlic bread",
+      "categoryId": 10,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "PPGB",
+      "variations": [
+        {
+          "id": 55,
+          "name": "Regular",
+          "priceDelta": 0,
+          "basePrice": 10900
+        },
+        {
+          "id": 56,
+          "name": "Medium",
+          "priceDelta": 4000,
+          "basePrice": 14900
+        }
+      ]
+    },
+    {
+      "id": 78,
+      "name": "Vanilla shake",
+      "categoryId": 11,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "VNSK",
+      "variations": []
+    },
+    {
+      "id": 79,
+      "name": "Strawberry shake",
+      "categoryId": 11,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "STSK",
+      "variations": []
+    },
+    {
+      "id": 80,
+      "name": "Butter scotch shake",
+      "categoryId": 11,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "BSSK",
+      "variations": []
+    },
+    {
+      "id": 81,
+      "name": "Kit-kat caramal shake",
+      "categoryId": 11,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "KKSK",
+      "variations": []
+    },
+    {
+      "id": 82,
+      "name": "Chocolate shake",
+      "categoryId": 11,
+      "basePrice": 9900,
+      "isVeg": 1,
+      "shortCode": "CHSK",
+      "variations": []
+    },
+    {
+      "id": 83,
+      "name": "Brownie shake",
+      "categoryId": 11,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "BRSK",
+      "variations": []
+    },
+    {
+      "id": 84,
+      "name": "Oreo shake",
+      "categoryId": 11,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "ORSK",
+      "variations": []
+    },
+    {
+      "id": 85,
+      "name": "Nutella shake",
+      "categoryId": 11,
+      "basePrice": 13900,
+      "isVeg": 1,
+      "shortCode": "NUSK",
+      "variations": []
+    },
+    {
+      "id": 86,
+      "name": "Brownie with ice cream",
+      "categoryId": 12,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "BWIC",
+      "variations": []
+    },
+    {
+      "id": 87,
+      "name": "Sizzling brownie",
+      "categoryId": 12,
+      "basePrice": 10900,
+      "isVeg": 1,
+      "shortCode": "SLBR",
+      "variations": []
+    },
+    {
+      "id": 88,
+      "name": "Virgin mojito",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "VRMJ",
+      "variations": []
+    },
+    {
+      "id": 89,
+      "name": "Blue ice mojito",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "BIMJ",
+      "variations": []
+    },
+    {
+      "id": 90,
+      "name": "Cool blue mocktail",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "CBMK",
+      "variations": []
+    },
+    {
+      "id": 91,
+      "name": "Italian Mojito",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "ITMJ",
+      "variations": []
+    },
+    {
+      "id": 92,
+      "name": "Nature kiwi cold mocktail",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "NKMK",
+      "variations": []
+    },
+    {
+      "id": 93,
+      "name": "Green apple mocktail",
+      "categoryId": 13,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "GAMK",
+      "variations": []
+    },
+    {
+      "id": 94,
+      "name": "Strawberry mojito",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "STMJ",
+      "variations": []
+    },
+    {
+      "id": 95,
+      "name": "Sunrise orange mocktail",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "SOMK",
+      "variations": []
+    },
+    {
+      "id": 96,
+      "name": "Veg Wrap",
+      "categoryId": 14,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "VGWP",
+      "variations": []
+    },
+    {
+      "id": 97,
+      "name": "Veg cheese wrap",
+      "categoryId": 14,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "VCWP",
+      "variations": []
+    },
+    {
+      "id": 98,
+      "name": "Mexican wrap",
+      "categoryId": 14,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "MXWP",
+      "variations": []
+    },
+    {
+      "id": 99,
+      "name": "Paneer masala wrap",
+      "categoryId": 14,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "PMWP",
+      "variations": []
+    },
+    {
+      "id": 100,
+      "name": "Manchurian dry",
+      "categoryId": 15,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "MNDR",
+      "variations": []
+    },
+    {
+      "id": 101,
+      "name": "Steam momos",
+      "categoryId": 15,
+      "basePrice": 6900,
+      "isVeg": 1,
+      "shortCode": "STMO",
+      "variations": []
+    },
+    {
+      "id": 102,
+      "name": "Fried momos",
+      "categoryId": 15,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "FRMO",
+      "variations": []
+    },
+    {
+      "id": 103,
+      "name": "Hakka noodles",
+      "categoryId": 15,
+      "basePrice": 7900,
+      "isVeg": 1,
+      "shortCode": "HKNO",
+      "variations": []
+    },
+    {
+      "id": 104,
+      "name": "Schezwan noodles",
+      "categoryId": 15,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "SZNO",
+      "variations": []
+    },
+    {
+      "id": 105,
+      "name": "Garlic Chowmein",
+      "categoryId": 15,
+      "basePrice": 8900,
+      "isVeg": 1,
+      "shortCode": "GACH",
+      "variations": []
+    },
+    {
+      "id": 106,
+      "name": "Potato chilly",
+      "categoryId": 15,
+      "basePrice": 11900,
+      "isVeg": 1,
+      "shortCode": "PTCH",
+      "variations": []
+    },
+    {
+      "id": 107,
+      "name": "Paneer chilly",
+      "categoryId": 15,
+      "basePrice": 12900,
+      "isVeg": 1,
+      "shortCode": "PNCH",
+      "variations": []
+    },
+    {
+      "id": 108,
+      "name": "Tea",
+      "categoryId": 16,
+      "basePrice": 3500,
+      "isVeg": 1,
+      "shortCode": "HTEA",
+      "variations": []
+    },
+    {
+      "id": 109,
+      "name": "Coffee",
+      "categoryId": 16,
+      "basePrice": 4000,
+      "isVeg": 1,
+      "shortCode": "HCFF",
+      "variations": []
+    },
+    {
+      "id": 110,
+      "name": "Cold Drink",
+      "categoryId": 16,
+      "basePrice": 4000,
+      "isVeg": 1,
+      "shortCode": "CDRK",
+      "variations": []
+    }
+  ],
+  "tables": [
+    {
+      "id": 1,
+      "name": "T1",
+      "capacity": 4
+    },
+    {
+      "id": 2,
+      "name": "T2",
+      "capacity": 4
+    },
+    {
+      "id": 3,
+      "name": "T3",
+      "capacity": 4
+    },
+    {
+      "id": 4,
+      "name": "T4",
+      "capacity": 4
+    },
+    {
+      "id": 5,
+      "name": "T5",
+      "capacity": 4
+    },
+    {
+      "id": 6,
+      "name": "T6",
+      "capacity": 4
+    },
+    {
+      "id": 7,
+      "name": "T7",
+      "capacity": 4
+    },
+    {
+      "id": 8,
+      "name": "T8",
+      "capacity": 4
+    },
+    {
+      "id": 9,
+      "name": "T9",
+      "capacity": 4
+    },
+    {
+      "id": 10,
+      "name": "T10",
+      "capacity": 4
+    }
+  ]
+}

@@ -23,6 +23,7 @@ interface TableLayoutProps {
   onTableDragEnd?: (tableId: number, posX: number, posY: number) => void;
   /** Map of tableId → order summary for occupied tables */
   tableOrders?: Map<number, TableOrderInfo>;
+  selectedTableId?: number | null;
 }
 
 const TableLayout: React.FC<TableLayoutProps> = ({
@@ -32,6 +33,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
   isEditMode = false,
   onTableDragEnd,
   tableOrders,
+  selectedTableId,
 }) => {
   const { t } = useTranslation();
   const dineInCount = tables.filter((t) => t.status === TableStatus.OCCUPIED).length;
@@ -142,6 +144,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
                     onClick={onTableClick}
                     onContextMenu={onTableContextMenu}
                     isEditMode={isEditMode}
+                    isSelected={selectedTableId === table.id}
                     orderTotal={orderInfo?.grandTotal}
                     orderItemCount={orderInfo?.itemCount}
                     orderStartedAt={orderInfo?.createdAt}
@@ -164,6 +167,7 @@ const TableLayout: React.FC<TableLayoutProps> = ({
                   onClick={onTableClick}
                   onContextMenu={onTableContextMenu}
                   isEditMode={false}
+                  isSelected={selectedTableId === table.id}
                   orderTotal={orderInfo?.grandTotal}
                   orderItemCount={orderInfo?.itemCount}
                   orderStartedAt={orderInfo?.createdAt}

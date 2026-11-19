@@ -11,7 +11,8 @@
     "settings": "ക്രമീകരണങ്ങൾ",
     "logout": "ലോഗ് ഔട്ട്",
     "collapseSidebar": "സൈഡ്‌ബാർ ചുരുക്കുക",
-    "expandSidebar": "സൈഡ്‌ബാർ വികസിപ്പിക്കുക"
+    "expandSidebar": "സൈഡ്‌ബാർ വികസിപ്പിക്കുക",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "ദിവസം തുറന്നു",
@@ -239,7 +240,8 @@
     "kotPending": "KOT ബാക്കിയുണ്ട്",
     "payNow": "പണം നൽകുക",
     "walkInGuest": "വാക്ക്-ഇൻ അതിഥി",
-    "itemsCount": "{{count}} ഇനങ്ങൾ"
+    "itemsCount": "{{count}} ഇനങ്ങൾ",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "അടുക്കള ഡിസ്പ്ലേ",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "അപ്‌ലോഡ് ചെയ്ത ഫയൽ ഉപയോഗിച്ച് മെനു വിജയകരമായി മാറ്റിസ്ഥാപിച്ചു!",
-    "station": "സ്റ്റേഷൻ"
+    "station": "സ്റ്റേഷൻ",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "ബിൽ പ്രിവ്യൂ",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "ഒരു പുതിയ സോഫ്റ്റ്‌വെയർ പതിപ്പ് ലഭ്യമാണ്. ഡൗൺലോഡ് ആരംഭിക്കാൻ താഴെ ക്ലിക്ക് ചെയ്യുക.",
-    "downloadUpdate": "അപ്ഡേറ്റ് ഡൗൺലോഡ് ചെയ്യുക"
+    "downloadUpdate": "അപ്ഡേറ്റ് ഡൗൺലോഡ് ചെയ്യുക",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "പ്രദേശവും ഭാഷയും",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "റിലീസുകൾ",
     "gotIt": "മനസ്സിലായി, ആരംഭിക്കാം!",
     "explorePos": "പിഒഎസ് എക്സ്പ്ലോർ ചെയ്യുക"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

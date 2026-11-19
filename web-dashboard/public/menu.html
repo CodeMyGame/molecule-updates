@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Digital Menu — Molecule</title>
+  <link rel="icon" href="/icon-192.png">
+  <meta name="theme-color" content="#070b14">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            serif: ['Playfair Display', 'Georgia', 'serif']
+          },
+          colors: {
+            gold: { 400: '#fbbf24', 500: '#d4af37', 600: '#b89628' }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #070b14;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+      overflow-x: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #d4af37 #070b14;
+    }
+    body::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    body::-webkit-scrollbar-track {
+      background: #070b14;
+    }
+    body::-webkit-scrollbar-thumb {
+      background: #d4af37;
+      border-radius: 6px;
+      border: 2px solid #070b14;
+    }
+    body::-webkit-scrollbar-thumb:hover {
+      background: #fbbf24;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16 antialiased selection:bg-amber-500 selection:text-slate-950 w-max min-w-[780px]">
+
+  <!-- Sticky Minimal Controls Bar -->
+  <header class="sticky top-0 z-40 bg-[#0b0f19]/95 backdrop-blur-md border-b border-slate-800/80 px-3 py-2 w-full min-w-[780px]">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <!-- Search Input -->
+      <div class="relative flex-1 min-w-[170px] max-w-xs">
+        <svg class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input
+          type="text"
+          id="searchInput"
+          oninput="handleSearch(this.value)"
+          placeholder="Search dishes..."
+          class="w-full bg-[#131b2e] border border-slate-800 rounded-lg pl-8 pr-7 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-500/60"
+        />
+        <button id="clearSearchBtn" type="button" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs">✕</button>
+      </div>
+
+      <!-- Veg / Non-Veg Filters -->
+      <div class="flex items-center gap-1">
+        <button
+          type="button"
+          id="filterAll"
+          onclick="setDietaryFilter('all')"
+          class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-200 text-slate-950 transition"
+        >
+          All
+        </button>
+        <button
+          type="button"
+          id="filterVeg"
+          onclick="setDietaryFilter('veg')"
+          class="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#131b2e] border border-slate-800 text-slate-400 hover:text-emerald-400 transition"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          <span>Veg</span>
+        </button>
+        <button
+          type="button"
+          id="filterNonVeg"
+          onclick="setDietaryFilter('non-veg')"
+          class="flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#131b2e] border border-slate-800 text-slate-400 hover:text-red-400 transition"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+          <span>Non-Veg</span>
+        </button>
+      </div>
+
+      <!-- Table Badge & Wi-Fi -->
+      <div class="flex items-center gap-1.5">
+        <div id="tableBadge" class="hidden px-2 py-1 bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold text-[11px] rounded-md flex items-center gap-1 shadow-sm">
+          <span>🍽️</span>
+          <span id="tableName">Table</span>
+        </div>
+
+        <button id="wifiBtn" type="button" onclick="openWifiModal()" class="hidden px-2 py-1 rounded-md bg-[#131b2e] hover:bg-slate-800 border border-slate-800 text-slate-300 transition flex items-center gap-1 text-[11px] font-medium" title="Wi-Fi Info">
+          <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
+          <span>Wi-Fi</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loading State -->
+  <div id="loadingState" class="py-24 flex flex-col items-center justify-center gap-3 text-slate-400">
+    <div class="w-10 h-10 border-3 border-[#fbbf24] border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-xs font-semibold tracking-widest uppercase">Loading menu...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="errorState" class="hidden py-16 p-6 max-w-md mx-auto text-center space-y-3">
+    <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto text-xl border border-red-500/20">⚠️</div>
+    <h3 class="text-base font-bold text-white">Menu Unavailable</h3>
+    <p id="errorMsg" class="text-xs text-slate-400 max-w-sm mx-auto">Could not connect to the menu service. Please check your internet or scan the table QR code.</p>
+    <button type="button" onclick="loadMenu()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl transition">
+      Try Again
+    </button>
+  </div>
+
+  <!-- ── MAIN MENU BOARD (Exact Golden Frame Noir Poster - Always 2 Columns with Horizontal & Vertical Scrolling) ── -->
+  <main id="boardContainer" class="hidden w-full overflow-x-auto py-3 px-2 sm:px-4">
+    <div class="w-max min-w-[780px] max-w-5xl mx-auto">
+      <!-- Outer Frame with 3px Gold Border -->
+      <div class="relative rounded-2xl border-[3px] border-[#d4af37] bg-gradient-to-b from-[#0b0f19] via-[#080d19] to-[#030712] p-3 sm:p-5 md:p-7 shadow-2xl">
+        
+        <!-- Inner Frame with 1px Amber Border -->
+        <div class="relative rounded-lg border border-[#fbbf24]/50 p-3 sm:p-5 md:p-7">
+          
+          <!-- 4 Corner Ornamental Accents (Exact reproduction of menuCanvasGenerator corner ornaments) -->
+          <div class="absolute top-1.5 left-1.5 w-6 h-6 sm:w-8 sm:h-8 border-t-[3px] border-l-[3px] border-[#fbbf24] pointer-events-none"></div>
+          <div class="absolute top-1.5 right-1.5 w-6 h-6 sm:w-8 sm:h-8 border-t-[3px] border-r-[3px] border-[#fbbf24] pointer-events-none"></div>
+          <div class="absolute bottom-1.5 left-1.5 w-6 h-6 sm:w-8 sm:h-8 border-b-[3px] border-l-[3px] border-[#fbbf24] pointer-events-none"></div>
+          <div class="absolute bottom-1.5 right-1.5 w-6 h-6 sm:w-8 sm:h-8 border-b-[3px] border-r-[3px] border-[#fbbf24] pointer-events-none"></div>
+
+          <!-- Header Section -->
+          <header class="text-center pt-1 pb-4 space-y-1">
+            <h1 id="restaurantTitle" class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif font-black tracking-widest text-white drop-shadow uppercase">
+              RESTAURANT
+            </h1>
+            <p id="restaurantSubtitle" class="text-[10px] sm:text-xs md:text-sm font-bold tracking-[0.22em] text-[#fbbf24] uppercase">
+              SCAN TO BROWSE OUR DIGITAL MENU
+            </p>
+            <p id="restaurantMeta" class="text-[10px] sm:text-xs text-slate-400 font-medium tracking-wide">
+              <!-- Address and phone line -->
+            </p>
+
+            <!-- Horizontal Gold Divider Line with Center Diamond -->
+            <div class="relative flex items-center justify-center pt-2 max-w-xs sm:max-w-sm md:max-w-md mx-auto">
+              <div class="w-full border-t border-[#d4af37]/80"></div>
+              <div class="absolute w-2 h-2 sm:w-2.5 sm:h-2.5 bg-[#fbbf24] rotate-45 shadow-sm"></div>
+            </div>
+          </header>
+
+          <!-- Two Columns Container - Always 2 columns, never squished, horizontally scrollable -->
+          <div id="columnsGrid" class="grid grid-cols-2 gap-x-8 lg:gap-x-12 gap-y-6 pt-2">
+            <!-- Column 1 (Left) -->
+            <div id="colLeft" class="space-y-5 min-w-[340px]"></div>
+            <!-- Column 2 (Right) -->
+            <div id="colRight" class="space-y-5 min-w-[340px]"></div>
+          </div>
+
+          <div id="emptyNotice" class="hidden py-16 text-center text-slate-500 space-y-2">
+            <p class="text-xs">No dishes match your filter or search.</p>
+            <button type="button" onclick="resetFilters()" class="px-3 py-1 bg-slate-800 text-amber-400 text-xs font-semibold rounded hover:bg-slate-700">
+              Reset Filters
+            </button>
+          </div>
+
+          <!-- Footer Section -->
+          <footer class="mt-8 pt-4 border-t border-[#d4af37]/60">
+            <div class="flex flex-row items-center justify-between gap-4">
+              <!-- Left: Disclaimers -->
+              <div class="text-[10px] sm:text-xs text-slate-400 space-y-0.5 text-left">
+                <p>Prices inclusive of all applicable taxes • Freshly prepared on order</p>
+                <p class="text-slate-500">Thank you for dining with us!  •  Powered by Molecule POS</p>
+              </div>
+
+              <!-- Right: Mini QR Code with call to action -->
+              <div class="flex items-center gap-3">
+                <div class="text-right">
+                  <p class="text-xs font-bold text-[#fbbf24] tracking-wider uppercase">
+                    SCAN FOR LIVE DIGITAL MENU
+                  </p>
+                  <p class="text-[10px] text-slate-400">
+                    Browse latest dishes, dietary details & specials on your phone
+                  </p>
+                </div>
+                <div class="p-1 bg-white rounded-xl border border-[#d4af37] shadow-md shrink-0">
+                  <img id="footerQrImg" src="" alt="Menu QR" class="w-14 h-14 sm:w-16 sm:h-16 object-contain" />
+                </div>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Wi-Fi Modal -->
+  <div id="wifiModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
+          </div>
+          <h3 class="font-bold text-white text-base">Guest Wi-Fi</h3>
+        </div>
+        <button type="button" onclick="closeWifiModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <div class="space-y-3 p-4 bg-slate-950/70 rounded-2xl border border-slate-800">
+        <div>
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Network Name</span>
+          <span id="wifiSsidVal" class="text-sm font-bold text-white font-mono block mt-0.5">Guest_WiFi</span>
+        </div>
+        <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Password</span>
+            <span id="wifiPassVal" class="text-sm font-bold text-emerald-400 font-mono block mt-0.5">••••••••</span>
+          </div>
+          <button type="button" onclick="copyWifiPassword()" id="copyWifiBtn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition">
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let menuData = null;
+    let currentDietary = 'all';
+    let searchQuery = '';
+
+    // Extract customer slug from URL
+    function getSlug() {
+      const path = window.location.pathname;
+      const prefixMatch = path.match(/^\/(?:m|r|menu|c)\/([^/?#]+)/i);
+      if (prefixMatch && prefixMatch[1]) return decodeURIComponent(prefixMatch[1]).toLowerCase();
+      
+      const q = new URLSearchParams(window.location.search).get('customer') || 
+                new URLSearchParams(window.location.search).get('restaurant') ||
+                new URLSearchParams(window.location.search).get('slug');
+      if (q) return q.toLowerCase();
+
+      const direct = path.replace(/^\/+/, '').split('/')[0];
+      if (direct && !['menu.html', 'index.html', 'errors.html', 'api', 'errors'].includes(direct)) {
+        return decodeURIComponent(direct).toLowerCase();
+      }
+      return 'one-bite';
+    }
+
+    // Extract table from query string
+    function getTable() {
+      const p = new URLSearchParams(window.location.search);
+      return p.get('table') || (p.get('tableId') ? 'Table ' + p.get('tableId') : null);
+    }
+
+    async function loadMenu() {
+      const slug = getSlug();
+      const table = getTable();
+
+      if (table) {
+        document.getElementById('tableBadge').classList.remove('hidden');
+        document.getElementById('tableName').textContent = table;
+      }
+
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('errorState').classList.add('hidden');
+      document.getElementById('boardContainer').classList.add('hidden');
+
+      const candidates = [
+        `https://bkziskyecxiozsdmmrfs.supabase.co/storage/v1/object/public/molecule-storage/menus/${encodeURIComponent(slug)}.json`,
+        `/menus/${encodeURIComponent(slug)}.json`,
+        `/menus/${encodeURIComponent(slug)}/menu.json`,
+        `/menus/default.json`,
+        `https://firestore.googleapis.com/v1/projects/molecule-e2e95/databases/(default)/documents/qr_menus/${encodeURIComponent(slug)}`
+      ];
+
+      for (const url of candidates) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            let json = await res.json();
+            if (json.fields?.payload?.stringValue) {
+              json = JSON.parse(json.fields.payload.stringValue);
+            }
+            if (json && (json.categories || json.items)) {
+              menuData = json;
+              renderMenuBoard();
+              document.getElementById('loadingState').classList.add('hidden');
+              document.getElementById('boardContainer').classList.remove('hidden');
+              return;
+            }
+          }
+        } catch (e) {
+          // continue to next candidate
+        }
+      }
+
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('errorState').classList.remove('hidden');
+    }
+
+    function renderMenuBoard() {
+      if (!menuData) return;
+
+      const rest = menuData.restaurant || {};
+      const settings = menuData.settings || {};
+
+      document.title = (rest.name || 'Restaurant') + ' — Menu';
+      
+      // Header details
+      document.getElementById('restaurantTitle').textContent = (rest.name || 'Restaurant').toUpperCase();
+      document.getElementById('restaurantSubtitle').textContent = (settings.subtitle || 'SCAN TO BROWSE OUR DIGITAL MENU').toUpperCase();
+      
+      const metaParts = [rest.address, rest.phone].filter(Boolean);
+      document.getElementById('restaurantMeta').textContent = metaParts.join('   •   ');
+
+      // Wi-Fi Setup
+      if (settings.wifiSsid) {
+        document.getElementById('wifiBtn').classList.remove('hidden');
+        document.getElementById('wifiSsidVal').textContent = settings.wifiSsid;
+        document.getElementById('wifiPassVal').textContent = settings.wifiPassword || 'No Password';
+      }
+
+      // Footer QR Code
+      const qrTarget = window.location.href;
+      document.getElementById('footerQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(qrTarget)}`;
+
+      renderDishes();
+    }
+
+    function setDietaryFilter(val) {
+      currentDietary = val;
+      ['filterAll', 'filterVeg', 'filterNonVeg'].forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#131b2e] border border-slate-800 text-slate-400 hover:text-slate-200 transition';
+      });
+
+      if (val === 'all') {
+        document.getElementById('filterAll').className = 'px-2.5 py-1 rounded-md text-[11px] font-semibold bg-slate-200 text-slate-950 transition';
+      } else if (val === 'veg') {
+        document.getElementById('filterVeg').className = 'flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-500/20 border border-emerald-500 text-emerald-300 transition';
+      } else if (val === 'non-veg') {
+        document.getElementById('filterNonVeg').className = 'flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-red-500/20 border border-red-500 text-red-300 transition';
+      }
+
+      renderDishes();
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      const clearBtn = document.getElementById('clearSearchBtn');
+      if (searchQuery) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderDishes();
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      searchQuery = '';
+      document.getElementById('clearSearchBtn').classList.add('hidden');
+      renderDishes();
+    }
+
+    function resetFilters() {
+      clearSearch();
+      setDietaryFilter('all');
+    }
+
+    function renderDishes() {
+      if (!menuData) return;
+
+      const currency = menuData.restaurant?.currencySymbol || menuData.restaurant?.currency || '₹';
+      let items = menuData.items || [];
+
+      // Dietary filter
+      if (currentDietary === 'veg') items = items.filter(it => it.isVeg);
+      if (currentDietary === 'non-veg') items = items.filter(it => !it.isVeg);
+
+      // Search filter
+      if (searchQuery) {
+        items = items.filter(it =>
+          it.name.toLowerCase().includes(searchQuery) ||
+          (it.description && it.description.toLowerCase().includes(searchQuery)) ||
+          (it.shortCode && it.shortCode.toLowerCase().includes(searchQuery))
+        );
+      }
+
+      // Group by category
+      const cats = menuData.categories || [];
+      const catBlocks = [];
+
+      for (const cat of cats) {
+        const catItems = items.filter(it => it.categoryId === cat.id);
+        if (catItems.length > 0) {
+          catBlocks.push({ category: cat, items: catItems });
+        }
+      }
+
+      const emptyNotice = document.getElementById('emptyNotice');
+      const colLeft = document.getElementById('colLeft');
+      const colRight = document.getElementById('colRight');
+
+      if (catBlocks.length === 0) {
+        emptyNotice.classList.remove('hidden');
+        colLeft.innerHTML = '';
+        colRight.innerHTML = '';
+        return;
+      }
+
+      emptyNotice.classList.add('hidden');
+
+      // Balance categories between left and right column
+      const leftCats = [];
+      const rightCats = [];
+      let leftCount = 0;
+      let rightCount = 0;
+
+      for (const block of catBlocks) {
+        if (leftCount <= rightCount) {
+          leftCats.push(block);
+          leftCount += block.items.length + 2;
+        } else {
+          rightCats.push(block);
+          rightCount += block.items.length + 2;
+        }
+      }
+
+      colLeft.innerHTML = leftCats.map(b => renderCategoryHTML(b.category, b.items, currency)).join('');
+      colRight.innerHTML = rightCats.map(b => renderCategoryHTML(b.category, b.items, currency)).join('');
+    }
+
+    function renderCategoryHTML(cat, items, currency) {
+      let itemsHtml = items.map(it => {
+        const isVeg = !!it.isVeg;
+        const price = formatPrice(it.basePrice, currency);
+        const hasVars = it.variations && it.variations.length > 0;
+        
+        let varText = '';
+        if (hasVars) {
+          varText = it.variations
+            .map(v => `${escapeHtml(v.name)}: ${formatPrice(v.basePrice || (it.basePrice + (v.priceDelta || 0)), currency)}`)
+            .join('  •  ');
+        }
+
+        return `
+          <div class="group py-0.5">
+            <div class="flex items-baseline justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0 shrink-0">
+                <span class="w-3.5 h-3.5 border rounded-[2px] flex items-center justify-center shrink-0 ${isVeg ? 'border-[#10b981]' : 'border-[#ef4444]'}" title="${isVeg ? 'Vegetarian' : 'Non-Vegetarian'}">
+                  <span class="w-1.5 h-1.5 rounded-full ${isVeg ? 'bg-[#10b981]' : 'bg-[#ef4444]'}"></span>
+                </span>
+                <span class="font-semibold text-xs sm:text-sm text-slate-100 tracking-normal whitespace-nowrap">${escapeHtml(it.name)}</span>
+              </div>
+              <div class="flex-1 border-b border-dotted border-slate-700/80 mx-2 self-baseline min-w-[20px] translate-y-[-3px]"></div>
+              <span class="font-bold text-xs sm:text-sm text-[#fbbf24] shrink-0 text-right font-mono whitespace-nowrap">${price}</span>
+            </div>
+            ${varText ? `<div class="pl-5 text-[10px] sm:text-xs text-slate-400 italic font-normal tracking-wide whitespace-nowrap">${varText}</div>` : ''}
+            ${!varText && it.description ? `<div class="pl-5 text-[10px] sm:text-xs text-slate-400 italic font-normal whitespace-nowrap overflow-hidden text-ellipsis">${escapeHtml(it.description)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="space-y-2.5">
+          <div class="bg-[#1e293b] border border-[#d4af37]/70 rounded-md py-1 px-4 text-center shadow-sm">
+            <h2 class="font-extrabold text-xs sm:text-sm tracking-widest uppercase text-[#fbbf24]">
+              ${escapeHtml(cat.name)}
+            </h2>
+          </div>
+          <div class="space-y-2 px-1">
+            ${itemsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function formatPrice(paise, currency) {
+      if (typeof paise !== 'number') return `${currency}0`;
+      const val = paise > 1000 ? (paise / 100).toFixed(0) : paise;
+      return `${currency}${val}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Wi-Fi Modal Helpers
+    function openWifiModal() {
+      document.getElementById('wifiModal').classList.remove('hidden');
+    }
+    function closeWifiModal() {
+      document.getElementById('wifiModal').classList.add('hidden');
+    }
+    function copyWifiPassword() {
+      const pass = document.getElementById('wifiPassVal').textContent;
+      navigator.clipboard.writeText(pass).then(() => {
+        const btn = document.getElementById('copyWifiBtn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    }
+
+    // Start loading immediately
+    loadMenu();
+  </script>
+</body>
+</html>

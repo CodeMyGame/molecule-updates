@@ -11,7 +11,8 @@
     "settings": "الإعدادات",
     "logout": "تسجيل الخروج",
     "collapseSidebar": "طي الشريط الجانبي",
-    "expandSidebar": "توسيع الشريط الجانبي"
+    "expandSidebar": "توسيع الشريط الجانبي",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "يوم مفتوح",
@@ -239,7 +240,8 @@
     "kotPending": "KOT قيد الانتظار",
     "payNow": "دفع",
     "walkInGuest": "زبون مباشر",
-    "itemsCount": "{{count}} عناصر"
+    "itemsCount": "{{count}} عناصر",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "شاشة المطبخ",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "تم استبدال القائمة بنجاح بالملف الذي تم تحميله!",
-    "station": "محطة"
+    "station": "محطة",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "معاينة الفاتورة",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "يتوفر إصدار جديد من البرنامج. انقر أدناه لبدء التنزيل.",
-    "downloadUpdate": "تنزيل التحديث"
+    "downloadUpdate": "تنزيل التحديث",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "المنطقة واللغة",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "الإصدارات",
     "gotIt": "فهمت، لنبدأ!",
     "explorePos": "استكشف POS"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

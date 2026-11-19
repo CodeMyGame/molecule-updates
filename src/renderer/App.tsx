@@ -18,6 +18,8 @@ const Customers = lazy(() => import('./pages/Customers'));
 const Kitchen = lazy(() => import('./pages/Kitchen'));
 const TakeOrder = lazy(() => import('./pages/TakeOrder'));
 const Settings = lazy(() => import('./pages/Settings'));
+const QrMenuStudio = lazy(() => import('./pages/QrMenuStudio'));
+const CustomerMenu = lazy(() => import('./pages/CustomerMenu'));
 
 const PageLoader: React.FC = () => (
   <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -54,11 +56,22 @@ const TakeOrderOnlyApp: React.FC = () => (
   </Suspense>
 );
 
-function browserRole(): 'kitchen' | 'take-order' {
-  if (typeof window === 'undefined') return 'kitchen';
+const CustomerMenuOnlyApp: React.FC = () => (
+  <Suspense fallback={<PageLoader />}>
+    <Routes>
+      <Route path="*" element={<CustomerMenu />} />
+    </Routes>
+  </Suspense>
+);
+
+function browserRole(): 'kitchen' | 'take-order' | 'qr-menu' {
+  if (typeof window === 'undefined') return 'qr-menu';
   const path = window.location.pathname.toLowerCase();
+  if (path.startsWith('/kitchen')) return 'kitchen';
   if (path.startsWith('/take-order')) return 'take-order';
-  return 'kitchen';
+  // All other web routes (root /, /qr-menu, /m/:slug, /r/:slug, /c/:slug, /menu/:slug, /:slug)
+  // are customer-facing digital menus for Firebase Hosting.
+  return 'qr-menu';
 }
 
 const ElectronApp: React.FC = () => {
@@ -99,6 +112,7 @@ const ElectronApp: React.FC = () => {
           <Route path="/billing" element={<Billing />} />
           <Route path="/tables" element={<Tables />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/qr-menu" element={<QrMenuStudio />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/staff" element={<Staff />} />
           <Route path="/reports" element={<Reports />} />
@@ -117,7 +131,10 @@ const ElectronApp: React.FC = () => {
 
 const App: React.FC = () => {
   if (isBrowserMode()) {
-    return browserRole() === 'take-order' ? <TakeOrderOnlyApp /> : <KitchenOnlyApp />;
+    const role = browserRole();
+    if (role === 'qr-menu') return <CustomerMenuOnlyApp />;
+    if (role === 'take-order') return <TakeOrderOnlyApp />;
+    return <KitchenOnlyApp />;
   }
   return <ElectronApp />;
 };

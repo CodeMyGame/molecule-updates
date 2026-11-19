@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Plus,
@@ -21,6 +22,7 @@ import {
   Loader2,
   PlusCircle,
   Check,
+  QrCode,
 } from 'lucide-react';
 import {
   useMenu,
@@ -81,6 +83,7 @@ const defaultItemForm: ItemFormData = {
 };
 
 const MenuManagement: React.FC = () => {
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { settings, fetchSettings } = useSettings();
 
@@ -711,6 +714,15 @@ const MenuManagement: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => navigate('/qr-menu')}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-800 hover:bg-amber-500/20 transition-colors"
+            title="Create and print QR codes, table stands, and menu cards"
+          >
+            <QrCode size={13} className="text-amber-600" />
+            <span>{t('menu.qrMenu', 'QR Menu & Stands')}</span>
+          </button>
+
           <button
             onClick={handleExport}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"

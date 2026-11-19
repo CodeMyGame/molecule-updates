@@ -152,10 +152,10 @@ export function renderQrSvg(text: string, style: QrStyle = 'square', margin = 2,
     }
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgW}" width="100%" height="100%"><rect width="${svgW}" height="${svgW}" fill="#ffffff"/>${shapes.join('')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgW}" width="${svgW}" height="${svgW}"><rect width="${svgW}" height="${svgW}" fill="#ffffff"/>${shapes.join('')}</svg>`;
 }
 
 export function renderQrDataUri(text: string, style: QrStyle = 'square', margin = 2, centerIcon = true): string {
   const svg = renderQrSvg(text, style, margin, centerIcon);
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }

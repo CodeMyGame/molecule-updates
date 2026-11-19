@@ -78,15 +78,15 @@ const Modal: React.FC<ModalProps> = ({
       {/* Modal content */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`relative bg-white rounded-xl shadow-2xl w-full ${sizeClasses[size]} mx-auto animate-slide-up flex flex-col max-h-[85vh] z-10`}
+        className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 w-full ${sizeClasses[size]} mx-auto animate-slide-up flex flex-col max-h-[85vh] z-10`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
           >
             <X size={20} />
           </button>
@@ -97,7 +97,7 @@ const Modal: React.FC<ModalProps> = ({
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-3 border-t border-gray-200 flex items-center justify-end gap-2 flex-shrink-0">
+          <div className="px-6 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-end gap-2 flex-shrink-0">
             {footer}
           </div>
         )}

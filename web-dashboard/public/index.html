@@ -15,6 +15,15 @@
   <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
 
   <script>
+    // Automatic routing for customer QR digital menus
+    (function() {
+      const p = window.location.pathname.toLowerCase();
+      const s = window.location.search.toLowerCase();
+      if (p.startsWith('/m/') || p.startsWith('/menu/') || s.includes('table=') || s.includes('customer=')) {
+        window.location.replace('/menu.html' + window.location.pathname + window.location.search);
+      }
+    })();
+
     // Early capture of beforeinstallprompt so it is NEVER missed
     window.deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', function(e) {

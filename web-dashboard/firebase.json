@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "molecule-e2e95",
     "public": "public",
     "ignore": [
       "firebase.json",
@@ -10,6 +11,14 @@
       {
         "source": "/errors",
         "destination": "/errors.html"
+      },
+      {
+        "source": "/m/**",
+        "destination": "/menu.html"
+      },
+      {
+        "source": "/menu/**",
+        "destination": "/menu.html"
       },
       {
         "source": "**",

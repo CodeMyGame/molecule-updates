@@ -16,6 +16,7 @@ import {
   Plus,
   Sun,
   Moon,
+  QrCode,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../stores/auth.store';
@@ -31,6 +32,7 @@ const NAV_KEYS = [
   { key: 'billing' as const, path: '/billing', icon: <Receipt size={16} /> },
   { key: 'tables' as const, path: '/tables', icon: <LayoutGrid size={16} /> },
   { key: 'menu' as const, path: '/menu', icon: <UtensilsCrossed size={16} /> },
+  { key: 'qrMenu' as const, path: '/qr-menu', icon: <QrCode size={16} /> },
   { key: 'inventory' as const, path: '/inventory', icon: <Package size={16} /> },
   { key: 'kitchen' as const, path: '/kitchen', icon: <ChefHat size={16} /> },
   { key: 'customers' as const, path: '/customers', icon: <Users size={16} /> },
@@ -262,37 +264,37 @@ const Sidebar: React.FC = () => {
       </div>
       {/* Logout confirmation modal */}
       {logoutModal && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40" onClick={() => setLogoutModal(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-[340px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-xs" onClick={() => setLogoutModal(null)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 w-[340px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="bg-gray-50 px-6 pt-5 pb-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3">
-                <LogOut size={22} className="text-red-600" />
+            <div className="bg-gray-50 dark:bg-gray-900 px-6 pt-5 pb-4 text-center border-b border-gray-100 dark:border-gray-700">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-950/60 flex items-center justify-center mx-auto mb-3">
+                <LogOut size={22} className="text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-base font-semibold text-gray-900">{t('sidebar.endShiftLogout')}</h3>
-              <p className="text-xs text-gray-500 mt-1">{currentUser?.name ?? t('sidebar.userFallback')}</p>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">{t('sidebar.endShiftLogout')}</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{currentUser?.name ?? t('sidebar.userFallback')}</p>
             </div>
 
             {/* Shift summary */}
             <div className="px-6 py-4">
               {logoutModal.error ? (
-                <p className="text-sm text-gray-500 text-center">{t('sidebar.shiftReportError')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">{t('sidebar.shiftReportError')}</p>
               ) : logoutModal.orders > 0 ? (
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">{t('sidebar.shiftSummary')}</p>
-                  <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm text-gray-600">{t('sidebar.ordersHandled')}</span>
-                    <span className="text-sm font-semibold text-gray-900">{logoutModal.orders}</span>
+                  <div className="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-900/60 rounded-lg">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">{t('sidebar.ordersHandled')}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{logoutModal.orders}</span>
                   </div>
-                  <div className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg">
-                    <span className="text-sm text-gray-600">{t('common.revenue')}</span>
-                    <span className="text-sm font-semibold text-green-600">
+                  <div className="flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-900/60 rounded-lg">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">{t('common.revenue')}</span>
+                    <span className="text-sm font-semibold text-green-600 dark:text-emerald-400">
                       {currencySymbolForLanguage(i18n.language)}{(logoutModal.revenue / 100).toFixed(2)}
                     </span>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 text-center">{t('sidebar.noOrdersShift')}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center">{t('sidebar.noOrdersShift')}</p>
               )}
             </div>
 
@@ -300,7 +302,7 @@ const Sidebar: React.FC = () => {
             <div className="px-6 pb-5 flex gap-3">
               <button
                 onClick={() => setLogoutModal(null)}
-                className="flex-1 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                className="flex-1 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 border border-transparent dark:border-gray-600 transition-colors"
               >
                 {t('common.cancel')}
               </button>

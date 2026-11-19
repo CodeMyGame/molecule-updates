@@ -11,7 +11,8 @@
     "settings": "सेटिंग्ज",
     "logout": "लॉग आउट",
     "collapseSidebar": "साइडबार संकुचित करा",
-    "expandSidebar": "साइडबार विस्तृत करा"
+    "expandSidebar": "साइडबार विस्तृत करा",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "दिवस उघडा",
@@ -239,7 +240,8 @@
     "kotPending": "KOT प्रलंबित",
     "payNow": "पैसे द्या",
     "walkInGuest": "वॉक-इन ग्राहक",
-    "itemsCount": "{{count}} आयटम"
+    "itemsCount": "{{count}} आयटम",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "स्वयंपाकगृह प्रदर्शन",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "अपलोड केलेल्या फाईलसह मेनू यशस्वीरित्या बदलला गेला!",
-    "station": "स्टेशन"
+    "station": "स्टेशन",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "बिल पूर्वावलोकन",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "नवीन सॉफ्टवेअर आवृत्ती उपलब्ध आहे. डाउनलोड सुरू करण्यासाठी खाली क्लिक करा.",
-    "downloadUpdate": "अपडेट डाउनलोड करा"
+    "downloadUpdate": "अपडेट डाउनलोड करा",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "प्रदेश आणि भाषा",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "रिलीज",
     "gotIt": "समजले, सुरू करा!",
     "explorePos": "पीओएस एक्सप्लोर करा"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

@@ -11,7 +11,8 @@
     "settings": "設定",
     "logout": "ログアウト",
     "collapseSidebar": "サイドバーを閉じる",
-    "expandSidebar": "サイドバーを開く"
+    "expandSidebar": "サイドバーを開く",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "営業中",
@@ -239,7 +240,8 @@
     "kotPending": "KOT保留中",
     "payNow": "支払う",
     "walkInGuest": "一般客",
-    "itemsCount": "{{count}} 点"
+    "itemsCount": "{{count}} 点",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "キッチンディスプレイ",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "アップロードされたファイルでメニューが正常に置き換えられました！",
-    "station": "ステーション"
+    "station": "ステーション",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "伝票プレビュー",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "新しいソフトウェアバージョンが利用可能です。以下をクリックしてダウンロードを開始してください。",
-    "downloadUpdate": "アップデートをダウンロード"
+    "downloadUpdate": "アップデートをダウンロード",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "地域と言語",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "リリース",
     "gotIt": "了解、始める！",
     "explorePos": "POSを見る"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

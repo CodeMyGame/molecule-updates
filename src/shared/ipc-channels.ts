@@ -247,6 +247,15 @@ export const WAITER_NETWORK = {
   regenerateToken: 'waiterNetwork:regenerateToken',
 } as const;
 
+export const QR_MENU = {
+  getInfo: 'qrMenu:getInfo',
+  saveSettings: 'qrMenu:saveSettings',
+  getMenuData: 'qrMenu:getMenuData',
+  setEnabled: 'qrMenu:setEnabled',
+  exportFirebaseMenu: 'qrMenu:exportFirebaseMenu',
+  publishToCloud: 'qrMenu:publishToCloud',
+} as const;
+
 export const LOGGER = {
   logError: 'logger:logError',
   getDailyErrors: 'logger:getDailyErrors',

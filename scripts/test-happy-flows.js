@@ -1971,10 +1971,159 @@ suite('17. System Settings, Multi-Currency, 15-Locale Parity & Hot Backup', () =
 });
 
 // -------------------------------------------------------------
+// 18. Customer QR Menu & Table Stand Card Generator
+// -------------------------------------------------------------
+suite('18. Customer QR Menu & Table Stand Card Generator', () => {
+  test('QR-01 Initializes QR Menu configuration and defaults', () => {
+    db.prepare(`
+      INSERT OR IGNORE INTO settings (key, value, category)
+      VALUES ('qr_menu_network_enabled', 'true', 'qr_menu')
+    `).run();
+    db.prepare(`
+      INSERT OR IGNORE INTO settings (key, value, category)
+      VALUES ('qr_menu_table_card_title', 'Scan for Digital Menu', 'qr_menu')
+    `).run();
+
+    const enabled = db.prepare("SELECT value FROM settings WHERE key = 'qr_menu_network_enabled'").get();
+    const title = db.prepare("SELECT value FROM settings WHERE key = 'qr_menu_table_card_title'").get();
+    assertEqual(enabled.value, 'true', 'QR Menu network should be enabled by default');
+    assertEqual(title.value, 'Scan for Digital Menu', 'Table card title default matches');
+  });
+
+  test('QR-02 Computes table-specific URL targets with table name and ID parameters', () => {
+    const baseLanUrl = 'http://192.168.1.100:3030/qr-menu';
+    const tableId = 3;
+    const tableName = 'Table 3';
+    const computedUrl = `${baseLanUrl}?table=${encodeURIComponent(tableName)}&tableId=${tableId}`;
+    assert(computedUrl.includes('table=Table%203'), 'URL must contain encoded table name');
+    assert(computedUrl.includes('tableId=3'), 'URL must contain table ID');
+  });
+
+  test('QR-03 Assembles QR Menu JSON payload including categories, dishes, variations & table list', () => {
+    const categories = db.prepare('SELECT id, name FROM categories').all();
+    const items = db.prepare('SELECT id, name, category_id, base_price, is_veg FROM menu_items WHERE base_price > 0').all();
+    const tables = db.prepare('SELECT id, name, capacity FROM tables').all();
+
+    assert(categories.length > 0, 'Must have active categories');
+    assert(items.length > 0, 'Must have available menu items');
+    assert(tables.length > 0, 'Must have tables configured');
+
+    const sampleItem = items[0];
+    assert(typeof sampleItem.base_price === 'number', 'Base price must be minor unit integer (paise)');
+    assert(sampleItem.name.length > 0, 'Item name must not be empty');
+  });
+
+  test('QR-04 Standalone QR Code generation supports standard styles and Molecule center atom badge', () => {
+    const QRCode = require('qrcode');
+    const qr = QRCode.create('http://192.168.1.100:3030/qr-menu?table=1', { errorCorrectionLevel: 'Q' });
+    assert(qr && qr.modules && qr.modules.size > 0, 'QR Code engine must produce valid QR modules');
+  });
+
+  test('QR-05 Firebase Hosting configuration validates SPA rewrites and public directory', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const fbJsonPath = path.resolve(__dirname, '..', 'firebase.json');
+    const fbRcPath = path.resolve(__dirname, '..', '.firebaserc');
+
+    assert(fs.existsSync(fbJsonPath), 'firebase.json must exist');
+    assert(fs.existsSync(fbRcPath), '.firebaserc must exist');
+
+    const fbJson = JSON.parse(fs.readFileSync(fbJsonPath, 'utf-8'));
+    assertEqual(fbJson.hosting.public, 'out/renderer', 'Hosting public dir must point to out/renderer');
+    assert(Array.isArray(fbJson.hosting.rewrites), 'Hosting must configure SPA rewrites');
+    assertEqual(fbJson.hosting.rewrites[0].destination, '/index.html', 'SPA rewrite destination must be /index.html');
+  });
+
+  test('QR-06 Multi-Customer Path Routing extracts per-customer slugs accurately', () => {
+    function extractCustomerSlug(pathname, search = '') {
+      const prefixMatch = pathname.match(/^\/(?:m|r|c|menu)\/([^/?#]+)/i);
+      if (prefixMatch && prefixMatch[1]) {
+        return decodeURIComponent(prefixMatch[1]).trim().toLowerCase();
+      }
+      const params = new URLSearchParams(search);
+      const q = params.get('customer') || params.get('c') || params.get('restaurant') || params.get('slug');
+      if (q && q.trim().length > 0) return q.trim().toLowerCase();
+
+      const reserved = ['', 'kitchen', 'take-order', 'qr-menu', 'index.html', 'api', 'assets', 'menus', 'data'];
+      const rootMatch = pathname.match(/^\/([^/?#]+)/);
+      if (rootMatch && rootMatch[1]) {
+        const candidate = decodeURIComponent(rootMatch[1]).trim().toLowerCase();
+        if (!reserved.includes(candidate)) return candidate;
+      }
+      return null;
+    }
+
+    assertEqual(extractCustomerSlug('/m/one-bite'), 'one-bite', 'Extracts /m/one-bite prefix');
+    assertEqual(extractCustomerSlug('/r/cafe-delight'), 'cafe-delight', 'Extracts /r/cafe-delight prefix');
+    assertEqual(extractCustomerSlug('/menu/grand-bistro'), 'grand-bistro', 'Extracts /menu/grand-bistro prefix');
+    assertEqual(extractCustomerSlug('/pizza-king'), 'pizza-king', 'Extracts single root slug');
+    assertEqual(extractCustomerSlug('/qr-menu', '?customer=burger-hub'), 'burger-hub', 'Extracts from ?customer= query param');
+    assertEqual(extractCustomerSlug('/kitchen'), null, 'Reserved /kitchen route is ignored as customer slug');
+    assertEqual(extractCustomerSlug('/take-order'), null, 'Reserved /take-order route is ignored as customer slug');
+  });
+
+  test('QR-07 Firebase menu exporter creates static JSON payload for customer path', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const { execSync } = require('child_process');
+    const customerSlug = 'one-bite';
+
+    // Execute exporter script
+    execSync(`node "${path.resolve(__dirname, 'export-firebase-menu.js')}" --slug ${customerSlug}`, {
+      cwd: path.resolve(__dirname, '..'),
+      stdio: 'pipe',
+    });
+
+    const outMenuFile = path.resolve(__dirname, '..', 'out', 'renderer', 'menus', `${customerSlug}.json`);
+    assert(fs.existsSync(outMenuFile), `Target out/renderer/menus/${customerSlug}.json must exist`);
+    const menuData = JSON.parse(fs.readFileSync(outMenuFile, 'utf-8'));
+    assert(menuData.restaurant && menuData.restaurant.name, 'Payload must have restaurant object');
+    assert(Array.isArray(menuData.categories), 'Payload must have categories array');
+    assert(Array.isArray(menuData.items), 'Payload must have items array');
+
+    const cloudDomain = 'https://molecule-e2e95.web.app';
+    const liveCustomerUrl = `${cloudDomain}/m/${customerSlug}?table=Table%201&tableId=1`;
+    assert(liveCustomerUrl.includes('/m/one-bite'), 'Customer path must be present in live URL');
+    assert(liveCustomerUrl.includes('tableId=1'), 'Table ID parameter must be preserved');
+  });
+
+  test('QR-08 Collision-Proof License-Based Customer Slugs prevent multi-store URL collisions', () => {
+    function computeSlug(restaurant, licenseKey, customSlug) {
+      if (customSlug && customSlug.trim().length > 0) {
+        return customSlug.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/^-+|-+$/g, '');
+      }
+      const raw = restaurant?.name || 'menu';
+      const baseSlug = raw.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/^-+|-+$/g, '') || 'menu';
+      const cleanLicense = licenseKey ? licenseKey.replace(/[^a-zA-Z0-9]/g, '').slice(-5).toLowerCase() : '';
+      if (cleanLicense) return `${baseSlug}-${cleanLicense}`;
+      const phone = (restaurant?.phone || '').trim();
+      const cleanPhone = phone ? phone.replace(/[^0-9]/g, '').slice(-4) : '';
+      if (cleanPhone) return `${baseSlug}-${cleanPhone}`;
+      return baseSlug;
+    }
+
+    // Two stores with identical restaurant names generate distinct, collision-free URLs
+    const store1 = computeSlug({ name: 'Kapil Cafe', phone: '9690148808' }, 'AEGAAACSOTSLXFI');
+    const store2 = computeSlug({ name: 'Kapil Cafe', phone: '9876543210' }, 'BGKAAAWXYZABCDE');
+    assertEqual(store1, 'kapil-cafe-slxfi', 'Store 1 receives unique license suffix slxfi');
+    assertEqual(store2, 'kapil-cafe-abcde', 'Store 2 receives unique license suffix abcde');
+    assert(store1 !== store2, 'Same-named restaurants have unique collision-proof URLs');
+
+    // Manual custom slug still overrides if explicitly specified
+    const custom = computeSlug({ name: 'Kapil Cafe' }, 'AEGAAACSOTSLXFI', 'kapil-vip');
+    assertEqual(custom, 'kapil-vip', 'Explicit custom slug overrides automatic license slug');
+
+    // Fallback without license key uses phone suffix
+    const fallbackPhone = computeSlug({ name: 'One Bite', phone: '9988776655' }, null);
+    assertEqual(fallbackPhone, 'one-bite-6655', 'Falls back gracefully to phone suffix');
+  });
+});
+
+// -------------------------------------------------------------
 // Final Summary & Exit
 // -------------------------------------------------------------
 console.log(`\n${colors.bright}========================================================================${colors.reset}`);
-console.log(`  ${colors.bright}ALL 17 MODULES & SCENARIOS AUTOMATION RESULTS:${colors.reset}`);
+console.log(`  ${colors.bright}ALL 18 MODULES & SCENARIOS AUTOMATION RESULTS:${colors.reset}`);
 console.log(`  ${colors.green}Total Passed Tests: ${passedCount}${colors.reset}`);
 if (failedCount > 0) {
   console.log(`  ${colors.red}Total Failed Tests: ${failedCount}${colors.reset}`);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Building2,
   Receipt,
@@ -118,7 +119,7 @@ import { renderQrSvg, QR_STYLES, type QrStyle } from '../../shared/qr-render';
 import { useUIStore } from '../stores/ui.store';
 import { useDaySessionStore } from '../stores/daySession.store';
 
-type SettingsSection = 'restaurant' | 'tax' | 'printer' | 'billing' | 'offers' | 'backup' | 'cloud' | 'day_session' | 'license' | 'refer_and_earn' | 'language' | 'appearance' | 'coins' | 'kitchen_network' | 'waiter_network' | 'system_update';
+type SettingsSection = 'restaurant' | 'tax' | 'printer' | 'billing' | 'offers' | 'backup' | 'cloud' | 'day_session' | 'license' | 'refer_and_earn' | 'language' | 'appearance' | 'coins' | 'kitchen_network' | 'waiter_network' | 'qr_menu_settings' | 'system_update';
 
 const SECTION_DEFS: { key: SettingsSection; labelKey: string; icon: React.ReactNode }[] = [
   { key: 'restaurant', labelKey: 'settingsPage.restaurantProfile', icon: <Building2 size={18} /> },
@@ -136,6 +137,7 @@ const SECTION_DEFS: { key: SettingsSection; labelKey: string; icon: React.ReactN
   { key: 'coins', labelKey: 'settings.coins', icon: <Coins size={18} /> },
   { key: 'kitchen_network', labelKey: 'settings.kitchenNetwork', icon: <Wifi size={18} /> },
   { key: 'waiter_network', labelKey: 'settings.waiterNetwork', icon: <Smartphone size={18} /> },
+  { key: 'qr_menu_settings', labelKey: 'settings.qrMenu', icon: <QrCode size={18} /> },
   { key: 'system_update', labelKey: 'settings.systemUpdate', icon: <RefreshCw size={18} /> },
 ];
 
@@ -144,7 +146,7 @@ const SECTION_DEFS: { key: SettingsSection; labelKey: string; icon: React.ReactN
 const SECTION_GROUPS: { labelKey: string; fallback: string; keys: SettingsSection[] }[] = [
   { labelKey: 'settingsPage.groupGeneral', fallback: 'General', keys: ['restaurant', 'refer_and_earn', 'appearance', 'language'] },
   { labelKey: 'settingsPage.groupSales', fallback: 'Sales & Billing', keys: ['tax', 'billing', 'offers', 'coins'] },
-  { labelKey: 'settingsPage.groupDevices', fallback: 'Devices & Network', keys: ['printer', 'kitchen_network', 'waiter_network'] },
+  { labelKey: 'settingsPage.groupDevices', fallback: 'Devices & Network', keys: ['printer', 'kitchen_network', 'waiter_network', 'qr_menu_settings'] },
   { labelKey: 'settingsPage.groupSystem', fallback: 'System', keys: ['backup', 'cloud', 'day_session', 'license', 'system_update'] },
 ];
 
@@ -213,6 +215,7 @@ const ReceiptFieldLabelInput: React.FC<{
 };
 
 const Settings: React.FC = () => {
+  const navigate = useNavigate();
   const openTour = useTourStore((s) => s.openTour);
   const openWhatsNew = useWhatsNewStore((s) => s.openWhatsNew);
   const licenseStatus = useLicenseStore((s) => s.status);
@@ -2363,8 +2366,8 @@ const Settings: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-1 text-[11px] text-gray-500 leading-relaxed mt-4">
-            <p className="font-semibold text-gray-700 flex items-center gap-1">
+          <div className="bg-slate-50 dark:bg-gray-800/80 rounded-xl p-3.5 border border-slate-200 dark:border-gray-700 space-y-1 text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed mt-4">
+            <p className="font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-1">
               <ShieldCheck size={13} className="text-green-600" />
               Privacy & Isolation Guarantee:
             </p>
@@ -2375,34 +2378,34 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Column 2: Mobile Access URL & Quick QR Scanner */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-5 flex flex-col justify-between">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-5 flex flex-col justify-between">
           <div className="space-y-4">
-            <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100">
-              <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700">
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                 <Smartphone size={20} />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-gray-900">Mobile Phone & Browser Access</h3>
-                <p className="text-xs text-gray-500">Open on iPhone, Android, iPad, or any laptop browser</p>
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Mobile Phone & Browser Access</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Open on iPhone, Android, iPad, or any laptop browser</p>
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-1.5">
                 Dashboard URL
               </label>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <div className="flex-1 flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-800 select-all overflow-hidden text-ellipsis">
-                  <Globe size={14} className="text-indigo-600 mr-2 flex-shrink-0" />
+                <div className="flex-1 flex items-center bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs font-mono text-gray-800 dark:text-gray-200 select-all overflow-hidden text-ellipsis">
+                  <Globe size={14} className="text-indigo-600 dark:text-indigo-400 mr-2 flex-shrink-0" />
                   <span className="truncate">{dashboardWebUrl}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={handleCopyDashboardUrl}
-                    className="px-3 py-2 text-xs font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center gap-1.5 transition-colors"
+                    className="px-3 py-2 text-xs font-semibold rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 flex items-center gap-1.5 transition-colors"
                   >
-                    {copiedDashboardUrl ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                    {copiedDashboardUrl ? <Check size={14} className="text-green-600 dark:text-emerald-400" /> : <Copy size={14} />}
                     {copiedDashboardUrl ? 'Copied' : 'Copy URL'}
                   </button>
                   <button
@@ -2418,30 +2421,30 @@ const Settings: React.FC = () => {
             </div>
 
             {/* QR Code Box */}
-            <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4">
+            <div className="bg-indigo-50/70 dark:bg-gray-900/90 border border-indigo-100 dark:border-gray-700 rounded-xl p-4 flex flex-col sm:flex-row items-center gap-4">
               {cloudQr ? (
-                <div className="bg-white p-2 rounded-xl border border-indigo-200 shadow-sm flex-shrink-0">
+                <div className="bg-white p-2 rounded-xl border border-indigo-200 dark:border-gray-600 shadow-sm flex-shrink-0">
                   <img src={cloudQr} alt="Scan QR to open mobile dashboard" className="w-28 h-28" />
                 </div>
               ) : (
-                <div className="w-28 h-28 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 flex-shrink-0">
+                <div className="w-28 h-28 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-gray-400 flex-shrink-0">
                   <QrCode size={36} />
                 </div>
               )}
 
-              <div className="space-y-2 text-xs text-gray-700">
-                <p className="font-bold text-gray-900 flex items-center gap-1.5 text-sm">
-                  <QrCode size={16} className="text-indigo-600" />
+              <div className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
+                <p className="font-bold text-gray-900 dark:text-white flex items-center gap-1.5 text-sm">
+                  <QrCode size={16} className="text-indigo-600 dark:text-indigo-400" />
                   Scan with Phone Camera
                 </p>
-                <p className="text-gray-600 text-xs leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-400 text-xs leading-relaxed">
                   Open your mobile camera or scanner app and point it at this QR code to load your dashboard on your smartphone instantly.
                 </p>
-                <div className="pt-1 flex flex-col gap-1 text-[11px] font-medium text-indigo-900">
-                  <span className="bg-white px-2.5 py-1 rounded-lg border border-indigo-200">
+                <div className="pt-1 flex flex-col gap-1 text-[11px] font-medium text-indigo-900 dark:text-indigo-300">
+                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
                     📱 <b>iPhone (Safari):</b> Tap Share → <b>Add to Home Screen</b>
                   </span>
-                  <span className="bg-white px-2.5 py-1 rounded-lg border border-indigo-200">
+                  <span className="bg-white dark:bg-gray-800 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
                     🤖 <b>Android (Chrome):</b> Tap Menu (⋮) → <b>Install App</b>
                   </span>
                 </div>
@@ -2449,7 +2452,7 @@ const Settings: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-emerald-50 rounded-xl p-3.5 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-2">
+          <div className="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3.5 border border-emerald-200 dark:border-emerald-800/50 text-xs text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
             <span>Progressive Web App: Runs in full screen without needing App Store downloads.</span>
           </div>
@@ -3458,6 +3461,7 @@ const Settings: React.FC = () => {
       case 'coins': return renderCoins();
       case 'kitchen_network': return renderKitchenNetwork();
       case 'waiter_network': return renderWaiterNetwork();
+      case 'qr_menu_settings': return renderQrMenuSettings();
       case 'system_update': return renderSystemUpdate();
       default: return null;
     }
@@ -3645,6 +3649,56 @@ const Settings: React.FC = () => {
       waiterQr,
       false,
     );
+
+  const renderQrMenuSettings = () => {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+            {t('settings.qrMenuTitle', 'Customer QR Menu & Table Stands')}
+          </h3>
+          <p className="text-sm text-gray-500">
+            {t('settings.qrMenuDesc', 'Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.')}
+          </p>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                <QrCode size={22} />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900 text-sm">QR Menu Studio</h4>
+                <p className="text-xs text-gray-500">Print Table Stands, Tent Cards, and Download Beautiful Menu Images</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/qr-menu')}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-sm transition"
+            >
+              <span>Open QR Menu Studio</span>
+              <ExternalLink size={14} />
+            </button>
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-600 leading-relaxed space-y-2">
+            <p>
+              Molecule includes a full-featured QR Menu generator that lets you:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-gray-600">
+              <li>Print beautiful physical table tent cards, acrylic stands & stickers for all your tables.</li>
+              <li>Download a high-resolution, full-menu image or flyer (A4 300 DPI) for printing or social media.</li>
+              <li>Provide instant guest Wi-Fi details printed right onto each table stand.</li>
+              <li>Let dining customers view live dishes, prices, and save digital menu cards to their phones.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderSystemUpdate = () => {
     return (
@@ -4101,12 +4155,12 @@ const Settings: React.FC = () => {
                 <p className="text-xs text-gray-500 dark:text-gray-400">{t('settings.themeLightDesc')}</p>
               </div>
             </div>
-            <div className="rounded-lg overflow-hidden border border-gray-200">
-              <div className="h-3 bg-white" />
+            <div className="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+              <div className="h-3 theme-preview-light" />
               <div className="flex">
                 <div className="w-6 bg-gray-900 h-8" />
-                <div className="flex-1 bg-gray-100 h-8 p-1">
-                  <div className="w-full h-full bg-white rounded-sm" />
+                <div className="flex-1 theme-preview-light-bg h-8 p-1">
+                  <div className="w-full h-full theme-preview-light rounded-sm" />
                 </div>
               </div>
             </div>

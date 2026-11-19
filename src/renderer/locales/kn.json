@@ -11,7 +11,8 @@
     "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
     "logout": "ಲಾಗ್ ಔಟ್",
     "collapseSidebar": "ಸೈಡ್‌ಬಾರ್ ಸಂಕುಚಿಸಿ",
-    "expandSidebar": "ಸೈಡ್‌ಬಾರ್ ವಿಸ್ತರಿಸಿ"
+    "expandSidebar": "ಸೈಡ್‌ಬಾರ್ ವಿಸ್ತರಿಸಿ",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "ದಿನ ತೆರೆದಿದೆ",
@@ -239,7 +240,8 @@
     "kotPending": "KOT ಬಾಕಿ ಇದೆ",
     "payNow": "ಪಾವತಿಸಿ",
     "walkInGuest": "ವಾಕ್-ಇನ್ ಗ್ರಾಹಕ",
-    "itemsCount": "{{count}} ಐಟಂಗಳು"
+    "itemsCount": "{{count}} ಐಟಂಗಳು",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "ಅಡುಗೆಮನೆ ಪ್ರದರ್ಶನ",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್‌ನೊಂದಿಗೆ ಮೆನುವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಬದಲಾಯಿಸಲಾಗಿದೆ!",
-    "station": "ನಿಲ್ದಾಣ"
+    "station": "ನಿಲ್ದಾಣ",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "ಬಿಲ್ ಪೂರ್ವವೀಕ್ಷಣೆ",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "ಹೊಸ ಸಾಫ್ಟ್‌ವೇರ್ ಆವೃತ್ತಿ ಲಭ್ಯವಿದೆ. ಡೌನ್‌ಲೋಡ್ ಪ್ರಾರಂಭಿಸಲು ಕೆಳಗೆ ಕ್ಲಿಕ್ ಮಾಡಿ.",
-    "downloadUpdate": "ನವೀಕರಣವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"
+    "downloadUpdate": "ನವೀಕರಣವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "ಪ್ರದೇಶ ಮತ್ತು ಭಾಷೆ",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "ಬಿಡುಗಡೆಗಳು",
     "gotIt": "ತಿಳಿಯಿತು, ಪ್ರಾರಂಭಿಸಿ!",
     "explorePos": "POS ಅನ್ವೇಷಿಸಿ"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

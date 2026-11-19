@@ -216,36 +216,36 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
     <Modal isOpen={isOpen} onClose={handleClose} title={t('paymentModal.title')} size="md" closeOnOverlay={false}>
       <div className="flex flex-col gap-3">
         {/* Order summary */}
-        <div className="bg-gray-50 rounded-lg px-3 py-2 space-y-1">
-          <div className="flex justify-between text-xs text-gray-600">
+        <div className="bg-gray-50 dark:bg-gray-800/80 border border-gray-200/60 dark:border-gray-700 rounded-lg px-3 py-2 space-y-1">
+          <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300">
             <span>{t('paymentModal.subtotal')}</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
           {discountAmount > 0 && (
-            <div className="flex justify-between text-xs text-green-600">
+            <div className="flex justify-between text-xs text-green-600 dark:text-emerald-400">
               <span>{t('paymentModal.discount')}</span>
               <span>- {formatCurrency(discountAmount)}</span>
             </div>
           )}
           {totalTax > 0 && (
-            <div className="flex justify-between text-xs text-gray-600">
+            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300">
               <span>{t('paymentModal.tax')}</span>
               <span>{formatCurrency(totalTax)}</span>
             </div>
           )}
           {tip > 0 && (
-            <div className="flex justify-between text-xs text-gray-600">
+            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-300">
               <span>{t('paymentModal.tip')}</span>
               <span>{formatCurrency(tip)}</span>
             </div>
           )}
           {parsedRedeemAmount > 0 && (
-            <div className="flex justify-between text-xs text-yellow-600">
+            <div className="flex justify-between text-xs text-yellow-600 dark:text-amber-400">
               <span>{t('paymentModal.coinRedemption', { count: parsedRedeemAmount })}</span>
               <span>- {cs}{parsedRedeemAmount}</span>
             </div>
           )}
-          <div className="flex justify-between text-sm font-bold text-gray-900 pt-1 border-t border-gray-200">
+          <div className="flex justify-between text-sm font-bold text-gray-900 dark:text-white pt-1 border-t border-gray-200 dark:border-gray-700">
             <span>{t('paymentModal.total')}</span>
             <span>{formatCurrency(totalWithTip)}</span>
           </div>
@@ -253,7 +253,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
 
         {/* Tip input — only shown when enable_tips is on */}
         {tipsEnabled && <div>
-          <label className="text-xs font-medium text-gray-700 mb-1 block">
+          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
             {t('paymentModal.addTipOptional')}
           </label>
           <div className="relative">
@@ -270,7 +270,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
                 setTipInput(parts.length > 2 ? parts[0] + '.' + parts.slice(1).join('') : v);
               }}
               placeholder={t('paymentModal.tipPlaceholder')}
-              className="w-full pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-lg
+              className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg
                 focus:outline-none focus:ring-2 focus:ring-blue-300"
             />
           </div>
@@ -278,18 +278,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
 
         {/* Payment mode selection */}
         <div>
-          <label className="text-xs font-medium text-gray-700 mb-1.5 block">{t('paymentModal.paymentMode')}</label>
+          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5 block">{t('paymentModal.paymentMode')}</label>
           <div className="grid grid-cols-3 gap-2">
             {paymentModes.map(({ key, label, icon: Icon, color }) => (
               <button
                 key={key}
                 onClick={() => { setActiveMode(key); setReferenceError(''); }}
                 className={`flex flex-col items-center justify-center gap-1 py-2 px-3 rounded-lg
-                  transition-all text-white font-medium
+                  transition-all font-medium
                   ${
                     activeMode === key
-                      ? `${color} ring-2 ring-offset-1 ring-blue-400 shadow scale-105`
-                      : 'bg-gray-300 hover:bg-gray-400'
+                      ? `${color} text-white ring-2 ring-offset-1 ring-blue-400 shadow scale-105`
+                      : 'bg-gray-100 dark:bg-gray-750 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600'
                   }`}
               >
                 <Icon size={16} />
@@ -302,7 +302,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
         {/* Card / UPI: reference input */}
         {(activeMode === 'card' || activeMode === 'upi') && (
           <div>
-            <label className="text-xs font-medium text-gray-700 mb-1 block">
+            <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">
               {activeMode === 'card' ? t('paymentModal.cardLast4') : t('paymentModal.transactionId')}
             </label>
             <input
@@ -311,9 +311,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
               onChange={(e) => { setReference(e.target.value); setReferenceError(''); }}
               placeholder={activeMode === 'card' ? t('paymentModal.placeholderCard') : t('paymentModal.placeholderTxnId')}
               maxLength={activeMode === 'card' ? 4 : 30}
-              className={`w-full px-3 py-1.5 text-xs border rounded-lg
+              className={`w-full px-3 py-1.5 text-xs bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border rounded-lg
                 focus:outline-none focus:ring-2 focus:ring-blue-300
-                ${referenceError ? 'border-red-400' : 'border-gray-300'}`}
+                ${referenceError ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
             />
             {referenceError && (
               <p className="text-xs text-red-500 mt-0.5">{referenceError}</p>
@@ -341,9 +341,9 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
                 onFocus={() => { if (phoneSuggestions.length > 0) setShowSuggestions(true); }}
                 placeholder={t('paymentModal.phonePlaceholder')}
                 maxLength={10}
-                className={`w-full pl-8 pr-3 py-1.5 text-xs border rounded-lg
+                className={`w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border rounded-lg
                   focus:outline-none focus:ring-2 focus:ring-blue-300
-                  ${customerPhone.length > 0 && customerPhone.length < 10 ? 'border-red-400' : 'border-gray-300'}`}
+                  ${customerPhone.length > 0 && customerPhone.length < 10 ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'}`}
               />
             </div>
             {customerPhone.length > 0 && customerPhone.length < 10 && (
@@ -355,7 +355,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
               <>
                 <div className="fixed inset-0 z-[60]" onClick={() => setShowSuggestions(false)} />
                 <div
-                  className="fixed bg-white border border-gray-200 rounded-lg shadow-xl z-[61] max-h-48 overflow-y-auto"
+                  className="fixed bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-[61] max-h-48 overflow-y-auto"
                   style={{ top: dropdownStyle.top, left: dropdownStyle.left, width: dropdownStyle.width }}
                 >
                   {phoneSuggestions.map((c) => (
@@ -368,13 +368,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
                         setDropdownStyle(null);
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left
-                        hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-0"
+                        hover:bg-blue-50 dark:hover:bg-gray-750 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0"
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{c.name}</p>
-                        <p className="text-xs text-gray-500">{c.phone}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{c.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{c.phone}</p>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-gray-500 flex-shrink-0">
+                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
                         <span className="flex items-center gap-1">
                           <Coins size={10} className="text-yellow-500" />
                           {c.loyaltyPoints ?? 0}
@@ -390,10 +390,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onComplete
 
           {/* Selected customer info badge */}
           {selectedCustomerInfo && (
-            <div className="mt-1.5 flex items-center gap-2 px-2.5 py-1.5 bg-blue-50 rounded-lg">
-              <Phone size={11} className="text-blue-600" />
-              <span className="text-blue-800 font-medium text-xs">{selectedCustomerInfo.phone}</span>
-              <span className="text-blue-600 text-xs">
+            <div className="mt-1.5 flex items-center gap-2 px-2.5 py-1.5 bg-blue-50 dark:bg-blue-950/40 rounded-lg">
+              <Phone size={11} className="text-blue-600 dark:text-blue-400" />
+              <span className="text-blue-800 dark:text-blue-300 font-medium text-xs">{selectedCustomerInfo.phone}</span>
+              <span className="text-blue-600 dark:text-blue-400 text-xs">
                 {t('paymentModal.customerBadge', {
                   points: selectedCustomerInfo.loyaltyPoints ?? 0,
                   visits: selectedCustomerInfo.totalVisits ?? 0,

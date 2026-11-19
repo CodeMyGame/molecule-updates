@@ -17,12 +17,12 @@ const LOCAL_STORAGE_KEY = 'molecule_custom_parcel_presets';
 const SETTING_KEY = 'custom_parcel_presets';
 
 const DEFAULT_PARCEL_PARTNERS = [
-  { label: 'Zomato', icon: '🛵', color: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100/80' },
-  { label: 'Swiggy', icon: '📦', color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100/80' },
-  { label: 'Blinkit', icon: '⚡', color: 'bg-yellow-50 text-yellow-800 border-yellow-200 hover:bg-yellow-100/80' },
-  { label: 'Dunzo', icon: '🛵', color: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/80' },
-  { label: 'Takeaway', icon: '🛍️', color: 'bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100/80' },
-  { label: 'Walk-in', icon: '👤', color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100/80' },
+  { label: 'Zomato', icon: '🛵', color: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100/80 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/50' },
+  { label: 'Swiggy', icon: '📦', color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100/80 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-900/50' },
+  { label: 'Blinkit', icon: '⚡', color: 'bg-yellow-50 text-yellow-800 border-yellow-200 hover:bg-yellow-100/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/50' },
+  { label: 'Dunzo', icon: '🛵', color: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/50' },
+  { label: 'Takeaway', icon: '🛍️', color: 'bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100/80 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-900/50' },
+  { label: 'Walk-in', icon: '👤', color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100/80 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/50' },
 ];
 
 function getStoredPresets(): string[] {
@@ -156,20 +156,20 @@ export const ParcelNameModal: React.FC<ParcelNameModalProps> = ({
       onKeyDown={handleKeyDown}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-[390px] overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-150"
+        className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-[390px] overflow-hidden border border-gray-100 dark:border-gray-700 animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100">
+        <div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-gray-900 dark:to-emerald-950/40 border-b border-emerald-100 dark:border-gray-700">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-xs shrink-0">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shadow-xs shrink-0">
               <ShoppingBag size={16} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 leading-tight">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
                 {title || t('billing.parcelNameModalTitle', { defaultValue: 'Parcel Name / Partner' })}
               </h3>
-              <p className="text-[11px] text-gray-500 mt-0.5">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
                 {t('billing.parcelNameOptionalHint', { defaultValue: 'Optional: tag Zomato, Swiggy, or reference' })}
               </p>
             </div>
@@ -177,7 +177,7 @@ export const ParcelNameModal: React.FC<ParcelNameModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <X size={15} />
           </button>
@@ -272,7 +272,7 @@ export const ParcelNameModal: React.FC<ParcelNameModalProps> = ({
                     }}
                     className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-xs font-semibold border transition-all text-center ${
                       isSelected
-                        ? 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/80 shadow-xs font-bold'
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200 ring-2 ring-emerald-500/80 shadow-xs font-bold'
                         : `${preset.color} active:scale-98`
                     }`}
                   >
@@ -324,7 +324,7 @@ export const ParcelNameModal: React.FC<ParcelNameModalProps> = ({
 
           {/* Text Input Section */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-gray-700">
+            <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
               {t('billing.customParcelName', { defaultValue: 'Name or Order Note' })}
             </label>
             <div className="relative">
@@ -338,13 +338,13 @@ export const ParcelNameModal: React.FC<ParcelNameModalProps> = ({
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t('billing.parcelPlaceholder', { defaultValue: 'e.g. Zomato #482, Rahul, Party' })}
                 maxLength={40}
-                className="w-full pl-8 pr-8 py-2.5 rounded-xl text-xs bg-gray-50 border border-gray-200 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-hidden font-medium text-gray-900"
+                className="w-full pl-8 pr-8 py-2.5 rounded-xl text-xs bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:bg-white dark:focus:bg-gray-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-hidden font-medium text-gray-900 dark:text-gray-100"
               />
               {name.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setName('')}
-                  className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-gray-400 hover:text-gray-600"
+                  className="absolute inset-y-0 right-0 pr-2.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
                 >
                   <X size={13} />
                 </button>
@@ -357,7 +357,7 @@ export const ParcelNameModal: React.FC<ParcelNameModalProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAddCustomPreset(name)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10.5px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10.5px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-800 transition-all cursor-pointer active:scale-95 shadow-2xs"
                 >
                   <Plus size={10} strokeWidth={2.5} />
                   <span>
@@ -372,11 +372,11 @@ export const ParcelNameModal: React.FC<ParcelNameModalProps> = ({
           </div>
 
           {/* Action buttons footer */}
-          <div className="flex items-center gap-2.5 pt-3 border-t border-gray-100">
+          <div className="flex items-center gap-2.5 pt-3 border-t border-gray-100 dark:border-gray-700">
             <button
               type="button"
               onClick={handleSkip}
-              className="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-98 transition-all"
+              className="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-98 transition-all"
             >
               {t('common.skip', { defaultValue: 'Skip (No Name)' })}
             </button>

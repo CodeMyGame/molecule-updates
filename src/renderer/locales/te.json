@@ -11,7 +11,8 @@
     "settings": "సెట్టింగులు",
     "logout": "లాగ్అవుట్",
     "collapseSidebar": "సైడ్‌బార్ కుదించు",
-    "expandSidebar": "సైడ్‌బార్ విస్తరించు"
+    "expandSidebar": "సైడ్‌బార్ విస్తరించు",
+    "qrMenu": "QR Menu"
   },
   "header": {
     "dayOpen": "రోజు తెరిచి ఉంది",
@@ -239,7 +240,8 @@
     "kotPending": "KOT పెండింగ్‌లో ఉంది",
     "payNow": "చెల్లించండి",
     "walkInGuest": "వాక్-ఇన్ కస్టమర్",
-    "itemsCount": "{{count}} అంశాలు"
+    "itemsCount": "{{count}} అంశాలు",
+    "tableQrs": "Table QR Stands"
   },
   "kitchen": {
     "title": "వంటగది డిస్‌ప్లే",
@@ -760,7 +762,8 @@
     "importSuccess": "Imported {{categories}} categories and {{items}} items successfully",
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "అప్‌లోడ్ చేసిన ఫైల్‌తో మెను విజయవంతంగా భర్తీ చేయబడింది!",
-    "station": "స్టేషన్"
+    "station": "స్టేషన్",
+    "qrMenu": "QR Menu & Stands"
   },
   "bill": {
     "preview": "బిల్ ప్రివ్యూ",
@@ -883,7 +886,10 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "కొత్త సాఫ్ట్‌వేర్ వెర్షన్ అందుబాటులో ఉంది. డౌన్‌లోడ్ ప్రారంభించడానికి క్రింద క్లిక్ చేయండి.",
-    "downloadUpdate": "నవీకరణను డౌన్‌లోడ్ చేయండి"
+    "downloadUpdate": "నవీకరణను డౌన్‌లోడ్ చేయండి",
+    "qrMenu": "QR Menu",
+    "qrMenuTitle": "Customer QR Menu & Table Stands",
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
   },
   "language": {
     "title": "ప్రాంతం మరియు భాష",
@@ -1689,5 +1695,11 @@
     "releaseNotes": "విడుదలలు",
     "gotIt": "అర్థమైంది, వెళ్దాం!",
     "explorePos": "POS ని అన్వేషించండి"
+  },
+  "qrMenu": {
+    "settingsSaved": "QR Menu settings saved!",
+    "tableCardDownloaded": "Table card image downloaded!",
+    "batchComplete": "Downloaded cards for all tables!",
+    "menuDownloaded": "Menu image downloaded!"
   }
 }

@@ -19,13 +19,15 @@ import { logger } from '../utils/logger';
 
 const SETTING_KITCHEN_ENABLED = 'kitchen_network_enabled';
 const SETTING_WAITER_ENABLED = 'waiter_network_enabled';
+const SETTING_QR_MENU_ENABLED = 'qr_menu_network_enabled';
 const SETTING_PORT = 'kitchen_network_port';
 const SETTING_KITCHEN_TOKEN = 'kitchen_network_token';
 const SETTING_WAITER_TOKEN = 'waiter_network_token';
+const SETTING_QR_MENU_TOKEN = 'qr_menu_network_token';
 const DEFAULT_PORT = 3030;
 const SETTINGS_CATEGORY = 'kitchen_network';
 
-type Role = 'kitchen' | 'waiter';
+export type Role = 'kitchen' | 'waiter' | 'qr_menu';
 
 let server: http.Server | null = null;
 
@@ -101,14 +103,22 @@ export function getCurrentPort(): number {
 }
 
 function tokenSettingKey(role: Role): string {
-  return role === 'kitchen' ? SETTING_KITCHEN_TOKEN : SETTING_WAITER_TOKEN;
+  if (role === 'kitchen') return SETTING_KITCHEN_TOKEN;
+  if (role === 'waiter') return SETTING_WAITER_TOKEN;
+  return SETTING_QR_MENU_TOKEN;
 }
 
 function enabledSettingKey(role: Role): string {
-  return role === 'kitchen' ? SETTING_KITCHEN_ENABLED : SETTING_WAITER_ENABLED;
+  if (role === 'kitchen') return SETTING_KITCHEN_ENABLED;
+  if (role === 'waiter') return SETTING_WAITER_ENABLED;
+  return SETTING_QR_MENU_ENABLED;
 }
 
 export function isRoleEnabled(role: Role): boolean {
+  if (role === 'qr_menu') {
+    const val = settingsRepo.get(SETTING_QR_MENU_ENABLED);
+    return val !== 'false';
+  }
   return settingsRepo.get(enabledSettingKey(role)) === 'true';
 }
 
@@ -171,12 +181,20 @@ function sendJson(res: ServerResponse, status: number, body: unknown): void {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
     'Content-Length': Buffer.byteLength(payload),
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   });
   res.end(payload);
 }
 
 function sendStatus(res: ServerResponse, status: number, message: string): void {
-  res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.writeHead(status, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  });
   res.end(message);
 }
 
@@ -543,6 +561,183 @@ async function handleWaiterApi(
   return false;
 }
 
+export function getDefaultCustomerSlug(restaurant?: any): string {
+  const rest = restaurant || settingsRepo.getRestaurant();
+  const raw = rest?.name || 'menu';
+  const baseSlug = raw.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'menu';
+
+  // License key suffix (last 5 alphanumeric characters) prevents collision when two restaurants have the same name
+  const licenseKey = (settingsRepo.get('license_key') || '').trim();
+  const cleanLicense = licenseKey ? licenseKey.replace(/[^a-zA-Z0-9]/g, '').slice(-5).toLowerCase() : '';
+  if (cleanLicense) {
+    return `${baseSlug}-${cleanLicense}`;
+  }
+
+  // Graceful fallback to phone number suffix if license key not present
+  const phone = (rest?.phone || '').trim();
+  const cleanPhone = phone ? phone.replace(/[^0-9]/g, '').slice(-4) : '';
+  if (cleanPhone) {
+    return `${baseSlug}-${cleanPhone}`;
+  }
+
+  return baseSlug;
+}
+
+export function getQrMenuData() {
+  const restaurant = settingsRepo.getRestaurant();
+  let logoDataUrl = '';
+  if (restaurant?.logoPath) {
+    if (restaurant.logoPath.startsWith('data:')) {
+      logoDataUrl = restaurant.logoPath;
+    } else {
+      try {
+        const buf = fs.readFileSync(restaurant.logoPath);
+        const ext = restaurant.logoPath.split('.').pop()?.toLowerCase() || 'png';
+        const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : `image/${ext}`;
+        logoDataUrl = `data:${mime};base64,${buf.toString('base64')}`;
+      } catch {
+        /* skip logo if unreadable */
+      }
+    }
+  }
+
+  const categories = menuRepo.getCategories().filter((c: any) => c.isActive !== false);
+  const allItems = menuRepo.getItems();
+  let allAddonGroups: any[] = [];
+  try {
+    allAddonGroups = menuRepo.getAddonGroups();
+  } catch {
+    allAddonGroups = [];
+  }
+
+  const activeItems = allItems.map((item: any) => {
+    let variations: any[] = [];
+    let addonGroups: any[] = [];
+    try {
+      variations = menuRepo.getVariations(item.id);
+    } catch {}
+    try {
+      const groupIds = menuRepo.getItemAddonGroupIds(item.id);
+      addonGroups = allAddonGroups.filter((g: any) => groupIds.includes(g.id));
+    } catch {}
+
+    return {
+      ...item,
+      taxRate: getEffectiveTaxRate(item.taxRate),
+      variations,
+      addonGroups,
+    };
+  });
+
+  const tables = tableRepo.getAll().map((t: any) => ({
+    id: t.id,
+    name: t.name,
+    capacity: t.capacity,
+    floorName: (t as any).floor_name || (t as any).floorName || '',
+  }));
+
+  const lan = getLanAddress();
+  const port = getCurrentPort();
+  const customUrl = (settingsRepo.get('qr_menu_custom_url') || '').trim();
+  const lanUrl = lan ? `http://${lan}:${port}/qr-menu` : null;
+
+  const defaultSlug = getDefaultCustomerSlug(restaurant);
+  const customerSlug = (settingsRepo.get('qr_menu_customer_slug') || defaultSlug).trim().toLowerCase();
+  const cloudDomain = (settingsRepo.get('qr_menu_cloud_domain') || 'https://molecule-e2e95.web.app').replace(/\/+$/, '');
+  const urlMode = settingsRepo.get('qr_menu_url_mode') || 'cloud';
+  const cloudUrl = `${cloudDomain}/m/${customerSlug}`;
+
+  let activeUrl: string | null = cloudUrl;
+  if (urlMode === 'lan') {
+    activeUrl = lanUrl || cloudUrl;
+  } else if (urlMode === 'custom' && customUrl.length > 0) {
+    activeUrl = customUrl;
+  } else {
+    activeUrl = cloudUrl;
+  }
+
+  return {
+    restaurant: {
+      name: restaurant?.name || 'Restaurant',
+      address: restaurant?.address || '',
+      phone: restaurant?.phone || '',
+      email: settingsRepo.get('restaurant_email') || '',
+      fssai: restaurant?.fssai || '',
+      gstin: restaurant?.gstin || '',
+      logo: logoDataUrl,
+      currency: settingsRepo.get('currency_symbol') || '₹',
+      currencyCode: settingsRepo.get('currency') || 'INR',
+    },
+    settings: {
+      wifiSsid: settingsRepo.get('qr_menu_wifi_ssid') || '',
+      wifiPassword: settingsRepo.get('qr_menu_wifi_password') || '',
+      subtitle: settingsRepo.get('qr_menu_subtitle') || 'Scan to browse our digital menu',
+      notice: settingsRepo.get('qr_menu_notice') || '',
+      theme: settingsRepo.get('qr_menu_theme') || 'noir',
+      customUrl,
+      cloudDomain,
+      customerSlug,
+      urlMode,
+      cloudUrl,
+      tableCardTitle: settingsRepo.get('qr_menu_table_card_title') || 'Scan for Digital Menu',
+      tableCardSubtitle: settingsRepo.get('qr_menu_table_card_subtitle') || 'Point phone camera at QR code to view live menu & specials',
+    },
+    server: {
+      running: isRunning(),
+      lanAddress: lan,
+      port,
+      lanUrl,
+      cloudUrl,
+      activeUrl,
+    },
+    categories,
+    items: activeItems,
+    tables,
+  };
+}
+
+async function handleQrMenuApi(
+  pathname: string,
+  req: IncomingMessage,
+  res: ServerResponse,
+  reqUrl: URL,
+): Promise<boolean> {
+  if (req.method === 'GET') {
+    if (pathname === '/api/qr-menu' || pathname === '/api/qr-menu/menu' || pathname === '/api/qr-menu/all') {
+      sendJson(res, 200, getQrMenuData());
+      return true;
+    }
+    if (pathname === '/api/qr-menu/info') {
+      const data = getQrMenuData();
+      sendJson(res, 200, {
+        restaurant: data.restaurant,
+        settings: data.settings,
+        server: data.server,
+      });
+      return true;
+    }
+    if (pathname === '/api/qr-menu/categories') {
+      sendJson(res, 200, getQrMenuData().categories);
+      return true;
+    }
+    if (pathname === '/api/qr-menu/items') {
+      const catId = reqUrl.searchParams.get('categoryId');
+      let items = getQrMenuData().items;
+      if (catId) {
+        const id = Number(catId);
+        items = items.filter((it: any) => it.categoryId === id);
+      }
+      sendJson(res, 200, items);
+      return true;
+    }
+    if (pathname === '/api/qr-menu/tables') {
+      sendJson(res, 200, getQrMenuData().tables);
+      return true;
+    }
+  }
+  return false;
+}
+
 async function handleApi(reqUrl: URL, req: IncomingMessage, res: ServerResponse): Promise<void> {
   const pathname = reqUrl.pathname;
 
@@ -580,6 +775,13 @@ async function handleApi(reqUrl: URL, req: IncomingMessage, res: ServerResponse)
     return;
   }
 
+  // QR Menu routes (publicly accessible on local WiFi / LAN)
+  if (pathname.startsWith('/api/qr-menu')) {
+    if (await handleQrMenuApi(pathname, req, res, reqUrl)) return;
+    sendStatus(res, 404, 'Not found');
+    return;
+  }
+
   sendStatus(res, 404, 'Not found');
 }
 
@@ -591,7 +793,13 @@ async function handleStatic(reqUrl: URL, res: ServerResponse): Promise<void> {
   }
 
   let pathname = reqUrl.pathname;
-  if (pathname === '/' || pathname === '/kitchen' || pathname === '/take-order') {
+  if (
+    pathname === '/' ||
+    pathname === '/kitchen' ||
+    pathname === '/take-order' ||
+    pathname === '/qr-menu' ||
+    pathname.startsWith('/qr-menu')
+  ) {
     pathname = '/index.html';
   }
 
@@ -623,6 +831,16 @@ async function handleStatic(reqUrl: URL, res: ServerResponse): Promise<void> {
 
 function requestHandler(req: IncomingMessage, res: ServerResponse): void {
   try {
+    if (req.method === 'OPTIONS') {
+      res.writeHead(204, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      });
+      res.end();
+      return;
+    }
+
     const host = req.headers.host ?? 'localhost';
     const reqUrl = new URL(req.url ?? '/', `http://${host}`);
 
@@ -737,8 +955,28 @@ export function getRoleInfo(role: Role): RoleInfo {
   const token = getOrCreateToken(role);
   const lan = getLanAddress();
   const port = getCurrentPort();
-  const path = role === 'kitchen' ? '/kitchen' : '/take-order';
-  const url = lan ? `http://${lan}:${port}${path}` : null;
+  const path = role === 'kitchen' ? '/kitchen' : role === 'waiter' ? '/take-order' : '/qr-menu';
+
+  let url: string | null = null;
+  if (role === 'qr_menu') {
+    const customUrl = settingsRepo.get('qr_menu_custom_url');
+    const cloudDomain = (settingsRepo.get('qr_menu_cloud_domain') || 'https://molecule-e2e95.web.app').replace(/\/+$/, '');
+    const rest = settingsRepo.getRestaurant();
+    const defaultSlug = getDefaultCustomerSlug(rest);
+    const customerSlug = (settingsRepo.get('qr_menu_customer_slug') || defaultSlug).trim().toLowerCase();
+    const urlMode = settingsRepo.get('qr_menu_url_mode') || 'cloud';
+
+    if (urlMode === 'cloud') {
+      url = `${cloudDomain}/m/${customerSlug}`;
+    } else if (urlMode === 'custom' && customUrl && customUrl.trim().length > 0) {
+      url = customUrl.trim();
+    } else {
+      url = lan ? `http://${lan}:${port}/qr-menu` : `${cloudDomain}/m/${customerSlug}`;
+    }
+  } else {
+    url = lan ? `http://${lan}:${port}${path}` : null;
+  }
+
   return { enabled, token, url };
 }
 
@@ -748,6 +986,7 @@ export function getInfo(): {
   lanAddress: string | null;
   kitchen: RoleInfo;
   waiter: RoleInfo;
+  qrMenu: RoleInfo;
 } {
   return {
     running: isRunning(),
@@ -755,5 +994,6 @@ export function getInfo(): {
     lanAddress: getLanAddress(),
     kitchen: getRoleInfo('kitchen'),
     waiter: getRoleInfo('waiter'),
+    qrMenu: getRoleInfo('qr_menu'),
   };
 }

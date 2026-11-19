@@ -2036,7 +2036,7 @@ const Billing: React.FC = () => {
                 <>
                   {/* Floor tabs — vertical sidebar */}
                   {floors.length > 0 && (
-                    <div className="flex flex-col gap-1 px-1.5 py-2 bg-gray-50 border-r border-gray-200 overflow-y-auto flex-shrink-0 scrollbar-thin" style={{ width: floorSidebarWidth }}>
+                    <div className="flex flex-col gap-1 px-1.5 py-2 bg-gray-50 dark:bg-gray-900/60 border-r border-gray-200 dark:border-gray-800 overflow-y-auto flex-shrink-0 scrollbar-thin" style={{ width: floorSidebarWidth }}>
                       {floors.map((floor) => (
                         <button
                           key={floor.id}
@@ -2045,7 +2045,7 @@ const Billing: React.FC = () => {
                           className={`w-full flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors select-none text-left
                             ${billingFloorId === floor.id
                               ? 'bg-blue-600 text-white shadow-sm'
-                              : 'text-gray-600 hover:bg-gray-200'
+                              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800'
                             }`}
                         >
                           <Layers size={12} className="flex-shrink-0" />
@@ -2055,7 +2055,7 @@ const Billing: React.FC = () => {
                       {/* Add Floor button */}
                       <button
                         onClick={() => setShowAddFloorDialog(true)}
-                        className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium border-2 border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500 hover:bg-blue-50/50 transition-colors mt-1"
+                        className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-medium border-2 border-dashed border-gray-300 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-blue-400 dark:hover:border-blue-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-colors mt-1"
                       >
                         <Plus size={12} />
                         {t('common.add')}
@@ -2071,10 +2071,10 @@ const Billing: React.FC = () => {
                       title={t('billing.resizeFloorSidebar', 'Drag to resize')}
                     >
                       {/* Sash hairline */}
-                      <div className="w-[1px] h-full bg-gray-200 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
+                      <div className="w-[1px] h-full bg-gray-200 dark:bg-gray-700 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
 
                       {/* VS Code micro grip indicator */}
-                      <div className="absolute top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gray-300 group-hover:bg-blue-500 group-hover:h-8 transition-all" />
+                      <div className="absolute top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gray-300 dark:bg-gray-600 group-hover:bg-blue-500 group-hover:h-8 transition-all" />
                     </div>
                   )}
 
@@ -2108,10 +2108,10 @@ const Billing: React.FC = () => {
                       {billingFloorId !== null && (
                         <button
                           onClick={() => setShowAddTableDialog(true)}
-                          className="table-card group min-h-[68px] flex flex-col items-center justify-center bg-white border-2 border-dashed border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50/50 transition-colors"
+                          className="table-card group min-h-[68px] flex flex-col items-center justify-center bg-white dark:bg-gray-800/60 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-colors"
                         >
-                          <Plus size={20} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-                          <span className="text-[10px] text-gray-300 group-hover:text-blue-400 transition-colors font-medium mt-0.5">
+                          <Plus size={20} className="text-gray-300 dark:text-gray-600 group-hover:text-blue-400 dark:group-hover:text-blue-400 transition-colors" />
+                          <span className="text-[10px] text-gray-300 dark:text-gray-500 group-hover:text-blue-400 dark:group-hover:text-blue-400 transition-colors font-medium mt-0.5">
                             {t('billingPage.addTable')}
                           </span>
                         </button>
@@ -2292,23 +2292,23 @@ const Billing: React.FC = () => {
       {/* Custom item modal */}
       {showTempItemModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30" onClick={() => setShowTempItemModal(false)}>
-          <div className="bg-white rounded-xl shadow-xl w-80 p-5" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 border border-transparent dark:border-gray-700 rounded-xl shadow-xl w-80 p-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-gray-800">{t('billing.addTempItem', 'Add Custom Item')}</h3>
-              <button onClick={() => setShowTempItemModal(false)} className="text-gray-400 hover:text-gray-600">
+              <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100">{t('billing.addTempItem', 'Add Custom Item')}</h3>
+              <button onClick={() => setShowTempItemModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <X size={18} />
               </button>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">{t('billing.tempItemName')}</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">{t('billing.tempItemName')}</label>
                 <input
                   type="text"
                   autoFocus
                   value={tempItemName}
                   onChange={(e) => setTempItemName(e.target.value)}
                   placeholder={t('billing.tempItemName')}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -2318,7 +2318,7 @@ const Billing: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">{t('billing.tempItemPrice')}</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">{t('billing.tempItemPrice')}</label>
                 <input
                   type="number"
                   value={tempItemPrice}
@@ -2326,7 +2326,7 @@ const Billing: React.FC = () => {
                   placeholder="0.00"
                   min="0"
                   step="0.01"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -2355,7 +2355,8 @@ const Billing: React.FC = () => {
                 }}
                 disabled={!tempItemName.trim() || !parseFloat(tempItemPrice)}
                 className="w-full py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600
-                  disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg transition-colors"
+                  dark:bg-orange-600 dark:hover:bg-orange-500 disabled:bg-gray-300 dark:disabled:bg-gray-700
+                  disabled:text-gray-500 dark:disabled:text-gray-500 disabled:cursor-not-allowed rounded-lg transition-colors"
               >
                 {t('billing.addTempItem', 'Add Custom Item')}
               </button>

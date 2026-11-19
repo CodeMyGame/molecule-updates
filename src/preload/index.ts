@@ -253,6 +253,16 @@ const api = {
     regenerateToken: () => ipcRenderer.invoke('waiterNetwork:regenerateToken'),
   },
 
+  qrMenu: {
+    getInfo: () => ipcRenderer.invoke('qrMenu:getInfo'),
+    getMenuData: () => ipcRenderer.invoke('qrMenu:getMenuData'),
+    saveSettings: (settings: Record<string, string>) =>
+      ipcRenderer.invoke('qrMenu:saveSettings', settings),
+    setEnabled: (enabled: boolean) => ipcRenderer.invoke('qrMenu:setEnabled', enabled),
+    exportFirebaseMenu: (slug?: string) => ipcRenderer.invoke('qrMenu:exportFirebaseMenu', slug),
+    publishToCloud: (slug?: string) => ipcRenderer.invoke('qrMenu:publishToCloud', slug),
+  },
+
   updater: {
     checkForUpdates: () => ipcRenderer.invoke('updater:check-for-updates'),
     downloadUpdate: () => ipcRenderer.invoke('updater:download-update'),

@@ -262,7 +262,7 @@ export const QuickTourModal: React.FC = () => {
 
       {/* Floating Tooltip Card */}
       <div
-        className="fixed z-[100000] w-[340px] max-w-[92vw] bg-white rounded-2xl shadow-2xl border border-gray-200/90 overflow-hidden flex flex-col transition-all duration-300 ease-out animate-in fade-in zoom-in-95"
+        className="fixed z-[100000] w-[340px] max-w-[92vw] bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200/90 dark:border-gray-700 overflow-hidden flex flex-col transition-all duration-300 ease-out animate-in fade-in zoom-in-95"
         style={{
           top: tooltipTop,
           left: tooltipLeft,
@@ -271,19 +271,19 @@ export const QuickTourModal: React.FC = () => {
         aria-modal="true"
       >
         {/* Tooltip Header */}
-        <div className="px-4 pt-3.5 pb-2.5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white">
+        <div className="px-4 pt-3.5 pb-2.5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-blue-100/90 text-blue-800">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase bg-blue-100/90 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300">
               {currentStep.badge}
             </span>
-            <span className="text-[11px] font-medium text-gray-400">
+            <span className="text-[11px] font-medium text-gray-400 dark:text-gray-400">
               {step + 1} of {steps.length}
             </span>
           </div>
 
           <button
             onClick={closeTour}
-            className="p-1 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+            className="p-1 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             title="Close Tour (Esc)"
           >
             <X size={15} />
@@ -296,17 +296,17 @@ export const QuickTourModal: React.FC = () => {
             <div className={`p-2 rounded-xl border flex-shrink-0 ${currentStep.accentBg}`}>
               {currentStep.icon}
             </div>
-            <h3 className="text-sm font-bold text-gray-900 tracking-tight leading-snug">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
               {currentStep.title}
             </h3>
           </div>
-          <p className="text-xs text-gray-600 leading-relaxed">
+          <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
             {currentStep.description}
           </p>
         </div>
 
         {/* Tooltip Footer with Steps & Navigation Buttons */}
-        <div className="px-4 py-3 bg-gray-50/90 border-t border-gray-150 flex items-center justify-between gap-2">
+        <div className="px-4 py-3 bg-gray-50/90 dark:bg-gray-900/90 border-t border-gray-150 dark:border-gray-700 flex items-center justify-between gap-2">
           {/* Step dots */}
           <div className="flex items-center gap-1.5">
             {steps.map((s, idx) => (
@@ -316,7 +316,7 @@ export const QuickTourModal: React.FC = () => {
                 className={`transition-all rounded-full ${
                   idx === step
                     ? 'w-5 h-2 bg-blue-600'
-                    : 'w-2 h-2 bg-gray-300 hover:bg-gray-400'
+                    : 'w-2 h-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
                 }`}
                 title={`Jump to ${s.title}`}
               />
@@ -328,7 +328,7 @@ export const QuickTourModal: React.FC = () => {
             <button
               type="button"
               onClick={closeTour}
-              className="px-2 py-1 text-[11px] font-semibold text-gray-400 hover:text-gray-700 transition"
+              className="px-2 py-1 text-[11px] font-semibold text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition"
             >
               Skip
             </button>
@@ -337,7 +337,7 @@ export const QuickTourModal: React.FC = () => {
               <button
                 type="button"
                 onClick={prevStep}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-200 border border-gray-300 bg-white transition flex items-center gap-1 shadow-xs active:scale-95"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 transition flex items-center gap-1 shadow-xs active:scale-95"
               >
                 <ArrowLeft size={13} />
                 <span>Prev</span>

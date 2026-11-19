@@ -710,13 +710,13 @@ const MenuGrid: React.FC<MenuGridProps> = ({
               <div className={`grid ${compact ? 'grid-cols-[repeat(auto-fill,minmax(108px,1fr))] gap-1.5' : 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2'}`}>
                 <button
                   onClick={() => setShowAddItemDialog(true)}
-                  className={`menu-item-card group relative flex flex-col items-center justify-center bg-white border-2 border-dashed border-gray-200
+                  className={`menu-item-card group relative flex flex-col items-center justify-center bg-white dark:bg-gray-800/60 border-2 border-dashed border-gray-200 dark:border-gray-700
                     rounded-lg text-left transition-all duration-150 select-none
-                    hover:border-blue-400 hover:bg-blue-50/50
+                    hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-950/30
                     ${compact ? 'p-2 min-h-[68px]' : 'p-2.5 min-h-[80px]'}`}
                 >
-                  <Plus size={compact ? 18 : 22} className="text-gray-300 group-hover:text-blue-400 transition-colors" />
-                  <span className={`text-gray-300 group-hover:text-blue-400 transition-colors font-medium ${compact ? 'text-[10px] mt-0.5' : 'text-[11px] mt-1'}`}>
+                  <Plus size={compact ? 18 : 22} className="text-gray-300 dark:text-gray-600 group-hover:text-blue-400 dark:group-hover:text-blue-400 transition-colors" />
+                  <span className={`text-gray-300 dark:text-gray-500 group-hover:text-blue-400 dark:group-hover:text-blue-400 transition-colors font-medium ${compact ? 'text-[10px] mt-0.5' : 'text-[11px] mt-1'}`}>
                     {t('menuEdit.addItem')}
                   </span>
                 </button>
@@ -731,10 +731,10 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                     key={item.id}
                     onClick={() => handleItemClick(item)}
                     disabled={loadingItem === item.id}
-                    className="menu-item-card relative w-full flex items-center gap-1.5 bg-white border border-gray-200
+                    className="menu-item-card relative w-full flex items-center gap-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
                       rounded-lg px-2 py-[5px] text-left transition-all duration-100
-                      hover:border-blue-300 hover:bg-blue-50 active:scale-[0.98]
-                      focus:outline-none focus:ring-1 focus:ring-blue-300
+                      hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50/80 dark:hover:bg-gray-750 active:scale-[0.98]
+                      focus:outline-none focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500
                       disabled:opacity-60 disabled:cursor-wait select-none mb-0.5 break-inside-avoid"
                   >
                     {item.isVeg ? (
@@ -746,17 +746,17 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                         <CircleDot size={5} className="text-red-600" />
                       </div>
                     )}
-                    <span className="flex-1 font-medium text-gray-900 text-[11px] leading-tight truncate">
+                    <span className="flex-1 font-medium text-gray-900 dark:text-gray-100 text-[11px] leading-tight truncate">
                       {getName(item)}
                     </span>
                     {showPrices && (
-                      <span className="flex-shrink-0 font-semibold text-blue-700 text-[11px]">
+                      <span className="flex-shrink-0 font-semibold text-blue-700 dark:text-blue-400 text-[11px]">
                         {formatCurrency(item.basePrice)}
                       </span>
                     )}
                     <span
                       onClick={(e) => toggleFavorite(e, item.id)}
-                      className={`flex-shrink-0 cursor-pointer transition-colors ${favoriteIds.includes(item.id) ? 'text-amber-400' : 'text-gray-300 hover:text-amber-300'}`}
+                      className={`flex-shrink-0 cursor-pointer transition-colors ${favoriteIds.includes(item.id) ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600 hover:text-amber-300 dark:hover:text-amber-400'}`}
                     >
                       <Star size={10} fill={favoriteIds.includes(item.id) ? 'currentColor' : 'none'} />
                     </span>
@@ -776,10 +776,10 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                 onClick={() => handleItemClick(item)}
                 onContextMenu={(e) => { e.preventDefault(); openItemContextMenu(e, item); }}
                 disabled={loadingItem === item.id}
-                className={`menu-item-card relative flex flex-col items-start bg-white border border-gray-200
+                className={`menu-item-card relative flex flex-col items-start bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
                   rounded-lg text-left transition-all duration-150
-                  hover:border-blue-300 hover:shadow-md active:scale-[0.97] active:shadow-sm
-                  focus:outline-none focus:ring-2 focus:ring-blue-300
+                  hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50/40 dark:hover:bg-gray-750 hover:shadow-md dark:hover:shadow-blue-950/40 active:scale-[0.97] active:shadow-sm
+                  focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500
                   disabled:opacity-60 disabled:cursor-wait select-none
                   ${compact ? 'p-2 min-h-[68px]' : 'p-2.5 min-h-[80px]'}`}
               >
@@ -803,28 +803,28 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                 )}
 
                 {loadingItem === item.id && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-xl">
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 rounded-xl">
                     <Loader2 size={16} className="text-blue-500 animate-spin" />
                   </div>
                 )}
 
-                <span className={`font-medium text-gray-900 leading-tight line-clamp-2 ${compact ? 'text-[11px] pr-3' : 'text-xs pr-4'}`}>
+                <span className={`font-medium text-gray-900 dark:text-gray-100 leading-tight line-clamp-2 ${compact ? 'text-[11px] pr-3' : 'text-xs pr-4'}`}>
                   {getName(item)}
                 </span>
 
                 {item.shortCode && !compact && (
-                  <span className="text-[9px] text-gray-400 mt-0.5">{item.shortCode}</span>
+                  <span className="text-[9px] text-gray-400 dark:text-gray-500 mt-0.5">{item.shortCode}</span>
                 )}
 
                 <div className={`mt-auto flex items-center justify-between w-full ${compact ? 'pt-1' : 'pt-1.5'}`}>
                   {showPrices ? (
-                    <span className={`font-semibold text-blue-700 ${compact ? 'text-[11px]' : 'text-xs'}`}>
+                    <span className={`font-semibold text-blue-700 dark:text-blue-400 ${compact ? 'text-[11px]' : 'text-xs'}`}>
                       {formatCurrency(item.basePrice)}
                     </span>
                   ) : <span />}
                   <span
                     onClick={(e) => toggleFavorite(e, item.id)}
-                    className={`cursor-pointer transition-colors ${favoriteIds.includes(item.id) ? 'text-amber-400' : 'text-gray-300 hover:text-amber-300'}`}
+                    className={`cursor-pointer transition-colors ${favoriteIds.includes(item.id) ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600 hover:text-amber-300 dark:hover:text-amber-400'}`}
                   >
                     <Star size={compact ? 10 : 12} fill={favoriteIds.includes(item.id) ? 'currentColor' : 'none'} />
                   </span>

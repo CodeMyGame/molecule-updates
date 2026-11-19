@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Clock, Pin, Pause } from 'lucide-react';
+import { Clock, Pin, Pause, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { currencySymbolForLanguage } from '../../lib/currencyLocale';
 import { TableStatus } from '../../../shared/enums';
@@ -122,15 +122,18 @@ const TableCard: React.FC<TableCardProps> = ({
   return (
     <button
       type="button"
+      data-selected={isSelected ? 'true' : 'false'}
       onClick={() => onClick(table)}
       onContextMenu={onContextMenu ? (e) => { e.preventDefault(); onContextMenu(e, table); } : undefined}
       className={`
         table-card relative flex flex-col items-center justify-center
         rounded-lg w-full border
         ${compact ? 'min-h-[68px] p-1.5' : 'min-h-[72px] p-1.5'}
-        ${cardBorderAndBg}
-        ${isSelected ? '!border-blue-600 ring-2 ring-blue-600 shadow-md z-10' : ''}
-        shadow-xs hover:shadow-sm
+        ${
+          isSelected
+            ? 'is-selected table-selected !border-blue-500 dark:!border-sky-400 bg-blue-50/95 dark:bg-blue-950/85 ring-2 ring-blue-500 dark:ring-sky-400 shadow-md dark:shadow-[0_0_16px_rgba(56,189,248,0.45)] z-10 scale-[1.02]'
+            : `${cardBorderAndBg} shadow-xs hover:shadow-sm`
+        }
         transition-all duration-150
         active:scale-95
         cursor-pointer select-none
@@ -140,28 +143,70 @@ const TableCard: React.FC<TableCardProps> = ({
       `}
       title={isHold ? t('reports.statusHold', 'Hold') : isLongHour ? t('tables.longHourAlert', { defaultValue: 'Occupied over 2 hours' }) : undefined}
     >
+      {/* Corner Status Badge */}
       <span
-        className={`absolute -top-1 -right-1 font-bold rounded-full flex items-center justify-center gap-0.5 ${badgeBg} ${compact ? 'text-[8px] px-1 py-0' : 'text-[9px] px-1.5 py-0.2'}`}
+        className={`absolute -top-1 -right-1 font-bold rounded-full flex items-center justify-center gap-0.5 ${badgeBg} ${
+          compact ? 'text-[8px] px-1 py-0' : 'text-[9px] px-1.5 py-0.2'
+        } ${isSelected ? 'ring-2 ring-white dark:ring-sky-400 shadow-xs' : ''}`}
       >
         {isHold && <Pause size={compact ? 6 : 7} className="fill-current shrink-0" />}
         {compact ? badgeLetter : badgeText}
       </span>
 
+      {/* Selected Indicator Badge */}
+      {isSelected && (
+        <span
+          className="absolute -top-1.5 -left-1.5 bg-blue-600 dark:bg-sky-500 text-white rounded-full p-0.5 shadow-md ring-2 ring-white dark:ring-gray-900 z-20 flex items-center justify-center animate-in zoom-in-75 duration-100"
+          title="Selected"
+        >
+          <Check size={compact ? 8 : 10} strokeWidth={3.5} />
+        </span>
+      )}
+
+      {/* Pinned Icon */}
       {table.isPinned && (
-        <span className={`absolute ${compact ? '-top-1 -left-1' : '-top-1 -left-1'} bg-blue-500 text-white rounded-full p-0.5 shadow-xs`} title={t('common.pinned')}>
+        <span
+          className={`absolute ${isSelected ? (compact ? 'top-3.5 -left-1' : 'top-4 -left-1') : '-top-1 -left-1'} bg-blue-500 text-white rounded-full p-0.5 shadow-xs`}
+          title={t('common.pinned')}
+        >
           <Pin size={compact ? 7 : 9} className="fill-current" />
         </span>
       )}
 
-      <span className={`font-bold text-gray-800 px-1 truncate max-w-full text-center ${compact ? 'text-[11px] mb-0' : 'text-xs mb-0.5'}`}>{table.name}</span>
+      {/* Table Name */}
+      <span
+        className={`font-bold px-1 truncate max-w-full text-center transition-colors ${
+          compact ? 'text-[11px] mb-0' : 'text-xs mb-0.5'
+        } ${
+          isSelected
+            ? 'text-blue-900 dark:text-sky-100 font-extrabold tracking-wide'
+            : 'text-gray-800 dark:text-gray-100'
+        }`}
+      >
+        {table.name}
+      </span>
 
       {hasOrderInfo && (
         <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-1 gap-0.5'}`}>
-          <span className={`font-bold ${isHold ? 'text-amber-800' : 'text-red-700'} ${compact ? 'text-[10px]' : 'text-xs'}`}>
+          <span
+            className={`font-bold ${
+              isHold
+                ? 'text-amber-800 dark:text-amber-300'
+                : isSelected
+                  ? 'text-blue-950 dark:text-amber-300 font-extrabold'
+                  : 'text-red-700 dark:text-red-400'
+            } ${compact ? 'text-[10px]' : 'text-xs'}`}
+          >
             {formatPaise(orderTotal!)}
           </span>
           {orderStartedAt && (
-            <span className={`flex items-center gap-0.5 font-medium ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[9px]' : 'text-[9px]'}`}>
+            <span
+              className={`flex items-center gap-0.5 font-medium ${
+                isSelected ? 'text-blue-800 dark:text-sky-300 font-semibold' : waitColor.text
+              } ${isLongHour ? 'animate-pulse font-bold' : ''} ${
+                compact ? 'text-[9px]' : 'text-[9px]'
+              }`}
+            >
               <Clock size={compact ? 8 : 9} />
               {formatElapsedTime(elapsedMins)}
             </span>
@@ -170,7 +215,13 @@ const TableCard: React.FC<TableCardProps> = ({
       )}
 
       {isOccupied && !hasOrderInfo && orderStartedAt && (
-        <span className={`flex items-center gap-0.5 font-medium mt-0.5 ${waitColor.text} ${isLongHour ? 'animate-pulse font-bold' : ''} ${compact ? 'text-[9px]' : 'text-[9px]'}`}>
+        <span
+          className={`flex items-center gap-0.5 font-medium mt-0.5 ${
+            isSelected ? 'text-blue-800 dark:text-sky-300 font-semibold' : waitColor.text
+          } ${isLongHour ? 'animate-pulse font-bold' : ''} ${
+            compact ? 'text-[9px]' : 'text-[9px]'
+          }`}
+        >
           <Clock size={compact ? 8 : 9} />
           {formatElapsedTime(elapsedMins)}
         </span>
@@ -178,7 +229,9 @@ const TableCard: React.FC<TableCardProps> = ({
 
       {isOccupied && kotBadge && (
         <span
-          className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full border mt-1 leading-tight font-medium ${kotBadge.bg} ${compact ? 'text-[8px]' : 'text-[9px]'}`}
+          className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full border mt-1 leading-tight font-medium ${kotBadge.bg} ${
+            compact ? 'text-[8px]' : 'text-[9px]'
+          } ${isSelected ? 'ring-1 ring-blue-400/50 dark:ring-sky-400/60' : ''}`}
         >
           <span className={`rounded-full shrink-0 ${kotBadge.dot} ${compact ? 'w-1 h-1' : 'w-1.5 h-1.5'}`} />
           <span className="truncate max-w-[80px]">{kotBadge.label}</span>

@@ -20,6 +20,7 @@ import {
   ShoppingBag,
   Clock,
   Banknote,
+  QrCode,
 } from 'lucide-react';
 import TransferMergeModal from '../components/tables/TransferMergeModal';
 import { TableStatus } from '../../shared/enums';
@@ -922,6 +923,14 @@ const Tables: React.FC = () => {
 
         <div className="flex items-center gap-1.5">
           <button
+            onClick={() => navigate('/qr-menu')}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-800 hover:bg-amber-500/20 transition-colors"
+            title="Generate and print physical Table QR stands and menu cards"
+          >
+            <QrCode size={12} className="text-amber-600" />
+            <span>{t('tables.tableQrs', 'Table QR Stands')}</span>
+          </button>
+          <button
             onClick={handleNewParcel}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors"
           >
@@ -958,33 +967,33 @@ const Tables: React.FC = () => {
 
       {/* Active Parcels / Takeaway Shelf */}
       {activeParcels.length === 0 ? (
-        <div className="flex items-center justify-between px-3 py-1 bg-emerald-50/50 border-b border-emerald-100 text-xs select-none">
+        <div className="flex items-center justify-between px-3 py-1 bg-emerald-50/50 dark:bg-slate-900/60 border-b border-emerald-100 dark:border-slate-800 text-xs select-none">
           <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 font-semibold text-emerald-900 text-[11px]">
-              <ShoppingBag size={13} className="text-emerald-600" />
+            <span className="flex items-center gap-1.5 font-semibold text-emerald-900 dark:text-emerald-300 text-[11px]">
+              <ShoppingBag size={13} className="text-emerald-600 dark:text-emerald-400" />
               {t('tables.parcelShelfTitle')}
             </span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-medium border border-transparent dark:border-emerald-800/40">
               0 {t('tables.active', { defaultValue: 'active' })}
             </span>
-            <span className="text-[11px] text-gray-400 font-normal hidden md:inline">
+            <span className="text-[11px] text-gray-400 dark:text-gray-500 font-normal hidden md:inline">
               — {t('tables.noActiveParcelsHint')}
             </span>
           </div>
           <button
             onClick={handleNewParcel}
-            className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 hover:underline"
+            className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 flex items-center gap-1 hover:underline"
           >
             <Plus size={11} />
             <span>{t('tables.newParcel')}</span>
           </button>
         </div>
       ) : (
-        <div className="px-3 py-2 bg-gradient-to-r from-emerald-50/80 via-teal-50/50 to-emerald-50/80 border-b border-emerald-200">
+        <div className="px-3 py-2 bg-gradient-to-r from-emerald-50/80 via-teal-50/50 to-emerald-50/80 dark:from-slate-900 dark:via-emerald-950/20 dark:to-slate-900 border-b border-emerald-200 dark:border-emerald-900/40">
           <div className="flex items-center justify-between mb-1.5 select-none">
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 font-bold text-gray-900 text-xs tracking-tight">
-                <ShoppingBag size={14} className="text-emerald-600" />
+              <span className="flex items-center gap-1.5 font-bold text-gray-900 dark:text-gray-100 text-xs tracking-tight">
+                <ShoppingBag size={14} className="text-emerald-600 dark:text-emerald-400" />
                 {t('tables.parcelShelfTitle')}
               </span>
               <span className="text-[10px] px-2 py-0.2 rounded-full bg-emerald-600 text-white font-bold shadow-xs">
@@ -1009,42 +1018,42 @@ const Tables: React.FC = () => {
                 <div
                   key={parcel.id}
                   onClick={() => handleOpenParcelOrder(parcel.id)}
-                  className="flex-shrink-0 w-52 bg-white border border-emerald-200/90 hover:border-emerald-400 rounded-xl p-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between group min-h-[72px]"
+                  className="flex-shrink-0 w-52 bg-white dark:bg-slate-800 border border-emerald-200/90 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-600 rounded-xl p-2 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between group min-h-[72px]"
                 >
                   {/* Card Top */}
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1">
                       <div className="flex items-center gap-1.5 truncate">
                         <span
-                          className="font-bold text-xs text-gray-900 group-hover:text-emerald-700 transition-colors flex items-center gap-1 truncate"
+                          className="font-bold text-xs text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors flex items-center gap-1 truncate"
                           title={`Parcel #${parcel.parcelNumber || (parcel as any).parcel_number || (index + 1)} • Order #${parcel.orderNumber || (parcel as any).order_number || parcel.id}`}
                         >
                           <span>🛍️</span>
                           <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: parcel.parcelNumber || (parcel as any).parcel_number || (index + 1) })}</span>
                         </span>
                       </div>
-                      <span className="font-bold text-xs text-gray-900 font-mono">
+                      <span className="font-bold text-xs text-gray-900 dark:text-white font-mono">
                         {formatCurrency(parcel.grandTotal)}
                       </span>
                     </div>
 
                     {/* Customer or Tag & Time */}
-                    <div className="flex items-center justify-between text-[11px] text-gray-500">
+                    <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
                       <span className="font-medium truncate max-w-[130px]" title={parcel.parcelName || (parcel as any).parcel_name || parcel.customerName || parcel.customerPhone}>
                         {(parcel.parcelName || (parcel as any).parcel_name) ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-800 font-bold bg-emerald-100/90 px-1.5 py-0.5 rounded border border-emerald-300 text-[10px] shadow-2xs">
+                          <span className="inline-flex items-center gap-1 text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100/90 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800 text-[10px] shadow-2xs">
                             <span>🏷️</span>
                             <span className="truncate max-w-[110px]">{parcel.parcelName || (parcel as any).parcel_name}</span>
                           </span>
                         ) : parcel.customerName ? (
-                          <span className="text-gray-700 font-medium">👤 {parcel.customerName}</span>
+                          <span className="text-gray-700 dark:text-gray-300 font-medium">👤 {parcel.customerName}</span>
                         ) : parcel.customerPhone ? (
-                          <span className="text-gray-700 font-medium">📞 {parcel.customerPhone}</span>
+                          <span className="text-gray-700 dark:text-gray-300 font-medium">📞 {parcel.customerPhone}</span>
                         ) : (
-                          <span className="text-gray-500 font-medium">{t('tables.walkInGuest', { defaultValue: 'Walk-in Guest' })}</span>
+                          <span className="text-gray-500 dark:text-gray-400 font-medium">{t('tables.walkInGuest', { defaultValue: 'Walk-in Guest' })}</span>
                         )}
                       </span>
-                      <span className="flex items-center gap-0.5 text-[10px] text-gray-400 shrink-0">
+                      <span className="flex items-center gap-0.5 text-[10px] text-gray-400 dark:text-gray-500 shrink-0">
                         <Clock size={9} />
                         <span>{elapsedMins === 0 ? 'Now' : `${elapsedMins}m`}</span>
                       </span>
@@ -1052,7 +1061,7 @@ const Tables: React.FC = () => {
                   </div>
 
                   {/* Card Bottom / Badges & Pay button */}
-                  <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-gray-100 gap-1">
+                  <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-gray-100 dark:border-slate-700 gap-1">
                     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] border leading-tight ${statusBadge.bg}`}>
                       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusBadge.dot}`} />
                       <span className="truncate max-w-[85px]">{statusBadge.label}</span>
@@ -1130,6 +1139,7 @@ const Tables: React.FC = () => {
             isEditMode={isEditMode}
             onTableDragEnd={handleTableDragEnd}
             tableOrders={tableOrdersMap}
+            selectedTableId={selectedTable?.id}
           />
         </div>
       ) : (

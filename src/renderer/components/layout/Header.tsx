@@ -19,8 +19,11 @@ import {
   Download,
   RefreshCw,
   Rocket,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
+import { useUIStore } from '../../stores/ui.store';
 import toast from 'react-hot-toast';
 import { useBillingStore } from '../../stores/billing.store';
 import { useDaySessionStore } from '../../stores/daySession.store';
@@ -47,6 +50,11 @@ const Header: React.FC = () => {
   const openTour = useTourStore((s) => s.openTour);
   const openWhatsNew = useWhatsNewStore((s) => s.openWhatsNew);
   const hasUnseenUpdate = useWhatsNewStore((s) => s.hasUnseenUpdate);
+  const theme = useUIStore((s) => s.theme);
+  const setTheme = useUIStore((s) => s.setTheme);
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
   useEffect(() => { void fetchRestaurant(); }, [fetchRestaurant]);
   const restaurantName = restaurant?.name?.trim() || t('header.appName');
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -251,18 +259,18 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 shrink-0 ml-3">
+      <div className="flex items-center gap-1 shrink-0 ml-3">
         {/* What's New Button */}
         <Tooltip text={t('whatsNew.button', "What's New")} position="bottom">
           <button
             onClick={() => openWhatsNew()}
-            className="relative flex items-center justify-center w-7 h-7 rounded-full text-indigo-700 bg-indigo-50/90 hover:bg-indigo-100 hover:text-indigo-800 border border-indigo-200/80 transition-all shadow-xs active:scale-95"
+            className="relative flex items-center justify-center p-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors active:scale-95"
             title={t('whatsNew.button', "What's New")}
             aria-label={t('whatsNew.button', "What's New")}
           >
-            <Rocket size={14} className="text-indigo-600" />
+            <Rocket size={15} />
             {hasUnseenUpdate && (
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white animate-pulse" />
+              <span className="absolute 0.5 top-0.5 right-0.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             )}
           </button>
         </Tooltip>
@@ -277,11 +285,23 @@ const Header: React.FC = () => {
               }
               openTour(0);
             }}
-            className="flex items-center justify-center w-7 h-7 rounded-full text-blue-700 bg-blue-50/90 hover:bg-blue-100 hover:text-blue-800 border border-blue-200/80 transition-all shadow-xs active:scale-95"
+            className="flex items-center justify-center p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors active:scale-95"
             title={t('header.quickTour', 'Quick Tour')}
             aria-label={t('header.quickTour', 'Quick Tour')}
           >
-            <Sparkles size={14} className="text-blue-600 animate-pulse" />
+            <Sparkles size={15} />
+          </button>
+        </Tooltip>
+
+        {/* Theme Dark/Light Mode Toggle */}
+        <Tooltip text={theme === 'dark' ? t('header.lightMode', 'Switch to Light Mode') : t('header.darkMode', 'Switch to Dark Mode')} position="bottom">
+          <button
+            onClick={toggleTheme}
+            className="flex items-center justify-center p-1.5 rounded-lg text-amber-500 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors active:scale-95"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} className="text-slate-600 dark:text-slate-300" />}
           </button>
         </Tooltip>
 
@@ -289,29 +309,27 @@ const Header: React.FC = () => {
         <div className="relative flex items-center">
           <button
             onClick={handleToggleBell}
-            className={`group relative flex items-center justify-center w-7 h-7 rounded-full transition-all duration-200 shadow-xs ${
+            className={`group relative flex items-center justify-center p-1.5 rounded-lg transition-colors ${
               showBellMenu
-                ? 'bg-amber-500 text-white shadow-amber-500/25 scale-105'
-                : hasAlerts
-                ? 'bg-amber-50 text-amber-600 border border-amber-300 animate-amber-glow hover:bg-amber-100 hover:border-amber-400 hover:scale-110 active:scale-95 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-700/60'
-                : 'bg-amber-50/80 text-amber-500 border border-amber-200/70 hover:bg-amber-100 hover:text-amber-600 hover:border-amber-300 hover:scale-110 active:scale-95 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/50'
+                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                : 'text-amber-500 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/50 active:scale-95'
             }`}
             title={t('header.dailyHeadsUp', 'Daily Heads-Up & Notifications')}
           >
             <Bell
-              size={14}
+              size={15}
               className={`transition-all duration-200 ${
                 showBellMenu
-                  ? 'fill-white text-white'
+                  ? 'fill-amber-500 text-amber-600 dark:fill-amber-400 dark:text-amber-300'
                   : hasAlerts
                   ? 'fill-amber-400 text-amber-600 animate-bell-ring group-hover:animate-bell-ring-fast'
                   : 'fill-amber-400/50 text-amber-500 animate-bell-ring group-hover:animate-bell-ring-fast'
               }`}
             />
             {hasAlerts && (
-              <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+              <span className="absolute top-0.5 right-0.5 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-80" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 ring-2 ring-white dark:ring-gray-800" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
               </span>
             )}
           </button>
@@ -325,18 +343,18 @@ const Header: React.FC = () => {
               />
 
               {/* Context Dropdown Menu */}
-              <div className="fixed top-9 right-2.5 w-[380px] max-w-[92vw] bg-white border border-gray-200 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="fixed top-9 right-2.5 w-[380px] max-w-[92vw] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* Header with Title and Refresh */}
-                <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/40 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/40 dark:from-gray-900 dark:to-blue-950/40 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-blue-600 text-white rounded-lg shadow-xs">
                       <Sparkles size={14} />
                     </div>
                     <div>
-                      <h3 className="text-xs font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
+                      <h3 className="text-xs font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-1.5">
                         {t('header.dailyHeadsUp', 'Daily Heads-Up')}
                       </h3>
-                      <p className="text-[10px] text-gray-500">Quick store overview & business pulse</p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400">Quick store overview & business pulse</p>
                     </div>
                   </div>
                   <button
@@ -344,7 +362,7 @@ const Header: React.FC = () => {
                       e.stopPropagation();
                       fetchStats();
                     }}
-                    className={`p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white/80 border border-transparent hover:border-gray-200 transition ${
+                    className={`p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition ${
                       loadingStats ? 'animate-spin text-blue-600' : ''
                     }`}
                     title="Refresh data"
@@ -354,13 +372,13 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* Tab selector */}
-                <div className="flex border-b border-gray-100 bg-gray-50/50 p-1 text-xs">
+                <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 p-1 text-xs">
                   <button
                     onClick={() => setActiveTab('yesterday')}
                     className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition text-center flex items-center justify-center gap-1.5 ${
                       activeTab === 'yesterday'
-                        ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60'
-                        : 'text-gray-500 hover:text-gray-800'
+                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs border border-gray-200/60 dark:border-gray-700'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                   >
                     <span>{t('header.yesterdayRecap', 'Yesterday')}</span>
@@ -370,8 +388,8 @@ const Header: React.FC = () => {
                     onClick={() => setActiveTab('today')}
                     className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition text-center flex items-center justify-center gap-1.5 ${
                       activeTab === 'today'
-                        ? 'bg-white text-gray-900 shadow-xs border border-gray-200/60'
-                        : 'text-gray-500 hover:text-gray-800'
+                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs border border-gray-200/60 dark:border-gray-700'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                     }`}
                   >
                     <span className="flex items-center gap-1">

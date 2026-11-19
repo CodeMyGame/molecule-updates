@@ -23,6 +23,7 @@ import {
   FAVORITES,
   KITCHEN_NETWORK,
   WAITER_NETWORK,
+  QR_MENU,
   LOGGER,
 } from '../../shared/ipc-channels';
 import * as errorLogger from '../services/error-logger.service';
@@ -54,6 +55,7 @@ import * as whatsappService from '../services/whatsapp.service';
 import * as cloudSync from '../services/cloud-sync.service';
 import * as kitchenServer from '../services/kitchen-server.service';
 import * as supabaseBackupService from '../services/supabase-backup.service';
+import * as qrMenuCloudService from '../services/qr-menu-cloud.service';
 import { logger } from '../utils/logger';
 
 type IpcResult<T = unknown> =
@@ -109,9 +111,21 @@ export function registerAllHandlers(): void {
   // ---- Menu ----
   handle(MENU.getCategories, () => menuRepo.getCategories());
   handle(MENU.getItems, (categoryId?: number) => menuRepo.getItems(categoryId));
-  handle(MENU.createItem, (data) => menuRepo.createItem(data));
-  handle(MENU.updateItem, (id: number, data) => menuRepo.updateItem(id, data));
-  handle(MENU.deleteItem, (id: number) => menuRepo.deleteItem(id));
+  handle(MENU.createItem, (data) => {
+    const res = menuRepo.createItem(data);
+    qrMenuCloudService.scheduleAutoPublish();
+    return res;
+  });
+  handle(MENU.updateItem, (id: number, data) => {
+    const res = menuRepo.updateItem(id, data);
+    qrMenuCloudService.scheduleAutoPublish();
+    return res;
+  });
+  handle(MENU.deleteItem, (id: number) => {
+    const res = menuRepo.deleteItem(id);
+    qrMenuCloudService.scheduleAutoPublish();
+    return res;
+  });
   handle(MENU.getVariations, (itemId: number) => menuRepo.getVariations(itemId));
   handle(MENU.getAddons, (itemId: number) => menuRepo.getAddons(itemId));
   handle(MENU.createCategory, (data) => menuRepo.createCategory(data));
@@ -1496,6 +1510,68 @@ export function registerAllHandlers(): void {
   handle(WAITER_NETWORK.regenerateToken, () => {
     kitchenServer.regenerateToken('waiter');
     return kitchenServer.getInfo();
+  });
+
+  // ---- QR Menu ----
+  handle(QR_MENU.getInfo, () => kitchenServer.getInfo());
+  handle(QR_MENU.getMenuData, () => kitchenServer.getQrMenuData());
+  handle(QR_MENU.saveSettings, (settings: Record<string, string>) => {
+    for (const [k, v] of Object.entries(settings)) {
+      settingsRepo.set(k, String(v), 'qr_menu');
+    }
+    qrMenuCloudService.scheduleAutoPublish();
+    return kitchenServer.getQrMenuData();
+  });
+  handle(QR_MENU.setEnabled, async (enabled: boolean) => {
+    await kitchenServer.applyRoleEnabled('qr_menu', enabled);
+    qrMenuCloudService.scheduleAutoPublish();
+    return kitchenServer.getInfo();
+  });
+  handle(QR_MENU.publishToCloud, (slug?: string) => qrMenuCloudService.publishQrMenuToCloud(slug));
+  handle(QR_MENU.exportFirebaseMenu, (customSlug?: string) => {
+    const data = kitchenServer.getQrMenuData();
+    const restName = data.restaurant.name || 'restaurant';
+    const slug = (
+      customSlug ||
+      settingsRepo.get('qr_menu_customer_slug') ||
+      kitchenServer.getDefaultCustomerSlug()
+    )
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'menu';
+
+    const menuJson = JSON.stringify(data, null, 2);
+    const rootDir = process.cwd();
+
+    const targets = [
+      path.join(rootDir, 'out', 'renderer', 'menus', `${slug}.json`),
+      path.join(rootDir, 'out', 'renderer', 'menus', 'default.json'),
+      path.join(rootDir, 'public', 'menus', `${slug}.json`),
+      path.join(rootDir, 'public', 'menus', 'default.json'),
+    ];
+
+    const saved: string[] = [];
+    for (const t of targets) {
+      try {
+        fs.mkdirSync(path.dirname(t), { recursive: true });
+        fs.writeFileSync(t, menuJson, 'utf-8');
+        saved.push(t);
+      } catch {
+        // ignore if path cannot be written
+      }
+    }
+
+    const cloudDomain = (
+      settingsRepo.get('qr_menu_cloud_domain') ||
+      'https://molecule-e2e95.web.app'
+    ).replace(/\/+$/, '');
+
+    return {
+      success: true,
+      slug,
+      savedPaths: saved,
+      url: `${cloudDomain}/m/${slug}`,
+    };
   });
 
   // ---- Offers ----

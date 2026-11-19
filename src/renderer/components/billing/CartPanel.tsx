@@ -45,22 +45,22 @@ const KotReceiptSeparator: React.FC<{
     <div className="relative my-0.5 select-none px-2">
       <div className="flex items-center gap-1">
         {/* Left ticket notch cutout */}
-        <div className="w-2 h-2 rounded-full bg-gray-200 border border-gray-300 -ml-0.5 shrink-0 shadow-inner" />
+        <div className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 -ml-0.5 shrink-0 shadow-inner" />
 
         {/* Perforated dashed tear line */}
-        <div className="flex-1 border-t border-dashed border-gray-300" />
+        <div className="flex-1 border-t border-dashed border-gray-300 dark:border-gray-700" />
 
         {/* Center tear label badge */}
-        <div className="px-1.5 py-0.2 rounded-full bg-white border border-gray-200 text-[8px] font-mono font-semibold text-gray-500 flex items-center gap-0.5 uppercase tracking-wider shrink-0 shadow-xs">
-          <span className="text-[9px] text-gray-400">✂</span>
+        <div className="px-1.5 py-0.2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-[8px] font-mono font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-0.5 uppercase tracking-wider shrink-0 shadow-xs">
+          <span className="text-[9px] text-gray-400 dark:text-gray-500">✂</span>
           <span>{label || (isPending ? 'Next KOT' : 'KOT Slip')}</span>
         </div>
 
         {/* Perforated dashed tear line */}
-        <div className="flex-1 border-t border-dashed border-gray-300" />
+        <div className="flex-1 border-t border-dashed border-gray-300 dark:border-gray-700" />
 
         {/* Right ticket notch cutout */}
-        <div className="w-2 h-2 rounded-full bg-gray-200 border border-gray-300 -mr-0.5 shrink-0 shadow-inner" />
+        <div className="w-2 h-2 rounded-full bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 -mr-0.5 shrink-0 shadow-inner" />
       </div>
     </div>
   );
@@ -927,13 +927,13 @@ const CartPanel: React.FC<CartPanelProps> = ({
             onMouseEnter={() => setShowTransferTooltip(true)}
             onMouseLeave={() => setShowTransferTooltip(false)}
             onClick={() => setShowTransferTooltip((prev) => !prev)}
-            className="group/transferBanner relative mx-2.5 my-1.5 px-3 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300/80 rounded-xl text-xs text-amber-950 flex items-center justify-between shadow-2xs cursor-pointer select-none"
+            className="group/transferBanner relative mx-2.5 my-1.5 px-3 py-2 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-300/80 dark:border-amber-800/60 rounded-xl text-xs text-amber-950 dark:text-amber-200 flex items-center justify-between shadow-2xs cursor-pointer select-none"
           >
             <div className="flex items-center gap-2 min-w-0">
-              <span className="p-1 rounded-lg bg-amber-100 text-amber-800 shrink-0">
-                <ArrowRightLeft size={13} className="text-amber-700" />
+              <span className="p-1 rounded-lg bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 shrink-0">
+                <ArrowRightLeft size={13} className="text-amber-700 dark:text-amber-300" />
               </span>
-              <p className="font-semibold text-xs text-amber-950 truncate">
+              <p className="font-semibold text-xs text-amber-950 dark:text-amber-200 truncate">
                 {t('cart.someItemsTransferredTo', { table: outboundTables.join(', '), defaultValue: 'Some items transferred to {{table}}' })}
               </p>
             </div>
@@ -980,22 +980,22 @@ const CartPanel: React.FC<CartPanelProps> = ({
 
         {/* Inbound transfer notice for destination table (T2) */}
         {transferredInItems.length > 0 && (
-          <div className="mx-2.5 my-2 p-2.5 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 border border-blue-300 rounded-xl text-xs text-blue-950 shadow-xs">
+          <div className="mx-2.5 my-2 p-2.5 bg-gradient-to-r from-blue-50 via-indigo-50 to-blue-50 dark:from-blue-950/70 dark:via-indigo-950/50 dark:to-blue-950/70 border border-blue-300 dark:border-blue-800/80 rounded-xl text-xs text-blue-950 dark:text-blue-100 shadow-xs">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="p-1 rounded-lg bg-blue-200/80 text-blue-800 shrink-0">
-                  <ArrowRightLeft size={13} className="text-blue-800" />
+                <span className="p-1 rounded-lg bg-blue-200/80 dark:bg-blue-900/80 text-blue-800 dark:text-blue-300 shrink-0">
+                  <ArrowRightLeft size={13} className="text-blue-800 dark:text-blue-300" />
                 </span>
                 <div className="min-w-0">
-                  <p className="font-bold text-[12px] text-blue-950 truncate">
+                  <p className="font-bold text-[12px] text-blue-950 dark:text-blue-200 truncate">
                     {t('cart.transferredInTitle', { source: uniqueInboundSources.join(', '), defaultValue: 'Transferred from {{source}}' })}
                   </p>
-                  <p className="text-[10px] text-blue-700/80 truncate">
+                  <p className="text-[10px] text-blue-700/80 dark:text-blue-300/90 truncate">
                     {t('cart.transferredInSubtitle', 'Highlighted items were moved from another table')}
                   </p>
                 </div>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-200 text-blue-900 shrink-0">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-200 dark:bg-blue-900/80 text-blue-900 dark:text-blue-200 border border-transparent dark:border-blue-700/60 shrink-0">
                 {transferredInItems.length} {t('common.items', 'items')}
               </span>
             </div>
@@ -1020,54 +1020,54 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   {/* Receipt slip card container for this KOT batch */}
                   <div className={`mx-2 my-0.5 rounded-lg border transition-shadow ${
                     batch.isPending
-                      ? 'border-amber-200 bg-amber-50/20 shadow-xs'
-                      : 'border-gray-200 bg-white shadow-xs'
+                      ? 'border-amber-200 dark:border-amber-900/60 bg-amber-50/20 dark:bg-gray-800/90 shadow-xs'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xs'
                   }`}>
                     {/* KOT Slip Header */}
                     {batch.isPending ? (
-                      <div className="px-2.5 py-1.5 bg-gradient-to-r from-amber-50/90 to-orange-50/70 border-b border-amber-200 rounded-t-lg flex items-center justify-between">
+                      <div className="px-2.5 py-1.5 bg-gradient-to-r from-amber-50/90 to-orange-50/70 dark:from-amber-950/70 dark:to-orange-950/50 border-b border-amber-200 dark:border-amber-900/60 rounded-t-lg flex items-center justify-between">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <div className="w-5 h-5 rounded-md bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-[10px] shrink-0">
+                          <div className="w-5 h-5 rounded-md bg-amber-200 dark:bg-amber-900/80 text-amber-900 dark:text-amber-200 flex items-center justify-center font-bold text-[10px] shrink-0">
                             ⏳
                           </div>
                           <div className="min-w-0">
-                            <span className="text-[11px] font-bold text-amber-950 tracking-tight">
+                            <span className="text-[11px] font-bold text-amber-950 dark:text-amber-200 tracking-tight">
                               {sortedBatches.length > 1
                                 ? t('cart.newItemsPending', 'New Items (Pending KOT)')
                                 : t('cart.pendingKot', 'Order Items (Pending KOT)')}
                             </span>
-                            <p className="text-[9px] text-amber-700/80">
+                            <p className="text-[9px] text-amber-700/80 dark:text-amber-400/90">
                               {t('cart.notSentToKitchen', 'Not sent to kitchen yet')}
                             </p>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1">
+                          <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800/70 flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
                             {t('cart.unsent', 'Unsent')}
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div className="px-2.5 py-1.5 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200 rounded-t-lg flex items-center justify-between">
+                      <div className="px-2.5 py-1.5 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700 rounded-t-lg flex items-center justify-between">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <div className="w-5 h-5 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0">
+                          <div className="w-5 h-5 rounded-md bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-[10px] shrink-0">
                             #{batch.kotIndex ?? 1}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] font-bold text-gray-900 tracking-tight">
+                              <span className="text-[11px] font-bold text-gray-900 dark:text-gray-100 tracking-tight">
                                 {batch.kotNumber ? `KOT #${batch.kotIndex}` : t('cart.kotSlip', 'KOT Slip')}
                               </span>
                               {batch.station && (
-                                <span className="text-[9px] font-medium bg-gray-200 text-gray-700 px-1 py-0.2 rounded">
+                                <span className="text-[9px] font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-1 py-0.2 rounded">
                                   {batch.station}
                                 </span>
                               )}
                             </div>
                             {batch.kotNumber && (
-                              <p className="text-[9px] font-mono text-gray-400 truncate">
+                              <p className="text-[9px] font-mono text-gray-400 dark:text-gray-500 truncate">
                                 {batch.kotNumber}
                               </p>
                             )}
@@ -1076,19 +1076,19 @@ const CartPanel: React.FC<CartPanelProps> = ({
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           {formattedTime && (
-                            <span className="text-[10px] text-gray-500 font-mono flex items-center gap-0.5">
-                              <Clock size={10} className="text-gray-400" />
+                            <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono flex items-center gap-0.5">
+                              <Clock size={10} className="text-gray-400 dark:text-gray-500" />
                               {formattedTime}
                             </span>
                           )}
                           <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full flex items-center gap-1 border ${
                             batch.status === 'ready'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                               : batch.status === 'preparing'
-                              ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                              ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
                               : batch.status === 'served'
-                              ? 'bg-purple-50 text-purple-700 border-purple-200'
-                              : 'bg-blue-50 text-blue-700 border-blue-200'
+                              ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                              : 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
                           }`}>
                             <Check size={9} />
                             {batch.status ? (batch.status.charAt(0).toUpperCase() + batch.status.slice(1)) : 'Sent'}
@@ -1098,7 +1098,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     )}
 
                     {/* Items in this batch */}
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-800">
                       {batch.groups.map((group) => {
                         const item = group.representative;
                         const totalQty = group.totalQuantity;
@@ -1124,21 +1124,21 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                 <div className="flex items-start justify-between gap-1.5">
                                   <div className="min-w-0">
                                     <div className="flex items-center gap-1.5 flex-wrap">
-                                      <p className="text-xs font-medium text-gray-900 truncate">
+                                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
                                         {getName(item.menuItem)}
                                       </p>
                                       {isTransferredIn && (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                                          <ArrowRightLeft size={9} className="text-blue-600" />
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
+                                          <ArrowRightLeft size={9} className="text-blue-600 dark:text-blue-400" />
                                           {t('cart.fromTable', { name: item.sourceTableName, defaultValue: 'From {{name}}' })}
                                         </span>
                                       )}
                                     </div>
                                     {item.variation && (
-                                      <p className="text-[10px] text-gray-500">{item.variation.name}</p>
+                                      <p className="text-[10px] text-gray-500 dark:text-gray-400">{item.variation.name}</p>
                                     )}
                                   </div>
-                                  <p className="text-xs font-semibold text-gray-900 flex-shrink-0">
+                                  <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 flex-shrink-0">
                                     {formatCurrency(totalAmt)}
                                   </p>
                                 </div>
@@ -1146,7 +1146,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                 {item.addons.length > 0 && (
                                   <div className="space-y-0">
                                     {item.addons.map((addon) => (
-                                      <p key={addon.id} className="text-[10px] text-gray-400">
+                                      <p key={addon.id} className="text-[10px] text-gray-400 dark:text-gray-500">
                                         + {addon.name} ({formatCurrency(addon.price)})
                                       </p>
                                     ))}
@@ -1157,16 +1157,16 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                   <button
                                     type="button"
                                     onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
-                                    className="mt-1 flex items-center gap-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-lg px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors max-w-full text-left font-medium"
+                                    className="mt-1 flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 rounded-lg px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors max-w-full text-left font-medium"
                                   >
-                                    <StickyNote size={10} className="text-amber-600 flex-shrink-0" />
+                                    <StickyNote size={10} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
                                     <span className="truncate">{item.notes}</span>
-                                    <Pencil size={9} className="text-amber-500 flex-shrink-0 opacity-70 ml-0.5" />
+                                    <Pencil size={9} className="text-amber-500 dark:text-amber-400 flex-shrink-0 opacity-70 ml-0.5" />
                                   </button>
                                 ) : null}
 
                                 <div className="flex items-center gap-1.5 mt-1">
-                                  <div className="flex items-center border border-gray-200 rounded-lg bg-white">
+                                  <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                                     <Tooltip
                                       text={group.isSynced ? t('cart.voidItemTooltip', 'Cancel sent item (requires reason)') : t('cart.decreaseQty', 'Decrease quantity')}
                                       position="top"
@@ -1176,14 +1176,14 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                         onClick={() => handleGroupDecrement(group)}
                                         className={`p-0.5 rounded-l-lg transition-colors ${
                                           group.isSynced
-                                            ? 'text-red-500 hover:bg-red-50'
-                                            : 'text-gray-500 hover:text-red-600 hover:bg-red-50'
+                                            ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40'
+                                            : 'text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40'
                                         }`}
                                       >
                                         <Minus size={11} />
                                       </button>
                                     </Tooltip>
-                                    <span className="px-2 text-[11px] font-medium text-gray-900 min-w-[22px] text-center">
+                                    <span className="px-2 text-[11px] font-medium text-gray-900 dark:text-gray-100 min-w-[22px] text-center">
                                       {totalQty}
                                     </span>
                                     <Tooltip
@@ -1193,14 +1193,14 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                     >
                                       <button
                                         onClick={() => handleGroupIncrement(group)}
-                                        className="p-0.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-r-lg transition-colors"
+                                        className="p-0.5 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-r-lg transition-colors"
                                       >
                                         <Plus size={11} />
                                       </button>
                                     </Tooltip>
                                   </div>
 
-                                  <span className="text-[10px] text-gray-400">
+                                  <span className="text-[10px] text-gray-400 dark:text-gray-500">
                                     @ {formatCurrency(item.unitPrice)}
                                   </span>
 
@@ -1210,7 +1210,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                         <button
                                           type="button"
                                           onClick={() => onTransferOrder(item.orderItemId)}
-                                          className="p-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100"
+                                          className="p-1 rounded-lg text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all opacity-0 group-hover:opacity-100"
                                         >
                                           <ArrowRightLeft size={11} />
                                         </button>
@@ -1222,8 +1222,8 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                         onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
                                         className={`p-1 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${
                                           item.notes
-                                            ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
-                                            : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
+                                            ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50'
+                                            : 'text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
                                         }`}
                                       >
                                         <StickyNote size={12} />
@@ -1232,7 +1232,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                     <Tooltip text={group.isSynced ? t('cart.voidItem', 'Cancel item') : t('cart.removeItem', 'Remove item')} position="top" delay={false}>
                                       <button
                                         onClick={() => handleGroupRemove(group)}
-                                        className="p-0.5 text-gray-400 hover:text-red-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-0.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                                       >
                                         <X size={11} />
                                       </button>
@@ -1247,9 +1247,9 @@ const CartPanel: React.FC<CartPanelProps> = ({
                     </div>
 
                     {/* Batch subtotal footer */}
-                    <div className="px-2.5 py-1 bg-gray-50/70 border-t border-gray-100 rounded-b-lg flex items-center justify-between text-[10px] text-gray-500">
+                    <div className="px-2.5 py-1 bg-gray-50/70 dark:bg-gray-900/60 border-t border-gray-100 dark:border-gray-800 rounded-b-lg flex items-center justify-between text-[10px] text-gray-500 dark:text-gray-400">
                       <span>{t('cart.slipItems', '{{count}} items', { count: batch.totalQuantity })}</span>
-                      <span className="font-semibold text-gray-700">
+                      <span className="font-semibold text-gray-700 dark:text-gray-200">
                         {formatCurrency(batch.totalAmount)}
                       </span>
                     </div>
@@ -1259,7 +1259,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
             })}
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {collapsedGroups.map((group) => {
               const item = group.representative;
               const lastIndex = group.indices[group.indices.length - 1];
@@ -1278,7 +1278,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   }
                   className={`px-3 py-1.5 group hover:bg-gray-50/50 transition-colors ${
                     isTransferredIn
-                      ? "bg-blue-50/40 border-l-[3px] !border-l-blue-500 pl-2.5"
+                      ? "bg-blue-50/40 dark:bg-blue-950/20 border-l-[3px] !border-l-blue-500 pl-2.5"
                       : ""
                   }`}
                 >
@@ -1287,21 +1287,21 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       <div className="flex items-start justify-between gap-1.5">
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <p className="text-xs font-medium text-gray-900 truncate">
+                            <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
                               {getName(item.menuItem)}
                             </p>
                             {isTransferredIn && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                                <ArrowRightLeft size={9} className="text-blue-600" />
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60">
+                                <ArrowRightLeft size={9} className="text-blue-600 dark:text-blue-400" />
                                 {t('cart.fromTable', { name: item.sourceTableName, defaultValue: 'From {{name}}' })}
                               </span>
                             )}
                           </div>
                           {item.variation && (
-                            <p className="text-[10px] text-gray-500">{item.variation.name}</p>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400">{item.variation.name}</p>
                           )}
                         </div>
-                        <p className="text-xs font-semibold text-gray-900 flex-shrink-0">
+                        <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 flex-shrink-0">
                           {formatCurrency(totalAmt)}
                         </p>
                       </div>
@@ -1309,7 +1309,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                       {item.addons.length > 0 && (
                         <div className="space-y-0">
                           {item.addons.map((addon) => (
-                            <p key={addon.id} className="text-[10px] text-gray-400">
+                            <p key={addon.id} className="text-[10px] text-gray-400 dark:text-gray-500">
                               + {addon.name} ({formatCurrency(addon.price)})
                             </p>
                           ))}
@@ -1320,16 +1320,16 @@ const CartPanel: React.FC<CartPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
-                          className="mt-1 flex items-center gap-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-lg px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors max-w-full text-left font-medium"
+                          className="mt-1 flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 rounded-lg px-1.5 py-0.5 text-[10px] cursor-pointer transition-colors max-w-full text-left font-medium"
                         >
-                          <StickyNote size={10} className="text-amber-600 flex-shrink-0" />
+                          <StickyNote size={10} className="text-amber-600 dark:text-amber-400 flex-shrink-0" />
                           <span className="truncate">{item.notes}</span>
-                          <Pencil size={9} className="text-amber-500 flex-shrink-0 opacity-70 ml-0.5" />
+                          <Pencil size={9} className="text-amber-500 dark:text-amber-400 flex-shrink-0 opacity-70 ml-0.5" />
                         </button>
                       ) : null}
 
                       <div className="flex items-center gap-1.5 mt-1">
-                        <div className="flex items-center border border-gray-200 rounded-lg bg-white">
+                        <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900">
                           <button
                             onClick={() => {
                               const now = Date.now();
