@@ -152,7 +152,7 @@ export function renderQrSvg(text: string, style: QrStyle = 'square', margin = 2,
     }
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgW}" width="100%" height="100%"><rect width="${svgW}" height="${svgW}" fill="#ffffff"/>${shapes.join('')}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgW} ${svgW}" width="100%" height="100%" style="width:100%;height:100%;display:block;"><rect width="${svgW}" height="${svgW}" fill="#ffffff"/>${shapes.join('')}</svg>`;
 }
 
 export function renderQrDataUri(text: string, style: QrStyle = 'square', margin = 2, centerIcon = true): string {

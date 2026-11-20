@@ -85,3 +85,28 @@ export function compareTableNames(
     sensitivity: 'base',
   });
 }
+
+/**
+ * Formats elapsed minutes into a compact, human-readable duration.
+ * Automatically converts minutes to hours (and days for long-running orders).
+ * Examples:
+ *   0 -> "Now"
+ *   25 -> "25m"
+ *   60 -> "1h"
+ *   75 -> "1h 15m"
+ *   120 -> "2h"
+ *   1440 -> "1d"
+ *   2505 -> "1d 17h"
+ */
+export function formatElapsedDuration(minutes: number): string {
+  if (minutes <= 0) return 'Now';
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remMins = minutes % 60;
+  if (hours < 24) {
+    return remMins > 0 ? `${hours}h ${remMins}m` : `${hours}h`;
+  }
+  const days = Math.floor(minutes / 1440);
+  const remHours = Math.floor((minutes % 1440) / 60);
+  return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`;
+}

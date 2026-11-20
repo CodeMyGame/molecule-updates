@@ -34,7 +34,7 @@ import { syncOrderDiscountToServer } from '../lib/syncOrderDiscount';
 import { useMenu } from '../hooks/useMenu';
 import { useOrders } from '../hooks/useOrders';
 import { ipc } from '../lib/ipc';
-import { formatCurrency, compareTableNames } from '../lib/formatters';
+import { formatCurrency, compareTableNames, formatElapsedDuration } from '../lib/formatters';
 import { ORDER_TYPES } from '../lib/constants';
 import { useSettings } from '../hooks/useSettings';
 import MenuGrid from '../components/billing/MenuGrid';
@@ -98,7 +98,7 @@ function getOrderStatusBadge(order: any, t: (key: string, options?: any) => stri
   if (items.length === 0) {
     return {
       label: t('tables.statusOccupied', { defaultValue: 'Occupied' }),
-      bg: 'bg-rose-100 text-rose-800 border-rose-300',
+      bg: 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800',
       dot: 'bg-rose-500',
     };
   }
@@ -112,34 +112,34 @@ function getOrderStatusBadge(order: any, t: (key: string, options?: any) => stri
   if (allReady || hasReady) {
     return {
       label: t('tables.readyForPickup', { defaultValue: 'Ready for Pickup' }),
-      bg: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold animate-pulse',
+      bg: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800 font-bold animate-pulse',
       dot: 'bg-emerald-500',
     };
   }
   if (hasPreparing) {
     return {
       label: t('tables.preparingInKitchen', { defaultValue: 'Preparing' }),
-      bg: 'bg-amber-100 text-amber-800 border-amber-300 font-semibold',
+      bg: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800 font-semibold',
       dot: 'bg-amber-500',
     };
   }
   if (hasPending) {
     return {
       label: t('tables.kotPending', { defaultValue: 'KOT Pending' }),
-      bg: 'bg-orange-100 text-orange-800 border-orange-300 font-semibold',
+      bg: 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-950/70 dark:text-orange-300 dark:border-orange-800 font-semibold',
       dot: 'bg-orange-500',
     };
   }
   if (allServed) {
     return {
       label: t('billing.kotServed', { defaultValue: 'Served' }),
-      bg: 'bg-gray-100 text-gray-700 border-gray-300',
+      bg: 'bg-gray-100 text-gray-700 border-gray-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
       dot: 'bg-gray-400',
     };
   }
   return {
     label: t('billing.kotSent', { defaultValue: 'Sent to Kitchen' }),
-    bg: 'bg-blue-100 text-blue-800 border-blue-300',
+    bg: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-800',
     dot: 'bg-blue-500',
   };
 }
@@ -2176,57 +2176,57 @@ const Billing: React.FC = () => {
                     <div
                       key={parcel.id}
                       onClick={() => loadOrderById(parcel.id)}
-                      className={`relative flex flex-col justify-between p-2 rounded-xl border transition-all cursor-pointer min-h-[72px] ${
+                      className={`relative flex flex-col justify-between p-2 rounded-xl border transition-all cursor-pointer min-h-[72px] overflow-hidden ${
                         isSelected
-                          ? 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-500/30 shadow-md'
-                          : 'border-emerald-200/80 bg-white hover:border-emerald-400 hover:shadow-xs'
+                          ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 ring-2 ring-emerald-500/30 shadow-md'
+                          : 'border-emerald-200/80 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-xs'
                       }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span
-                            className="font-bold text-xs text-gray-900 flex items-center gap-1 truncate"
+                            className="font-bold text-xs text-gray-900 dark:text-white flex items-center gap-1 truncate"
                             title={`Parcel #${parcel.parcelNumber || (parcel as any).parcel_number || (index + 1)} • Order #${parcelOrderNum}`}
                           >
                             <span>🛍️</span>
                             <span>{t('tables.parcelCardTitle', { defaultValue: 'Parcel #{{number}}', number: parcel.parcelNumber || (parcel as any).parcel_number || (index + 1) })}</span>
                           </span>
-                          <span className="font-bold text-xs text-gray-900 font-mono">
+                          <span className="font-bold text-xs text-gray-900 dark:text-white font-mono">
                             {formatCurrency(parcelTotal)}
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between text-[11px] text-gray-500">
-                          <span className="font-medium truncate max-w-[130px]" title={parcel.parcelName || (parcel as any).parcel_name || custName || custPhone}>
+                        <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400 gap-1 min-w-0">
+                          <span className="font-medium truncate max-w-[125px]" title={parcel.parcelName || (parcel as any).parcel_name || custName || custPhone}>
                             {(parcel.parcelName || (parcel as any).parcel_name) ? (
-                              <span className="inline-flex items-center gap-1 text-emerald-800 font-bold bg-emerald-100/90 px-1.5 py-0.5 rounded border border-emerald-300 text-[10px] shadow-2xs">
+                              <span className="inline-flex items-center gap-1 text-emerald-800 dark:text-emerald-300 font-bold bg-emerald-100/90 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-800 text-[10px] shadow-2xs min-w-0">
                                 <span>🏷️</span>
-                                <span className="truncate max-w-[110px]">{parcel.parcelName || (parcel as any).parcel_name}</span>
+                                <span className="truncate max-w-[100px]">{parcel.parcelName || (parcel as any).parcel_name}</span>
                               </span>
                             ) : custName ? (
-                              <span className="text-gray-700 font-medium">👤 {custName}</span>
+                              <span className="text-gray-700 dark:text-gray-300 font-medium truncate">👤 {custName}</span>
                             ) : custPhone ? (
-                              <span className="text-gray-700 font-medium">📞 {custPhone}</span>
+                              <span className="text-gray-700 dark:text-gray-300 font-medium">📞 {custPhone}</span>
                             ) : (
-                              <span className="text-gray-500 font-medium">{t('tables.walkInGuest', { defaultValue: 'Walk-in Guest' })}</span>
+                              <span className="text-gray-500 dark:text-gray-400 font-medium truncate">{t('tables.walkInGuest', { defaultValue: 'Walk-in Guest' })}</span>
                             )}
                           </span>
-                          <span className="text-[10px] text-gray-400 flex items-center gap-0.5 shrink-0">
-                            <Clock size={9} />
-                            <span>{elapsedMins === 0 ? 'Now' : `${elapsedMins}m`}</span>
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-0.5 shrink-0 font-medium">
+                            <Clock size={10} />
+                            <span>{formatElapsedDuration(elapsedMins)}</span>
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-gray-100 gap-1">
-                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] border leading-tight ${statusBadge.bg}`}>
+                      <div className="flex items-center justify-between pt-1.5 mt-1 border-t border-gray-100 dark:border-slate-700/80 gap-1.5 min-w-0">
+                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] border leading-tight min-w-0 shrink truncate ${statusBadge.bg}`}>
                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusBadge.dot}`} />
-                          <span className="truncate max-w-[85px]">{statusBadge.label}</span>
+                          <span className="truncate max-w-[80px]">{statusBadge.label}</span>
                         </span>
 
                         <button
                           onClick={(e) => handlePayParcelOrder(parcel.id, e)}
-                          className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors shrink-0 cursor-pointer"
+                          className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:border-emerald-800 dark:text-emerald-300 dark:hover:bg-emerald-900 border border-emerald-200 transition-colors shrink-0 cursor-pointer"
                           title="Quick Pay"
                         >
                           <Banknote size={10} />
