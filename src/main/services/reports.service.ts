@@ -59,18 +59,48 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
     ORDER BY date
   `).all(startDate, endDate) as any[];
 
-  return rows.map((row) => {
-    const ordersByType = db.prepare(`
-      SELECT
-        order_type AS type,
-        COUNT(*) AS count,
-        COALESCE(SUM(grand_total), 0) AS revenue
-      FROM orders
-      WHERE DATE(created_at) = ? AND status = 'completed'
-      GROUP BY order_type
-    `).all(row.date) as any[];
+  // Batch query 1: orders by type grouped by date and order_type (eliminates N queries)
+  const ordersByTypeRows = db.prepare(`
+    SELECT
+      DATE(created_at) AS date,
+      order_type AS type,
+      COUNT(*) AS count,
+      COALESCE(SUM(grand_total), 0) AS revenue
+    FROM orders
+    WHERE created_at >= ? AND created_at <= ? AND status = 'completed'
+    GROUP BY DATE(created_at), order_type
+  `).all(startDate, endDate) as { date: string; type: string; count: number; revenue: number }[];
 
-    const coins = getCoinTotalsForDate(row.date);
+  const ordersByTypeMap = new Map<string, { type: string; count: number; revenue: number }[]>();
+  for (const r of ordersByTypeRows) {
+    let list = ordersByTypeMap.get(r.date);
+    if (!list) {
+      list = [];
+      ordersByTypeMap.set(r.date, list);
+    }
+    list.push({ type: r.type, count: r.count, revenue: r.revenue });
+  }
+
+  // Batch query 2: coins totals grouped by date (eliminates N queries)
+  const coinRows = db.prepare(`
+    SELECT
+      DATE(lt.created_at) AS date,
+      COALESCE(SUM(CASE WHEN lt.points < 0 THEN ABS(lt.points) * 100 ELSE 0 END), 0) AS coins_redeemed,
+      COALESCE(SUM(CASE WHEN lt.points > 0 THEN lt.points ELSE 0 END), 0) AS coins_earned
+    FROM loyalty_transactions lt
+    JOIN orders o ON lt.order_id = o.id
+    WHERE lt.created_at >= ? AND lt.created_at <= ? AND o.status = 'completed'
+    GROUP BY DATE(lt.created_at)
+  `).all(startDate, endDate) as { date: string; coins_redeemed: number; coins_earned: number }[];
+
+  const coinsMap = new Map<string, { coinsRedeemed: number; coinsEarned: number }>();
+  for (const c of coinRows) {
+    coinsMap.set(c.date, { coinsRedeemed: c.coins_redeemed, coinsEarned: c.coins_earned });
+  }
+
+  return rows.map((row) => {
+    const ordersByType = ordersByTypeMap.get(row.date) ?? [];
+    const coins = coinsMap.get(row.date) ?? { coinsRedeemed: 0, coinsEarned: 0 };
 
     return {
       date: row.date,
@@ -82,11 +112,7 @@ export function dailySales(dateRange: DateRangeFilter): DailySalesReport[] {
       averageOrderValue: row.total_orders > 0
         ? Math.round(row.total_revenue / row.total_orders)
         : 0,
-      ordersByType: ordersByType.map((r: any) => ({
-        type: r.type,
-        count: r.count,
-        revenue: r.revenue,
-      })),
+      ordersByType,
       coinsRedeemed: coins.coinsRedeemed,
       coinsEarned: coins.coinsEarned,
       cancelledOrders: row.cancelled_orders,

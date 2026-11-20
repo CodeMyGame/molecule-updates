@@ -32,6 +32,7 @@ import { addParcelNameToOrders } from './db/migrations/026_add_parcel_name_to_or
 import { addParcelNumberToOrders } from './db/migrations/027_add_parcel_number_to_orders';
 import { addQrMenuSettings } from './db/migrations/028_add_qr_menu_settings';
 import { addLoyaltyOrderPerfIndex } from './db/migrations/029_add_loyalty_order_perf_index';
+import { addOrdersStatusCreatedIndex } from './db/migrations/030_add_orders_status_created_index';
 import { seedDatabase } from './db/seed';
 import { registerAllHandlers } from './ipc/index';
 import { logger } from './utils/logger';
@@ -160,6 +161,7 @@ function initializeDatabase(): void {
       addParcelNumberToOrders,
       addQrMenuSettings,
       addLoyaltyOrderPerfIndex,
+      addOrdersStatusCreatedIndex,
     ]);
 
     // Seed default data

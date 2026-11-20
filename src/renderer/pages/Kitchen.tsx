@@ -13,6 +13,30 @@ import { KOTStatus } from '../../shared/enums';
 import KOTCard from '../components/kitchen/KOTCard';
 import StationFilter from '../components/kitchen/StationFilter';
 
+const KitchenClock: React.FC = React.memo(() => {
+  const [time, setTime] = useState(() => new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const timeString = time.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+
+  return (
+    <div className="text-right">
+      <div className="text-2xl font-mono font-bold text-white tabular-nums">
+        {timeString}
+      </div>
+    </div>
+  );
+});
+
 const KitchenDisplay: React.FC = () => {
   const { t } = useTranslation();
   const {
@@ -29,7 +53,6 @@ const KitchenDisplay: React.FC = () => {
     stopAutoRefresh,
   } = useKOTStore();
 
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [showCompleted, setShowCompleted] = useState(false);
   // Persist sound preference across navigation/reload.
   const [soundEnabled, setSoundEnabledState] = useState<boolean>(() => {
@@ -47,12 +70,6 @@ const KitchenDisplay: React.FC = () => {
   useEffect(() => {
     useKOTStore.getState().startAutoRefresh();
     return () => useKOTStore.getState().stopAutoRefresh();
-  }, []);
-
-  // Clock update every second
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
   }, []);
 
   // Detect newly-arrived KOTs from polling diffs and play a sound.
@@ -157,13 +174,6 @@ const KitchenDisplay: React.FC = () => {
     updateKOTStatus(id, status);
   };
 
-  const timeString = currentTime.toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true,
-  });
-
   return (
     <div className="h-full flex flex-col bg-gray-950 text-white overflow-hidden">
       {/* Header */}
@@ -195,11 +205,7 @@ const KitchenDisplay: React.FC = () => {
           >
             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
           </button>
-          <div className="text-right">
-            <div className="text-2xl font-mono font-bold text-white tabular-nums">
-              {timeString}
-            </div>
-          </div>
+          <KitchenClock />
         </div>
       </header>
 

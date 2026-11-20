@@ -614,12 +614,21 @@ const Billing: React.FC = () => {
 
   // Fetch active orders on mount + poll every 5s so kitchen status changes
   // (Accept/Ready/Served from a tablet) reflect in the order pills automatically.
+  // Pauses when window is hidden/minimized to save CPU and battery.
   useEffect(() => {
     fetchActiveOrders();
     const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       fetchActiveOrders();
     }, 5000);
-    return () => clearInterval(interval);
+    const onVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) fetchActiveOrders();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, [fetchActiveOrders]);
 
   // Detect orders transitioning to "Ready" (all items ready/served, none pending)

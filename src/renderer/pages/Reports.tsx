@@ -27,21 +27,6 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 import Button from '../components/common/Button';
 import DataTable from '../components/common/DataTable';
 import { formatCurrency, formatDate, formatDateTime } from '../lib/formatters';
@@ -50,6 +35,22 @@ import { useReports, type DatePreset } from '../hooks/useReports';
 import { useTaxTerminology } from '../hooks/useTaxTerminology';
 import { useLocaleCurrencyIcon } from '../hooks/useLocaleCurrencyIcon';
 import { currencySymbolForLanguage } from '../lib/currencyLocale';
+
+const DailySalesChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.DailySalesChart })));
+const TopItemsBarChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.TopItemsBarChart })));
+const CategoryPieChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.CategoryPieChart })));
+const PaymentModesPieChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.PaymentModesPieChart })));
+const StaffPerformanceBarChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.StaffPerformanceBarChart })));
+const InventoryConsumptionBarChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.InventoryConsumptionBarChart })));
+const KitchenPrepTimeBarChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.KitchenPrepTimeBarChart })));
+const TableWiseBarCharts = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.TableWiseBarCharts })));
+const BusyHoursBarChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.BusyHoursBarChart })));
+
+const ChartFallback: React.FC<{ height?: number }> = ({ height = 300 }) => (
+  <div style={{ height }} className="bg-white rounded-xl border border-gray-200 p-5 flex items-center justify-center">
+    <div className="shimmer h-full w-full rounded-lg" />
+  </div>
+);
 
 type ReportTab =
   | 'order_history'
@@ -550,19 +551,14 @@ const Reports: React.FC = () => {
         )}
 
         {chartData.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.salesOverTime')}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="date" fontSize={12} tick={{ fill: '#6B7280' }} />
-                <YAxis fontSize={12} tick={{ fill: '#6B7280' }} />
-                <Tooltip formatter={(value: number) => [`${currencySymbolForLanguage(i18n.language)}${value.toFixed(2)}`, t('reports.revenue')]} contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} name={t('reports.revenue')} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={300} />}>
+            <DailySalesChart
+              title={t('reports.salesOverTime')}
+              data={chartData}
+              currencySymbol={currencySymbolForLanguage(i18n.language)}
+              revenueLabel={t('reports.revenue')}
+            />
+          </React.Suspense>
         )}
 
         <DataTable
@@ -620,18 +616,14 @@ const Reports: React.FC = () => {
         </div>
 
         {top10.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.top10ItemsByRevenue')}</h3>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={top10} layout="vertical" margin={{ left: 100 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis type="number" fontSize={12} tick={{ fill: '#6B7280' }} />
-                <YAxis dataKey="name" type="category" fontSize={12} tick={{ fill: '#6B7280' }} width={90} />
-                <Tooltip formatter={(value: number) => [`${currencySymbolForLanguage(i18n.language)}${value.toFixed(2)}`, t('reports.revenue')]} contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                <Bar dataKey="revenue" fill="#3B82F6" radius={[0, 4, 4, 0]} name={t('reports.revenue')} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={350} />}>
+            <TopItemsBarChart
+              title={t('reports.top10ItemsByRevenue')}
+              data={top10}
+              currencySymbol={currencySymbolForLanguage(i18n.language)}
+              revenueLabel={t('reports.revenue')}
+            />
+          </React.Suspense>
         )}
 
         <div className="flex items-center gap-3 mb-3">
@@ -697,19 +689,14 @@ const Reports: React.FC = () => {
         </div>
 
         {pieData.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.categoryDistribution')}</h3>
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" outerRadius={120} innerRadius={60} dataKey="value" label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} labelLine>
-                  {pieData.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => [`${currencySymbolForLanguage(i18n.language)}${value.toFixed(2)}`, t('reports.revenue')]} contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={350} />}>
+            <CategoryPieChart
+              title={t('reports.categoryDistribution')}
+              data={pieData}
+              currencySymbol={currencySymbolForLanguage(i18n.language)}
+              revenueLabel={t('reports.revenue')}
+            />
+          </React.Suspense>
         )}
 
         <DataTable
@@ -778,19 +765,14 @@ const Reports: React.FC = () => {
         )}
 
         {pieData.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.paymentModeDistribution')}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" outerRadius={110} innerRadius={50} dataKey="value" label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`} labelLine>
-                  {pieData.map((entry, index) => (
-                    <Cell key={index} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => [`${currencySymbolForLanguage(i18n.language)}${value.toFixed(2)}`, t('reports.amount')]} contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={300} />}>
+            <PaymentModesPieChart
+              title={t('reports.paymentModeDistribution')}
+              data={pieData}
+              currencySymbol={currencySymbolForLanguage(i18n.language)}
+              amountLabel={t('reports.amount')}
+            />
+          </React.Suspense>
         )}
 
         <DataTable
@@ -988,20 +970,14 @@ const Reports: React.FC = () => {
         </div>
 
         {chartData.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.revenueByStaff')}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="name" fontSize={12} tick={{ fill: '#6B7280' }} />
-                <YAxis fontSize={12} tick={{ fill: '#6B7280' }} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                <Legend />
-                <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} name={t('reports.revenue')} />
-                <Bar dataKey="orders" fill="#10B981" radius={[4, 4, 0, 0]} name={t('reports.orders')} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={300} />}>
+            <StaffPerformanceBarChart
+              title={t('reports.revenueByStaff')}
+              data={chartData}
+              revenueLabel={t('reports.revenue')}
+              ordersLabel={t('reports.orders')}
+            />
+          </React.Suspense>
         )}
 
         <DataTable
@@ -1051,20 +1027,14 @@ const Reports: React.FC = () => {
         </div>
 
         {top10.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.topConsumedIngredients')}</h3>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={top10} layout="vertical" margin={{ left: 100 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis type="number" fontSize={12} tick={{ fill: '#6B7280' }} />
-                <YAxis dataKey="name" type="category" fontSize={12} tick={{ fill: '#6B7280' }} width={90} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                <Legend />
-                <Bar dataKey="cost" fill="#3B82F6" radius={[0, 4, 4, 0]} name={t('reports.cost')} />
-                <Bar dataKey="wasted" fill="#EF4444" radius={[0, 4, 4, 0]} name={t('reports.wasted')} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={350} />}>
+            <InventoryConsumptionBarChart
+              title={t('reports.topConsumedIngredients')}
+              data={top10}
+              costLabel={t('reports.cost')}
+              wastedLabel={t('reports.wasted')}
+            />
+          </React.Suspense>
         )}
 
         <DataTable
@@ -1125,18 +1095,13 @@ const Reports: React.FC = () => {
         </div>
 
         {chartData.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.avgPrepTimeByItem')}</h3>
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={chartData} layout="vertical" margin={{ left: 120 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis type="number" fontSize={12} tick={{ fill: '#6B7280' }} />
-                <YAxis dataKey="name" type="category" fontSize={11} tick={{ fill: '#6B7280' }} width={110} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                <Bar dataKey="avgMinutes" fill="#F59E0B" radius={[0, 4, 4, 0]} name={t('reports.avgMinutes')} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={400} />}>
+            <KitchenPrepTimeBarChart
+              title={t('reports.avgPrepTimeByItem')}
+              data={chartData}
+              avgMinutesLabel={t('reports.avgMinutes')}
+            />
+          </React.Suspense>
         )}
 
         <DataTable
@@ -1733,34 +1698,16 @@ const Reports: React.FC = () => {
           <SummaryCard title={t('reports.totalRevenue')} value={formatCurrency(totalRevenue)} icon={<CurrencyIcon size={20} />} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('reports.revenueByTable')}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={tableWiseData.slice(0, 15)}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="tableName" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => formatCurrency(v)} />
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                <Bar dataKey="revenue" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">{t('reports.ordersByTable')}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={tableWiseData.slice(0, 15)}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="tableName" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Bar dataKey="completedOrders" name={t('reports.statusCompleted')} fill="#10B981" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="cancelledOrders" name={t('reports.statusCancelled')} fill="#EF4444" radius={[4, 4, 0, 0]} />
-                <Legend />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <React.Suspense fallback={<ChartFallback height={300} />}>
+          <TableWiseBarCharts
+            data={tableWiseData}
+            revenueTitle={t('reports.revenueByTable')}
+            ordersTitle={t('reports.ordersByTable')}
+            completedLabel={t('reports.statusCompleted')}
+            cancelledLabel={t('reports.statusCancelled')}
+            formatCurrencyFn={formatCurrency}
+          />
+        </React.Suspense>
 
         <div className="flex justify-end mb-4">
           <Button
@@ -1952,22 +1899,14 @@ const Reports: React.FC = () => {
         </div>
 
         {totalOrders > 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('reports.ordersDistribution', 'Orders Distribution')}</h3>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="name" fontSize={12} tick={{ fill: '#6B7280' }} interval={0} angle={busyHoursView === 'day' ? -45 : 0} textAnchor={busyHoursView === 'day' ? 'end' : 'middle'} height={busyHoursView === 'day' ? 60 : 30} />
-                <YAxis fontSize={12} tick={{ fill: '#6B7280' }} allowDecimals={false} />
-                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                <Bar dataKey="orders" radius={[4, 4, 0, 0]} name={t('reports.orders')}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={index} fill={entry.isPeak ? '#EF4444' : '#3B82F6'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <React.Suspense fallback={<ChartFallback height={320} />}>
+            <BusyHoursBarChart
+              title={t('reports.ordersDistribution', 'Orders Distribution')}
+              data={chartData}
+              ordersLabel={t('reports.orders')}
+              busyHoursView={busyHoursView}
+            />
+          </React.Suspense>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-gray-400 bg-white rounded-xl border border-gray-200">
             <Clock size={36} strokeWidth={1.5} />

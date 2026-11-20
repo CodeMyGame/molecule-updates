@@ -296,8 +296,18 @@ const Tables: React.FC = () => {
 
   useEffect(() => {
     fetchActiveParcels();
-    const interval = setInterval(fetchActiveParcels, 5000);
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      fetchActiveParcels();
+    }, 5000);
+    const onVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) fetchActiveParcels();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, [fetchActiveParcels]);
 
   const handleOpenTransfer = (table: Table, orderId: number) => {
@@ -397,12 +407,20 @@ const Tables: React.FC = () => {
   };
 
   // Poll the table list every 5s so orders placed from waiter tablets show up
-  // here in near real-time (occupations, KOT statuses).
+  // here in near real-time (occupations, KOT statuses). Pauses when hidden.
   useEffect(() => {
     const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       refetch();
     }, 5000);
-    return () => clearInterval(interval);
+    const onVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden) refetch();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, [refetch]);
 
   // Order for selected occupied table (modal detail)

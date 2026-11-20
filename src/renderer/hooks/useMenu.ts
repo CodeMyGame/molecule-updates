@@ -162,8 +162,20 @@ export function useMenu(): UseMenuReturn {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setDebouncedQuery('');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   // Cache for variations and addons
   const variationsCache = useRef<Map<number, Variation[]>>(new Map());
@@ -191,18 +203,19 @@ export function useMenu(): UseMenuReturn {
   }, [fetchData]);
 
   const filteredItems = useMemo(() => {
+    const q = debouncedQuery.trim().toLowerCase();
     return items.filter((item) => {
       const matchesCategory =
         selectedCategoryId === null || item.categoryId === selectedCategoryId;
 
       const matchesSearch =
-        searchQuery === '' ||
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.shortCode && item.shortCode.toLowerCase().includes(searchQuery.toLowerCase()));
+        q === '' ||
+        item.name.toLowerCase().includes(q) ||
+        (item.shortCode && item.shortCode.toLowerCase().includes(q));
 
       return matchesCategory && matchesSearch;
     });
-  }, [items, selectedCategoryId, searchQuery]);
+  }, [items, selectedCategoryId, debouncedQuery]);
 
   const getVariations = useCallback(async (itemId: number): Promise<Variation[]> => {
     const cached = variationsCache.current.get(itemId);
