@@ -889,7 +889,9 @@
     "downloadUpdate": "புதுப்பிப்பைப் பதிவிறக்கவும்",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "பிட்ச் பிளாக்",
+    "themeBlackDesc": "தூய OLED கருப்பு (நீல நிறம் இல்லாமல்)"
   },
   "language": {
     "title": "பிராந்தியமும் மொழியும்",

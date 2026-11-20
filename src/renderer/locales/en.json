@@ -889,7 +889,9 @@
     "whatsappDisconnectFailed": "Could not disconnect WhatsApp",
     "whatsappDisabledNotice": "WhatsApp bill sending is turned off in this version. These options are shown for reference only.",
     "updateManualDownloadPrompt": "A new software version is available. Click below to start the download.",
-    "downloadUpdate": "Download Update"
+    "downloadUpdate": "Download Update",
+    "themeBlack": "Pitch Black",
+    "themeBlackDesc": "Pure OLED black (zero blue tint)"
   },
   "language": {
     "title": "Region & language",

@@ -32,6 +32,7 @@ import {
   Trash2,
   Pencil,
   Moon,
+  Contrast,
   Palette,
   Coins,
   Wifi,
@@ -4137,7 +4138,7 @@ const Settings: React.FC = () => {
           <p className="text-sm text-gray-500 dark:text-gray-400">{t('settings.appearanceDesc')}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             onClick={() => setTheme('light')}
             className={`p-4 rounded-xl border-2 transition-all text-left ${
@@ -4147,7 +4148,7 @@ const Settings: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center shadow-xs">
                 <Sun size={20} className="text-yellow-500" />
               </div>
               <div>
@@ -4175,20 +4176,48 @@ const Settings: React.FC = () => {
             }`}
           >
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center">
-                <Moon size={20} className="text-blue-400" />
+              <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center shadow-xs">
+                <Moon size={20} className="text-sky-400" />
               </div>
               <div>
                 <p className="font-medium text-gray-900 dark:text-gray-100">{t('settings.themeDark')}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{t('settings.themeDarkDesc')}</p>
               </div>
             </div>
-            <div className="rounded-lg overflow-hidden border border-gray-700">
-              <div className="h-3 bg-gray-800" />
+            <div className="rounded-lg overflow-hidden border border-slate-700">
+              <div className="h-3 bg-[#1e293b]" />
               <div className="flex">
-                <div className="w-6 bg-gray-950 h-8" />
-                <div className="flex-1 bg-gray-900 h-8 p-1">
-                  <div className="w-full h-full bg-gray-800 rounded-sm" />
+                <div className="w-6 bg-[#0f172a] h-8" />
+                <div className="flex-1 bg-[#1a1f2e] h-8 p-1">
+                  <div className="w-full h-full bg-[#1e293b] rounded-sm" />
+                </div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setTheme('black')}
+            className={`p-4 rounded-xl border-2 transition-all text-left ${
+              currentTheme === 'black'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-500'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-black border border-neutral-800 flex items-center justify-center shadow-xs">
+                <Contrast size={20} className="text-zinc-100" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{t('settings.themeBlack', 'Pitch Black')}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('settings.themeBlackDesc', 'Pure #000000 OLED black')}</p>
+              </div>
+            </div>
+            <div className="rounded-lg overflow-hidden border border-neutral-800">
+              <div className="h-3 bg-neutral-950" />
+              <div className="flex">
+                <div className="w-6 bg-black h-8 border-r border-neutral-900" />
+                <div className="flex-1 bg-black h-8 p-1">
+                  <div className="w-full h-full bg-neutral-900 rounded-sm border border-neutral-800" />
                 </div>
               </div>
             </div>

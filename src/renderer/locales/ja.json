@@ -889,7 +889,9 @@
     "downloadUpdate": "アップデートをダウンロード",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "ピッチブラック",
+    "themeBlackDesc": "純粋なOLEDブラック（青みなし）"
   },
   "language": {
     "title": "地域と言語",

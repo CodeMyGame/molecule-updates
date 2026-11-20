@@ -889,7 +889,9 @@
     "downloadUpdate": "నవీకరణను డౌన్‌లోడ్ చేయండి",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "పిచ్ బ్లాక్",
+    "themeBlackDesc": "స్వచ్ఛమైన OLED నలుపు (నీలిరంగు లేకుండా)"
   },
   "language": {
     "title": "ప్రాంతం మరియు భాష",

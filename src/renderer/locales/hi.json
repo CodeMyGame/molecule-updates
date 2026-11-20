@@ -889,7 +889,9 @@
     "downloadUpdate": "अपडेट डाउनलोड करें",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "पिच ब्लैक",
+    "themeBlackDesc": "शुद्ध OLED काला (बिना नीले रंग के)"
   },
   "language": {
     "title": "क्षेत्र और भाषा",

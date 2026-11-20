@@ -7,7 +7,7 @@ interface Notification {
   timestamp: number;
 }
 
-type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'black';
 
 interface UIState {
   sidebarCollapsed: boolean;
@@ -28,8 +28,16 @@ interface UIState {
 
 function getInitialTheme(): Theme {
   const saved = localStorage.getItem('theme');
-  if (saved === 'dark' || saved === 'light') return saved;
+  if (saved === 'dark' || saved === 'light' || saved === 'black') return saved;
   return 'light';
+}
+
+function applyThemeClasses(theme: Theme) {
+  const root = document.documentElement.classList;
+  const isAnyDark = theme === 'dark' || theme === 'black';
+  root.toggle('dark', isAnyDark);
+  root.toggle('theme-dark', theme === 'dark');
+  root.toggle('theme-black', theme === 'black');
 }
 
 export const useUIStore = create<UIState>((set, get) => ({
@@ -84,7 +92,7 @@ export const useUIStore = create<UIState>((set, get) => ({
 
   setTheme: (theme: Theme) => {
     localStorage.setItem('theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
+    applyThemeClasses(theme);
     set({ theme });
   },
 }));
@@ -92,5 +100,5 @@ export const useUIStore = create<UIState>((set, get) => ({
 // Apply theme on load
 (() => {
   const theme = getInitialTheme();
-  document.documentElement.classList.toggle('dark', theme === 'dark');
+  applyThemeClasses(theme);
 })();

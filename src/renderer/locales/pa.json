@@ -889,7 +889,9 @@
     "downloadUpdate": "ਅਪਡੇਟ ਡਾਊਨਲੋਡ ਕਰੋ",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "ਪਿਚ ਬਲੈਕ",
+    "themeBlackDesc": "ਸ਼ੁੱਧ OLED ਕਾਲਾ (ਬਿਨਾਂ ਨੀਲੇ ਰੰਗ ਦੇ)"
   },
   "language": {
     "title": "ਖੇਤਰ ਅਤੇ ਭਾਸ਼ਾ",

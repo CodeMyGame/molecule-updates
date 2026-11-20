@@ -889,7 +889,9 @@
     "downloadUpdate": "അപ്ഡേറ്റ് ഡൗൺലോഡ് ചെയ്യുക",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "പിച്ച് ബ്ലാക്ക്",
+    "themeBlackDesc": "ശുദ്ധമായ OLED കറുപ്പ് (നീല നിറമില്ലാതെ)"
   },
   "language": {
     "title": "പ്രദേശവും ഭാഷയും",

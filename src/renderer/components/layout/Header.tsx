@@ -21,6 +21,7 @@ import {
   Rocket,
   Sun,
   Moon,
+  Contrast,
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/auth.store';
 import { useUIStore } from '../../stores/ui.store';
@@ -53,7 +54,13 @@ const Header: React.FC = () => {
   const theme = useUIStore((s) => s.theme);
   const setTheme = useUIStore((s) => s.setTheme);
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('black');
+    } else {
+      setTheme('light');
+    }
   };
   useEffect(() => { void fetchRestaurant(); }, [fetchRestaurant]);
   const restaurantName = restaurant?.name?.trim() || t('header.appName');
@@ -293,15 +300,36 @@ const Header: React.FC = () => {
           </button>
         </Tooltip>
 
-        {/* Theme Dark/Light Mode Toggle */}
-        <Tooltip text={theme === 'dark' ? t('header.lightMode', 'Switch to Light Mode') : t('header.darkMode', 'Switch to Dark Mode')} position="bottom">
+        {/* Theme 3-Way Mode Toggle (Light -> Dark Slate -> Pitch Black -> Light) */}
+        <Tooltip
+          text={
+            theme === 'light'
+              ? t('header.darkSlateMode', 'Switch to Dark Mode (Slate)')
+              : theme === 'dark'
+              ? t('header.pitchBlackMode', 'Switch to Pitch Black Mode (OLED)')
+              : t('header.lightMode', 'Switch to Light Mode')
+          }
+          position="bottom"
+        >
           <button
             onClick={toggleTheme}
             className="flex items-center justify-center p-1.5 rounded-lg text-amber-500 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950/50 transition-colors active:scale-95"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            title={
+              theme === 'light'
+                ? 'Switch to Dark Mode (Slate)'
+                : theme === 'dark'
+                ? 'Switch to Pitch Black Mode (OLED)'
+                : 'Switch to Light Mode'
+            }
+            aria-label="Toggle display theme"
           >
-            {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} className="text-slate-600 dark:text-slate-300" />}
+            {theme === 'light' ? (
+              <Moon size={15} className="text-slate-600 dark:text-slate-300" />
+            ) : theme === 'dark' ? (
+              <Contrast size={15} className="text-sky-400" />
+            ) : (
+              <Sun size={15} className="text-amber-400" />
+            )}
           </button>
         </Tooltip>
 

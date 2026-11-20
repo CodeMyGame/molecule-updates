@@ -889,7 +889,9 @@
     "downloadUpdate": "ನವೀಕರಣವನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "ಪಿಚ್ ಕಪ್ಪು",
+    "themeBlackDesc": "ಶುದ್ಧ OLED ಕಪ್ಪು (ನೀಲಿ ಛಾಯೆ ಇಲ್ಲದೆ)"
   },
   "language": {
     "title": "ಪ್ರದೇಶ ಮತ್ತು ಭಾಷೆ",

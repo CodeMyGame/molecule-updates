@@ -889,7 +889,9 @@
     "downloadUpdate": "تنزيل التحديث",
     "qrMenu": "QR Menu",
     "qrMenuTitle": "Customer QR Menu & Table Stands",
-    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu."
+    "qrMenuDesc": "Allow customers to scan physical table QR stands with their smartphone to view a beautiful digital menu.",
+    "themeBlack": "أسود نقي",
+    "themeBlackDesc": "أسود OLED حقيقي بدون صبغة زرقاء"
   },
   "language": {
     "title": "المنطقة واللغة",

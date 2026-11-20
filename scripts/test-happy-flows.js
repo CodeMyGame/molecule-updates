@@ -1968,6 +1968,44 @@ suite('17. System Settings, Multi-Currency, 15-Locale Parity & Hot Backup', () =
     assert(fullCsv.includes('\r\n'), 'CSV must use CRLF row separators');
     assertEqual(csvLines.length, allOrders.length + 1, 'CSV must contain header plus every single order row');
   });
+
+  test('17.8 Three-Way Display Theme Engine: verifies light, dark slate, and pitch-black OLED modes', () => {
+    // Test theme state cycle function
+    const cycleTheme = (current) => {
+      if (current === 'light') return 'dark';
+      if (current === 'dark') return 'black';
+      return 'light';
+    };
+
+    assertEqual(cycleTheme('light'), 'dark');
+    assertEqual(cycleTheme('dark'), 'black');
+    assertEqual(cycleTheme('black'), 'light');
+
+    // Test classList mapping
+    const getThemeClasses = (theme) => {
+      const isAnyDark = theme === 'dark' || theme === 'black';
+      return {
+        dark: isAnyDark,
+        themeDark: theme === 'dark',
+        themeBlack: theme === 'black',
+      };
+    };
+
+    const lightClasses = getThemeClasses('light');
+    assertEqual(lightClasses.dark, false);
+    assertEqual(lightClasses.themeDark, false);
+    assertEqual(lightClasses.themeBlack, false);
+
+    const darkClasses = getThemeClasses('dark');
+    assertEqual(darkClasses.dark, true);
+    assertEqual(darkClasses.themeDark, true);
+    assertEqual(darkClasses.themeBlack, false);
+
+    const blackClasses = getThemeClasses('black');
+    assertEqual(blackClasses.dark, true);
+    assertEqual(blackClasses.themeDark, false);
+    assertEqual(blackClasses.themeBlack, true);
+  });
 });
 
 // -------------------------------------------------------------

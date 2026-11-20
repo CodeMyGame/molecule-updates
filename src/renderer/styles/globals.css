@@ -296,6 +296,198 @@
   fill: #9ca3af !important;
 }
 
+/* =========================================================================
+   PITCH BLACK (OLED) THEME OVERRIDES (.theme-black)
+   Pure 100% #000000 backgrounds and true neutral dark surfaces (no blue tint)
+   ========================================================================= */
+.dark.theme-black,
+.theme-black {
+  --tw-bg-white: #000000;
+  --tw-ring-offset-color: #000000;
+  background-color: #000000 !important;
+}
+
+.dark.theme-black body,
+.dark.theme-black #root,
+.theme-black body,
+.theme-black #root {
+  background-color: #000000 !important;
+}
+
+/* Base surfaces in Pitch Black */
+.dark.theme-black .bg-white { background-color: #09090b !important; }
+.dark.theme-black .bg-gray-50,
+.dark.theme-black .bg-slate-50,
+.dark.theme-black .bg-zinc-50 { background-color: #000000 !important; }
+.dark.theme-black .bg-gray-100,
+.dark.theme-black .bg-slate-100,
+.dark.theme-black .bg-zinc-100 { background-color: #050505 !important; }
+.dark.theme-black .bg-gray-200,
+.dark.theme-black .bg-slate-200,
+.dark.theme-black .bg-zinc-200 { background-color: #121214 !important; }
+
+/* Tailwind dark variants in Pitch Black */
+.dark.theme-black .dark\:bg-gray-950,
+.dark.theme-black .dark\:bg-slate-950,
+.dark.theme-black .dark\:bg-gray-900,
+.dark.theme-black .dark\:bg-slate-900 { background-color: #000000 !important; }
+.dark.theme-black .dark\:bg-gray-800,
+.dark.theme-black .dark\:bg-slate-800 { background-color: #0a0a0c !important; }
+.dark.theme-black .dark\:bg-gray-700,
+.dark.theme-black .dark\:bg-slate-700 { background-color: #141418 !important; }
+
+/* Opacity / Fractional backgrounds in Pitch Black */
+.dark.theme-black [class*="bg-gray-50/"],
+.dark.theme-black [class*="bg-slate-50/"],
+.dark.theme-black [class*="bg-zinc-50/"],
+.dark.theme-black [class*="dark:bg-slate-900/"],
+.dark.theme-black [class*="dark:bg-gray-900/"] { background-color: #000000 !important; }
+.dark.theme-black [class*="bg-gray-100/"],
+.dark.theme-black [class*="bg-slate-100/"] { background-color: #050505 !important; }
+.dark.theme-black [class*="bg-gray-200/"],
+.dark.theme-black [class*="bg-slate-200/"] { background-color: #121214 !important; }
+.dark.theme-black [class*="dark:bg-gray-800/"],
+.dark.theme-black [class*="dark:bg-slate-800/"] { background-color: rgba(10, 10, 12, 0.95) !important; }
+
+/* Structural POS containers */
+.dark.theme-black .pos-sidebar,
+.theme-black .pos-sidebar {
+  background-color: #000000 !important;
+  border-right: 1px solid #1a1a1e !important;
+}
+.dark.theme-black .pos-header,
+.theme-black .pos-header {
+  background-color: #000000 !important;
+  border-bottom: 1px solid #1a1a1e !important;
+}
+
+/* Neutral borders without blue tint */
+.dark.theme-black .border-gray-100,
+.dark.theme-black .border-slate-100 { border-color: #18181b !important; }
+.dark.theme-black .border-gray-150,
+.dark.theme-black .border-slate-150 { border-color: #1f1f23 !important; }
+.dark.theme-black .border-gray-200,
+.dark.theme-black .border-slate-200 { border-color: #222226 !important; }
+.dark.theme-black .border-gray-300,
+.dark.theme-black .border-slate-300 { border-color: #2a2a2e !important; }
+.dark.theme-black .dark\:border-gray-800,
+.dark.theme-black .dark\:border-slate-800 { border-color: #18181b !important; }
+.dark.theme-black .dark\:border-gray-700,
+.dark.theme-black .dark\:border-slate-700 { border-color: #222226 !important; }
+.dark.theme-black .dark\:border-gray-600,
+.dark.theme-black .dark\:border-slate-600 { border-color: #2e2e34 !important; }
+.dark.theme-black [class*="border-gray-100/"],
+.dark.theme-black [class*="border-slate-100/"] { border-color: rgba(24, 24, 27, 0.8) !important; }
+.dark.theme-black [class*="border-gray-200/"],
+.dark.theme-black [class*="border-slate-200/"] { border-color: rgba(34, 34, 38, 0.8) !important; }
+
+/* Gradients in Pitch Black */
+.dark.theme-black .from-gray-50,
+.dark.theme-black .from-slate-50,
+.dark.theme-black .dark\:from-slate-900 { --tw-gradient-from: #000000 var(--tw-gradient-from-position) !important; }
+.dark.theme-black .to-gray-50,
+.dark.theme-black .to-slate-50,
+.dark.theme-black .dark\:to-slate-900 { --tw-gradient-to: #000000 var(--tw-gradient-to-position) !important; }
+.dark.theme-black .via-gray-50,
+.dark.theme-black .via-slate-50 { --tw-gradient-stops: var(--tw-gradient-from), #000000 var(--tw-gradient-via-position), var(--tw-gradient-to) !important; }
+
+/* Hover states in Pitch Black */
+.dark.theme-black .hover\:bg-gray-50:hover,
+.dark.theme-black .hover\:bg-slate-50:hover { background-color: #0f0f12 !important; }
+.dark.theme-black .hover\:bg-gray-100:hover,
+.dark.theme-black .hover\:bg-slate-100:hover { background-color: #141418 !important; }
+.dark.theme-black .hover\:bg-gray-200:hover,
+.dark.theme-black .hover\:bg-slate-200:hover { background-color: #1c1c22 !important; }
+.dark.theme-black .dark\:hover\:bg-gray-800:hover,
+.dark.theme-black .dark\:hover\:bg-slate-800:hover { background-color: #141418 !important; }
+.dark.theme-black .dark\:hover\:bg-gray-700:hover,
+.dark.theme-black .dark\:hover\:bg-slate-700:hover { background-color: #1c1c22 !important; }
+
+/* Form inputs & dropdowns */
+.dark.theme-black input:not([type="checkbox"]):not([type="radio"]),
+.dark.theme-black select,
+.dark.theme-black textarea {
+  background-color: #08080a !important;
+  color: #ffffff !important;
+  border-color: #24242a !important;
+}
+.dark.theme-black input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark.theme-black select:focus,
+.dark.theme-black textarea:focus {
+  background-color: #0d0d10 !important;
+  border-color: #3b82f6 !important;
+}
+
+/* Dividers */
+.dark.theme-black .divide-gray-50 > :not([hidden]) ~ :not([hidden]),
+.dark.theme-black .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+.dark.theme-black .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
+.dark.theme-black .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark.theme-black .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1a1a1e !important;
+}
+
+/* POS Menu Item Cards in Pitch Black */
+.dark.theme-black .menu-item-card {
+  background-color: #08080a !important;
+  border-color: #1c1c20 !important;
+}
+.dark.theme-black .menu-item-card:hover {
+  background-color: #121216 !important;
+  background-image: none !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.5), 0 4px 14px rgba(0, 0, 0, 0.8) !important;
+  transform: translateY(-1px);
+}
+.dark.theme-black .menu-item-card:active {
+  background-color: #0c0c0e !important;
+}
+
+/* Table Cards in Pitch Black */
+.dark.theme-black .table-card.bg-green-50 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+.dark.theme-black .table-card.bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.09) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+.dark.theme-black .table-card.bg-yellow-50,
+.dark.theme-black .table-card.bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.08) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+.dark.theme-black .table-card.bg-gray-100 {
+  background-color: #08080a !important;
+  border-color: #1f1f23 !important;
+}
+.dark.theme-black .table-card.is-selected,
+.dark.theme-black .table-card[data-selected="true"],
+.dark.theme-black .table-card.is-selected.bg-green-50,
+.dark.theme-black .table-card.is-selected.bg-red-50,
+.dark.theme-black .table-card.is-selected.bg-yellow-50,
+.dark.theme-black .table-card.is-selected.bg-amber-50,
+.dark.theme-black .table-card.is-selected.bg-gray-100 {
+  background: #000000 !important;
+  background-color: #000000 !important;
+  border-color: #38bdf8 !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 2px #38bdf8, 0 0 22px rgba(56, 189, 248, 0.5) !important;
+}
+
+/* Modals & Dialogs in Pitch Black */
+.dark.theme-black [data-modal-container],
+.dark.theme-black .pos-modal-card {
+  background-color: #08080a !important;
+  border-color: #1f1f23 !important;
+}
+
+/* Recharts Tooltips in Pitch Black */
+.dark.theme-black .recharts-default-tooltip {
+  background-color: #08080a !important;
+  border-color: #1f1f23 !important;
+}
+
 /* System font stack with Inter preference */
 @layer base {
   @font-face {
