@@ -453,9 +453,65 @@ const QrMenuStudio: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full min-h-[500px]">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3" />
-        <p className="text-gray-500 font-medium text-sm">Loading QR Menu Studio...</p>
+      <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
+        {/* Studio Top Header Shimmer */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-600/30 flex items-center justify-center">
+              <QrCode size={20} className="text-white/60" />
+            </div>
+            <div>
+              <div className="shimmer h-5 w-36 rounded mb-1" />
+              <div className="shimmer h-3 w-72 rounded" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="shimmer h-8 w-48 rounded-lg" />
+            <div className="shimmer h-8 w-8 rounded-lg" />
+          </div>
+        </div>
+
+        {/* Tabs Shimmer */}
+        <div className="bg-white border-b border-gray-200 px-6 py-2.5 flex items-center gap-3">
+          <div className="shimmer h-7 w-48 rounded-md" />
+          <div className="shimmer h-7 w-44 rounded-md" />
+          <div className="shimmer h-7 w-40 rounded-md" />
+        </div>
+
+        {/* Studio Content Shimmer */}
+        <div className="flex-1 overflow-hidden p-6 flex flex-col lg:flex-row gap-6">
+          {/* Left Controls Column */}
+          <div className="w-full lg:w-[420px] shrink-0 space-y-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+              <div className="shimmer h-4 w-32 rounded" />
+              <div className="shimmer h-9 w-full rounded-lg" />
+              <div className="shimmer h-9 w-full rounded-lg" />
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+              <div className="shimmer h-4 w-28 rounded" />
+              <div className="grid grid-cols-4 gap-2">
+                <div className="shimmer h-12 rounded-lg" />
+                <div className="shimmer h-12 rounded-lg" />
+                <div className="shimmer h-12 rounded-lg" />
+                <div className="shimmer h-12 rounded-lg" />
+              </div>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-3">
+              <div className="shimmer h-4 w-40 rounded" />
+              <div className="shimmer h-10 w-full rounded-lg" />
+            </div>
+          </div>
+
+          {/* Right Live Preview Column */}
+          <div className="flex-1 bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center justify-center">
+            <div className="w-64 max-w-full space-y-4 text-center">
+              <div className="shimmer h-48 w-48 mx-auto rounded-2xl" />
+              <div className="shimmer h-4 w-36 mx-auto rounded" />
+              <div className="shimmer h-3 w-48 mx-auto rounded" />
+              <div className="shimmer h-9 w-40 mx-auto rounded-lg mt-4" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

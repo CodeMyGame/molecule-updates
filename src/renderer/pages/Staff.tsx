@@ -630,8 +630,27 @@ const StaffPage: React.FC = () => {
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-3">
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-blue-600" />
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
+            <div className="p-3 border-b border-gray-100 flex items-center justify-between">
+              <div className="shimmer h-4 w-28 rounded" />
+              <div className="shimmer h-7 w-20 rounded-full" />
+            </div>
+            <div className="divide-y divide-gray-100">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={`staff-shimmer-${i}`} className="p-3.5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="shimmer h-8 w-8 rounded-full shrink-0" />
+                    <div>
+                      <div className="shimmer h-3.5 w-32 rounded mb-1" />
+                      <div className="shimmer h-3 w-20 rounded" />
+                    </div>
+                  </div>
+                  <div className="shimmer h-6 w-16 rounded-full" />
+                  <div className="shimmer h-4 w-24 rounded" />
+                  <div className="shimmer h-6 w-14 rounded-md" />
+                </div>
+              ))}
+            </div>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-16 text-red-500">

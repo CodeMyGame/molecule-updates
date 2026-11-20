@@ -205,7 +205,36 @@ const KitchenDisplay: React.FC = () => {
 
       {/* KOT Grid */}
       <main className="flex-1 overflow-y-auto p-4">
-        {filteredKOTs.length === 0 && !loading ? (
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-auto">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={`kot-shimmer-${i}`}
+                className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col justify-between min-h-[220px]"
+              >
+                <div>
+                  <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+                    <div className="shimmer h-5 w-20 rounded" />
+                    <div className="shimmer h-5 w-16 rounded-full" />
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <div className="shimmer h-4 w-24 rounded" />
+                    <div className="shimmer h-3.5 w-12 rounded" />
+                  </div>
+                  <div className="mt-4 space-y-2.5">
+                    <div className="shimmer h-4 w-3/4 rounded" />
+                    <div className="shimmer h-4 w-1/2 rounded" />
+                    <div className="shimmer h-3.5 w-2/3 rounded" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-gray-800 flex gap-2">
+                  <div className="shimmer h-9 w-full rounded-lg" />
+                  <div className="shimmer h-9 w-12 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredKOTs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <MonitorPlay size={64} className="mb-4 opacity-30" />
             <p className="text-xl font-medium">{t('kitchen.noActiveOrders')}</p>

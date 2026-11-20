@@ -382,9 +382,35 @@ const CustomerMenu: React.FC<CustomerMenuProps> = ({ initialData, previewMode = 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex flex-col items-center justify-center p-4 text-white">
-        <div className="w-12 h-12 border-3 border-[#fbbf24] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-slate-400 font-medium text-xs tracking-widest uppercase">Loading menu...</p>
+      <div className="min-h-screen bg-[#0b0f19] text-white p-4 max-w-2xl mx-auto space-y-5">
+        {/* Restaurant Header Shimmer */}
+        <div className="text-center py-6 border-b border-slate-800 space-y-2">
+          <div className="shimmer h-7 w-48 mx-auto rounded-lg" />
+          <div className="shimmer h-3.5 w-64 mx-auto rounded" />
+          <div className="shimmer h-6 w-24 mx-auto rounded-full mt-2" />
+        </div>
+
+        {/* Categories Bar Shimmer */}
+        <div className="flex gap-2 overflow-x-hidden py-1">
+          <div className="shimmer h-8 w-20 rounded-full shrink-0" />
+          <div className="shimmer h-8 w-24 rounded-full shrink-0" />
+          <div className="shimmer h-8 w-20 rounded-full shrink-0" />
+          <div className="shimmer h-8 w-28 rounded-full shrink-0" />
+        </div>
+
+        {/* Dishes list Shimmer */}
+        <div className="space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={`dish-shimmer-${i}`} className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between gap-4">
+              <div className="space-y-2 flex-1">
+                <div className="shimmer h-4 w-40 rounded" />
+                <div className="shimmer h-3 w-56 rounded" />
+                <div className="shimmer h-4 w-16 rounded mt-1" />
+              </div>
+              <div className="shimmer h-16 w-16 rounded-lg shrink-0" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

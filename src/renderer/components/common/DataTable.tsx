@@ -22,6 +22,8 @@ interface DataTableProps<T> {
   enableInfiniteScroll?: boolean;
   pageSize?: number;
   initialPageSize?: number;
+  loading?: boolean;
+  shimmerRows?: number;
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -40,6 +42,8 @@ function DataTable<T extends Record<string, any>>({
   enableInfiniteScroll = true,
   pageSize = 40,
   initialPageSize,
+  loading = false,
+  shimmerRows = 6,
 }: DataTableProps<T>) {
   const { t } = useTranslation();
   const resolvedEmptyMessage = emptyMessage ?? t('common.noData');
@@ -145,7 +149,28 @@ function DataTable<T extends Record<string, any>>({
           </tr>
         </thead>
         <tbody>
-          {sortedData.length === 0 ? (
+          {loading ? (
+            Array.from({ length: shimmerRows }).map((_, rIdx) => {
+              const widths = ['65%', '85%', '50%', '75%', '40%', '60%'];
+              return (
+                <tr key={`shimmer-row-${rIdx}`} className="border-b border-gray-100 last:border-b-0">
+                  {columns.map((col, cIdx) => {
+                    const w = widths[(rIdx + cIdx) % widths.length];
+                    return (
+                      <td key={`shimmer-cell-${cIdx}`} className={`px-4 py-3.5 ${alignClass(col.align)}`}>
+                        <div
+                          className={`shimmer h-3.5 rounded ${
+                            col.align === 'right' ? 'ml-auto' : col.align === 'center' ? 'mx-auto' : ''
+                          }`}
+                          style={{ width: col.width && !col.width.includes('%') ? '80%' : w, maxWidth: '100%' }}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })
+          ) : sortedData.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="px-4 py-12 text-center">
                 <div className="flex flex-col items-center gap-2 text-gray-400">

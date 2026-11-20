@@ -528,17 +528,14 @@ const Customers: React.FC = () => {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-3 pb-3">
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 size={24} className="animate-spin text-blue-600" />
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="flex flex-col items-center justify-center py-16 text-red-500">
             <AlertCircle size={24} className="mb-2" />
             <p className="text-xs">{error}</p>
           </div>
         ) : (
           <DataTable
+            loading={loading}
             columns={[
               { header: t('customers.phone'), accessor: 'phone', render: (item) => item.phone || '-' },
               { header: t('customers.loyaltyPoints'), accessor: 'loyaltyPoints', align: 'right' },

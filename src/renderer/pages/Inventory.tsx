@@ -274,74 +274,108 @@ const Inventory: React.FC = () => {
 
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto p-3 bg-gray-50/50">
-        {activeTab === 'stock' && (
-          <StockOverviewTab
-            items={filteredItems}
-            allItems={inv.items}
-            categories={categories}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            categoryFilter={categoryFilter}
-            onCategoryFilterChange={setCategoryFilter}
-            stockFilter={stockFilter}
-            onStockFilterChange={setStockFilter}
-            onAddItem={() => setShowAddItem(true)}
-            onEditItem={setEditingItem}
-            onDeleteItem={(item) => inv.deleteItem(item.id, { isActive: false })}
-            onAdjustStock={() => setShowAdjustStock(true)}
-          />
-        )}
+        {inv.loading ? (
+          <div className="space-y-3">
+            {/* Filter toolbar shimmer */}
+            <div className="flex items-center justify-between gap-3 bg-white p-2.5 rounded-lg border border-gray-200">
+              <div className="shimmer h-7 w-64 rounded-md" />
+              <div className="flex items-center gap-2">
+                <div className="shimmer h-7 w-28 rounded-md" />
+                <div className="shimmer h-7 w-24 rounded-full" />
+              </div>
+            </div>
 
-        {activeTab === 'purchaseOrders' && (
-          <PurchaseOrdersTab
-            purchaseOrders={inv.purchaseOrders}
-            suppliers={inv.suppliers}
-            items={inv.items}
-            onCreate={() => setShowCreatePO(true)}
-            onView={setViewingPO}
-            onReceive={setReceivingPO}
-          />
-        )}
+            {/* Table Shimmer */}
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-xs">
+              <div className="p-3 border-b border-gray-100 flex items-center justify-between">
+                <div className="shimmer h-4 w-32 rounded" />
+                <div className="shimmer h-4 w-20 rounded" />
+              </div>
+              <div className="divide-y divide-gray-100">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={`inv-shimmer-${i}`} className="p-3.5 flex items-center justify-between gap-4">
+                    <div className="shimmer h-4 w-36 rounded" />
+                    <div className="shimmer h-4 w-20 rounded" />
+                    <div className="shimmer h-4 w-24 rounded" />
+                    <div className="shimmer h-4 w-16 rounded" />
+                    <div className="shimmer h-6 w-20 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'stock' && (
+              <StockOverviewTab
+                items={filteredItems}
+                allItems={inv.items}
+                categories={categories}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                categoryFilter={categoryFilter}
+                onCategoryFilterChange={setCategoryFilter}
+                stockFilter={stockFilter}
+                onStockFilterChange={setStockFilter}
+                onAddItem={() => setShowAddItem(true)}
+                onEditItem={setEditingItem}
+                onDeleteItem={(item) => inv.deleteItem(item.id, { isActive: false })}
+                onAdjustStock={() => setShowAdjustStock(true)}
+              />
+            )}
 
-        {activeTab === 'suppliers' && (
-          <SuppliersTab
-            suppliers={inv.suppliers}
-            onAdd={() => setShowAddSupplier(true)}
-            onEdit={setEditingSupplier}
-          />
-        )}
+            {activeTab === 'purchaseOrders' && (
+              <PurchaseOrdersTab
+                purchaseOrders={inv.purchaseOrders}
+                suppliers={inv.suppliers}
+                items={inv.items}
+                onCreate={() => setShowCreatePO(true)}
+                onView={setViewingPO}
+                onReceive={setReceivingPO}
+              />
+            )}
 
-        {activeTab === 'recipes' && (
-          <RecipesTab
-            items={menu.items}
-            menuItems={menu.items}
-            inventoryItems={inv.items}
-            selectedMenuItemId={selectedMenuItemId}
-            recipes={recipes}
-            onSelectMenuItem={handleSelectMenuItem}
-            onAddRecipe={() => setShowAddRecipe(true)}
-            onDeleteRecipe={async (r) => {
-              const id = typeof r === 'number' ? r : r.id;
-              await inv.deleteRecipe(id);
-              setRecipes((prev) => prev.filter((rec) => rec.id !== id));
-              await loadRecipes();
-            }}
-          />
-        )}
+            {activeTab === 'suppliers' && (
+              <SuppliersTab
+                suppliers={inv.suppliers}
+                onAdd={() => setShowAddSupplier(true)}
+                onEdit={setEditingSupplier}
+              />
+            )}
 
-        {activeTab === 'consumption' && (
-          <ConsumptionTab
-            getItemStockConsumption={inv.getItemStockConsumption}
-            inventoryItems={inv.items}
-          />
-        )}
+            {activeTab === 'recipes' && (
+              <RecipesTab
+                items={menu.items}
+                menuItems={menu.items}
+                inventoryItems={inv.items}
+                selectedMenuItemId={selectedMenuItemId}
+                recipes={recipes}
+                onSelectMenuItem={handleSelectMenuItem}
+                onAddRecipe={() => setShowAddRecipe(true)}
+                onDeleteRecipe={async (r) => {
+                  const id = typeof r === 'number' ? r : r.id;
+                  await inv.deleteRecipe(id);
+                  setRecipes((prev) => prev.filter((rec) => rec.id !== id));
+                  await loadRecipes();
+                }}
+              />
+            )}
 
-        {activeTab === 'wastage' && (
-          <WastageTab
-            history={wastageHistory}
-            items={inv.items}
-            onLogWastage={() => setShowWastageLog(true)}
-          />
+            {activeTab === 'consumption' && (
+              <ConsumptionTab
+                getItemStockConsumption={inv.getItemStockConsumption}
+                inventoryItems={inv.items}
+              />
+            )}
+
+            {activeTab === 'wastage' && (
+              <WastageTab
+                history={wastageHistory}
+                items={inv.items}
+                onLogWastage={() => setShowWastageLog(true)}
+              />
+            )}
+          </>
         )}
       </div>
 
@@ -1581,8 +1615,14 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
 
       {/* Main Content Area */}
       {loading ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-xs text-gray-500">
-          Loading consumption data...
+        <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-3 shadow-xs">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={`cons-shimmer-${i}`} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+              <div className="shimmer h-4 w-40 rounded" />
+              <div className="shimmer h-4 w-24 rounded" />
+              <div className="shimmer h-4 w-20 rounded" />
+            </div>
+          ))}
         </div>
       ) : filteredRecords.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">

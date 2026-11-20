@@ -1346,7 +1346,25 @@ const Reports: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((order) => (
+              {orderHistoryLoading && orderHistory.length === 0 ? (
+                Array.from({ length: 8 }).map((_, rIdx) => (
+                  <tr key={`oh-shimmer-${rIdx}`} className="border-b border-gray-100">
+                    <td className="px-3 py-3 w-8"><div className="shimmer h-4 w-4 rounded" /></td>
+                    <td className="px-3 py-3"><div className="shimmer h-4 w-28 rounded" /></td>
+                    <td className="px-3 py-3"><div className="shimmer h-4 w-20 rounded" /></td>
+                    <td className="px-3 py-3"><div className="shimmer h-4 w-16 rounded" /></td>
+                    <td className="px-3 py-3"><div className="shimmer h-4 w-20 rounded" /></td>
+                    <td className="px-3 py-3"><div className="shimmer h-4 w-14 rounded" /></td>
+                    <td className="px-3 py-3"><div className="shimmer h-4 w-24 rounded" /></td>
+                    <td className="px-3 py-3 text-center"><div className="shimmer h-5 w-6 rounded-full mx-auto" /></td>
+                    <td className="px-3 py-3 text-right"><div className="shimmer h-4 w-16 ml-auto rounded" /></td>
+                    <td className="px-3 py-3 text-right"><div className="shimmer h-4 w-16 ml-auto rounded" /></td>
+                    <td className="px-3 py-3 text-center"><div className="shimmer h-4 w-16 mx-auto rounded-full" /></td>
+                    <td className="px-3 py-3 text-center"><div className="shimmer h-4 w-12 mx-auto rounded" /></td>
+                  </tr>
+                ))
+              ) : (
+                sorted.map((order) => (
                 <React.Fragment key={order.id}>
                 <tr
                   className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${expandedOrderId === order.id ? 'bg-blue-50' : ''} ${selectedOrderIds.has(order.id) ? 'bg-red-50' : ''}`}
@@ -1509,8 +1527,9 @@ const Reports: React.FC = () => {
                         </div>
                       )}
                       {expandedOrderLoading ? (
-                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                          <Loader2 size={14} className="animate-spin" /> {t('reports.loadingItems')}
+                        <div className="space-y-2 py-1">
+                          <div className="shimmer h-3.5 w-48 rounded" />
+                          <div className="shimmer h-3.5 w-64 rounded" />
                         </div>
                       ) : expandedOrderItems.length === 0 ? (
                         order.status === 'merged' ? (
@@ -1622,7 +1641,7 @@ const Reports: React.FC = () => {
                   </tr>
                 )}
                 </React.Fragment>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>
@@ -1657,8 +1676,23 @@ const Reports: React.FC = () => {
   const renderTableWise = () => {
     if (tableWiseLoading) {
       return (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 size={32} className="animate-spin text-blue-600" />
+        <div className="space-y-4">
+          <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-200">
+            <div className="shimmer h-7 w-48 rounded" />
+            <div className="shimmer h-7 w-28 rounded-full" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={`tw-shimmer-${i}`} className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs space-y-3">
+                <div className="flex justify-between">
+                  <div className="shimmer h-4 w-20 rounded" />
+                  <div className="shimmer h-4 w-12 rounded" />
+                </div>
+                <div className="shimmer h-6 w-24 rounded" />
+                <div className="shimmer h-3 w-32 rounded" />
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
@@ -2296,8 +2330,56 @@ const Reports: React.FC = () => {
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
         {reports.loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 size={32} className="animate-spin text-blue-600" />
+          <div className="space-y-4">
+            {/* KPI Summary Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={`kpi-shimmer-${i}`} className="bg-white rounded-xl border border-gray-200 p-4 shadow-xs">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="shimmer h-3.5 w-24 rounded" />
+                    <div className="shimmer h-7 w-7 rounded-lg" />
+                  </div>
+                  <div className="shimmer h-7 w-32 rounded mb-2" />
+                  <div className="shimmer h-3 w-20 rounded" />
+                </div>
+              ))}
+            </div>
+
+            {/* Charts & Breakdown Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="shimmer h-4 w-36 rounded" />
+                  <div className="shimmer h-7 w-24 rounded-full" />
+                </div>
+                <div className="shimmer h-56 w-full rounded-lg" />
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
+                <div className="shimmer h-4 w-28 rounded mb-4" />
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={`list-shimmer-${i}`} className="flex items-center justify-between py-1 border-b border-gray-100 last:border-b-0">
+                      <div className="shimmer h-3.5 w-32 rounded" />
+                      <div className="shimmer h-3.5 w-16 rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Data Table Shimmer */}
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-xs">
+              <div className="flex items-center justify-between mb-4">
+                <div className="shimmer h-4 w-32 rounded" />
+                <div className="shimmer h-7 w-28 rounded-md" />
+              </div>
+              <div className="space-y-3">
+                <div className="shimmer h-8 w-full rounded" />
+                <div className="shimmer h-7 w-full rounded" />
+                <div className="shimmer h-7 w-full rounded" />
+                <div className="shimmer h-7 w-full rounded" />
+              </div>
+            </div>
           </div>
         ) : reports.error ? (
           <div className="flex flex-col items-center justify-center py-20 text-red-500">

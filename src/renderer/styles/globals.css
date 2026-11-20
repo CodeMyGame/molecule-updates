@@ -887,6 +887,16 @@
   background-size: 800px 100%;
 }
 
+[data-theme="oled"] .shimmer {
+  background: linear-gradient(
+    90deg,
+    #151518 25%,
+    #2a2a30 37%,
+    #151518 63%
+  );
+  background-size: 800px 100%;
+}
+
 /* ── Custom Visible Gold Scrollbars for Interactive Preview ── */
 .preview-scroll {
   scrollbar-width: thin;

@@ -698,8 +698,59 @@ const MenuManagement: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col h-full bg-white">
+        {/* Header Shimmer */}
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white">
+          <div className="flex items-center gap-1.5">
+            <Package size={15} className="text-blue-600 shrink-0 opacity-40" />
+            <div className="shimmer h-4 w-28 rounded" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="shimmer h-7 w-20 rounded-full" />
+            <div className="shimmer h-7 w-24 rounded-full" />
+            <div className="shimmer h-7 w-20 rounded-full" />
+          </div>
+        </div>
+
+        {/* Category Pills Shimmer */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50/80 border-b border-gray-200 overflow-x-hidden">
+          <div className="shimmer h-6 w-16 rounded-full" />
+          <div className="shimmer h-6 w-20 rounded-full" />
+          <div className="shimmer h-6 w-24 rounded-full" />
+          <div className="shimmer h-6 w-16 rounded-full" />
+          <div className="shimmer h-6 w-22 rounded-full" />
+          <div className="shimmer h-6 w-28 rounded-full" />
+        </div>
+
+        {/* Search / Subbar Shimmer */}
+        <div className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-gray-200">
+          <div className="shimmer h-7 w-56 rounded-md" />
+          <div className="shimmer h-4 w-20 rounded" />
+        </div>
+
+        {/* Items Grid Shimmer */}
+        <div className="flex-1 p-3 overflow-y-auto bg-gray-50/50">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+            {Array.from({ length: 18 }).map((_, i) => (
+              <div
+                key={`menu-shimmer-${i}`}
+                className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-xs p-3 flex flex-col justify-between min-h-[140px]"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-1 mb-2">
+                    <div className="shimmer h-3.5 w-3/4 rounded" />
+                    <div className="shimmer h-3.5 w-3.5 rounded-full shrink-0" />
+                  </div>
+                  <div className="shimmer h-3 w-1/2 rounded mb-3" />
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <div className="shimmer h-4 w-12 rounded" />
+                  <div className="shimmer h-6 w-14 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
