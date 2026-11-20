@@ -51,12 +51,12 @@ const StationFilter: React.FC<StationFilterProps> = ({
             type="button"
             onClick={() => onSelect(station.key)}
             className={`
-              relative flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm
+              relative flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold text-sm
               transition-all duration-150 select-none
               ${
                 isActive
-                  ? 'bg-white text-gray-900 shadow-lg shadow-white/20'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                  : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white border border-transparent dark:border-slate-700/60'
               }
             `}
           >
@@ -65,12 +65,12 @@ const StationFilter: React.FC<StationFilterProps> = ({
             {count > 0 && (
               <span
                 className={`
-                  inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5
+                  inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5
                   rounded-full text-xs font-bold
                   ${
                     isActive
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-600 text-gray-200'
+                      ? 'bg-white/25 text-white'
+                      : 'bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200'
                   }
                 `}
               >

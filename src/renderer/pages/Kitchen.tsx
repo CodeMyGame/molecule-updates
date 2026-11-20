@@ -30,7 +30,7 @@ const KitchenClock: React.FC = React.memo(() => {
 
   return (
     <div className="text-right">
-      <div className="text-2xl font-mono font-bold text-white tabular-nums">
+      <div className="text-2xl font-mono font-bold text-gray-900 dark:text-white tabular-nums">
         {timeString}
       </div>
     </div>
@@ -175,12 +175,12 @@ const KitchenDisplay: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-950 text-white overflow-hidden">
+    <div className="h-full flex flex-col bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-white overflow-hidden">
       {/* Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-gray-900 border-b border-gray-800">
+      <header className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-2xs">
         <div className="flex items-center gap-3">
-          <MonitorPlay size={28} className="text-blue-400" />
-          <h1 className="text-xl font-bold tracking-tight">{t('kitchen.title')}</h1>
+          <MonitorPlay size={28} className="text-blue-600 dark:text-blue-400" />
+          <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">{t('kitchen.title')}</h1>
         </div>
 
         <StationFilter
@@ -189,10 +189,10 @@ const KitchenDisplay: React.FC = () => {
           counts={stationCounts}
         />
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-400 hover:text-white"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white"
             title={soundEnabled ? t('kitchen.muteSound') : t('kitchen.unmuteSound')}
           >
             {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
@@ -200,7 +200,7 @@ const KitchenDisplay: React.FC = () => {
           <button
             onClick={fetchKOTs}
             disabled={loading}
-            className="p-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-400 hover:text-white disabled:opacity-50"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white disabled:opacity-50"
             title={t('common.refresh')}
           >
             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
@@ -216,10 +216,10 @@ const KitchenDisplay: React.FC = () => {
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={`kot-shimmer-${i}`}
-                className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col justify-between min-h-[220px]"
+                className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-4 flex flex-col justify-between min-h-[220px] shadow-xs"
               >
                 <div>
-                  <div className="flex items-center justify-between pb-3 border-b border-gray-800">
+                  <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-800">
                     <div className="shimmer h-5 w-20 rounded" />
                     <div className="shimmer h-5 w-16 rounded-full" />
                   </div>
@@ -233,7 +233,7 @@ const KitchenDisplay: React.FC = () => {
                     <div className="shimmer h-3.5 w-2/3 rounded" />
                   </div>
                 </div>
-                <div className="mt-4 pt-3 border-t border-gray-800 flex gap-2">
+                <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800 flex gap-2">
                   <div className="shimmer h-9 w-full rounded-lg" />
                   <div className="shimmer h-9 w-12 rounded-lg" />
                 </div>
@@ -241,10 +241,10 @@ const KitchenDisplay: React.FC = () => {
             ))}
           </div>
         ) : filteredKOTs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-500">
-            <MonitorPlay size={64} className="mb-4 opacity-30" />
-            <p className="text-xl font-medium">{t('kitchen.noActiveOrders')}</p>
-            <p className="text-sm mt-1">{t('kitchen.noActiveOrdersDesc')}</p>
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500">
+            <MonitorPlay size={64} className="mb-4 opacity-40" />
+            <p className="text-xl font-medium text-gray-700 dark:text-slate-300">{t('kitchen.noActiveOrders')}</p>
+            <p className="text-sm mt-1 text-gray-500 dark:text-slate-400">{t('kitchen.noActiveOrdersDesc')}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-auto">
@@ -261,42 +261,42 @@ const KitchenDisplay: React.FC = () => {
 
       {/* Completed KOTs (collapsible) */}
       {completedKOTs.length > 0 && (
-        <div className="flex-shrink-0 border-t border-gray-800">
+        <div className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="w-full flex items-center justify-between px-6 py-2.5 bg-gray-900 hover:bg-gray-800 transition-colors text-sm"
+            className="w-full flex items-center justify-between px-6 py-2.5 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm"
           >
-            <span className="text-gray-400 font-medium">
+            <span className="text-gray-600 dark:text-slate-400 font-medium">
               {t('kitchen.recentlyCompleted', { count: completedKOTs.length })}
             </span>
             {showCompleted ? (
-              <ChevronUp size={18} className="text-gray-500" />
+              <ChevronUp size={18} className="text-gray-400 dark:text-slate-500" />
             ) : (
-              <ChevronDown size={18} className="text-gray-500" />
+              <ChevronDown size={18} className="text-gray-400 dark:text-slate-500" />
             )}
           </button>
 
           {showCompleted && (
-            <div className="bg-gray-900/50 px-4 py-3 max-h-60 overflow-y-auto">
+            <div className="bg-gray-50 dark:bg-slate-900/60 px-4 py-3 max-h-60 overflow-y-auto border-t border-gray-100 dark:border-slate-800/80">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {completedKOTs.map((kot) => (
                   <div
                     key={kot.id}
-                    className="bg-gray-800/60 rounded-lg px-3 py-2 border border-gray-700/40"
+                    className="bg-white dark:bg-slate-800/80 rounded-lg px-3 py-2 border border-gray-200 dark:border-slate-700/60 shadow-xs"
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-white font-bold text-sm">
+                      <span className="text-gray-900 dark:text-white font-bold text-sm">
                         #{kot.kotNumber}
                       </span>
-                      <span className="text-xs bg-green-800 text-green-300 px-1.5 py-0.5 rounded-full font-medium">
+                      <span className="text-xs bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-1.5 py-0.5 rounded-full font-medium">
                         {t('kitchen.served')}
                       </span>
                     </div>
-                    <div className="text-gray-400 text-xs">
+                    <div className="text-gray-600 dark:text-slate-400 text-xs">
                       {t('kitchen.orderNumberPrefix', { number: kot.orderNumber })}
                       {kot.tableName && ` - ${kot.tableName}`}
                     </div>
-                    <div className="text-gray-500 text-xs mt-0.5">
+                    <div className="text-gray-400 dark:text-slate-500 text-xs mt-0.5">
                       {t('kitchen.itemCount', { count: kot.items.length })}
                     </div>
                   </div>

@@ -31,22 +31,22 @@ function getUrgencyColor(minutes: number): {
 } {
   if (minutes < 10) {
     return {
-      border: 'border-green-500',
-      timer: 'text-green-400',
-      bg: 'bg-green-500/10',
+      border: 'border-emerald-500',
+      timer: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-500/10',
     };
   }
   if (minutes < 20) {
     return {
-      border: 'border-yellow-500',
-      timer: 'text-yellow-400',
-      bg: 'bg-yellow-500/10',
+      border: 'border-amber-500',
+      timer: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-500/10',
     };
   }
   return {
-    border: 'border-red-500',
-    timer: 'text-red-400',
-    bg: 'bg-red-500/10',
+    border: 'border-rose-500',
+    timer: 'text-rose-600 dark:text-rose-400',
+    bg: 'bg-rose-500/10',
   };
 }
 
@@ -143,15 +143,15 @@ const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
   return (
     <div
       className={`
-        rounded-xl border-2 ${urgency.border} bg-gray-900 overflow-hidden
-        transition-all duration-300
+        rounded-xl border-2 ${urgency.border} bg-white dark:bg-slate-900 overflow-hidden
+        transition-all duration-300 shadow-xs hover:shadow-md
         ${isNew ? 'animate-pulse-subtle shadow-lg shadow-blue-500/20' : ''}
       `}
     >
-      <div className="flex items-center justify-between px-4 py-3 bg-gray-800/80">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-white font-bold text-lg">
-            <Hash size={16} className="text-gray-400" />
+      <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50/90 dark:bg-slate-800/80 border-b border-gray-100 dark:border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1 text-gray-900 dark:text-white font-bold text-base tracking-tight">
+            <Hash size={15} className="text-gray-400 dark:text-slate-500" />
             {kot.kotNumber}
           </div>
           <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusStyle.badge}`}>
@@ -160,7 +160,7 @@ const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
         </div>
         <div className="flex items-center gap-2">
           {prepTime !== null && (
-            <span className="text-xs bg-green-800 text-green-300 px-1.5 py-0.5 rounded font-medium">
+            <span className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-1.5 py-0.5 rounded font-medium">
               {t('kitchen.kotPrepPrefix', { time: formatElapsed(prepTime) })}
             </span>
           )}
@@ -171,16 +171,16 @@ const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3 px-4 py-2 border-b border-gray-700/50 text-sm">
-        <span className="flex items-center gap-1 text-gray-400">
+      <div className="flex items-center gap-3 px-4 py-1.5 border-b border-gray-100 dark:border-slate-800 text-xs">
+        <span className="flex items-center gap-1 text-gray-500 dark:text-slate-400">
           {getOrderTypeIcon(kot.orderType)}
-          <span className="text-gray-300">#{kot.orderNumber}</span>
+          <span className="text-gray-700 dark:text-slate-300 font-mono font-medium">#{kot.orderNumber}</span>
         </span>
         {kot.tableName && (
-          <span className="text-gray-300 font-medium">{kot.tableName}</span>
+          <span className="text-gray-900 dark:text-slate-200 font-bold">{kot.tableName}</span>
         )}
         {stationLabel && (
-          <span className="text-gray-500 text-xs capitalize">{stationLabel}</span>
+          <span className="text-gray-400 dark:text-slate-500 capitalize ml-auto">{stationLabel}</span>
         )}
       </div>
 
@@ -191,29 +191,29 @@ const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
             className={`
               flex items-start gap-3
               ${item.isCancelled ? 'opacity-40 line-through' : ''}
-              ${item.isNew ? 'bg-blue-500/10 -mx-2 px-2 py-1 rounded' : ''}
+              ${item.isNew ? 'bg-blue-50 dark:bg-blue-500/10 -mx-2 px-2 py-1 rounded' : ''}
             `}
           >
             <span
               className={`
                 flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center
                 font-bold text-sm
-                ${item.isCancelled ? 'bg-red-900/50 text-red-400' : 'bg-gray-700 text-white'}
+                ${item.isCancelled ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400' : 'bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-100'}
               `}
             >
               {item.quantity}
             </span>
             <div className="flex-1 min-w-0">
-              <span className="text-white font-medium text-sm block truncate">
+              <span className="text-gray-900 dark:text-white font-medium text-sm block truncate">
                 {item.name}
               </span>
               {item.addons && item.addons.length > 0 && (
-                <span className="text-cyan-400 text-xs block mt-0.5">
+                <span className="text-teal-600 dark:text-cyan-400 text-xs block mt-0.5 font-medium">
                   + {item.addons.join(', ')}
                 </span>
               )}
               {item.notes && (
-                <span className="text-yellow-400 text-xs block mt-0.5">
+                <span className="text-amber-600 dark:text-amber-400 text-xs block mt-0.5 font-medium">
                   * {item.notes}
                 </span>
               )}
@@ -227,14 +227,14 @@ const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
         ))}
       </div>
 
-      <div className="px-4 py-3 border-t border-gray-700/50 flex gap-2">
+      <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex gap-2">
         {(kot.status === KOTStatus.PENDING || kot.status === KOTStatus.SENT) && (
           <button
             type="button"
             onClick={handleAccept}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg
               bg-orange-500 hover:bg-orange-600 active:bg-orange-700
-              text-white font-bold text-sm transition-colors tap-target"
+              text-white font-bold text-sm transition-colors tap-target shadow-xs"
           >
             <PlayCircle size={18} />
             {t('kitchen.kotAccept')}
@@ -245,8 +245,8 @@ const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
             type="button"
             onClick={handleReady}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg
-              bg-green-600 hover:bg-green-700 active:bg-green-800
-              text-white font-bold text-sm transition-colors tap-target"
+              bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800
+              text-white font-bold text-sm transition-colors tap-target shadow-xs"
           >
             <CheckCircle2 size={18} />
             {t('kitchen.kotReadyButton')}
@@ -258,7 +258,7 @@ const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
             onClick={handleServed}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg
               bg-blue-600 hover:bg-blue-700 active:bg-blue-800
-              text-white font-bold text-sm transition-colors tap-target"
+              text-white font-bold text-sm transition-colors tap-target shadow-xs"
           >
             <CheckCircle2 size={18} />
             {t('kitchen.kotServedButton')}
