@@ -84,6 +84,61 @@ const MenuGrid: React.FC<MenuGridProps> = ({
   const [editAddonId, setEditAddonId] = useState<number | null>(null);
   const [editAddonForm, setEditAddonForm] = useState({ name: '', price: '' });
 
+  // Category sidebar resizable width (persisted in localStorage)
+  const [categorySidebarWidth, setCategorySidebarWidth] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('billing.categorySidebarWidth');
+      if (saved) {
+        const val = parseInt(saved, 10);
+        if (!isNaN(val) && val >= 80 && val <= 360) return val;
+      }
+    } catch { /* ignore */ }
+    return compact ? 120 : 144;
+  });
+
+  const onCategoryResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = categorySidebarWidth;
+
+    let animId: number | null = null;
+    let currentX = startX;
+
+    const onMouseMove = (ev: MouseEvent) => {
+      currentX = ev.clientX;
+      if (animId === null) {
+        animId = requestAnimationFrame(() => {
+          animId = null;
+          const delta = currentX - startX;
+          const newWidth = Math.max(80, Math.min(360, startWidth + delta));
+          setCategorySidebarWidth(newWidth);
+        });
+      }
+    };
+
+    const onMouseUp = () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      setCategorySidebarWidth((finalW) => {
+        try {
+          localStorage.setItem('billing.categorySidebarWidth', String(finalW));
+        } catch { /* ignore */ }
+        return finalW;
+      });
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [categorySidebarWidth]);
+
   const handleSaveVariationEdit = async (variationId: number) => {
     if (!variationModal || !editVariationForm.name.trim() || !editVariationForm.price) return;
     try {
@@ -512,10 +567,13 @@ const MenuGrid: React.FC<MenuGridProps> = ({
   }, []);
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full relative">
       {/* Category sidebar */}
-      <div className={`flex-shrink-0 border-r border-gray-200 bg-gray-50 overflow-y-auto scrollbar-thin
-        ${compact ? 'w-28 py-1' : 'w-36 py-2'}`}>
+      <div
+        style={{ width: `${categorySidebarWidth}px` }}
+        className={`flex-shrink-0 border-r border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 overflow-y-auto scrollbar-thin select-none
+          ${compact ? 'py-1' : 'py-2'}`}
+      >
         <div className="flex flex-col gap-1 px-1.5">
           {loading ? (
             <>
@@ -539,7 +597,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
               ${
                 selectedCategoryId === null && !showTopSelling && !showFavorites
                   ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-700 hover:bg-gray-200'
+                  : 'text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800'
               }`}
           >
             {t('menuGrid.all')}
@@ -552,11 +610,11 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                 ${
                   showFavorites
                     ? 'bg-amber-500 text-white shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-200'
+                    : 'text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800'
                 }`}
             >
               <Star size={compact ? 12 : 14} />
-              {t('menuEdit.favorites')}
+              <span className="truncate">{t('menuEdit.favorites')}</span>
             </button>
           )}
           {topSellingIds.length > 0 && (
@@ -567,11 +625,11 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                 ${
                   showTopSelling
                     ? 'bg-orange-500 text-white shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-200'
+                    : 'text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800'
                 }`}
             >
               <TrendingUp size={compact ? 12 : 14} />
-              {t('menuGrid.top10')}
+              <span className="truncate">{t('menuGrid.top10')}</span>
             </button>
           )}
           {categories.map((cat, index) => (
@@ -584,17 +642,17 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                 ${
                   selectedCategoryId === cat.id && !showTopSelling && !showFavorites
                     ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-200'
+                    : 'text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800'
                 }`}
               title={index < 12 ? `F${index + 1}` : undefined}
             >
-                {cat.name}
+                <span className="break-words leading-tight block">{cat.name}</span>
             </button>
           ))}
           {/* Add category button */}
           <button
             onClick={() => setShowAddCategoryDialog(true)}
-            className={`group w-full flex items-center gap-1.5 rounded-lg font-medium transition-colors text-gray-400 hover:text-blue-600 hover:bg-blue-50 border-2 border-dashed border-gray-200 hover:border-blue-300 justify-center
+            className={`group w-full flex items-center gap-1.5 rounded-lg font-medium transition-colors text-gray-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 justify-center
               ${compact ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm'}`}
           >
             <Plus size={compact ? 12 : 14} />
@@ -603,6 +661,19 @@ const MenuGrid: React.FC<MenuGridProps> = ({
           </>
           )}
         </div>
+      </div>
+
+      {/* Category sidebar resize handle (VS Code style sash) */}
+      <div
+        className="group relative flex-shrink-0 w-2 -mx-[4px] cursor-col-resize z-10 flex items-center justify-center select-none"
+        onMouseDown={onCategoryResizeStart}
+        title={t('billing.resizeCategorySidebar', 'Drag to resize category section')}
+      >
+        {/* Sash hairline */}
+        <div className="w-[1px] h-full bg-gray-200 dark:bg-slate-800 group-hover:bg-blue-500 group-active:bg-blue-600 transition-colors" />
+
+        {/* VS Code micro grip indicator */}
+        <div className="absolute top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-gray-300 dark:bg-slate-600 group-hover:bg-blue-500 group-hover:h-8 transition-all" />
       </div>
 
       {/* Right content area */}
