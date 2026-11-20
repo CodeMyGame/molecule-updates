@@ -59,8 +59,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Clean working tree from any test/build artifacts before bumping version
+          git reset --hard HEAD
+          git clean -fd
+
           # Bump package.json version and create a commit + tag
           npm version ${{ github.event.inputs.bump_type }} -m "chore(release): bump version to %s"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           
           # Push the commit and the tag back to GitHub
           git push origin main

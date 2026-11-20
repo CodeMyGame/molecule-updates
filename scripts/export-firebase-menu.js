@@ -16,6 +16,7 @@ const path = require('path');
 
 const rootDir = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
+const isTestMode = args.includes('--test');
 let customSlug = null;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--slug' || args[i] === '-s' || args[i] === '--customer') {
@@ -165,12 +166,14 @@ const baseNameSlug = (payload.restaurant.name || 'one-bite')
   .replace(/[^a-z0-9_-]+/g, '-')
   .replace(/^-+|-+$/g, '') || 'one-bite';
 
-const outDirs = [
-  path.join(rootDir, 'out', 'renderer', 'menus'),
-  path.join(rootDir, 'public', 'menus'),
-  path.join(rootDir, 'src', 'renderer', 'public', 'menus'),
-  path.join(rootDir, 'web-dashboard', 'public', 'menus'),
-];
+const outDirs = isTestMode
+  ? [path.join(rootDir, 'out', 'renderer', 'menus')]
+  : [
+      path.join(rootDir, 'out', 'renderer', 'menus'),
+      path.join(rootDir, 'public', 'menus'),
+      path.join(rootDir, 'src', 'renderer', 'public', 'menus'),
+      path.join(rootDir, 'web-dashboard', 'public', 'menus'),
+    ];
 
 outDirs.forEach((d) => {
   fs.mkdirSync(d, { recursive: true });
@@ -187,17 +190,19 @@ outDirs.forEach((d) => {
 });
 
 // Copy standalone menu.html into out/renderer and public
-const menuHtmlSrc = path.join(rootDir, 'web-dashboard', 'public', 'menu.html');
-if (fs.existsSync(menuHtmlSrc)) {
-  [
-    path.join(rootDir, 'out', 'renderer', 'menu.html'),
-    path.join(rootDir, 'public', 'menu.html'),
-  ].forEach((targetPath) => {
-    try {
-      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-      fs.copyFileSync(menuHtmlSrc, targetPath);
-    } catch {}
-  });
+if (!isTestMode) {
+  const menuHtmlSrc = path.join(rootDir, 'web-dashboard', 'public', 'menu.html');
+  if (fs.existsSync(menuHtmlSrc)) {
+    [
+      path.join(rootDir, 'out', 'renderer', 'menu.html'),
+      path.join(rootDir, 'public', 'menu.html'),
+    ].forEach((targetPath) => {
+      try {
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        fs.copyFileSync(menuHtmlSrc, targetPath);
+      } catch {}
+    });
+  }
 }
 
 const cloudDomain = 'https://molecule-e2e95.web.app';

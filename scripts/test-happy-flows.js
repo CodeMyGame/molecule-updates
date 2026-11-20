@@ -2106,8 +2106,8 @@ suite('18. Customer QR Menu & Table Stand Card Generator', () => {
     const { execSync } = require('child_process');
     const customerSlug = 'one-bite';
 
-    // Execute exporter script
-    execSync(`node "${path.resolve(__dirname, 'export-firebase-menu.js')}" --slug ${customerSlug}`, {
+    // Execute exporter script in test mode (writes to out/renderer without dirtying tracked repo files)
+    execSync(`node "${path.resolve(__dirname, 'export-firebase-menu.js')}" --slug ${customerSlug} --test`, {
       cwd: path.resolve(__dirname, '..'),
       stdio: 'pipe',
     });
