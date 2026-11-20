@@ -105,13 +105,16 @@ export function calculateTotals(
   }
 
   let discountAmount = 0;
-  if (discount) {
+  if (discount && typeof discount.value === 'number' && !isNaN(discount.value)) {
     const discType = discount.type === 'percent' ? 'percentage' : discount.type;
     if (discType === 'percentage') {
-      discountAmount = Math.round((subtotal * discount.value) / 100);
+      const clampedPct = Math.max(0, Math.min(100, discount.value));
+      discountAmount = Math.round((subtotal * clampedPct) / 100);
     } else {
-      discountAmount = Math.min(discount.value, subtotal);
+      const clampedFlat = Math.max(0, Math.min(subtotal, discount.value));
+      discountAmount = Math.min(clampedFlat, subtotal);
     }
+    discountAmount = Math.max(0, Math.min(subtotal, discountAmount));
   }
 
   // Tax is calculated on post-discount amounts (proportional reduction per item)

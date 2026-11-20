@@ -1020,17 +1020,21 @@ export function applyDiscount(
       return;
     }
 
+    let sanitizedValue = Number(value) || 0;
     let discountAmount: number;
     if (type === 'percentage') {
-      discountAmount = Math.round(order.subtotal * value / 100);
+      sanitizedValue = Math.max(0, Math.min(100, sanitizedValue));
+      discountAmount = Math.round((order.subtotal * sanitizedValue) / 100);
     } else {
-      discountAmount = Math.min(value, order.subtotal);
+      sanitizedValue = Math.max(0, Math.min(order.subtotal, sanitizedValue));
+      discountAmount = Math.min(sanitizedValue, order.subtotal);
     }
+    discountAmount = Math.max(0, Math.min(order.subtotal, discountAmount));
 
     db.prepare(`
       UPDATE orders SET discount_type = ?, discount_value = ?, discount_amount = ?, discount_reason = ?, updated_at = datetime('now')
       WHERE id = ?
-    `).run(type, value, discountAmount, reason ?? null, orderId);
+    `).run(type, sanitizedValue, discountAmount, reason ?? null, orderId);
 
     recalculateOrderTotals(orderId);
   });
@@ -1286,10 +1290,13 @@ export function recalculateOrderTotals(orderId: number): void {
   const order = db.prepare('SELECT discount_type, discount_value FROM orders WHERE id = ?').get(orderId) as any;
   let discountAmount = 0;
   if (order?.discount_type === 'percentage') {
-    discountAmount = Math.round((subtotal * order.discount_value) / 100);
+    const val = Math.max(0, Math.min(100, Number(order.discount_value) || 0));
+    discountAmount = Math.round((subtotal * val) / 100);
   } else if (order?.discount_type === 'flat') {
-    discountAmount = Math.min(order.discount_value || 0, subtotal);
+    const val = Math.max(0, Math.min(subtotal, Number(order.discount_value) || 0));
+    discountAmount = Math.min(val, subtotal);
   }
+  discountAmount = Math.max(0, Math.min(subtotal, discountAmount));
 
   // Tax is calculated on post-discount amounts (proportional reduction per item)
   const discountRatio = subtotal > 0 ? discountAmount / subtotal : 0;

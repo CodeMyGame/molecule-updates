@@ -2,10 +2,24 @@ import { getDb } from '../db/connection';
 import type { DateRangeFilter, DailySalesReport, ItemSalesReport, CategorySalesReport, PaymentSummaryReport, CashFlowReport, GSTReport, BusyBucket, BusyHoursReport, VoidReportSummary, VoidItemReport, ItemStockConsumptionRecord } from '../../shared/types/report.types';
 import type { PaymentMode } from '../../shared/enums';
 
+function formatDateYMD(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 /** Normalize date range so endDate includes the full day (appends 23:59:59) */
-function normalizeDateRange(dateRange: DateRangeFilter): { startDate: string; endDate: string } {
-  const start = dateRange.startDate?.includes(' ') ? dateRange.startDate : `${dateRange.startDate} 00:00:00`;
-  const end = dateRange.endDate?.includes(' ') ? dateRange.endDate : `${dateRange.endDate} 23:59:59`;
+function normalizeDateRange(dateRange?: Partial<DateRangeFilter>): { startDate: string; endDate: string } {
+  const todayStr = formatDateYMD(new Date());
+  const rawStart = (dateRange?.startDate && typeof dateRange.startDate === 'string') ? dateRange.startDate.trim() : '';
+  const rawEnd = (dateRange?.endDate && typeof dateRange.endDate === 'string') ? dateRange.endDate.trim() : '';
+
+  const startVal = rawStart || todayStr;
+  const endVal = rawEnd || rawStart || todayStr;
+
+  const start = startVal.includes(' ') ? startVal : `${startVal} 00:00:00`;
+  const end = endVal.includes(' ') ? endVal : `${endVal} 23:59:59`;
   return { startDate: start, endDate: end };
 }
 
@@ -360,6 +374,7 @@ export function dayEndSummary(dateRange: DateRangeFilter): {
     FROM order_items oi
     JOIN orders o ON oi.order_id = o.id
     WHERE o.created_at >= ? AND o.created_at <= ? AND o.status = 'completed'
+      AND (oi.kot_status IS NULL OR oi.kot_status != 'cancelled')
     GROUP BY oi.name
     ORDER BY quantity DESC
     LIMIT 5

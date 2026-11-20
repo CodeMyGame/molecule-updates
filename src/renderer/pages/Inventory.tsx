@@ -145,7 +145,7 @@ const Inventory: React.FC = () => {
   // Fetch wastage when tab changes
   useEffect(() => {
     if (activeTab === 'wastage') {
-      inv.getTransactions().then((txns) => {
+      inv.getTransactions(undefined, undefined, 200).then((txns) => {
         setWastageHistory(
           txns.filter(
             (t) =>
@@ -481,7 +481,7 @@ const Inventory: React.FC = () => {
               notes,
             });
             setShowWastageLog(false);
-            const txns = await inv.getTransactions();
+            const txns = await inv.getTransactions(undefined, undefined, 200);
             setWastageHistory(
               txns.filter(
                 (t) =>

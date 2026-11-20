@@ -139,10 +139,13 @@ export function registerAllHandlers(): void {
   handle(MENU.getTopSellingIds, (limit: number) => {
     const db = getDb();
     const rows = db.prepare(`
-      SELECT menu_item_id, SUM(quantity) as total_qty
-      FROM order_items
-      WHERE menu_item_id IS NOT NULL
-      GROUP BY menu_item_id
+      SELECT oi.menu_item_id, SUM(oi.quantity) as total_qty
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      WHERE oi.menu_item_id IS NOT NULL
+        AND o.status NOT IN ('cancelled', 'void', 'merged')
+        AND (oi.kot_status IS NULL OR oi.kot_status != 'cancelled')
+      GROUP BY oi.menu_item_id
       ORDER BY total_qty DESC
       LIMIT ?
     `).all(limit) as any[];
@@ -310,8 +313,8 @@ export function registerAllHandlers(): void {
     return inventoryRepo.adjustStock(id, q, t, rt, ri, n);
   });
   handle(INVENTORY.getLowStock, () => inventoryRepo.getLowStock());
-  handle(INVENTORY.getTransactions, (itemId?: number, dateRange?) =>
-    inventoryRepo.getTransactions(itemId, dateRange)
+  handle(INVENTORY.getTransactions, (itemId?: number, dateRange?: any, limit?: number, offset?: number) =>
+    inventoryRepo.getTransactions(itemId, dateRange, limit, offset)
   );
   handle(INVENTORY.getConsumptionReport, (filters) =>
     reportsService.itemStockConsumption(filters)
@@ -370,7 +373,7 @@ export function registerAllHandlers(): void {
   // ---- Customers ----
   handle(CUSTOMERS.getAll, () => customerRepo.getAll());
   handle(CUSTOMERS.getById, (id: number) => customerRepo.getById(id));
-  handle(CUSTOMERS.search, (query: string) => customerRepo.search(query));
+  handle(CUSTOMERS.search, (query: string, limit?: number) => customerRepo.search(query, limit));
   handle(CUSTOMERS.create, (data) => customerRepo.create(data));
   handle(CUSTOMERS.update, (id: number, data) => customerRepo.update(id, data));
   handle(CUSTOMERS.getLoyalty, (customerId: number) => customerRepo.getLoyalty(customerId));

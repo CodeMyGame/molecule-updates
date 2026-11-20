@@ -97,7 +97,12 @@ interface UseInventoryReturn {
   deleteItem: (id: number, data: UpdateInventoryItemDTO) => Promise<void>;
   adjustStock: (id: number, adjustment: StockAdjustmentDTO) => Promise<void>;
   getLowStock: () => Promise<InventoryItem[]>;
-  getTransactions: (itemId?: number) => Promise<StockTransaction[]>;
+  getTransactions: (
+    itemId?: number,
+    dateRange?: { startDate?: string; endDate?: string },
+    limit?: number,
+    offset?: number
+  ) => Promise<StockTransaction[]>;
 
   // Suppliers
   fetchSuppliers: () => Promise<void>;
@@ -212,19 +217,27 @@ export function useInventory(): UseInventoryReturn {
     }
   }, []);
 
-  const getTransactions = useCallback(async (itemId?: number): Promise<StockTransaction[]> => {
-    try {
-      const result = await ipc<StockTransaction[]>(
-        window.electronAPI.inventory.getTransactions(itemId)
-      );
-      const txns = result ?? [];
-      setTransactions(txns);
-      return txns;
-    } catch (err: any) {
-      setError(err.message ?? 'Failed to get transactions');
-      return [];
-    }
-  }, []);
+  const getTransactions = useCallback(
+    async (
+      itemId?: number,
+      dateRange?: { startDate?: string; endDate?: string },
+      limit?: number,
+      offset?: number
+    ): Promise<StockTransaction[]> => {
+      try {
+        const result = await ipc<StockTransaction[]>(
+          (window.electronAPI.inventory.getTransactions as any)(itemId, dateRange, limit, offset)
+        );
+        const txns = result ?? [];
+        setTransactions(txns);
+        return txns;
+      } catch (err: any) {
+        setError(err.message ?? 'Failed to get transactions');
+        return [];
+      }
+    },
+    []
+  );
 
   // ---------- Suppliers ----------
 

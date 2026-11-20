@@ -376,10 +376,13 @@ async function handleWaiterApi(
     const limit = Number(reqUrl.searchParams.get('limit') ?? 10);
     const db = getDb();
     const rows = db.prepare(`
-      SELECT menu_item_id, SUM(quantity) as total_qty
-      FROM order_items
-      WHERE menu_item_id IS NOT NULL
-      GROUP BY menu_item_id
+      SELECT oi.menu_item_id, SUM(oi.quantity) as total_qty
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      WHERE oi.menu_item_id IS NOT NULL
+        AND o.status NOT IN ('cancelled', 'void', 'merged')
+        AND (oi.kot_status IS NULL OR oi.kot_status != 'cancelled')
+      GROUP BY oi.menu_item_id
       ORDER BY total_qty DESC
       LIMIT ?
     `).all(limit) as any[];

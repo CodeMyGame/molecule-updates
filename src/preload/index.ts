@@ -99,7 +99,8 @@ const api = {
     update: (id: number, data: any) => ipcRenderer.invoke('inventory:update', id, data),
     adjustStock: (id: number, adjustment: any) => ipcRenderer.invoke('inventory:adjustStock', id, adjustment),
     getLowStock: () => ipcRenderer.invoke('inventory:getLowStock'),
-    getTransactions: (itemId?: number) => ipcRenderer.invoke('inventory:getTransactions', itemId),
+    getTransactions: (itemId?: number, dateRange?: any, limit?: number, offset?: number) =>
+      ipcRenderer.invoke('inventory:getTransactions', itemId, dateRange, limit, offset),
     getConsumptionReport: (filters?: any) => ipcRenderer.invoke('inventory:getConsumptionReport', filters),
   },
 

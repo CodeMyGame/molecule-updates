@@ -176,8 +176,7 @@ function batchLoadKotItems(kotIds: number[]): Map<number, KOTItem[]> {
   const rows = db.prepare(`
     SELECT ki.*, oi.name as item_name, oi.notes, oi.quantity as oi_qty
     FROM kot_items ki
-    JOIN order_items oi ON ki.order_item_id = oi.id
-    JOIN kots k ON ki.kot_id = k.id AND oi.order_id = k.order_id
+    LEFT JOIN order_items oi ON ki.order_item_id = oi.id
     WHERE ki.kot_id IN (${placeholders})
     ORDER BY ki.id ASC
   `).all(...kotIds) as any[];

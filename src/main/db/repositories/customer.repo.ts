@@ -13,12 +13,15 @@ export function getById(id: number): Customer | undefined {
   return row ? mapCustomer(row) : undefined;
 }
 
-export function search(query: string): Customer[] {
+export function search(query: string, limit = 50): Customer[] {
+  const trimmed = query ? query.trim() : '';
+  if (!trimmed) return [];
   const db = getDb();
-  const pattern = `%${query}%`;
+  const pattern = `%${trimmed}%`;
+  const safeLimit = Math.max(1, Math.min(200, Number(limit) || 50));
   const rows = db.prepare(
-    'SELECT * FROM customers WHERE name LIKE ? OR phone LIKE ? ORDER BY name'
-  ).all(pattern, pattern) as any[];
+    'SELECT * FROM customers WHERE name LIKE ? OR phone LIKE ? ORDER BY name LIMIT ?'
+  ).all(pattern, pattern, safeLimit) as any[];
   return rows.map(mapCustomer);
 }
 

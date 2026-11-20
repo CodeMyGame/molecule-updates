@@ -29,8 +29,11 @@ export function create(orderId: number, payments: CreatePaymentDTO['payments'], 
   });
 
   const ids = createInTransaction();
+  if (ids.length === 0) return [];
+
+  const selectPayment = db.prepare('SELECT * FROM payments WHERE id = ?');
   return ids.map((id) => {
-    const row = db.prepare('SELECT * FROM payments WHERE id = ?').get(id) as any;
+    const row = selectPayment.get(id) as any;
     return mapPayment(row);
   });
 }

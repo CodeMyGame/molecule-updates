@@ -109,7 +109,9 @@ export function getLowStock(): InventoryItem[] {
 
 export function getTransactions(
   itemId?: number,
-  dateRange?: { startDate: string; endDate: string },
+  dateRange?: { startDate?: string; endDate?: string },
+  limit = 200,
+  offset = 0,
 ): StockTransaction[] {
   const db = getDb();
   const conditions: string[] = [];
@@ -128,13 +130,18 @@ export function getTransactions(
     params.push(dateRange.endDate);
   }
 
+  const safeLimit = Math.max(1, Math.min(1000, Number(limit) || 200));
+  const safeOffset = Math.max(0, Number(offset) || 0);
+  params.push(safeLimit, safeOffset);
+
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   const rows = db.prepare(`
     SELECT st.*, ii.name as item_name, ii.unit
     FROM stock_transactions st
     LEFT JOIN inventory_items ii ON st.inventory_item_id = ii.id
     ${where}
-    ORDER BY st.created_at DESC
+    ORDER BY st.created_at DESC, st.id DESC
+    LIMIT ? OFFSET ?
   `).all(...params) as any[];
 
   return rows.map((row) => ({
