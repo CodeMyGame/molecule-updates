@@ -1155,7 +1155,7 @@ const Settings: React.FC = () => {
             {isBill && settings.dynamic_qr_bill === 'true' && (
               <div className="mt-2 pt-2 border-t border-dashed border-gray-300 text-center">
                 <div
-                  className="w-16 h-16 mx-auto bg-white p-1 border rounded shadow-xs"
+                  className="w-16 h-16 mx-auto bg-white p-1 border rounded shadow-xs flex items-center justify-center overflow-hidden [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
                   dangerouslySetInnerHTML={{
                     __html: renderQrSvg(
                       generateUpiUrl({
@@ -1747,7 +1747,7 @@ const Settings: React.FC = () => {
                         }`}
                       >
                         <div
-                          className="w-14 h-14 mb-1.5 p-1 bg-white border border-gray-200 rounded shadow-xs flex items-center justify-center overflow-hidden"
+                          className="w-14 h-14 mb-1.5 p-1 bg-white border border-gray-200 rounded shadow-xs flex items-center justify-center overflow-hidden [&>svg]:w-full [&>svg]:h-full [&>svg]:block"
                           dangerouslySetInnerHTML={{ __html: renderQrSvg('upi://pay?pa=demo@upi', st.id, 1) }}
                         />
                         <span className="text-xs font-semibold leading-tight">{t(`settingsPage.qrStyles.${st.id}`, { defaultValue: st.name })}</span>

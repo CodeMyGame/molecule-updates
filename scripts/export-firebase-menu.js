@@ -166,14 +166,9 @@ const baseNameSlug = (payload.restaurant.name || 'one-bite')
   .replace(/[^a-z0-9_-]+/g, '-')
   .replace(/^-+|-+$/g, '') || 'one-bite';
 
-const outDirs = isTestMode
-  ? [path.join(rootDir, 'out', 'renderer', 'menus')]
-  : [
-      path.join(rootDir, 'out', 'renderer', 'menus'),
-      path.join(rootDir, 'public', 'menus'),
-      path.join(rootDir, 'src', 'renderer', 'public', 'menus'),
-      path.join(rootDir, 'web-dashboard', 'public', 'menus'),
-    ];
+const outDirs = [
+  path.join(rootDir, 'out', 'renderer', 'menus'),
+];
 
 outDirs.forEach((d) => {
   fs.mkdirSync(d, { recursive: true });
@@ -189,19 +184,15 @@ outDirs.forEach((d) => {
   fs.writeFileSync(path.join(d, 'one-bite.json'), JSON.stringify(payload, null, 2), 'utf-8');
 });
 
-// Copy standalone menu.html into out/renderer and public
+// Copy standalone menu.html into out/renderer
 if (!isTestMode) {
   const menuHtmlSrc = path.join(rootDir, 'web-dashboard', 'public', 'menu.html');
+  const targetPath = path.join(rootDir, 'out', 'renderer', 'menu.html');
   if (fs.existsSync(menuHtmlSrc)) {
-    [
-      path.join(rootDir, 'out', 'renderer', 'menu.html'),
-      path.join(rootDir, 'public', 'menu.html'),
-    ].forEach((targetPath) => {
-      try {
-        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-        fs.copyFileSync(menuHtmlSrc, targetPath);
-      } catch {}
-    });
+    try {
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.copyFileSync(menuHtmlSrc, targetPath);
+    } catch {}
   }
 }
 
