@@ -146,7 +146,13 @@ const Tables: React.FC = () => {
   }, [fetchSettings]);
   const CurrencyIcon = useLocaleCurrencyIcon();
   const navigate = useNavigate();
-  const billingStore = useBillingStore();
+  const loadOrderIntoCart = useBillingStore((s) => s.loadOrderIntoCart);
+  const setCustomer = useBillingStore((s) => s.setCustomer);
+  const resetForNewTable = useBillingStore((s) => s.resetForNewTable);
+  const resetForTakeaway = useBillingStore((s) => s.resetForTakeaway);
+  const setOrderType = useBillingStore((s) => s.setOrderType);
+  const setTable = useBillingStore((s) => s.setTable);
+  const setCurrentOrderId = useBillingStore((s) => s.setCurrentOrderId);
 
   const {
     floors,
@@ -486,8 +492,8 @@ const Tables: React.FC = () => {
             splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
             splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
           };
-          billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null, order.parcelNumber ?? (order as any).parcel_number ?? null);
-          billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
+          loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null, order.parcelNumber ?? (order as any).parcel_number ?? null);
+          setCustomer(order.customerId ?? (order as any).customer_id ?? null);
           navigate('/billing');
           return;
         }
@@ -495,9 +501,9 @@ const Tables: React.FC = () => {
         // fall through to simple navigation
       }
     }
-    billingStore.resetForNewTable(tableId);
+    resetForNewTable(tableId);
     navigate('/billing');
-  }, [billingStore, navigate, settings.default_tax_rate, i18n.language]);
+  }, [loadOrderIntoCart, setCustomer, resetForNewTable, navigate, settings.default_tax_rate, i18n.language]);
 
   const handleOpenParcelOrder = useCallback(
     async (orderId: number) => {
@@ -557,7 +563,7 @@ const Tables: React.FC = () => {
             splitFromOrderNumber: fullOrder.splitFromOrderNumber ?? (fullOrder as any).split_from_order_number ?? null,
           };
 
-          billingStore.loadOrderIntoCart(
+          loadOrderIntoCart(
             fullOrder.id,
             null,
             cartItems,
@@ -573,7 +579,7 @@ const Tables: React.FC = () => {
             fullOrder.parcelName ?? fullOrder.parcel_name ?? null,
             fullOrder.parcelNumber ?? (fullOrder as any).parcel_number ?? null
           );
-          billingStore.setCustomer(fullOrder.customerId ?? (fullOrder as any).customer_id ?? null);
+          setCustomer(fullOrder.customerId ?? (fullOrder as any).customer_id ?? null);
           navigate('/billing');
         }
       } catch (err) {
@@ -581,7 +587,7 @@ const Tables: React.FC = () => {
         toast.error('Failed to load order');
       }
     },
-    [billingStore, navigate, settings.default_tax_rate, i18n.language]
+    [loadOrderIntoCart, setCustomer, navigate, settings.default_tax_rate, i18n.language]
   );
 
   const handlePayParcelOrder = useCallback(
@@ -607,10 +613,10 @@ const Tables: React.FC = () => {
           nextNum = await ipc<number>(window.electronAPI.orders.getNextParcelNumber());
         }
       } catch {}
-      billingStore.resetForTakeaway(name, nextNum);
+      resetForTakeaway(name, nextNum);
       navigate('/billing');
     },
-    [billingStore, navigate]
+    [resetForTakeaway, navigate]
   );
 
   const handlePrintKotFromTable = useCallback(async () => {
@@ -686,16 +692,16 @@ const Tables: React.FC = () => {
           splitFromOrderId: order.splitFromOrderId ?? (order as any).split_from_order_id ?? null,
           splitFromOrderNumber: order.splitFromOrderNumber ?? (order as any).split_from_order_number ?? null,
         };
-        billingStore.loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null, order.parcelNumber ?? (order as any).parcel_number ?? null);
-        billingStore.setCustomer(order.customerId ?? (order as any).customer_id ?? null);
+        loadOrderIntoCart(order.id, tableId, cartItems, cartItems.length, order.orderType ?? order.order_type, orderDiscount, order.notes, order.kots ?? [], order.outboundTransfers ?? [], splitInfo, order.status, order.customerId ?? (order as any).customer_id ?? null, order.parcelName ?? (order as any).parcel_name ?? null, order.parcelNumber ?? (order as any).parcel_number ?? null);
+        setCustomer(order.customerId ?? (order as any).customer_id ?? null);
       }
     } catch {
-      billingStore.setOrderType('dine_in');
-      billingStore.setTable(tableId);
-      billingStore.setCurrentOrderId(orderId);
+      setOrderType('dine_in');
+      setTable(tableId);
+      setCurrentOrderId(orderId);
     }
     navigate('/billing?action=pay');
-  }, [billingStore, navigate, settings.default_tax_rate, i18n.language]);
+  }, [loadOrderIntoCart, setCustomer, setOrderType, setTable, setCurrentOrderId, navigate, settings.default_tax_rate, i18n.language]);
 
   // Resolve active floor
   const currentFloorId = activeFloorId ?? floors[0]?.id ?? null;

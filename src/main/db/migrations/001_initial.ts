@@ -341,6 +341,7 @@ export const initialMigration: Migration = {
       CREATE INDEX idx_kots_status ON kots(status);
       CREATE INDEX idx_attendance_staff ON attendance(staff_id);
       CREATE INDEX idx_loyalty_customer ON loyalty_transactions(customer_id);
+      CREATE INDEX IF NOT EXISTS idx_loyalty_order ON loyalty_transactions(order_id);
     `);
   },
 };

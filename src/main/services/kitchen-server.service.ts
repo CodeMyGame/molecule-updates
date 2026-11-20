@@ -821,10 +821,18 @@ async function handleStatic(reqUrl: URL, res: ServerResponse): Promise<void> {
   const ext = path.extname(filePath).toLowerCase();
   const mime = MIME_TYPES[ext] ?? 'application/octet-stream';
   const stat = fs.statSync(filePath);
+
+  let cacheControl = 'public, max-age=86400';
+  if (ext === '.html') {
+    cacheControl = 'no-cache, no-store, must-revalidate';
+  } else if (pathname.startsWith('/assets/') || filePath.replace(/\\/g, '/').includes('/assets/')) {
+    cacheControl = 'public, max-age=31536000, immutable';
+  }
+
   res.writeHead(200, {
     'Content-Type': mime,
     'Content-Length': stat.size,
-    'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
+    'Cache-Control': cacheControl,
   });
   fs.createReadStream(filePath).pipe(res);
 }

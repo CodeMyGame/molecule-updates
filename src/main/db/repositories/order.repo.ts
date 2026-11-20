@@ -43,6 +43,9 @@ export function create(data: CreateOrderDTO): Order {
   const getAddonVarPrice = db.prepare(
     'SELECT price FROM addon_variation_prices WHERE addon_id = ? AND variation_name = ?'
   );
+  const checkMenuItem = db.prepare('SELECT id FROM menu_items WHERE id = ?');
+  const checkCombo = db.prepare('SELECT id FROM combos WHERE id = ?');
+  const checkVariation = db.prepare('SELECT id FROM item_variations WHERE id = ?');
 
   const createInTransaction = db.transaction(() => {
     // Generate inside the transaction to prevent race conditions (SQLite serializes writes)
@@ -136,19 +139,19 @@ export function create(data: CreateOrderDTO): Order {
 
       let effectiveMenuItemId: number | null = null;
       if (item.menuItemId && Number(item.menuItemId) > 0) {
-        const mRow = db.prepare('SELECT id FROM menu_items WHERE id = ?').get(item.menuItemId);
+        const mRow = checkMenuItem.get(item.menuItemId);
         if (mRow) effectiveMenuItemId = Number(item.menuItemId);
       }
 
       let effectiveComboId: number | null = null;
       if (item.comboId && Number(item.comboId) > 0) {
-        const cRow = db.prepare('SELECT id FROM combos WHERE id = ?').get(item.comboId);
+        const cRow = checkCombo.get(item.comboId);
         if (cRow) effectiveComboId = Number(item.comboId);
       }
 
       let effectiveVariationId: number | null = null;
       if (item.variationId && Number(item.variationId) > 0) {
-        const vRow = db.prepare('SELECT id FROM item_variations WHERE id = ?').get(item.variationId);
+        const vRow = checkVariation.get(item.variationId);
         if (vRow) effectiveVariationId = Number(item.variationId);
       }
 
@@ -264,6 +267,8 @@ export function getOutboundTransfersForOrder(
     }
   };
 
+  const getTableByOrderNum = db.prepare('SELECT t.name FROM orders o JOIN tables t ON o.table_id = t.id WHERE o.order_number = ?');
+
   // 1. Look up items on active/hold orders that were split from THIS specific order
   if (splitChildCount > 0) {
     try {
@@ -278,7 +283,7 @@ export function getOutboundTransfersForOrder(
       for (const row of rows) {
         let dest = row.dest_table || 'Other';
         if (dest.startsWith('ORD-')) {
-          const tRow = db.prepare('SELECT t.name FROM orders o JOIN tables t ON o.table_id = t.id WHERE o.order_number = ?').get(dest) as any;
+          const tRow = getTableByOrderNum.get(dest) as any;
           if (tRow && tRow.name) dest = tRow.name;
         }
         addItemToMap(dest, row.name, row.quantity);
@@ -298,7 +303,7 @@ export function getOutboundTransfersForOrder(
         let dest = m[1].trim();
         if (dest.startsWith('ORD-')) {
           try {
-            const tRow = db.prepare('SELECT t.name FROM orders o JOIN tables t ON o.table_id = t.id WHERE o.order_number = ?').get(dest) as any;
+            const tRow = getTableByOrderNum.get(dest) as any;
             if (tRow && tRow.name) dest = tRow.name;
           } catch { /* ignore */ }
         }
@@ -613,14 +618,30 @@ export function updateStatus(
             WHERE oi.order_id = ?
           `).all(id) as any[];
 
+          const insertVoidStmt = db.prepare(`
+            INSERT INTO void_items (
+              order_id, order_number, table_name, menu_item_id, item_name,
+              variation_name, quantity, unit_price, total_amount, reason,
+              staff_id, staff_name, voided_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+          `);
+          const getDeductedTxnsStmt = db.prepare(`
+            SELECT inventory_item_id, quantity
+            FROM stock_transactions
+            WHERE reference_type = 'order_item' AND reference_id = ? AND transaction_type = 'consumption'
+          `);
+          const updateStockStmt = db.prepare(`
+            UPDATE inventory_items
+            SET current_stock = current_stock + ?, updated_at = datetime('now')
+            WHERE id = ?
+          `);
+          const insertStockTxnStmt = db.prepare(`
+            INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
+            VALUES (?, ?, ?, 'order_item', ?, ?)
+          `);
+
           for (const item of items) {
-            db.prepare(`
-              INSERT INTO void_items (
-                order_id, order_number, table_name, menu_item_id, item_name,
-                variation_name, quantity, unit_price, total_amount, reason,
-                staff_id, staff_name, voided_at
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-            `).run(
+            insertVoidStmt.run(
               order.id,
               order.order_number,
               tableName,
@@ -637,23 +658,12 @@ export function updateStatus(
 
             // Restock inventory for each cancelled item if it was previously deducted
             try {
-              const deductedTxns = db.prepare(`
-                SELECT inventory_item_id, quantity
-                FROM stock_transactions
-                WHERE reference_type = 'order_item' AND reference_id = ? AND transaction_type = 'consumption'
-              `).all(item.id) as { inventory_item_id: number; quantity: number }[];
+              const deductedTxns = getDeductedTxnsStmt.all(item.id) as { inventory_item_id: number; quantity: number }[];
 
               for (const txn of deductedTxns) {
-                db.prepare(`
-                  UPDATE inventory_items
-                  SET current_stock = current_stock + ?, updated_at = datetime('now')
-                  WHERE id = ?
-                `).run(txn.quantity, txn.inventory_item_id);
+                updateStockStmt.run(txn.quantity, txn.inventory_item_id);
 
-                db.prepare(`
-                  INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
-                  VALUES (?, ?, ?, 'order_item', ?, ?)
-                `).run(
+                insertStockTxnStmt.run(
                   txn.inventory_item_id,
                   StockTransactionType.ADJUSTMENT,
                   txn.quantity,
@@ -787,6 +797,9 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
   const getAddonVarPrice = db.prepare(
     'SELECT price FROM addon_variation_prices WHERE addon_id = ? AND variation_name = ?'
   );
+  const checkMenuItem = db.prepare('SELECT id FROM menu_items WHERE id = ?');
+  const checkCombo = db.prepare('SELECT id FROM combos WHERE id = ?');
+  const checkVariation = db.prepare('SELECT id FROM item_variations WHERE id = ?');
   const getOrderTable = db.prepare(`
     SELECT o.status, o.table_name_snapshot, t.name as current_table_name
     FROM orders o
@@ -817,19 +830,19 @@ export function addItems(orderId: number, items: CartItem[]): Order | undefined 
 
       let effectiveMenuItemId: number | null = null;
       if (item.menuItemId && Number(item.menuItemId) > 0) {
-        const mRow = db.prepare('SELECT id FROM menu_items WHERE id = ?').get(item.menuItemId);
+        const mRow = checkMenuItem.get(item.menuItemId);
         if (mRow) effectiveMenuItemId = Number(item.menuItemId);
       }
 
       let effectiveComboId: number | null = null;
       if (item.comboId && Number(item.comboId) > 0) {
-        const cRow = db.prepare('SELECT id FROM combos WHERE id = ?').get(item.comboId);
+        const cRow = checkCombo.get(item.comboId);
         if (cRow) effectiveComboId = Number(item.comboId);
       }
 
       let effectiveVariationId: number | null = null;
       if (item.variationId && Number(item.variationId) > 0) {
-        const vRow = db.prepare('SELECT id FROM item_variations WHERE id = ?').get(item.variationId);
+        const vRow = checkVariation.get(item.variationId);
         if (vRow) effectiveVariationId = Number(item.variationId);
       }
 
@@ -945,23 +958,28 @@ export function removeItem(
         WHERE reference_type = 'order_item' AND reference_id = ? AND transaction_type = 'consumption'
       `).all(orderItemId) as { inventory_item_id: number; quantity: number }[];
 
-      for (const txn of deductedTxns) {
-        db.prepare(`
+      if (deductedTxns.length > 0) {
+        const updateStockStmt = db.prepare(`
           UPDATE inventory_items
           SET current_stock = current_stock + ?, updated_at = datetime('now')
           WHERE id = ?
-        `).run(txn.quantity, txn.inventory_item_id);
-
-        db.prepare(`
+        `);
+        const insertStockTxnStmt = db.prepare(`
           INSERT INTO stock_transactions (inventory_item_id, transaction_type, quantity, reference_type, reference_id, notes)
           VALUES (?, ?, ?, 'order_item', ?, ?)
-        `).run(
-          txn.inventory_item_id,
-          StockTransactionType.ADJUSTMENT,
-          txn.quantity,
-          orderItemId,
-          `Restocked from voided item #${orderItemId} (${reason || 'Item Removed'})`,
-        );
+        `);
+
+        for (const txn of deductedTxns) {
+          updateStockStmt.run(txn.quantity, txn.inventory_item_id);
+
+          insertStockTxnStmt.run(
+            txn.inventory_item_id,
+            StockTransactionType.ADJUSTMENT,
+            txn.quantity,
+            orderItemId,
+            `Restocked from voided item #${orderItemId} (${reason || 'Item Removed'})`,
+          );
+        }
       }
     } catch (err) {
       logger.error('Failed to restock inventory on removeItem:', err, { orderItemId });

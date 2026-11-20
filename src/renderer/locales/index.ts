@@ -1,38 +1,59 @@
 import en from './en.json';
-import hi from './hi.json';
-import ta from './ta.json';
-import te from './te.json';
-import kn from './kn.json';
-import ml from './ml.json';
-import mr from './mr.json';
-import bn from './bn.json';
-import gu from './gu.json';
-import pa from './pa.json';
-import es from './es.json';
-import fr from './fr.json';
-import ar from './ar.json';
-import zh from './zh.json';
-import ja from './ja.json';
 
-/** All bundled UI locales — add a new *.json and import it here. */
-export const localeResources = {
+export const LOCALE_CODES = [
+  'en',
+  'hi',
+  'ta',
+  'te',
+  'kn',
+  'ml',
+  'mr',
+  'bn',
+  'gu',
+  'pa',
+  'es',
+  'fr',
+  'ar',
+  'zh',
+  'ja',
+] as const;
+
+export type LocaleCode = (typeof LOCALE_CODES)[number];
+
+const localeLoaders: Record<
+  Exclude<LocaleCode, 'en'>,
+  () => Promise<{ default: Record<string, any> }>
+> = {
+  hi: () => import('./hi.json'),
+  ta: () => import('./ta.json'),
+  te: () => import('./te.json'),
+  kn: () => import('./kn.json'),
+  ml: () => import('./ml.json'),
+  mr: () => import('./mr.json'),
+  bn: () => import('./bn.json'),
+  gu: () => import('./gu.json'),
+  pa: () => import('./pa.json'),
+  es: () => import('./es.json'),
+  fr: () => import('./fr.json'),
+  ar: () => import('./ar.json'),
+  zh: () => import('./zh.json'),
+  ja: () => import('./ja.json'),
+};
+
+/**
+ * Default bundled UI locales (only English is bundled synchronously into index.js).
+ * Other locales are loaded on-demand via loadLocaleResource.
+ */
+export const defaultLocaleResources = {
   en: { translation: en },
-  hi: { translation: hi },
-  ta: { translation: ta },
-  te: { translation: te },
-  kn: { translation: kn },
-  ml: { translation: ml },
-  mr: { translation: mr },
-  bn: { translation: bn },
-  gu: { translation: gu },
-  pa: { translation: pa },
-  es: { translation: es },
-  fr: { translation: fr },
-  ar: { translation: ar },
-  zh: { translation: zh },
-  ja: { translation: ja },
 } as const;
 
-export type LocaleCode = keyof typeof localeResources;
+export const localeResources = defaultLocaleResources;
 
-export const LOCALE_CODES = Object.keys(localeResources) as LocaleCode[];
+export async function loadLocaleResource(lang: LocaleCode): Promise<Record<string, any>> {
+  if (lang === 'en') return en;
+  const loader = localeLoaders[lang as Exclude<LocaleCode, 'en'>];
+  if (!loader) return en;
+  const mod = await loader();
+  return mod.default || mod;
+}

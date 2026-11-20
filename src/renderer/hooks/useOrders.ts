@@ -82,7 +82,6 @@ export function useOrders(): UseOrdersReturn {
   const [error, setError] = useState<string | null>(null);
   const kotPending = useRef(false);
 
-  const billingStore = useBillingStore();
   const currentUser = useAuthStore((s) => s.currentUser);
 
   const fetchActiveOrders = useCallback(async () => {
@@ -112,12 +111,12 @@ export function useOrders(): UseOrdersReturn {
         }
         const selectedFreeTable = freeTables[0];
         tableId = selectedFreeTable.id;
-        billingStore.setTable(selectedFreeTable.id);
+        liveStore.setTable(selectedFreeTable.id);
       }
     } else {
       tableId = null;
       if (liveStore.selectedTableId !== null) {
-        billingStore.setTable(null);
+        liveStore.setTable(null);
       }
     }
 
@@ -135,7 +134,7 @@ export function useOrders(): UseOrdersReturn {
       })(),
       notes,
       parcelName: effectiveParcelName,
-      parcelNumber: orderType === 'takeaway' ? (billingStore.parcelNumber || undefined) : undefined,
+      parcelNumber: orderType === 'takeaway' ? (liveStore.parcelNumber || undefined) : undefined,
       discount: discount
         ? { type: discount.type, value: discount.value, reason: discount.reason }
         : null,
@@ -152,39 +151,40 @@ export function useOrders(): UseOrdersReturn {
     };
 
     const order = await ipc<Order>(window.electronAPI.orders.create(orderData));
-    billingStore.setCurrentOrderId(order.id);
+    liveStore.setCurrentOrderId(order.id);
     if ((order as any).parcelNumber || (order as any).parcel_number) {
-      billingStore.setParcelNumber((order as any).parcelNumber || (order as any).parcel_number);
+      liveStore.setParcelNumber((order as any).parcelNumber || (order as any).parcel_number);
     }
-    billingStore.markItemsSynced();
+    liveStore.markItemsSynced();
     // Fetch full order to get orderItemIds for each cart item
     try {
       const fullOrder = await ipc<any>(window.electronAPI.orders.getById(order.id));
       if (fullOrder?.items) {
-        billingStore.syncOrderItemIds(fullOrder.items.map((oi: any) => ({
+        liveStore.syncOrderItemIds(fullOrder.items.map((oi: any) => ({
           id: oi.id,
           menuItemId: oi.menuItemId ?? oi.menu_item_id,
           name: oi.name ?? '',
         })));
       }
       if (fullOrder?.parcelNumber || (fullOrder as any)?.parcel_number) {
-        billingStore.setParcelNumber(fullOrder.parcelNumber || (fullOrder as any).parcel_number);
+        liveStore.setParcelNumber(fullOrder.parcelNumber || (fullOrder as any).parcel_number);
       }
     } catch { /* ignore — IDs will be set on next load */ }
     await fetchActiveOrders();
     return order;
-  }, [billingStore, currentUser, fetchActiveOrders, t]);
+  }, [currentUser, fetchActiveOrders, t]);
 
   const holdOrder = useCallback(async () => {
     try {
-      let orderId = billingStore.currentOrderId;
+      const store = useBillingStore.getState();
+      let orderId = store.currentOrderId;
 
       if (!orderId) {
         const order = await createOrder();
         orderId = order.id;
       } else {
         // If order already exists, ensure any newly added cart items are saved to DB
-        const { cart, syncedItemCount, syncedQuantities } = billingStore;
+        const { cart, syncedItemCount, syncedQuantities } = store;
         const deltaItems = cart.slice(0, syncedItemCount).flatMap((item, i) => {
           const delta = item.quantity - (syncedQuantities[i] ?? item.quantity);
           if (delta <= 0) return [];
@@ -214,49 +214,50 @@ export function useOrders(): UseOrdersReturn {
         const allItemsToAdd = [...deltaItems, ...newItems];
         if (allItemsToAdd.length > 0) {
           await ipc(window.electronAPI.orders.addItems(orderId, allItemsToAdd));
-          billingStore.markItemsSynced();
+          store.markItemsSynced();
         }
       }
 
       await ipc(window.electronAPI.orders.updateStatus(orderId!, 'hold'));
-      billingStore.setOrderStatus('hold');
+      useBillingStore.getState().setOrderStatus('hold');
       // Do not clear cart or unselect table — keep order items visible and table selected
       await fetchActiveOrders();
     } catch (err: any) {
       setError(err.message ?? 'Failed to hold order');
       throw err;
     }
-  }, [billingStore, createOrder, fetchActiveOrders]);
+  }, [createOrder, fetchActiveOrders]);
 
   const unholdOrder = useCallback(
     async (orderId?: number) => {
       try {
-        const targetId = orderId ?? billingStore.currentOrderId;
+        const store = useBillingStore.getState();
+        const targetId = orderId ?? store.currentOrderId;
         if (!targetId) return;
 
         await ipc(window.electronAPI.orders.updateStatus(targetId, 'active'));
-        billingStore.setOrderStatus('active');
+        store.setOrderStatus('active');
         await fetchActiveOrders();
       } catch (err: any) {
         setError(err.message ?? 'Failed to resume order');
         throw err;
       }
     },
-    [billingStore, fetchActiveOrders]
+    [fetchActiveOrders]
   );
 
   const cancelOrder = useCallback(
     async (orderId: number, reason?: string, staffId?: number) => {
       try {
         await ipc(window.electronAPI.orders.updateStatus(orderId, 'cancelled', reason, staffId ?? currentUser?.id));
-        billingStore.clearCart();
+        useBillingStore.getState().clearCart();
         await fetchActiveOrders();
       } catch (err: any) {
         setError(err.message ?? 'Failed to cancel order');
         throw err;
       }
     },
-    [billingStore, fetchActiveOrders, currentUser?.id]
+    [fetchActiveOrders, currentUser?.id]
   );
 
   const completePayment = useCallback(
@@ -270,7 +271,7 @@ export function useOrders(): UseOrdersReturn {
         throw err;
       }
     },
-    [billingStore, fetchActiveOrders]
+    [fetchActiveOrders]
   );
 
   const printKot = useCallback(
@@ -278,7 +279,8 @@ export function useOrders(): UseOrdersReturn {
       if (kotPending.current) return;
       kotPending.current = true;
       try {
-        let id = orderId ?? billingStore.currentOrderId;
+        const store = useBillingStore.getState();
+        let id = orderId ?? store.currentOrderId;
 
         if (!id) {
           // First KOT — create the order (which saves all current cart items)
@@ -289,7 +291,7 @@ export function useOrders(): UseOrdersReturn {
           // Order already exists — collect two kinds of changes:
           // 1. Quantity increases on already-synced items (delta rows)
           // 2. Brand-new items appended after the sync boundary
-          const { cart, syncedItemCount, syncedQuantities } = billingStore;
+          const { cart, syncedItemCount, syncedQuantities } = store;
 
           const deltaItems = cart.slice(0, syncedItemCount).flatMap((item, i) => {
             const delta = item.quantity - (syncedQuantities[i] ?? item.quantity);
@@ -320,12 +322,12 @@ export function useOrders(): UseOrdersReturn {
           const allPendingItems = [...deltaItems, ...newItems];
           if (allPendingItems.length > 0) {
             await ipc(window.electronAPI.orders.addItems(id, allPendingItems));
-            billingStore.markItemsSynced();
+            store.markItemsSynced();
             // Sync orderItemIds for newly added items
             try {
               const fullOrder = await ipc<any>(window.electronAPI.orders.getById(id));
               if (fullOrder?.items) {
-                billingStore.syncOrderItemIds(fullOrder.items.map((oi: any) => ({
+                store.syncOrderItemIds(fullOrder.items.map((oi: any) => ({
                   id: oi.id,
                   menuItemId: oi.menuItemId ?? oi.menu_item_id,
                   name: oi.name ?? '',
@@ -385,21 +387,22 @@ export function useOrders(): UseOrdersReturn {
               };
             });
             const rawDiscountType = fullOrder.discountType ?? fullOrder.discount_type;
+            const liveStore = useBillingStore.getState();
             const orderDiscount = rawDiscountType
               ? {
                   type: ((rawDiscountType === 'percentage' || rawDiscountType === 'percent') ? 'percent' : 'flat') as 'percent' | 'flat',
                   value: fullOrder.discountValue ?? fullOrder.discount_value ?? 0,
                   reason: fullOrder.discountReason ?? fullOrder.discount_reason ?? undefined,
                 }
-              : billingStore.discount;
-            billingStore.loadOrderIntoCart(
+              : liveStore.discount;
+            liveStore.loadOrderIntoCart(
               id,
-              fullOrder.tableId ?? fullOrder.table_id ?? billingStore.selectedTableId,
+              fullOrder.tableId ?? fullOrder.table_id ?? liveStore.selectedTableId,
               updatedCartItems,
               updatedCartItems.length,
-              fullOrder.orderType ?? fullOrder.order_type ?? billingStore.orderType,
+              fullOrder.orderType ?? fullOrder.order_type ?? liveStore.orderType,
               orderDiscount,
-              fullOrder.notes ?? billingStore.notes,
+              fullOrder.notes ?? liveStore.notes,
               fullOrder.kots ?? [],
               fullOrder.outboundTransfers ?? [],
               {
@@ -438,7 +441,7 @@ export function useOrders(): UseOrdersReturn {
         kotPending.current = false;
       }
     },
-    [billingStore, createOrder]
+    [createOrder]
   );
 
   return {
