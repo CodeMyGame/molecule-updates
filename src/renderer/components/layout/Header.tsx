@@ -371,9 +371,9 @@ const Header: React.FC = () => {
               />
 
               {/* Context Dropdown Menu */}
-              <div className="fixed top-9 right-2.5 w-[380px] max-w-[92vw] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="fixed top-9 right-2.5 w-[380px] max-w-[92vw] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* Header with Title and Refresh */}
-                <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/40 dark:from-gray-900 dark:to-blue-950/40 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/40 dark:from-slate-900 dark:to-slate-800 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-blue-600 text-white rounded-lg shadow-xs">
                       <Sparkles size={14} />
@@ -382,7 +382,7 @@ const Header: React.FC = () => {
                       <h3 className="text-xs font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-1.5">
                         {t('header.dailyHeadsUp', 'Daily Heads-Up')}
                       </h3>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400">Quick store overview & business pulse</p>
+                      <p className="text-[10px] text-gray-500 dark:text-slate-400">Quick store overview & business pulse</p>
                     </div>
                   </div>
                   <button
@@ -390,7 +390,7 @@ const Header: React.FC = () => {
                       e.stopPropagation();
                       fetchStats();
                     }}
-                    className={`p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-white/80 dark:hover:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition ${
+                    className={`p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:text-slate-400 dark:hover:text-white hover:bg-white/80 dark:hover:bg-slate-800 border border-transparent hover:border-gray-200 dark:hover:border-slate-700 transition ${
                       loadingStats ? 'animate-spin text-blue-600' : ''
                     }`}
                     title="Refresh data"
@@ -400,31 +400,31 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* Tab selector */}
-                <div className="flex border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/60 p-1 text-xs">
+                <div className="flex border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-950/60 p-1 text-xs">
                   <button
                     onClick={() => setActiveTab('yesterday')}
                     className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition text-center flex items-center justify-center gap-1.5 ${
                       activeTab === 'yesterday'
-                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs border border-gray-200/60 dark:border-gray-700'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-xs border border-gray-200/60 dark:border-slate-700'
+                        : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                     }`}
                   >
                     <span>{t('header.yesterdayRecap', 'Yesterday')}</span>
-                    <span className="text-[10px] font-normal text-gray-400">({yesterdayLabel})</span>
+                    <span className="text-[10px] font-normal text-gray-400 dark:text-slate-500">({yesterdayLabel})</span>
                   </button>
                   <button
                     onClick={() => setActiveTab('today')}
                     className={`flex-1 py-1.5 px-3 rounded-lg font-semibold transition text-center flex items-center justify-center gap-1.5 ${
                       activeTab === 'today'
-                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-xs border border-gray-200/60 dark:border-gray-700'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-xs border border-gray-200/60 dark:border-slate-700'
+                        : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
                     }`}
                   >
                     <span className="flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       {t('header.todayLive', 'Today')}
                     </span>
-                    <span className="text-[10px] font-normal text-gray-400">(Live)</span>
+                    <span className="text-[10px] font-normal text-gray-400 dark:text-slate-500">(Live)</span>
                   </button>
                 </div>
 
@@ -436,20 +436,20 @@ const Header: React.FC = () => {
                       {yesterdayData && yesterdayData.totalOrders > 0 ? (
                         <div className="space-y-3">
                           {/* Yesterday Revenue Card */}
-                          <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/70 to-blue-50/50 border border-emerald-150/80 shadow-xs">
-                            <div className="flex items-center justify-between text-[11px] text-emerald-800 font-semibold uppercase tracking-wider mb-1">
+                          <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 via-teal-50/70 to-blue-50/50 dark:from-slate-900 dark:via-emerald-950/40 dark:to-teal-950/30 border border-emerald-150/80 dark:border-emerald-900/40 shadow-xs">
+                            <div className="flex items-center justify-between text-[11px] text-emerald-800 dark:text-emerald-300 font-semibold uppercase tracking-wider mb-1">
                               <span>{t('header.yesterdayRevenue', "Yesterday's Revenue")}</span>
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-100/80 text-emerald-900 text-[10px]">
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100/80 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 dark:border dark:border-emerald-800/60 text-[10px] font-bold">
                                 {yesterdayData.totalOrders} {yesterdayData.totalOrders === 1 ? 'order' : 'orders'}
                               </span>
                             </div>
-                            <div className="text-2xl font-black text-gray-900 tracking-tight">
+                            <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                               {formatCurrency(yesterdayData.totalRevenue)}
                             </div>
-                            <div className="mt-2.5 pt-2.5 border-t border-emerald-200/50 grid grid-cols-2 gap-2 text-xs">
+                            <div className="mt-2.5 pt-2.5 border-t border-emerald-200/50 dark:border-emerald-900/40 grid grid-cols-2 gap-2 text-xs">
                               <div>
-                                <span className="text-gray-500 text-[10px] block">{t('header.avgTicket', 'Avg Ticket')}</span>
-                                <span className="font-bold text-gray-800">
+                                <span className="text-gray-500 dark:text-slate-400 text-[10px] block">{t('header.avgTicket', 'Avg Ticket')}</span>
+                                <span className="font-bold text-gray-800 dark:text-slate-200">
                                   {formatCurrency(
                                     yesterdayData.totalOrders > 0
                                       ? Math.round(yesterdayData.totalRevenue / yesterdayData.totalOrders)
@@ -458,8 +458,8 @@ const Header: React.FC = () => {
                                 </span>
                               </div>
                               <div>
-                                <span className="text-gray-500 text-[10px] block">Items Sold</span>
-                                <span className="font-bold text-gray-800">
+                                <span className="text-gray-500 dark:text-slate-400 text-[10px] block">Items Sold</span>
+                                <span className="font-bold text-gray-800 dark:text-slate-200">
                                   {yesterdayData.totalCovers ?? 0}
                                 </span>
                               </div>
@@ -468,10 +468,10 @@ const Header: React.FC = () => {
 
                           {/* Payment Breakdown Bar & List */}
                           {(yesterdayData.paymentBreakdown ?? []).length > 0 && (
-                            <div className="p-3 bg-gray-50/80 border border-gray-150 rounded-xl space-y-2">
-                              <div className="flex items-center justify-between text-[11px] font-semibold text-gray-700">
+                            <div className="p-3 bg-gray-50/80 dark:bg-slate-900/80 border border-gray-150 dark:border-slate-800 rounded-xl space-y-2">
+                              <div className="flex items-center justify-between text-[11px] font-semibold text-gray-700 dark:text-slate-300">
                                 <span>{t('header.paymentMix', 'Payment Breakdown')}</span>
-                                <span className="text-[10px] text-gray-400 font-normal">
+                                <span className="text-[10px] text-gray-400 dark:text-slate-500 font-normal">
                                   {(yesterdayData.paymentBreakdown ?? []).length} modes
                                 </span>
                               </div>
@@ -479,19 +479,19 @@ const Header: React.FC = () => {
                               <div className="grid grid-cols-3 gap-1.5 pt-1">
                                 {(yesterdayData.paymentBreakdown as any[]).map((p) => {
                                   const modeIcon =
-                                    p.mode === 'cash' ? <Banknote size={12} className="text-emerald-600" /> :
-                                    p.mode === 'card' ? <CreditCard size={12} className="text-blue-600" /> :
-                                    <Smartphone size={12} className="text-purple-600" />;
+                                    p.mode === 'cash' ? <Banknote size={12} className="text-emerald-600 dark:text-emerald-400" /> :
+                                    p.mode === 'card' ? <CreditCard size={12} className="text-blue-600 dark:text-blue-400" /> :
+                                    <Smartphone size={12} className="text-purple-600 dark:text-purple-400" />;
 
                                   return (
-                                    <div key={p.mode} className="bg-white p-2 rounded-lg border border-gray-100 text-center shadow-xs">
-                                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-gray-600 capitalize">
+                                    <div key={p.mode} className="bg-white dark:bg-slate-800 p-2 rounded-lg border border-gray-100 dark:border-slate-700 text-center shadow-xs">
+                                      <div className="flex items-center justify-center gap-1 text-[10px] font-semibold text-gray-600 dark:text-slate-300 capitalize">
                                         {modeIcon} {p.mode}
                                       </div>
-                                      <div className="text-xs font-bold text-gray-900 mt-0.5 truncate">
+                                      <div className="text-xs font-bold text-gray-900 dark:text-white mt-0.5 truncate">
                                         {formatCurrency(p.total)}
                                       </div>
-                                      <div className="text-[9px] text-gray-400 font-medium">
+                                      <div className="text-[9px] text-gray-400 dark:text-slate-500 font-medium">
                                         {p.count} {p.count === 1 ? 'bill' : 'bills'}
                                       </div>
                                     </div>
@@ -503,25 +503,25 @@ const Header: React.FC = () => {
 
                           {/* Top Seller Item */}
                           {(yesterdayData.topItems ?? []).length > 0 && (
-                            <div className="flex items-center justify-between p-2.5 bg-amber-50/60 border border-amber-150/70 rounded-xl text-xs">
+                            <div className="flex items-center justify-between p-2.5 bg-amber-50/60 dark:bg-amber-950/30 border border-amber-150/70 dark:border-amber-900/50 rounded-xl text-xs">
                               <div className="flex items-center gap-2 min-w-0">
-                                <div className="p-1.5 bg-amber-100 text-amber-700 rounded-lg flex-shrink-0">
+                                <div className="p-1.5 bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 rounded-lg flex-shrink-0">
                                   <Flame size={14} />
                                 </div>
                                 <div className="min-w-0">
-                                  <span className="text-[10px] font-semibold text-amber-800 uppercase block">
+                                  <span className="text-[10px] font-semibold text-amber-800 dark:text-amber-400 uppercase block">
                                     {t('header.topSeller', 'Top Seller')}
                                   </span>
-                                  <p className="font-bold text-gray-900 truncate">
+                                  <p className="font-bold text-gray-900 dark:text-white truncate">
                                     {yesterdayData.topItems[0].name}
                                   </p>
                                 </div>
                               </div>
                               <div className="text-right flex-shrink-0">
-                                <span className="font-bold text-amber-900 text-xs">
+                                <span className="font-bold text-amber-900 dark:text-amber-300 text-xs">
                                   {yesterdayData.topItems[0].quantity} sold
                                 </span>
-                                <span className="text-[10px] text-gray-500 block">
+                                <span className="text-[10px] text-gray-500 dark:text-slate-400 block">
                                   {formatCurrency(yesterdayData.topItems[0].revenue)}
                                 </span>
                               </div>
@@ -530,13 +530,13 @@ const Header: React.FC = () => {
                         </div>
                       ) : (
                         <div className="py-8 text-center space-y-1.5">
-                          <div className="w-10 h-10 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+                          <div className="w-10 h-10 mx-auto rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-400 dark:text-slate-500">
                             <BarChart2 size={18} />
                           </div>
-                          <p className="text-xs font-semibold text-gray-700">
+                          <p className="text-xs font-semibold text-gray-700 dark:text-slate-300">
                             {t('header.noOrdersYesterday', 'No completed orders yesterday')}
                           </p>
-                          <p className="text-[11px] text-gray-400">
+                          <p className="text-[11px] text-gray-400 dark:text-slate-500">
                             Sales figures will automatically appear after yesterday's day end.
                           </p>
                         </div>
@@ -548,23 +548,23 @@ const Header: React.FC = () => {
                   {activeTab === 'today' && (
                     <div className="space-y-3">
                       {/* Today Live Revenue Card */}
-                      <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50/70 to-purple-50/40 border border-blue-150/80 shadow-xs">
-                        <div className="flex items-center justify-between text-[11px] text-blue-800 font-semibold uppercase tracking-wider mb-1">
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50/70 to-purple-50/40 dark:from-slate-900 dark:via-blue-950/40 dark:to-indigo-950/30 border border-blue-150/80 dark:border-blue-900/40 shadow-xs">
+                        <div className="flex items-center justify-between text-[11px] text-blue-800 dark:text-blue-300 font-semibold uppercase tracking-wider mb-1">
                           <span className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
+                            <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-ping" />
                             {t('header.todayRevenue', "Today's Revenue (Live)")}
                           </span>
-                          <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 text-[10px]">
+                          <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-300 dark:border dark:border-blue-800/60 text-[10px] font-bold">
                             {todayData?.totalOrders ?? 0} {(todayData?.totalOrders ?? 0) === 1 ? 'order' : 'orders'}
                           </span>
                         </div>
-                        <div className="text-2xl font-black text-gray-900 tracking-tight">
+                        <div className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                           {formatCurrency(todayData?.totalRevenue ?? 0)}
                         </div>
-                        <div className="mt-2.5 pt-2.5 border-t border-blue-200/50 grid grid-cols-2 gap-2 text-xs">
+                        <div className="mt-2.5 pt-2.5 border-t border-blue-200/50 dark:border-blue-900/40 grid grid-cols-2 gap-2 text-xs">
                           <div>
-                            <span className="text-gray-500 text-[10px] block">{t('header.avgTicket', 'Avg Ticket')}</span>
-                            <span className="font-bold text-gray-800">
+                            <span className="text-gray-500 dark:text-slate-400 text-[10px] block">{t('header.avgTicket', 'Avg Ticket')}</span>
+                            <span className="font-bold text-gray-800 dark:text-slate-200">
                               {formatCurrency(
                                 (todayData?.totalOrders ?? 0) > 0
                                   ? Math.round((todayData?.totalRevenue ?? 0) / (todayData?.totalOrders ?? 1))
@@ -573,8 +573,8 @@ const Header: React.FC = () => {
                             </span>
                           </div>
                           <div>
-                            <span className="text-gray-500 text-[10px] block">Day Status</span>
-                            <span className={`font-bold flex items-center gap-1 ${isDayOpen ? 'text-emerald-700' : 'text-red-600'}`}>
+                            <span className="text-gray-500 dark:text-slate-400 text-[10px] block">Day Status</span>
+                            <span className={`font-bold flex items-center gap-1 ${isDayOpen ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${isDayOpen ? 'bg-emerald-500' : 'bg-red-400'}`} />
                               {isDayOpen ? t('header.dayOpen') : t('header.dayClosed')}
                             </span>
@@ -584,13 +584,13 @@ const Header: React.FC = () => {
 
                       {/* Today Top Item */}
                       {todayData && (todayData.topItems ?? []).length > 0 && (
-                        <div className="p-3 bg-gray-50 border border-gray-150 rounded-xl space-y-1.5">
-                          <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+                        <div className="p-3 bg-gray-50 dark:bg-slate-900/80 border border-gray-150 dark:border-slate-800 rounded-xl space-y-1.5">
+                          <span className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                             Leading Item Today
                           </span>
                           <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-gray-800">{todayData.topItems[0].name}</span>
-                            <span className="font-semibold text-blue-600">{todayData.topItems[0].quantity} sold</span>
+                            <span className="font-bold text-gray-800 dark:text-slate-200">{todayData.topItems[0].name}</span>
+                            <span className="font-semibold text-blue-600 dark:text-blue-400">{todayData.topItems[0].quantity} sold</span>
                           </div>
                         </div>
                       )}
@@ -599,8 +599,8 @@ const Header: React.FC = () => {
 
                   {/* Actionable Alerts (Software Update & Low Stock) */}
                   {hasAlerts && (
-                    <div className="pt-2 border-t border-gray-100 space-y-2">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    <div className="pt-2 border-t border-gray-100 dark:border-slate-800 space-y-2">
+                      <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
                         Alerts & Actions
                       </p>
 
@@ -626,31 +626,31 @@ const Header: React.FC = () => {
                           </button>
                         </div>
                       ) : updateState === 'downloading' ? (
-                        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-1.5">
-                          <div className="flex items-center justify-between text-xs text-blue-900 font-bold">
+                        <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 space-y-1.5">
+                          <div className="flex items-center justify-between text-xs text-blue-900 dark:text-blue-200 font-bold">
                             <span className="flex items-center gap-1.5">
-                              <RefreshCw size={13} className="animate-spin text-blue-600" />
+                              <RefreshCw size={13} className="animate-spin text-blue-600 dark:text-blue-400" />
                               <span>Downloading Update (v{updateVersion})...</span>
                             </span>
                             <span className="font-mono">{downloadProgress}%</span>
                           </div>
-                          <div className="w-full bg-blue-200 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-blue-200 dark:bg-blue-900/60 rounded-full h-1.5 overflow-hidden">
                             <div
-                              className="bg-blue-600 h-full transition-all duration-200"
+                              className="bg-blue-600 dark:bg-blue-400 h-full transition-all duration-200"
                               style={{ width: `${downloadProgress}%` }}
                             />
                           </div>
                         </div>
                       ) : updateState === 'available' ? (
-                        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 space-y-2">
+                        <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 font-bold text-xs text-blue-950">
-                              <Sparkles size={14} className="text-blue-600" />
+                            <div className="flex items-center gap-1.5 font-bold text-xs text-blue-950 dark:text-blue-200">
+                              <Sparkles size={14} className="text-blue-600 dark:text-blue-400" />
                               <span>New Update Available (v{updateVersion})</span>
                             </div>
-                            <span className="text-[10px] bg-blue-200/70 text-blue-800 px-1.5 py-0.5 rounded font-semibold">New</span>
+                            <span className="text-[10px] bg-blue-200/70 dark:bg-blue-900/80 text-blue-800 dark:text-blue-200 px-1.5 py-0.5 rounded font-semibold">New</span>
                           </div>
-                          <p className="text-[11px] text-blue-800 leading-snug">
+                          <p className="text-[11px] text-blue-800 dark:text-blue-300 leading-snug">
                             A new version is available with latest features & improvements.
                           </p>
                           <div className="flex items-center gap-2">
@@ -673,7 +673,7 @@ const Header: React.FC = () => {
                                 setShowBellMenu(false);
                                 navigate('/settings');
                               }}
-                              className="py-1.5 px-2.5 rounded-lg border border-blue-200 bg-white hover:bg-blue-50 text-blue-700 text-xs font-medium transition"
+                              className="py-1.5 px-2.5 rounded-lg border border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-blue-700 dark:text-blue-300 text-xs font-medium transition"
                             >
                               Details
                             </button>
@@ -688,17 +688,17 @@ const Header: React.FC = () => {
                             setShowBellMenu(false);
                             navigate('/inventory');
                           }}
-                          className="w-full text-left p-2.5 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200 transition flex items-center justify-between gap-2"
+                          className="w-full text-left p-2.5 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 dark:bg-amber-950/30 dark:hover:bg-amber-950/50 border border-amber-200 dark:border-amber-900/60 transition flex items-center justify-between gap-2"
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <div className="p-1.5 bg-amber-600 text-white rounded-lg flex-shrink-0">
                               <AlertTriangle size={13} />
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs font-bold text-amber-950 truncate">
+                              <p className="text-xs font-bold text-amber-950 dark:text-amber-200 truncate">
                                 {lowStockCount} {lowStockCount === 1 ? 'item' : 'items'} Low on Stock
                               </p>
-                              <p className="text-[10px] text-amber-800">Check inventory to reorder</p>
+                              <p className="text-[10px] text-amber-800 dark:text-amber-400">Check inventory to reorder</p>
                             </div>
                           </div>
                           <ChevronRight size={14} className="text-amber-500 flex-shrink-0" />
@@ -709,13 +709,13 @@ const Header: React.FC = () => {
                 </div>
 
                 {/* Footer: Link to Full Reports */}
-                <div className="p-2.5 bg-gray-50 border-t border-gray-150 flex items-center justify-between">
+                <div className="p-2.5 bg-gray-50 dark:bg-slate-900 border-t border-gray-150 dark:border-slate-800 flex items-center justify-between">
                   <button
                     onClick={() => {
                       setShowBellMenu(false);
                       navigate('/reports');
                     }}
-                    className="w-full py-2 px-3 rounded-xl bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 border border-gray-200/80 text-xs font-semibold text-gray-700 transition flex items-center justify-center gap-1.5 shadow-xs"
+                    className="w-full py-2 px-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-700 dark:hover:text-blue-300 hover:border-blue-200 dark:hover:border-slate-600 border border-gray-200/80 dark:border-slate-700 text-xs font-semibold text-gray-700 dark:text-slate-200 transition flex items-center justify-center gap-1.5 shadow-xs"
                   >
                     <span>{t('header.viewDetailedReports', 'View Detailed Reports')}</span>
                     <ArrowUpRight size={14} />
