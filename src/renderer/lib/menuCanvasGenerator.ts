@@ -2,7 +2,110 @@ import { type QrStyle } from '../../shared/qr-render';
 import { drawQrOnCanvas } from './qrCanvasDraw';
 import { downloadDataUri } from './qrCodeGenerator';
 
-export type MenuTheme = 'noir' | 'ivory' | 'minimal' | 'royal';
+export type MenuTheme =
+  | 'noir'
+  | 'ivory'
+  | 'minimal'
+  | 'royal'
+  | 'garden'
+  | 'blush'
+  | 'terracotta'
+  | 'charcoal'
+  | 'crimson';
+
+export interface MenuThemeMetadata {
+  id: MenuTheme;
+  name: string;
+  tagline: string;
+  category: 'Modern & Luxury' | 'Bistro & Botanical' | 'Bakery & Cafe' | 'Diner & Street Food';
+  accentColor: string;
+  badgeBg: string;
+  isDark: boolean;
+}
+
+export const MENU_THEME_CATALOG: MenuThemeMetadata[] = [
+  {
+    id: 'noir',
+    name: 'Modern Noir',
+    tagline: 'Obsidian Black & Gold Luxury',
+    category: 'Modern & Luxury',
+    accentColor: '#fbbf24',
+    badgeBg: '#0b0f19',
+    isDark: true,
+  },
+  {
+    id: 'garden',
+    name: 'Botanical Garden',
+    tagline: 'Fresh Sage Green & Organic Farm Bistro',
+    category: 'Bistro & Botanical',
+    accentColor: '#2d6a4f',
+    badgeBg: '#f4fbf6',
+    isDark: false,
+  },
+  {
+    id: 'blush',
+    name: 'Blush Bakery & Cafe',
+    tagline: 'Sweet Pastel Rose & Floral Patisserie',
+    category: 'Bakery & Cafe',
+    accentColor: '#e11d48',
+    badgeBg: '#fff5f7',
+    isDark: false,
+  },
+  {
+    id: 'terracotta',
+    name: 'Tuscan Bistro',
+    tagline: 'Warm Terracotta Clay & Italian Trattoria',
+    category: 'Bistro & Botanical',
+    accentColor: '#c2410c',
+    badgeBg: '#fdfbf7',
+    isDark: false,
+  },
+  {
+    id: 'charcoal',
+    name: 'Street Burger & Chalkboard',
+    tagline: 'Dark Slate Charcoal & Golden Mustard Diner',
+    category: 'Diner & Street Food',
+    accentColor: '#fbbf24',
+    badgeBg: '#18181b',
+    isDark: true,
+  },
+  {
+    id: 'crimson',
+    name: 'Fast-Food QSR Diner',
+    tagline: 'Bold Crimson Red Wave & Golden Sun',
+    category: 'Diner & Street Food',
+    accentColor: '#dc2626',
+    badgeBg: '#ffffff',
+    isDark: false,
+  },
+  {
+    id: 'ivory',
+    name: 'Vintage Ivory',
+    tagline: 'Classic Parchment & Roasted Espresso',
+    category: 'Bistro & Botanical',
+    accentColor: '#9a3412',
+    badgeBg: '#fdfbf7',
+    isDark: false,
+  },
+  {
+    id: 'minimal',
+    name: 'Minimal Emerald',
+    tagline: 'Clean White & Crisp Emerald Boutique',
+    category: 'Modern & Luxury',
+    accentColor: '#059669',
+    badgeBg: '#ffffff',
+    isDark: false,
+  },
+  {
+    id: 'royal',
+    name: 'Royal Navy',
+    tagline: 'Deep Sapphire Navy & Champagne Gold',
+    category: 'Modern & Luxury',
+    accentColor: '#f3ba2f',
+    badgeBg: '#0a192f',
+    isDark: true,
+  },
+];
 
 export interface MenuCanvasOptions {
   theme?: MenuTheme;
@@ -177,6 +280,106 @@ const MENU_THEMES: Record<
     vegDot: '#10b981',
     nonVegBorder: '#ef4444',
     nonVegDot: '#ef4444',
+  },
+  garden: {
+    bgStart: '#f5faf6',
+    bgEnd: '#e8f5ec',
+    border: '#2d6a4f',
+    cornerAccent: '#52b788',
+    headerColor: '#1b4332',
+    categoryBg: '#2d6a4f',
+    categoryText: '#ffffff',
+    categoryBorder: '#1b4332',
+    itemNameColor: '#1b4332',
+    itemPriceColor: '#2d6a4f',
+    descColor: '#52796f',
+    leaderDotColor: '#95d5b2',
+    footerText: '#52796f',
+    miniQrBg: '#ffffff',
+    vegBorder: '#2d6a4f',
+    vegDot: '#2d6a4f',
+    nonVegBorder: '#dc2626',
+    nonVegDot: '#dc2626',
+  },
+  blush: {
+    bgStart: '#fff7f9',
+    bgEnd: '#fce7ec',
+    border: '#e11d48',
+    cornerAccent: '#f43f5e',
+    headerColor: '#881337',
+    categoryBg: '#e11d48',
+    categoryText: '#ffffff',
+    categoryBorder: '#9f1239',
+    itemNameColor: '#4c0519',
+    itemPriceColor: '#e11d48',
+    descColor: '#9f1239',
+    leaderDotColor: '#fecdd3',
+    footerText: '#9f1239',
+    miniQrBg: '#ffffff',
+    vegBorder: '#15803d',
+    vegDot: '#15803d',
+    nonVegBorder: '#e11d48',
+    nonVegDot: '#e11d48',
+  },
+  terracotta: {
+    bgStart: '#fdfbf7',
+    bgEnd: '#fbeee4',
+    border: '#c2410c',
+    cornerAccent: '#ea580c',
+    headerColor: '#431407',
+    categoryBg: '#c2410c',
+    categoryText: '#ffffff',
+    categoryBorder: '#7c2d12',
+    itemNameColor: '#291b0f',
+    itemPriceColor: '#c2410c',
+    descColor: '#78716c',
+    leaderDotColor: '#fed7aa',
+    footerText: '#78716c',
+    miniQrBg: '#ffffff',
+    vegBorder: '#15803d',
+    vegDot: '#15803d',
+    nonVegBorder: '#b91c1c',
+    nonVegDot: '#b91c1c',
+  },
+  charcoal: {
+    bgStart: '#18181b',
+    bgEnd: '#09090b',
+    border: '#f59e0b',
+    cornerAccent: '#fbbf24',
+    headerColor: '#ffffff',
+    categoryBg: '#27272a',
+    categoryText: '#fbbf24',
+    categoryBorder: '#f59e0b',
+    itemNameColor: '#fafafa',
+    itemPriceColor: '#fbbf24',
+    descColor: '#a1a1aa',
+    leaderDotColor: '#3f3f46',
+    footerText: '#71717a',
+    miniQrBg: '#ffffff',
+    vegBorder: '#10b981',
+    vegDot: '#10b981',
+    nonVegBorder: '#ef4444',
+    nonVegDot: '#ef4444',
+  },
+  crimson: {
+    bgStart: '#ffffff',
+    bgEnd: '#fff1f1',
+    border: '#dc2626',
+    cornerAccent: '#eab308',
+    headerColor: '#991b1b',
+    categoryBg: '#dc2626',
+    categoryText: '#ffffff',
+    categoryBorder: '#991b1b',
+    itemNameColor: '#111827',
+    itemPriceColor: '#dc2626',
+    descColor: '#6b7280',
+    leaderDotColor: '#fca5a5',
+    footerText: '#6b7280',
+    miniQrBg: '#ffffff',
+    vegBorder: '#16a34a',
+    vegDot: '#16a34a',
+    nonVegBorder: '#dc2626',
+    nonVegDot: '#dc2626',
   },
 };
 

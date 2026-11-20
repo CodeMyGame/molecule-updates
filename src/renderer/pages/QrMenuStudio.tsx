@@ -33,6 +33,7 @@ import {
   downloadMenuImage,
   type MenuTheme,
   type MenuDataPayload,
+  MENU_THEME_CATALOG,
 } from '../lib/menuCanvasGenerator';
 import { generateQrImage, downloadDataUri } from '../lib/qrCodeGenerator';
 import { QR_STYLES, type QrStyle } from '../../shared/qr-render';
@@ -204,7 +205,7 @@ const QrMenuStudio: React.FC = () => {
           .replace(/^-+|-+$/g, '') || 'one-bite';
         setCustomerSlug((data.settings as any)?.customerSlug || defaultSlug);
 
-        if (data.settings?.theme && ['noir', 'ivory', 'minimal', 'royal'].includes(data.settings.theme)) {
+        if (data.settings?.theme && MENU_THEME_CATALOG.some((t) => t.id === data.settings?.theme)) {
           setMenuTheme(data.settings.theme as MenuTheme);
         }
       }
@@ -607,27 +608,39 @@ const QrMenuStudio: React.FC = () => {
                 {/* Theme Selector */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-                    Poster Theme
+                    Menu Design Template
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 'noir', name: 'Modern Noir', desc: 'Obsidian Black & Gold' },
-                      { id: 'ivory', name: 'Vintage Bistro', desc: 'Warm Ivory & Espresso' },
-                      { id: 'minimal', name: 'Minimal White', desc: 'Crisp White & Emerald' },
-                      { id: 'royal', name: 'Royal Navy', desc: 'Deep Blue & Champagne' },
-                    ].map((th) => (
+                  <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto pr-1">
+                    {MENU_THEME_CATALOG.map((th) => (
                       <button
                         key={th.id}
                         type="button"
-                        onClick={() => setMenuTheme(th.id as MenuTheme)}
+                        onClick={() => {
+                          setMenuTheme(th.id);
+                          if (menuData) {
+                            setMenuData({
+                              ...menuData,
+                              settings: {
+                                ...menuData.settings,
+                                theme: th.id,
+                              },
+                            });
+                          }
+                        }}
                         className={`p-2.5 rounded-xl border text-left transition ${
                           menuTheme === th.id
-                            ? 'border-blue-600 bg-blue-50/60 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-bold'
+                            ? 'border-blue-600 bg-blue-50/70 dark:bg-blue-950/40 text-blue-900 dark:text-blue-300 font-bold ring-2 ring-blue-500/30'
                             : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                         }`}
                       >
-                        <span className="text-xs font-bold block">{th.name}</span>
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400 block">{th.desc}</span>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <span
+                            className="w-3 h-3 rounded-full border border-black/10 shrink-0"
+                            style={{ backgroundColor: th.accentColor }}
+                          />
+                          <span className="text-xs font-bold truncate">{th.name}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400 block truncate">{th.tagline}</span>
                       </button>
                     ))}
                   </div>

@@ -2,7 +2,16 @@ import { type QrStyle } from '../../shared/qr-render';
 import { drawQrOnCanvas } from './qrCanvasDraw';
 import { downloadDataUri } from './qrCodeGenerator';
 
-export type TableCardTheme = 'noir' | 'ivory' | 'minimal' | 'royal';
+export type TableCardTheme =
+  | 'noir'
+  | 'ivory'
+  | 'minimal'
+  | 'royal'
+  | 'garden'
+  | 'blush'
+  | 'terracotta'
+  | 'charcoal'
+  | 'crimson';
 export type TableCardFormat = 'tent' | 'square' | 'wide';
 
 export interface TableCardOptions {
@@ -114,6 +123,91 @@ const THEME_PALETTES: Record<
     wifiBg: 'rgba(243, 186, 47, 0.12)',
     wifiBorder: '#f3ba2f',
     wifiText: '#ffffff',
+  },
+  garden: {
+    bgStart: '#f5faf6',
+    bgEnd: '#e8f5ec',
+    border: '#2d6a4f',
+    cornerAccent: '#52b788',
+    titleColor: '#1b4332',
+    accentColor: '#2d6a4f',
+    textColor: '#1b4332',
+    mutedColor: '#52796f',
+    tableBadgeBg: '#2d6a4f',
+    tableBadgeText: '#ffffff',
+    qrCardBg: '#ffffff',
+    qrCardBorder: '#95d5b2',
+    wifiBg: '#d8f3dc',
+    wifiBorder: '#74c69d',
+    wifiText: '#1b4332',
+  },
+  blush: {
+    bgStart: '#fff7f9',
+    bgEnd: '#fce7ec',
+    border: '#e11d48',
+    cornerAccent: '#f43f5e',
+    titleColor: '#881337',
+    accentColor: '#e11d48',
+    textColor: '#4c0519',
+    mutedColor: '#9f1239',
+    tableBadgeBg: '#e11d48',
+    tableBadgeText: '#ffffff',
+    qrCardBg: '#ffffff',
+    qrCardBorder: '#fecdd3',
+    wifiBg: '#ffe4e6',
+    wifiBorder: '#fda4af',
+    wifiText: '#881337',
+  },
+  terracotta: {
+    bgStart: '#fdfbf7',
+    bgEnd: '#fbeee4',
+    border: '#c2410c',
+    cornerAccent: '#ea580c',
+    titleColor: '#431407',
+    accentColor: '#c2410c',
+    textColor: '#291b0f',
+    mutedColor: '#78716c',
+    tableBadgeBg: '#c2410c',
+    tableBadgeText: '#ffffff',
+    qrCardBg: '#ffffff',
+    qrCardBorder: '#fed7aa',
+    wifiBg: '#ffedd5',
+    wifiBorder: '#fdba74',
+    wifiText: '#431407',
+  },
+  charcoal: {
+    bgStart: '#18181b',
+    bgEnd: '#09090b',
+    border: '#f59e0b',
+    cornerAccent: '#fbbf24',
+    titleColor: '#ffffff',
+    accentColor: '#fbbf24',
+    textColor: '#fafafa',
+    mutedColor: '#a1a1aa',
+    tableBadgeBg: '#f59e0b',
+    tableBadgeText: '#18181b',
+    qrCardBg: '#ffffff',
+    qrCardBorder: '#f59e0b',
+    wifiBg: '#27272a',
+    wifiBorder: '#3f3f46',
+    wifiText: '#fbbf24',
+  },
+  crimson: {
+    bgStart: '#ffffff',
+    bgEnd: '#fff1f1',
+    border: '#dc2626',
+    cornerAccent: '#eab308',
+    titleColor: '#991b1b',
+    accentColor: '#dc2626',
+    textColor: '#111827',
+    mutedColor: '#6b7280',
+    tableBadgeBg: '#dc2626',
+    tableBadgeText: '#ffffff',
+    qrCardBg: '#ffffff',
+    qrCardBorder: '#fca5a5',
+    wifiBg: '#fee2e2',
+    wifiBorder: '#fca5a5',
+    wifiText: '#991b1b',
   },
 };
 
