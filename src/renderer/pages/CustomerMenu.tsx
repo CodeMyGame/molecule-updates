@@ -895,13 +895,15 @@ const CustomerMenu: React.FC<CustomerMenuProps> = ({ initialData, previewMode = 
         <div className="space-y-2 px-1">
           {items.map((item) => {
             const isVeg = !!item.isVeg;
-            const priceVal = item.basePrice > 1000 ? (item.basePrice / 100).toFixed(0) : item.basePrice.toString();
+            const rupees = (item.basePrice || 0) / 100;
+            const priceVal = rupees % 1 === 0 ? rupees.toFixed(0) : rupees.toFixed(2);
             const hasVariations = item.variations && item.variations.length > 0;
             const variationText = hasVariations
               ? item.variations!
                   .map((v) => {
                     const vPrice = v.basePrice || item.basePrice + (v.priceDelta || 0);
-                    const formatted = vPrice > 1000 ? (vPrice / 100).toFixed(0) : vPrice;
+                    const vRupees = (vPrice || 0) / 100;
+                    const formatted = vRupees % 1 === 0 ? vRupees.toFixed(0) : vRupees.toFixed(2);
                     return `${v.name}: ${currencySymbol}${formatted}`;
                   })
                   .join('  •  ')

@@ -2155,6 +2155,23 @@ suite('18. Customer QR Menu & Table Stand Card Generator', () => {
     const fallbackPhone = computeSlug({ name: 'One Bite', phone: '9988776655' }, null);
     assertEqual(fallbackPhone, 'one-bite-6655', 'Falls back gracefully to phone suffix');
   });
+
+  test('QR-09 Customer Menu price formatting: correctly handles low-cost items (e.g. ₹10, ₹5) without showing raw paise', () => {
+    function formatPrice(paise, currency = '₹') {
+      if (typeof paise !== 'number' || isNaN(paise)) return `${currency}0`;
+      const rupees = paise / 100;
+      const val = rupees % 1 === 0 ? rupees.toFixed(0) : rupees.toFixed(2);
+      return `${currency}${val}`;
+    }
+
+    // 1000 paise must format as ₹10, NOT ₹1000
+    assertEqual(formatPrice(1000), '₹10', '1000 paise (₹10 water bottle) formats as ₹10');
+    assertEqual(formatPrice(2000), '₹20', '2000 paise (₹20 water bottle) formats as ₹20');
+    assertEqual(formatPrice(500), '₹5', '500 paise (₹5 candy) formats as ₹5');
+    assertEqual(formatPrice(5000), '₹50', '5000 paise (₹50 coffee) formats as ₹50');
+    assertEqual(formatPrice(1050), '₹10.50', '1050 paise (₹10.50 item) formats as ₹10.50');
+    assertEqual(formatPrice(0), '₹0', '0 paise formats as ₹0');
+  });
 });
 
 // -------------------------------------------------------------

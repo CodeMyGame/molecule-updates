@@ -496,8 +496,9 @@
     }
 
     function formatPrice(paise, currency) {
-      if (typeof paise !== 'number') return `${currency}0`;
-      const val = paise > 1000 ? (paise / 100).toFixed(0) : paise;
+      if (typeof paise !== 'number' || isNaN(paise)) return `${currency}0`;
+      const rupees = paise / 100;
+      const val = rupees % 1 === 0 ? rupees.toFixed(0) : rupees.toFixed(2);
       return `${currency}${val}`;
     }
 
