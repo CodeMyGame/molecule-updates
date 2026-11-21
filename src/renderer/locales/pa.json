@@ -12,7 +12,10 @@
     "logout": "ਲਾਗ ਆਉਟ",
     "collapseSidebar": "ਸਾਈਡਬਾਰ ਸਮੇਟੋ",
     "expandSidebar": "ਸਾਈਡਬਾਰ ਫੈਲਾਓ",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "ਦਿਨ ਖੁੱਲ੍ਹਾ",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "ਆਰਡਰ #{{number}}",
     "itemCount_one": "{{count}} ਆਈਟਮ",
     "itemCount_other": "{{count}} ਆਈਟਮਾਂ",
-    "itemCount": "{{count}} ਆਈਟਮਾਂ"
+    "itemCount": "{{count}} ਆਈਟਮਾਂ",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "ਆਰਡਰ ਲਓ",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "ਇਸ ਵਿਅੰਜਨ ਲਈ ਕੋਈ ਸਮੱਗਰੀ ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤੀ ਗਈ ਹੈ",
     "selectItemForRecipe": "ਇਸਦੀ ਵਿਅੰਜਨ ਦੇਖਣ ਜਾਂ ਕੌਂਫਿਗਰ ਕਰਨ ਲਈ ਇੱਕ ਮੀਨੂ ਆਈਟਮ ਚੁਣੋ",
     "notes": "ਨੋਟਸ",
-    "consumption": "ਖਪਤ ਰਿਪੋਰਟ"
+    "consumption": "ਖਪਤ ਰਿਪੋਰਟ",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "ਆਰਡਰ ਇਤਿਹਾਸ",
@@ -763,7 +773,19 @@
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "ਅੱਪਲੋਡ ਕੀਤੀ ਫ਼ਾਈਲ ਨਾਲ ਮੀਨੂ ਸਫਲਤਾਪੂਰਵਕ ਬਦਲਿਆ ਗਿਆ!",
     "station": "ਸਟੇਸ਼ਨ",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "ਬਿੱਲ ਪੂਰਵਦਰਸ਼ਨ",

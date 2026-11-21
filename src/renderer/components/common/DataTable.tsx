@@ -124,18 +124,18 @@ function DataTable<T extends Record<string, any>>({
   });
 
   return (
-    <div className={`overflow-x-auto rounded-lg border border-gray-200 ${className}`}>
+    <div className={`overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 ${className}`}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
+          <tr className="bg-gray-50 dark:bg-slate-800/80 border-b border-gray-200 dark:border-slate-800">
             {columns.map((col) => {
               const accessor = String(col.accessor);
               return (
                 <th
                   key={accessor}
-                  className={`px-4 py-3 font-semibold text-gray-600 ${alignClass(
+                  className={`px-4 py-3 font-semibold text-gray-600 dark:text-slate-300 ${alignClass(
                     col.align
-                  )} ${col.sortable !== false ? 'cursor-pointer select-none hover:bg-gray-100' : ''}`}
+                  )} ${col.sortable !== false ? 'cursor-pointer select-none hover:bg-gray-100 dark:hover:bg-slate-700/60' : ''}`}
                   style={col.width ? { width: col.width } : undefined}
                   onClick={() => col.sortable !== false && handleSort(accessor)}
                 >
@@ -153,7 +153,7 @@ function DataTable<T extends Record<string, any>>({
             Array.from({ length: shimmerRows }).map((_, rIdx) => {
               const widths = ['65%', '85%', '50%', '75%', '40%', '60%'];
               return (
-                <tr key={`shimmer-row-${rIdx}`} className="border-b border-gray-100 last:border-b-0">
+                <tr key={`shimmer-row-${rIdx}`} className="border-b border-gray-100 dark:border-slate-800/60 last:border-b-0">
                   {columns.map((col, cIdx) => {
                     const w = widths[(rIdx + cIdx) % widths.length];
                     return (
@@ -173,7 +173,7 @@ function DataTable<T extends Record<string, any>>({
           ) : sortedData.length === 0 ? (
             <tr>
               <td colSpan={columns.length} className="px-4 py-12 text-center">
-                <div className="flex flex-col items-center gap-2 text-gray-400">
+                <div className="flex flex-col items-center gap-2 text-gray-400 dark:text-slate-500">
                   <Inbox size={32} />
                   <span className="text-sm">{resolvedEmptyMessage}</span>
                 </div>
@@ -184,16 +184,16 @@ function DataTable<T extends Record<string, any>>({
               <tr
                 key={keyExtractor ? keyExtractor(item, index) : index}
                 onClick={() => onRowClick?.(item, index)}
-                className={`border-b border-gray-100 last:border-b-0 transition-colors ${
-                  index % 2 === 1 ? 'bg-gray-50/50' : 'bg-white'
-                } ${onRowClick ? 'cursor-pointer hover:bg-blue-50' : ''}`}
+                className={`border-b border-gray-100 dark:border-slate-800/60 last:border-b-0 transition-colors ${
+                  index % 2 === 1 ? 'bg-gray-50/50 dark:bg-slate-800/30' : 'bg-white dark:bg-slate-900'
+                } ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20' : 'hover:bg-gray-50/70 dark:hover:bg-slate-800/40'}`}
               >
                 {columns.map((col) => {
                   const accessor = String(col.accessor);
                   return (
                     <td
                       key={accessor}
-                      className={`px-4 py-3 ${alignClass(col.align)}`}
+                      className={`px-4 py-3 text-gray-800 dark:text-slate-200 ${alignClass(col.align)}`}
                     >
                       {col.render
                         ? col.render(item, index)
@@ -209,7 +209,7 @@ function DataTable<T extends Record<string, any>>({
               <td colSpan={columns.length} className="p-0 border-none">
                 <div
                   ref={observerTarget}
-                  className="py-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5"
+                  className="py-3 text-center text-xs text-gray-400 dark:text-slate-500 flex items-center justify-center gap-1.5"
                 >
                   <Loader2 size={13} className="animate-spin text-blue-500" />
                   <span>{t('common.loading')}</span>
@@ -220,7 +220,7 @@ function DataTable<T extends Record<string, any>>({
         </tbody>
       </table>
       {isInfiniteScrollActive && (
-        <div className="px-4 py-2.5 bg-gray-50/90 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between select-none">
+        <div className="px-4 py-2.5 bg-gray-50/90 dark:bg-slate-800/80 border-t border-gray-200 dark:border-slate-800 text-xs text-gray-500 dark:text-slate-400 flex items-center justify-between select-none">
           <span>
             {t('common.showingCount', {
               count: displayCount,

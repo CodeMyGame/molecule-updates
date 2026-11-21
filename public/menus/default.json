@@ -3,1505 +3,3715 @@
     "name": "Kapil Cafe",
     "address": "123 Main Street",
     "phone": "9690148808",
+    "email": "",
+    "fssai": "",
+    "gstin": "",
+    "logo": "",
     "currency": "₹",
     "currencyCode": "INR"
   },
   "settings": {
-    "subtitle": "Scan to browse our digital menu",
-    "tableCardTitle": "Scan for Digital Menu",
-    "tableCardSubtitle": "Point phone camera at QR code to view live menu & specials",
     "wifiSsid": "",
     "wifiPassword": "",
-    "theme": "noir"
+    "subtitle": "Scan to browse our digital menu",
+    "notice": "",
+    "theme": "noir",
+    "customUrl": "",
+    "cloudDomain": "https://molecule-e2e95.web.app",
+    "customerSlug": "kapil-cafe-slxfi",
+    "urlMode": "cloud",
+    "cloudUrl": "https://molecule-e2e95.web.app/m/kapil-cafe-slxfi",
+    "tableCardTitle": "Scan for Digital Menu",
+    "tableCardSubtitle": "Point phone camera at QR code to view live menu & specials"
+  },
+  "server": {
+    "running": false,
+    "lanAddress": "192.0.0.2",
+    "port": 3030,
+    "lanUrl": "http://192.0.0.2:3030/qr-menu",
+    "cloudUrl": "https://molecule-e2e95.web.app/m/kapil-cafe-slxfi",
+    "activeUrl": "https://molecule-e2e95.web.app/m/kapil-cafe-slxfi"
   },
   "categories": [
     {
       "id": 1,
       "name": "Cold Coffee",
-      "sortOrder": 1
+      "sortOrder": 1,
+      "isActive": true
     },
     {
       "id": 2,
       "name": "Burger",
-      "sortOrder": 2
+      "sortOrder": 2,
+      "isActive": true
     },
     {
       "id": 3,
       "name": "Veg Hot Dog",
-      "sortOrder": 3
+      "sortOrder": 3,
+      "isActive": true
     },
     {
       "id": 4,
       "name": "Maggi",
-      "sortOrder": 4
+      "sortOrder": 4,
+      "isActive": true
     },
     {
       "id": 5,
       "name": "Fries",
-      "sortOrder": 5
+      "sortOrder": 5,
+      "isActive": true
     },
     {
       "id": 6,
       "name": "Pasta",
-      "sortOrder": 6
+      "sortOrder": 6,
+      "isActive": true
     },
     {
       "id": 7,
       "name": "Sandwich",
-      "sortOrder": 7
+      "sortOrder": 7,
+      "isActive": true
     },
     {
       "id": 8,
       "name": "Waffle",
-      "sortOrder": 8
+      "sortOrder": 8,
+      "isActive": true
     },
     {
       "id": 9,
       "name": "Pizza",
-      "sortOrder": 9
+      "sortOrder": 9,
+      "isActive": true
     },
     {
       "id": 10,
       "name": "Garlic Bread",
-      "sortOrder": 10
+      "sortOrder": 10,
+      "isActive": true
     },
     {
       "id": 11,
       "name": "Milk Shake",
-      "sortOrder": 11
+      "sortOrder": 11,
+      "isActive": true
     },
     {
       "id": 12,
       "name": "Brownie",
-      "sortOrder": 12
+      "sortOrder": 12,
+      "isActive": true
     },
     {
       "id": 13,
       "name": "Mocktail",
-      "sortOrder": 13
+      "sortOrder": 13,
+      "isActive": true
     },
     {
       "id": 14,
       "name": "Wrap",
-      "sortOrder": 14
+      "sortOrder": 14,
+      "isActive": true
     },
     {
       "id": 15,
       "name": "Chinese",
-      "sortOrder": 15
+      "sortOrder": 15,
+      "isActive": true
     },
     {
       "id": 16,
       "name": "Hot & Cold",
-      "sortOrder": 16
+      "sortOrder": 16,
+      "isActive": true
     }
   ],
   "items": [
     {
-      "id": 1,
-      "name": "Cold coffee",
-      "categoryId": 1,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "CLCF",
-      "variations": []
-    },
-    {
-      "id": 2,
-      "name": "Chocolate cold coffee",
-      "categoryId": 1,
-      "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "CHCC",
-      "variations": []
-    },
-    {
-      "id": 3,
-      "name": "Crispy burger",
-      "categoryId": 2,
-      "basePrice": 3900,
-      "isVeg": 1,
-      "shortCode": "CRBR",
-      "variations": []
-    },
-    {
-      "id": 4,
-      "name": "Spicy alloo tikki burger",
-      "categoryId": 2,
-      "basePrice": 4900,
-      "isVeg": 1,
-      "shortCode": "SATB",
-      "variations": []
-    },
-    {
-      "id": 5,
-      "name": "Schezwan burger",
-      "categoryId": 2,
-      "basePrice": 4900,
-      "isVeg": 1,
-      "shortCode": "SZBR",
-      "variations": []
-    },
-    {
-      "id": 6,
-      "name": "Cheesy burger",
-      "categoryId": 2,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "CHBR",
-      "variations": []
-    },
-    {
-      "id": 7,
-      "name": "Fries burger",
-      "categoryId": 2,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "FRBR",
-      "variations": []
-    },
-    {
-      "id": 8,
-      "name": "Supremo burger",
-      "categoryId": 2,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "SPBR",
-      "variations": []
-    },
-    {
-      "id": 9,
-      "name": "Mexican burger",
-      "categoryId": 2,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "MXBR",
-      "variations": []
-    },
-    {
-      "id": 10,
-      "name": "Crispy nachos burger",
-      "categoryId": 2,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "CNBR",
-      "variations": []
-    },
-    {
-      "id": 11,
-      "name": "Baked burger",
-      "categoryId": 2,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "BKBR",
-      "variations": []
-    },
-    {
-      "id": 12,
-      "name": "BKB Burger",
-      "categoryId": 2,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "BBBR",
-      "variations": []
-    },
-    {
-      "id": 13,
-      "name": "BKB Cheese Burger",
-      "categoryId": 2,
-      "basePrice": 12900,
-      "isVeg": 1,
-      "shortCode": "BCBR",
-      "variations": []
-    },
-    {
-      "id": 14,
-      "name": "Paneer crispy burger",
-      "categoryId": 2,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "PCBR",
-      "variations": []
-    },
-    {
-      "id": 15,
-      "name": "Veg Treat Hot Dog",
-      "categoryId": 3,
-      "basePrice": 5900,
-      "isVeg": 1,
-      "shortCode": "VTHD",
-      "variations": []
-    },
-    {
-      "id": 16,
-      "name": "Veg spicy Hot Dog",
-      "categoryId": 3,
-      "basePrice": 5900,
-      "isVeg": 1,
-      "shortCode": "VSHD",
-      "variations": []
-    },
-    {
-      "id": 17,
-      "name": "Veg Schezwan Hot Dog",
-      "categoryId": 3,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "VSZH",
-      "variations": []
-    },
-    {
-      "id": 18,
-      "name": "Veg cheesy Hot Dog",
-      "categoryId": 3,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "VCHD",
-      "variations": []
-    },
-    {
-      "id": 19,
-      "name": "Veg cheesy Schezwan Hot Dog",
-      "categoryId": 3,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "VCSH",
-      "variations": []
-    },
-    {
-      "id": 20,
-      "name": "Masala maggi",
-      "categoryId": 4,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "MSMG",
-      "variations": []
-    },
-    {
-      "id": 21,
-      "name": "Masala Cheese maggi",
-      "categoryId": 4,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "MCMG",
-      "variations": []
-    },
-    {
-      "id": 22,
-      "name": "Schezwan maggi",
-      "categoryId": 4,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "SZMG",
-      "variations": []
-    },
-    {
-      "id": 23,
-      "name": "Mexican maggi",
-      "categoryId": 4,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "MXMG",
-      "variations": []
-    },
-    {
-      "id": 24,
-      "name": "Italian maggi",
-      "categoryId": 4,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "ITMG",
-      "variations": []
-    },
-    {
-      "id": 25,
-      "name": "Fries",
-      "categoryId": 5,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "FRIS",
-      "variations": []
-    },
-    {
-      "id": 26,
-      "name": "Fries wit piri piri",
-      "categoryId": 5,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "FPPP",
-      "variations": []
-    },
-    {
-      "id": 27,
-      "name": "Fries with meyo",
-      "categoryId": 5,
-      "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "FWMY",
-      "variations": []
-    },
-    {
-      "id": 28,
-      "name": "Fries with cheese",
-      "categoryId": 5,
-      "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "FWCH",
-      "variations": []
-    },
-    {
-      "id": 29,
-      "name": "Meyo cheesy fries",
-      "categoryId": 5,
-      "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "MCFR",
-      "variations": []
-    },
-    {
-      "id": 30,
-      "name": "Cheese nachos",
-      "categoryId": 5,
-      "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "CHNS",
-      "variations": []
-    },
-    {
-      "id": 31,
-      "name": "Mexican nachos",
-      "categoryId": 5,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "MXNS",
-      "variations": []
-    },
-    {
-      "id": 32,
-      "name": "White sause pasta",
-      "categoryId": 6,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "WSPA",
-      "variations": []
-    },
-    {
-      "id": 33,
-      "name": "Arabiata pasta (red pasta)",
-      "categoryId": 6,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "ARPA",
-      "variations": []
-    },
-    {
-      "id": 34,
-      "name": "Pink pasta (red&white)",
-      "categoryId": 6,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "PKPA",
-      "variations": []
-    },
-    {
-      "id": 35,
-      "name": "Exotic pasta",
-      "categoryId": 6,
-      "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "EXPA",
-      "variations": []
-    },
-    {
-      "id": 36,
-      "name": "Bread Butter Cheese Sandwich",
-      "categoryId": 7,
-      "basePrice": 4900,
-      "isVeg": 1,
-      "shortCode": "BBCS",
-      "variations": []
-    },
-    {
-      "id": 37,
-      "name": "Bread butter jam (3 layer)",
-      "categoryId": 7,
-      "basePrice": 4900,
-      "isVeg": 1,
-      "shortCode": "BBJS",
-      "variations": []
-    },
-    {
-      "id": 38,
-      "name": "Schezwan meyo grill Sandwich",
-      "categoryId": 7,
-      "basePrice": 5900,
-      "isVeg": 1,
-      "shortCode": "SMGS",
-      "variations": []
-    },
-    {
-      "id": 39,
-      "name": "White cheese grill Sandwich",
-      "categoryId": 7,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "WCGS",
-      "variations": []
-    },
-    {
       "id": 40,
       "name": "Exotic grill Sandwich",
-      "categoryId": 7,
-      "basePrice": 6900,
-      "isVeg": 1,
       "shortCode": "EXGS",
-      "variations": []
-    },
-    {
-      "id": 41,
-      "name": "Chilly grill Sandwich",
       "categoryId": 7,
       "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "CHGS",
-      "variations": []
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": true,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": 42,
-      "name": "Cheesy corn Sandwich",
-      "categoryId": 7,
+      "id": 108,
+      "name": "Tea",
+      "shortCode": "HTEA",
+      "categoryId": 16,
+      "basePrice": 1000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Hot & Cold",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 100,
+      "name": "Manchurian dry",
+      "shortCode": "MNDR",
+      "categoryId": 15,
       "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "CCNS",
-      "variations": []
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
-      "id": 43,
-      "name": "Pasta sandwich",
-      "categoryId": 7,
+      "id": 96,
+      "name": "Veg Wrap",
+      "shortCode": "VGWP",
+      "categoryId": 14,
       "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "PSAS",
-      "variations": []
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Wrap",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 16,
+          "name": "Wrap Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 24,
+              "addonGroupId": 16,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": 44,
-      "name": "Paneer chilly grill Sandwich",
-      "categoryId": 7,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "PCGS",
-      "variations": []
+      "id": 88,
+      "name": "Virgin mojito",
+      "shortCode": "VRMJ",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
-      "id": 45,
-      "name": "Schezwan meyo cheese grill Sandwich",
-      "categoryId": 7,
+      "id": 86,
+      "name": "Brownie with ice cream",
+      "shortCode": "BWIC",
+      "categoryId": 12,
       "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "SMCG",
-      "variations": []
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Brownie",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
-      "id": 46,
-      "name": "Tandoori paneer Sandwich",
-      "categoryId": 7,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "TDPS",
-      "variations": []
-    },
-    {
-      "id": 47,
-      "name": "Chocolate grill Sandwich",
-      "categoryId": 7,
+      "id": 78,
+      "name": "Vanilla shake",
+      "shortCode": "VNSK",
+      "categoryId": 11,
       "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "CGSS",
-      "variations": []
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
-      "id": 48,
-      "name": "Cheesy club Sandwich",
-      "categoryId": 7,
+      "id": 70,
+      "name": "Cheese garlic bread",
+      "shortCode": "CGGB",
+      "categoryId": 10,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "id": 41,
+          "menuItemId": 70,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 42,
+          "menuItemId": 70,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": []
+    },
+    {
+      "id": 56,
+      "name": "Margarita Pizza",
+      "shortCode": "MGPZ",
+      "categoryId": 9,
       "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "CCLS",
-      "variations": []
-    },
-    {
-      "id": 49,
-      "name": "Chesse bake Sandwich",
-      "categoryId": 7,
-      "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "CBKS",
-      "variations": []
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "id": 13,
+          "menuItemId": 56,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 14,
+          "menuItemId": 56,
+          "name": "Medium",
+          "priceDelta": 6000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
+        }
+      ]
     },
     {
       "id": 50,
       "name": "Chocolate Waffle",
+      "shortCode": "CHWF",
       "categoryId": 8,
       "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "CHWF",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Waffle",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 1,
+          "menuItemId": 50,
           "name": "2 Pieces",
           "priceDelta": 0,
-          "basePrice": 7900
+          "isDefault": true
         },
         {
           "id": 2,
+          "menuItemId": 50,
           "name": "4 Pieces",
           "priceDelta": 6000,
-          "basePrice": 13900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 14,
+          "name": "Waffle Toppings",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 21,
+              "addonGroupId": 14,
+              "name": "Ice Cream",
+              "price": 3900,
+              "variationPrices": {
+                "2 Pieces": 3900,
+                "4 Pieces": 5900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "name": "Bread Butter Cheese Sandwich",
+      "shortCode": "BBCS",
+      "categoryId": 7,
+      "basePrice": 4900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "White sause pasta",
+      "shortCode": "WSPA",
+      "categoryId": 6,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 25,
+      "name": "Fries",
+      "shortCode": "FRIS",
+      "categoryId": 5,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Fries",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 12,
+          "name": "Fries Add-ons",
+          "minSelect": 0,
+          "maxSelect": 3,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 17,
+              "addonGroupId": 12,
+              "name": "Extra Cheese",
+              "price": 4900
+            },
+            {
+              "id": 18,
+              "addonGroupId": 12,
+              "name": "Extra Meyo/Cheese Dip",
+              "price": 3000
+            },
+            {
+              "id": 19,
+              "addonGroupId": 12,
+              "name": "Schezwan/Spicy Meyo",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Masala maggi",
+      "shortCode": "MSMG",
+      "categoryId": 4,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Maggi",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 11,
+          "name": "Maggi Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 16,
+              "addonGroupId": 11,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Veg Treat Hot Dog",
+      "shortCode": "VTHD",
+      "categoryId": 3,
+      "basePrice": 5900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Veg Hot Dog",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 10,
+          "name": "Hot Dog Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 15,
+              "addonGroupId": 10,
+              "name": "Extra Cheese",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Crispy burger",
+      "shortCode": "CRBR",
+      "categoryId": 2,
+      "basePrice": 3900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 1,
+      "name": "Cold coffee",
+      "shortCode": "CLCF",
+      "categoryId": 1,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 1,
+      "isPinned": false,
+      "categoryName": "Cold Coffee",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 9,
+          "name": "Cold Coffee Add-ons",
+          "minSelect": 0,
+          "maxSelect": 2,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 13,
+              "addonGroupId": 9,
+              "name": "Ice Cream",
+              "price": 3900
+            },
+            {
+              "id": 14,
+              "addonGroupId": 9,
+              "name": "Choco Chips",
+              "price": 1900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "name": "Coffee",
+      "shortCode": "HCFF",
+      "categoryId": 16,
+      "basePrice": 4000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Hot & Cold",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 101,
+      "name": "Steam momos",
+      "shortCode": "STMO",
+      "categoryId": 15,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 97,
+      "name": "Veg cheese wrap",
+      "shortCode": "VCWP",
+      "categoryId": 14,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Wrap",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 16,
+          "name": "Wrap Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 24,
+              "addonGroupId": 16,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 89,
+      "name": "Blue ice mojito",
+      "shortCode": "BIMJ",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 87,
+      "name": "Sizzling brownie",
+      "shortCode": "SLBR",
+      "categoryId": 12,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Brownie",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 79,
+      "name": "Strawberry shake",
+      "shortCode": "STSK",
+      "categoryId": 11,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 71,
+      "name": "Onion chilly garlic bread",
+      "shortCode": "OCGB",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "id": 43,
+          "menuItemId": 71,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 44,
+          "menuItemId": 71,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": []
+    },
+    {
+      "id": 57,
+      "name": "Fresh farm pizza",
+      "shortCode": "FFPZ",
+      "categoryId": 9,
+      "basePrice": 11900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "id": 15,
+          "menuItemId": 57,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 16,
+          "menuItemId": 57,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
     },
     {
       "id": 51,
       "name": "Butter scotch Waffle",
+      "shortCode": "BSWF",
       "categoryId": 8,
       "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "BSWF",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Waffle",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 3,
+          "menuItemId": 51,
           "name": "2 Pieces",
           "priceDelta": 0,
-          "basePrice": 7900
+          "isDefault": true
         },
         {
           "id": 4,
+          "menuItemId": 51,
           "name": "4 Pieces",
           "priceDelta": 6000,
-          "basePrice": 13900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 14,
+          "name": "Waffle Toppings",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 21,
+              "addonGroupId": 14,
+              "name": "Ice Cream",
+              "price": 3900,
+              "variationPrices": {
+                "2 Pieces": 3900,
+                "4 Pieces": 5900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "name": "Bread butter jam (3 layer)",
+      "shortCode": "BBJS",
+      "categoryId": 7,
+      "basePrice": 4900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "name": "Arabiata pasta (red pasta)",
+      "shortCode": "ARPA",
+      "categoryId": 6,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 26,
+      "name": "Fries wit piri piri",
+      "shortCode": "FPPP",
+      "categoryId": 5,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Fries",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 12,
+          "name": "Fries Add-ons",
+          "minSelect": 0,
+          "maxSelect": 3,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 17,
+              "addonGroupId": 12,
+              "name": "Extra Cheese",
+              "price": 4900
+            },
+            {
+              "id": 18,
+              "addonGroupId": 12,
+              "name": "Extra Meyo/Cheese Dip",
+              "price": 3000
+            },
+            {
+              "id": 19,
+              "addonGroupId": 12,
+              "name": "Schezwan/Spicy Meyo",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Masala Cheese maggi",
+      "shortCode": "MCMG",
+      "categoryId": 4,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Maggi",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 11,
+          "name": "Maggi Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 16,
+              "addonGroupId": 11,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Veg spicy Hot Dog",
+      "shortCode": "VSHD",
+      "categoryId": 3,
+      "basePrice": 5900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Veg Hot Dog",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 10,
+          "name": "Hot Dog Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 15,
+              "addonGroupId": 10,
+              "name": "Extra Cheese",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Spicy alloo tikki burger",
+      "shortCode": "SATB",
+      "categoryId": 2,
+      "basePrice": 4900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 2,
+      "name": "Chocolate cold coffee",
+      "shortCode": "CHCC",
+      "categoryId": 1,
+      "basePrice": 9900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 2,
+      "isPinned": false,
+      "categoryName": "Cold Coffee",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 9,
+          "name": "Cold Coffee Add-ons",
+          "minSelect": 0,
+          "maxSelect": 2,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 13,
+              "addonGroupId": 9,
+              "name": "Ice Cream",
+              "price": 3900
+            },
+            {
+              "id": 14,
+              "addonGroupId": 9,
+              "name": "Choco Chips",
+              "price": 1900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "name": "Cold Drink",
+      "shortCode": "CDRK",
+      "categoryId": 16,
+      "basePrice": 4000,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Hot & Cold",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 102,
+      "name": "Fried momos",
+      "shortCode": "FRMO",
+      "categoryId": 15,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 98,
+      "name": "Mexican wrap",
+      "shortCode": "MXWP",
+      "categoryId": 14,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Wrap",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 16,
+          "name": "Wrap Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 24,
+              "addonGroupId": 16,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 90,
+      "name": "Cool blue mocktail",
+      "shortCode": "CBMK",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 80,
+      "name": "Butter scotch shake",
+      "shortCode": "BSSK",
+      "categoryId": 11,
+      "basePrice": 9900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 72,
+      "name": "Tomato chilly garlic bread",
+      "shortCode": "TCGB",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "id": 45,
+          "menuItemId": 72,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 46,
+          "menuItemId": 72,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": []
+    },
+    {
+      "id": 58,
+      "name": "Veg Supremo Pizza",
+      "shortCode": "VSPZ",
+      "categoryId": 9,
+      "basePrice": 13900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "id": 17,
+          "menuItemId": 58,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 18,
+          "menuItemId": 58,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
     },
     {
       "id": 52,
       "name": "Chocolate kit-kat Waffle",
+      "shortCode": "KKWF",
       "categoryId": 8,
       "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "KKWF",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Waffle",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 5,
+          "menuItemId": 52,
           "name": "2 Pieces",
           "priceDelta": 0,
-          "basePrice": 10900
+          "isDefault": true
         },
         {
           "id": 6,
+          "menuItemId": 52,
           "name": "4 Pieces",
           "priceDelta": 9000,
-          "basePrice": 19900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 14,
+          "name": "Waffle Toppings",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 21,
+              "addonGroupId": 14,
+              "name": "Ice Cream",
+              "price": 3900,
+              "variationPrices": {
+                "2 Pieces": 3900,
+                "4 Pieces": 5900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "name": "Schezwan meyo grill Sandwich",
+      "shortCode": "SMGS",
+      "categoryId": 7,
+      "basePrice": 5900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "name": "Pink pasta (red&white)",
+      "shortCode": "PKPA",
+      "categoryId": 6,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 27,
+      "name": "Fries with meyo",
+      "shortCode": "FWMY",
+      "categoryId": 5,
+      "basePrice": 9900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Fries",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 12,
+          "name": "Fries Add-ons",
+          "minSelect": 0,
+          "maxSelect": 3,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 17,
+              "addonGroupId": 12,
+              "name": "Extra Cheese",
+              "price": 4900
+            },
+            {
+              "id": 18,
+              "addonGroupId": 12,
+              "name": "Extra Meyo/Cheese Dip",
+              "price": 3000
+            },
+            {
+              "id": 19,
+              "addonGroupId": 12,
+              "name": "Schezwan/Spicy Meyo",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Schezwan maggi",
+      "shortCode": "SZMG",
+      "categoryId": 4,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Maggi",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 11,
+          "name": "Maggi Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 16,
+              "addonGroupId": 11,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Veg Schezwan Hot Dog",
+      "shortCode": "VSZH",
+      "categoryId": 3,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Veg Hot Dog",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 10,
+          "name": "Hot Dog Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 15,
+              "addonGroupId": 10,
+              "name": "Extra Cheese",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Schezwan burger",
+      "shortCode": "SZBR",
+      "categoryId": 2,
+      "basePrice": 4900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 3,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 103,
+      "name": "Hakka noodles",
+      "shortCode": "HKNO",
+      "categoryId": 15,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 99,
+      "name": "Paneer masala wrap",
+      "shortCode": "PMWP",
+      "categoryId": 14,
+      "basePrice": 11900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Wrap",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 16,
+          "name": "Wrap Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 24,
+              "addonGroupId": 16,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 91,
+      "name": "Italian Mojito",
+      "shortCode": "ITMJ",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 81,
+      "name": "Kit-kat caramal shake",
+      "shortCode": "KKSK",
+      "categoryId": 11,
+      "basePrice": 11900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 73,
+      "name": "Sweet corn garlic bread",
+      "shortCode": "SCGB",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "id": 47,
+          "menuItemId": 73,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 48,
+          "menuItemId": 73,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": []
+    },
+    {
+      "id": 59,
+      "name": "Mexican pizza",
+      "shortCode": "MXPZ",
+      "categoryId": 9,
+      "basePrice": 13900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "id": 19,
+          "menuItemId": 59,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 20,
+          "menuItemId": 59,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
     },
     {
       "id": 53,
       "name": "Double delight Waffle",
+      "shortCode": "DDWF",
       "categoryId": 8,
       "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "DDWF",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Waffle",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 7,
+          "menuItemId": 53,
           "name": "2 Pieces",
           "priceDelta": 0,
-          "basePrice": 10900
+          "isDefault": true
         },
         {
           "id": 8,
+          "menuItemId": 53,
           "name": "4 Pieces",
           "priceDelta": 9000,
-          "basePrice": 19900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 14,
+          "name": "Waffle Toppings",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 21,
+              "addonGroupId": 14,
+              "name": "Ice Cream",
+              "price": 3900,
+              "variationPrices": {
+                "2 Pieces": 3900,
+                "4 Pieces": 5900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "name": "White cheese grill Sandwich",
+      "shortCode": "WCGS",
+      "categoryId": 7,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "name": "Exotic pasta",
+      "shortCode": "EXPA",
+      "categoryId": 6,
+      "basePrice": 11900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Pasta",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 28,
+      "name": "Fries with cheese",
+      "shortCode": "FWCH",
+      "categoryId": 5,
+      "basePrice": 11900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Fries",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 12,
+          "name": "Fries Add-ons",
+          "minSelect": 0,
+          "maxSelect": 3,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 17,
+              "addonGroupId": 12,
+              "name": "Extra Cheese",
+              "price": 4900
+            },
+            {
+              "id": 18,
+              "addonGroupId": 12,
+              "name": "Extra Meyo/Cheese Dip",
+              "price": 3000
+            },
+            {
+              "id": 19,
+              "addonGroupId": 12,
+              "name": "Schezwan/Spicy Meyo",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Mexican maggi",
+      "shortCode": "MXMG",
+      "categoryId": 4,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Maggi",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 11,
+          "name": "Maggi Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 16,
+              "addonGroupId": 11,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Veg cheesy Hot Dog",
+      "shortCode": "VCHD",
+      "categoryId": 3,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Veg Hot Dog",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 10,
+          "name": "Hot Dog Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 15,
+              "addonGroupId": 10,
+              "name": "Extra Cheese",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Cheesy burger",
+      "shortCode": "CHBR",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 4,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 104,
+      "name": "Schezwan noodles",
+      "shortCode": "SZNO",
+      "categoryId": 15,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 92,
+      "name": "Nature kiwi cold mocktail",
+      "shortCode": "NKMK",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 82,
+      "name": "Chocolate shake",
+      "shortCode": "CHSK",
+      "categoryId": 11,
+      "basePrice": 9900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 74,
+      "name": "Jalapeno garlic bread",
+      "shortCode": "JPGB",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "id": 49,
+          "menuItemId": 74,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 50,
+          "menuItemId": 74,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": []
+    },
+    {
+      "id": 60,
+      "name": "Indian spicy Pizza",
+      "shortCode": "ISPZ",
+      "categoryId": 9,
+      "basePrice": 13900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "id": 21,
+          "menuItemId": 60,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 22,
+          "menuItemId": 60,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
     },
     {
       "id": 54,
       "name": "Chocolate Oreo Waffle",
+      "shortCode": "ORWF",
       "categoryId": 8,
       "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "ORWF",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Waffle",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 9,
+          "menuItemId": 54,
           "name": "2 Pieces",
           "priceDelta": 0,
-          "basePrice": 10900
+          "isDefault": true
         },
         {
           "id": 10,
+          "menuItemId": 54,
           "name": "4 Pieces",
           "priceDelta": 9000,
-          "basePrice": 19900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 14,
+          "name": "Waffle Toppings",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 21,
+              "addonGroupId": 14,
+              "name": "Ice Cream",
+              "price": 3900,
+              "variationPrices": {
+                "2 Pieces": 3900,
+                "4 Pieces": 5900
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Meyo cheesy fries",
+      "shortCode": "MCFR",
+      "categoryId": 5,
+      "basePrice": 9900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Fries",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 12,
+          "name": "Fries Add-ons",
+          "minSelect": 0,
+          "maxSelect": 3,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 17,
+              "addonGroupId": 12,
+              "name": "Extra Cheese",
+              "price": 4900
+            },
+            {
+              "id": 18,
+              "addonGroupId": 12,
+              "name": "Extra Meyo/Cheese Dip",
+              "price": 3000
+            },
+            {
+              "id": 19,
+              "addonGroupId": 12,
+              "name": "Schezwan/Spicy Meyo",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Italian maggi",
+      "shortCode": "ITMG",
+      "categoryId": 4,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Maggi",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 11,
+          "name": "Maggi Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 16,
+              "addonGroupId": 11,
+              "name": "Extra Cheese",
+              "price": 4900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Veg cheesy Schezwan Hot Dog",
+      "shortCode": "VCSH",
+      "categoryId": 3,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Veg Hot Dog",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 10,
+          "name": "Hot Dog Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 15,
+              "addonGroupId": 10,
+              "name": "Extra Cheese",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Fries burger",
+      "shortCode": "FRBR",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 5,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 105,
+      "name": "Garlic Chowmein",
+      "shortCode": "GACH",
+      "categoryId": 15,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 93,
+      "name": "Green apple mocktail",
+      "shortCode": "GAMK",
+      "categoryId": 13,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 83,
+      "name": "Brownie shake",
+      "shortCode": "BRSK",
+      "categoryId": 11,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 75,
+      "name": "Supremo garlic bread",
+      "shortCode": "SMGB",
+      "categoryId": 10,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "id": 51,
+          "menuItemId": 75,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 52,
+          "menuItemId": 75,
+          "name": "Medium",
+          "priceDelta": 3000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": []
+    },
+    {
+      "id": 61,
+      "name": "Masala paneer pizza",
+      "shortCode": "MPPZ",
+      "categoryId": 9,
+      "basePrice": 15900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
+      "variations": [
+        {
+          "id": 23,
+          "menuItemId": 61,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 24,
+          "menuItemId": 61,
+          "name": "Medium",
+          "priceDelta": 5000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
     },
     {
       "id": 55,
       "name": "Nutella Chocolate Waffle",
+      "shortCode": "NTWF",
       "categoryId": 8,
       "basePrice": 12900,
-      "isVeg": 1,
-      "shortCode": "NTWF",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Waffle",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 11,
+          "menuItemId": 55,
           "name": "2 Pieces",
           "priceDelta": 0,
-          "basePrice": 12900
+          "isDefault": true
         },
         {
           "id": 12,
+          "menuItemId": 55,
           "name": "4 Pieces",
           "priceDelta": 11000,
-          "basePrice": 23900
+          "isDefault": false
         }
-      ]
-    },
-    {
-      "id": 56,
-      "name": "Margarita Pizza",
-      "categoryId": 9,
-      "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "MGPZ",
-      "variations": [
-        {
-          "id": 13,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 9900
-        },
+      ],
+      "addonGroups": [
         {
           "id": 14,
-          "name": "Medium",
-          "priceDelta": 6000,
-          "basePrice": 15900
+          "name": "Waffle Toppings",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 21,
+              "addonGroupId": 14,
+              "name": "Ice Cream",
+              "price": 3900,
+              "variationPrices": {
+                "2 Pieces": 3900,
+                "4 Pieces": 5900
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "id": 57,
-      "name": "Fresh farm pizza",
-      "categoryId": 9,
+      "id": 41,
+      "name": "Chilly grill Sandwich",
+      "shortCode": "CHGS",
+      "categoryId": 7,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Cheese nachos",
+      "shortCode": "CHNS",
+      "categoryId": 5,
       "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "FFPZ",
-      "variations": [
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Fries",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
         {
-          "id": 15,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 11900
-        },
-        {
-          "id": 16,
-          "name": "Medium",
-          "priceDelta": 5000,
-          "basePrice": 16900
+          "id": 12,
+          "name": "Fries Add-ons",
+          "minSelect": 0,
+          "maxSelect": 3,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 17,
+              "addonGroupId": 12,
+              "name": "Extra Cheese",
+              "price": 4900
+            },
+            {
+              "id": 18,
+              "addonGroupId": 12,
+              "name": "Extra Meyo/Cheese Dip",
+              "price": 3000
+            },
+            {
+              "id": 19,
+              "addonGroupId": 12,
+              "name": "Schezwan/Spicy Meyo",
+              "price": 3000
+            }
+          ]
         }
       ]
     },
     {
-      "id": 58,
-      "name": "Veg Supremo Pizza",
-      "categoryId": 9,
-      "basePrice": 13900,
-      "isVeg": 1,
-      "shortCode": "VSPZ",
-      "variations": [
-        {
-          "id": 17,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 13900
-        },
-        {
-          "id": 18,
-          "name": "Medium",
-          "priceDelta": 5000,
-          "basePrice": 18900
-        }
-      ]
+      "id": 8,
+      "name": "Supremo burger",
+      "shortCode": "SPBR",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 6,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
-      "id": 59,
-      "name": "Mexican pizza",
-      "categoryId": 9,
-      "basePrice": 13900,
-      "isVeg": 1,
-      "shortCode": "MXPZ",
-      "variations": [
-        {
-          "id": 19,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 13900
-        },
-        {
-          "id": 20,
-          "name": "Medium",
-          "priceDelta": 5000,
-          "basePrice": 18900
-        }
-      ]
+      "id": 106,
+      "name": "Potato chilly",
+      "shortCode": "PTCH",
+      "categoryId": 15,
+      "basePrice": 11900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
-      "id": 60,
-      "name": "Indian spicy Pizza",
-      "categoryId": 9,
-      "basePrice": 13900,
-      "isVeg": 1,
-      "shortCode": "ISPZ",
-      "variations": [
-        {
-          "id": 21,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 13900
-        },
-        {
-          "id": 22,
-          "name": "Medium",
-          "priceDelta": 5000,
-          "basePrice": 18900
-        }
-      ]
+      "id": 94,
+      "name": "Strawberry mojito",
+      "shortCode": "STMJ",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
-      "id": 61,
-      "name": "Masala paneer pizza",
-      "categoryId": 9,
-      "basePrice": 15900,
-      "isVeg": 1,
-      "shortCode": "MPPZ",
+      "id": 84,
+      "name": "Oreo shake",
+      "shortCode": "ORSK",
+      "categoryId": 11,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 76,
+      "name": "Triple spice garlic bread",
+      "shortCode": "TSGB",
+      "categoryId": 10,
+      "basePrice": 9900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
       "variations": [
         {
-          "id": 23,
+          "id": 53,
+          "menuItemId": 76,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 15900
+          "isDefault": true
         },
         {
-          "id": 24,
+          "id": 54,
+          "menuItemId": 76,
           "name": "Medium",
-          "priceDelta": 5000,
-          "basePrice": 20900
+          "priceDelta": 4000,
+          "isDefault": false
         }
-      ]
+      ],
+      "addonGroups": []
     },
     {
       "id": 62,
       "name": "Corn delight Pizza",
+      "shortCode": "CDPZ",
       "categoryId": 9,
       "basePrice": 12900,
-      "isVeg": 1,
-      "shortCode": "CDPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 25,
+          "menuItemId": 62,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 12900
+          "isDefault": true
         },
         {
           "id": 26,
+          "menuItemId": 62,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 17900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
+    },
+    {
+      "id": 42,
+      "name": "Cheesy corn Sandwich",
+      "shortCode": "CCNS",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Mexican nachos",
+      "shortCode": "MXNS",
+      "categoryId": 5,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Fries",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 12,
+          "name": "Fries Add-ons",
+          "minSelect": 0,
+          "maxSelect": 3,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 17,
+              "addonGroupId": 12,
+              "name": "Extra Cheese",
+              "price": 4900
+            },
+            {
+              "id": 18,
+              "addonGroupId": 12,
+              "name": "Extra Meyo/Cheese Dip",
+              "price": 3000
+            },
+            {
+              "id": 19,
+              "addonGroupId": 12,
+              "name": "Schezwan/Spicy Meyo",
+              "price": 3000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Mexican burger",
+      "shortCode": "MXBR",
+      "categoryId": 2,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 7,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 107,
+      "name": "Paneer chilly",
+      "shortCode": "PNCH",
+      "categoryId": 15,
+      "basePrice": 12900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Chinese",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 95,
+      "name": "Sunrise orange mocktail",
+      "shortCode": "SOMK",
+      "categoryId": 13,
+      "basePrice": 6900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Mocktail",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 85,
+      "name": "Nutella shake",
+      "shortCode": "NUSK",
+      "categoryId": 11,
+      "basePrice": 13900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Milk Shake",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
+      "id": 77,
+      "name": "Peri Peri paneer garlic bread",
+      "shortCode": "PPGB",
+      "categoryId": 10,
+      "basePrice": 10900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Garlic Bread",
+      "has_variations": true,
+      "has_addons": false,
+      "variations": [
+        {
+          "id": 55,
+          "menuItemId": 77,
+          "name": "Regular",
+          "priceDelta": 0,
+          "isDefault": true
+        },
+        {
+          "id": 56,
+          "menuItemId": 77,
+          "name": "Medium",
+          "priceDelta": 4000,
+          "isDefault": false
+        }
+      ],
+      "addonGroups": []
     },
     {
       "id": 63,
       "name": "Veggie triangle Pizza",
+      "shortCode": "VTPZ",
       "categoryId": 9,
       "basePrice": 12900,
-      "isVeg": 1,
-      "shortCode": "VTPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 27,
+          "menuItemId": 63,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 12900
+          "isDefault": true
         },
         {
           "id": 28,
+          "menuItemId": 63,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 17900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
+    },
+    {
+      "id": 43,
+      "name": "Pasta sandwich",
+      "shortCode": "PSAS",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Crispy nachos burger",
+      "shortCode": "CNBR",
+      "categoryId": 2,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 8,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
       "id": 64,
       "name": "Triple Spicy pizza",
+      "shortCode": "TSPZ",
       "categoryId": 9,
       "basePrice": 13900,
-      "isVeg": 1,
-      "shortCode": "TSPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 9,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 29,
+          "menuItemId": 64,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 13900
+          "isDefault": true
         },
         {
           "id": 30,
+          "menuItemId": 64,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 18900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
+    },
+    {
+      "id": 44,
+      "name": "Paneer chilly grill Sandwich",
+      "shortCode": "PCGS",
+      "categoryId": 7,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 9,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Baked burger",
+      "shortCode": "BKBR",
+      "categoryId": 2,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": false,
+      "sortOrder": 9,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
       "id": 65,
       "name": "Fries pizza",
+      "shortCode": "FRPZ",
       "categoryId": 9,
       "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "FRPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 10,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 31,
+          "menuItemId": 65,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 11900
+          "isDefault": true
         },
         {
           "id": 32,
+          "menuItemId": 65,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 16900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
+    },
+    {
+      "id": 45,
+      "name": "Schezwan meyo cheese grill Sandwich",
+      "shortCode": "SMCG",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 10,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "BKB Burger",
+      "shortCode": "BBBR",
+      "categoryId": 2,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 10,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
       "id": 66,
       "name": "Tandoori paneer pizza",
+      "shortCode": "TPPZ",
       "categoryId": 9,
       "basePrice": 15900,
-      "isVeg": 1,
-      "shortCode": "TPPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 11,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 33,
+          "menuItemId": 66,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 15900
+          "isDefault": true
         },
         {
           "id": 34,
+          "menuItemId": 66,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 20900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
+    },
+    {
+      "id": 46,
+      "name": "Tandoori paneer Sandwich",
+      "shortCode": "TDPS",
+      "categoryId": 7,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 11,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "BKB Cheese Burger",
+      "shortCode": "BCBR",
+      "categoryId": 2,
+      "basePrice": 12900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 11,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
     },
     {
       "id": 67,
       "name": "Crowded pizza",
+      "shortCode": "CRPZ",
       "categoryId": 9,
       "basePrice": 15900,
-      "isVeg": 1,
-      "shortCode": "CRPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 12,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 35,
+          "menuItemId": 67,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 15900
+          "isDefault": true
         },
         {
           "id": 36,
+          "menuItemId": 67,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 20900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
     },
     {
+      "id": 47,
+      "name": "Chocolate grill Sandwich",
+      "shortCode": "CGSS",
+      "categoryId": 7,
+      "basePrice": 7900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 12,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Paneer crispy burger",
+      "shortCode": "PCBR",
+      "categoryId": 2,
+      "basePrice": 8900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 12,
+      "isPinned": false,
+      "categoryName": "Burger",
+      "has_variations": false,
+      "has_addons": false,
+      "variations": [],
+      "addonGroups": []
+    },
+    {
       "id": 68,
       "name": "Veggie Americano Pizza",
+      "shortCode": "VAPZ",
       "categoryId": 9,
       "basePrice": 15900,
-      "isVeg": 1,
-      "shortCode": "VAPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 13,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 37,
+          "menuItemId": 68,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 15900
+          "isDefault": true
         },
         {
           "id": 38,
+          "menuItemId": 68,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 20900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "name": "Cheesy club Sandwich",
+      "shortCode": "CCLS",
+      "categoryId": 7,
+      "basePrice": 9900,
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 13,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
+        {
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
         }
       ]
     },
     {
       "id": 69,
       "name": "Pasta Pizza",
+      "shortCode": "PAPZ",
       "categoryId": 9,
       "basePrice": 15900,
-      "isVeg": 1,
-      "shortCode": "PAPZ",
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 14,
+      "isPinned": false,
+      "categoryName": "Pizza",
+      "has_variations": true,
+      "has_addons": true,
       "variations": [
         {
           "id": 39,
+          "menuItemId": 69,
           "name": "Regular",
           "priceDelta": 0,
-          "basePrice": 15900
+          "isDefault": true
         },
         {
           "id": 40,
+          "menuItemId": 69,
           "name": "Medium",
           "priceDelta": 5000,
-          "basePrice": 20900
+          "isDefault": false
+        }
+      ],
+      "addonGroups": [
+        {
+          "id": 15,
+          "name": "Pizza Crust Options",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 22,
+              "addonGroupId": 15,
+              "name": "Cheese Burst",
+              "price": 4900,
+              "variationPrices": {
+                "Medium": 7900,
+                "Regular": 4900
+              }
+            },
+            {
+              "id": 23,
+              "addonGroupId": 15,
+              "name": "Thin Crust",
+              "price": 2000,
+              "variationPrices": {
+                "Medium": 4000,
+                "Regular": 2000
+              }
+            }
+          ]
         }
       ]
     },
     {
-      "id": 70,
-      "name": "Cheese garlic bread",
-      "categoryId": 10,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "CGGB",
-      "variations": [
-        {
-          "id": 41,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 7900
-        },
-        {
-          "id": 42,
-          "name": "Medium",
-          "priceDelta": 3000,
-          "basePrice": 10900
-        }
-      ]
-    },
-    {
-      "id": 71,
-      "name": "Onion chilly garlic bread",
-      "categoryId": 10,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "OCGB",
-      "variations": [
-        {
-          "id": 43,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 8900
-        },
-        {
-          "id": 44,
-          "name": "Medium",
-          "priceDelta": 3000,
-          "basePrice": 11900
-        }
-      ]
-    },
-    {
-      "id": 72,
-      "name": "Tomato chilly garlic bread",
-      "categoryId": 10,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "TCGB",
-      "variations": [
-        {
-          "id": 45,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 8900
-        },
-        {
-          "id": 46,
-          "name": "Medium",
-          "priceDelta": 3000,
-          "basePrice": 11900
-        }
-      ]
-    },
-    {
-      "id": 73,
-      "name": "Sweet corn garlic bread",
-      "categoryId": 10,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "SCGB",
-      "variations": [
-        {
-          "id": 47,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 8900
-        },
-        {
-          "id": 48,
-          "name": "Medium",
-          "priceDelta": 3000,
-          "basePrice": 11900
-        }
-      ]
-    },
-    {
-      "id": 74,
-      "name": "Jalapeno garlic bread",
-      "categoryId": 10,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "JPGB",
-      "variations": [
-        {
-          "id": 49,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 8900
-        },
-        {
-          "id": 50,
-          "name": "Medium",
-          "priceDelta": 3000,
-          "basePrice": 11900
-        }
-      ]
-    },
-    {
-      "id": 75,
-      "name": "Supremo garlic bread",
-      "categoryId": 10,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "SMGB",
-      "variations": [
-        {
-          "id": 51,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 8900
-        },
-        {
-          "id": 52,
-          "name": "Medium",
-          "priceDelta": 3000,
-          "basePrice": 11900
-        }
-      ]
-    },
-    {
-      "id": 76,
-      "name": "Triple spice garlic bread",
-      "categoryId": 10,
+      "id": 49,
+      "name": "Chesse bake Sandwich",
+      "shortCode": "CBKS",
+      "categoryId": 7,
       "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "TSGB",
-      "variations": [
+      "taxRate": 0,
+      "isVeg": true,
+      "isAvailable": true,
+      "sortOrder": 14,
+      "isPinned": false,
+      "categoryName": "Sandwich",
+      "has_variations": false,
+      "has_addons": true,
+      "variations": [],
+      "addonGroups": [
         {
-          "id": 53,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 9900
-        },
-        {
-          "id": 54,
-          "name": "Medium",
-          "priceDelta": 4000,
-          "basePrice": 13900
+          "id": 13,
+          "name": "Sandwich Add-ons",
+          "minSelect": 0,
+          "maxSelect": 1,
+          "isRequired": false,
+          "addons": [
+            {
+              "id": 20,
+              "addonGroupId": 13,
+              "name": "Extra Cheese",
+              "price": 3900
+            }
+          ]
         }
       ]
-    },
-    {
-      "id": 77,
-      "name": "Peri Peri paneer garlic bread",
-      "categoryId": 10,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "PPGB",
-      "variations": [
-        {
-          "id": 55,
-          "name": "Regular",
-          "priceDelta": 0,
-          "basePrice": 10900
-        },
-        {
-          "id": 56,
-          "name": "Medium",
-          "priceDelta": 4000,
-          "basePrice": 14900
-        }
-      ]
-    },
-    {
-      "id": 78,
-      "name": "Vanilla shake",
-      "categoryId": 11,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "VNSK",
-      "variations": []
-    },
-    {
-      "id": 79,
-      "name": "Strawberry shake",
-      "categoryId": 11,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "STSK",
-      "variations": []
-    },
-    {
-      "id": 80,
-      "name": "Butter scotch shake",
-      "categoryId": 11,
-      "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "BSSK",
-      "variations": []
-    },
-    {
-      "id": 81,
-      "name": "Kit-kat caramal shake",
-      "categoryId": 11,
-      "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "KKSK",
-      "variations": []
-    },
-    {
-      "id": 82,
-      "name": "Chocolate shake",
-      "categoryId": 11,
-      "basePrice": 9900,
-      "isVeg": 1,
-      "shortCode": "CHSK",
-      "variations": []
-    },
-    {
-      "id": 83,
-      "name": "Brownie shake",
-      "categoryId": 11,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "BRSK",
-      "variations": []
-    },
-    {
-      "id": 84,
-      "name": "Oreo shake",
-      "categoryId": 11,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "ORSK",
-      "variations": []
-    },
-    {
-      "id": 85,
-      "name": "Nutella shake",
-      "categoryId": 11,
-      "basePrice": 13900,
-      "isVeg": 1,
-      "shortCode": "NUSK",
-      "variations": []
-    },
-    {
-      "id": 86,
-      "name": "Brownie with ice cream",
-      "categoryId": 12,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "BWIC",
-      "variations": []
-    },
-    {
-      "id": 87,
-      "name": "Sizzling brownie",
-      "categoryId": 12,
-      "basePrice": 10900,
-      "isVeg": 1,
-      "shortCode": "SLBR",
-      "variations": []
-    },
-    {
-      "id": 88,
-      "name": "Virgin mojito",
-      "categoryId": 13,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "VRMJ",
-      "variations": []
-    },
-    {
-      "id": 89,
-      "name": "Blue ice mojito",
-      "categoryId": 13,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "BIMJ",
-      "variations": []
-    },
-    {
-      "id": 90,
-      "name": "Cool blue mocktail",
-      "categoryId": 13,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "CBMK",
-      "variations": []
-    },
-    {
-      "id": 91,
-      "name": "Italian Mojito",
-      "categoryId": 13,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "ITMJ",
-      "variations": []
-    },
-    {
-      "id": 92,
-      "name": "Nature kiwi cold mocktail",
-      "categoryId": 13,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "NKMK",
-      "variations": []
-    },
-    {
-      "id": 93,
-      "name": "Green apple mocktail",
-      "categoryId": 13,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "GAMK",
-      "variations": []
-    },
-    {
-      "id": 94,
-      "name": "Strawberry mojito",
-      "categoryId": 13,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "STMJ",
-      "variations": []
-    },
-    {
-      "id": 95,
-      "name": "Sunrise orange mocktail",
-      "categoryId": 13,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "SOMK",
-      "variations": []
-    },
-    {
-      "id": 96,
-      "name": "Veg Wrap",
-      "categoryId": 14,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "VGWP",
-      "variations": []
-    },
-    {
-      "id": 97,
-      "name": "Veg cheese wrap",
-      "categoryId": 14,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "VCWP",
-      "variations": []
-    },
-    {
-      "id": 98,
-      "name": "Mexican wrap",
-      "categoryId": 14,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "MXWP",
-      "variations": []
-    },
-    {
-      "id": 99,
-      "name": "Paneer masala wrap",
-      "categoryId": 14,
-      "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "PMWP",
-      "variations": []
-    },
-    {
-      "id": 100,
-      "name": "Manchurian dry",
-      "categoryId": 15,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "MNDR",
-      "variations": []
-    },
-    {
-      "id": 101,
-      "name": "Steam momos",
-      "categoryId": 15,
-      "basePrice": 6900,
-      "isVeg": 1,
-      "shortCode": "STMO",
-      "variations": []
-    },
-    {
-      "id": 102,
-      "name": "Fried momos",
-      "categoryId": 15,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "FRMO",
-      "variations": []
-    },
-    {
-      "id": 103,
-      "name": "Hakka noodles",
-      "categoryId": 15,
-      "basePrice": 7900,
-      "isVeg": 1,
-      "shortCode": "HKNO",
-      "variations": []
-    },
-    {
-      "id": 104,
-      "name": "Schezwan noodles",
-      "categoryId": 15,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "SZNO",
-      "variations": []
-    },
-    {
-      "id": 105,
-      "name": "Garlic Chowmein",
-      "categoryId": 15,
-      "basePrice": 8900,
-      "isVeg": 1,
-      "shortCode": "GACH",
-      "variations": []
-    },
-    {
-      "id": 106,
-      "name": "Potato chilly",
-      "categoryId": 15,
-      "basePrice": 11900,
-      "isVeg": 1,
-      "shortCode": "PTCH",
-      "variations": []
-    },
-    {
-      "id": 107,
-      "name": "Paneer chilly",
-      "categoryId": 15,
-      "basePrice": 12900,
-      "isVeg": 1,
-      "shortCode": "PNCH",
-      "variations": []
-    },
-    {
-      "id": 108,
-      "name": "Tea",
-      "categoryId": 16,
-      "basePrice": 3500,
-      "isVeg": 1,
-      "shortCode": "HTEA",
-      "variations": []
-    },
-    {
-      "id": 109,
-      "name": "Coffee",
-      "categoryId": 16,
-      "basePrice": 4000,
-      "isVeg": 1,
-      "shortCode": "HCFF",
-      "variations": []
-    },
-    {
-      "id": 110,
-      "name": "Cold Drink",
-      "categoryId": 16,
-      "basePrice": 4000,
-      "isVeg": 1,
-      "shortCode": "CDRK",
-      "variations": []
     }
   ],
   "tables": [
     {
       "id": 1,
       "name": "T1",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 2,
       "name": "T2",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 3,
       "name": "T3",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 4,
       "name": "T4",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 5,
       "name": "T5",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 6,
       "name": "T6",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 7,
       "name": "T7",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 8,
       "name": "T8",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 9,
       "name": "T9",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     },
     {
       "id": 10,
       "name": "T10",
-      "capacity": 4
+      "capacity": 4,
+      "floorName": "Ground Floor"
     }
-  ]
+  ],
+  "publishedAt": "2026-11-21T17:26:30.480Z",
+  "slug": "kapil-cafe-slxfi"
 }

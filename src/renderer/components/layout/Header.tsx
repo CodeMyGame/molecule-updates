@@ -233,7 +233,8 @@ const Header: React.FC = () => {
   return (
     <>
     <header className="pos-header">
-      <div className="flex items-center gap-2 shrink-0 mr-3 max-w-[200px]">
+      <div className="flex items-center gap-2 shrink-0 mr-3 max-w-[220px]">
+        <div className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0" />
         <span
           className="text-xs font-bold text-gray-800 dark:text-gray-100 tracking-tight whitespace-nowrap truncate leading-none"
           title={restaurantName}
@@ -251,15 +252,15 @@ const Header: React.FC = () => {
           }`}
           style={{ scrollbarWidth: 'thin' }}
         />
-        <div className={`flex items-center justify-center gap-3.5 mx-auto ${slotHasContent ? 'hidden' : ''}`}>
-          <div className="flex items-center gap-1 text-[11px] text-gray-600 leading-none">
-            <Clock size={11} />
+        <div className={`flex items-center justify-center gap-3 mx-auto ${slotHasContent ? 'hidden' : ''}`}>
+          <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-300 leading-none">
+            <Clock size={12} className="text-gray-400 dark:text-gray-500" />
             <span>{formattedDate}</span>
-            <span className="font-mono font-medium text-gray-800">{formattedTime}</span>
+            <span className="font-mono font-medium text-gray-800 dark:text-gray-100">{formattedTime}</span>
           </div>
-          <div className="flex items-center gap-1 leading-none">
-            <div className={`w-1.5 h-1.5 rounded-full ${isDayOpen ? 'bg-green-500 animate-pulse' : 'bg-red-400'}`} />
-            <span className={`text-[10px] font-medium ${isDayOpen ? 'text-green-700' : 'text-red-600'}`}>
+          <div className="flex items-center gap-1.5 leading-none px-2 py-0.5 rounded-full bg-gray-50 dark:bg-gray-700/50 border border-gray-200/60 dark:border-gray-600/60">
+            <div className={`w-1.5 h-1.5 rounded-full ${isDayOpen ? 'bg-emerald-500 animate-pulse' : 'bg-red-400'}`} />
+            <span className={`text-[10px] font-semibold tracking-wide ${isDayOpen ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-600 dark:text-red-400'}`}>
               {isDayOpen ? t('header.dayOpen') : t('header.dayClosed')}
             </span>
           </div>

@@ -625,9 +625,9 @@
   /* POS header */
   .pos-header {
     @apply bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 flex items-center justify-between;
-    height: 30px;
-    min-height: 30px;
-    max-height: 30px;
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
   }
 
   #header-center-slot::-webkit-scrollbar {

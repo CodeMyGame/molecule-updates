@@ -788,11 +788,11 @@ const CartPanel: React.FC<CartPanelProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 border-l border-gray-200 dark:border-slate-800 text-gray-900 dark:text-white">
       {/* Header */}
-      <div className="px-3 py-1.5 border-b border-gray-200 flex-shrink-0">
+      <div className="px-3.5 py-2 border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-gray-900">
+          <h2 className="text-xs font-bold text-gray-900 dark:text-white">
             {orderType === 'takeaway' ? (
               <span className="inline-flex items-center gap-1.5 text-emerald-700">
                 <ShoppingBag size={13} />
@@ -1210,7 +1210,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                         <button
                                           type="button"
                                           onClick={() => onTransferOrder(item.orderItemId)}
-                                          className="p-1 rounded-lg text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all opacity-0 group-hover:opacity-100"
+                                          className="p-1 rounded-lg text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-all opacity-70 group-hover:opacity-100"
                                         >
                                           <ArrowRightLeft size={11} />
                                         </button>
@@ -1220,7 +1220,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                       <button
                                         type="button"
                                         onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
-                                        className={`p-1 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${
+                                        className={`p-1 rounded-lg transition-all opacity-70 group-hover:opacity-100 ${
                                           item.notes
                                             ? 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50'
                                             : 'text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
@@ -1232,7 +1232,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                     <Tooltip text={group.isSynced ? t('cart.voidItem', 'Cancel item') : t('cart.removeItem', 'Remove item')} position="top" delay={false}>
                                       <button
                                         onClick={() => handleGroupRemove(group)}
-                                        className="p-0.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-0.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg transition-colors opacity-70 group-hover:opacity-100"
                                       >
                                         <X size={11} />
                                       </button>
@@ -1396,7 +1396,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                   const targetItemId = group.indices.map((i) => cart[i]?.orderItemId).find(Boolean);
                                   onTransferOrder(targetItemId);
                                 }}
-                                className="p-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all opacity-0 group-hover:opacity-100"
+                                className="p-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all opacity-70 group-hover:opacity-100"
                               >
                                 <ArrowRightLeft size={11} />
                               </button>
@@ -1406,7 +1406,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                             <button
                               type="button"
                               onClick={() => handleOpenNotes(group.indices, getName(item.menuItem), item.variation?.name, item.notes)}
-                              className={`p-1 rounded-lg transition-all opacity-0 group-hover:opacity-100 ${
+                              className={`p-1 rounded-lg transition-all opacity-70 group-hover:opacity-100 ${
                                 item.notes
                                   ? 'text-amber-600 bg-amber-50 hover:bg-amber-100'
                                   : 'text-gray-400 hover:text-amber-600 hover:bg-amber-50'
@@ -1432,7 +1432,7 @@ const CartPanel: React.FC<CartPanelProps> = ({
                                   }
                                 }
                               }}
-                              className="p-0.5 text-gray-400 hover:text-red-600 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                              className="p-0.5 text-gray-400 hover:text-red-600 rounded-lg transition-colors opacity-70 group-hover:opacity-100"
                             >
                               <X size={11} />
                             </button>
@@ -1471,37 +1471,37 @@ const CartPanel: React.FC<CartPanelProps> = ({
       )}
 
       {/* Totals section */}
-      <div className="border-t border-gray-200 flex-shrink-0">
-        <div className="px-3 py-1.5 space-y-0.5">
+      <div className="border-t border-gray-200 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-900/60 flex-shrink-0">
+        <div className="px-3.5 py-2 space-y-1">
           <div className="flex justify-between text-[11px]">
-            <span className="text-gray-600">{t('cart.subtotal')}</span>
-            <span className="text-gray-900 font-medium">{formatCurrency(subtotal)}</span>
+            <span className="text-gray-600 dark:text-slate-400">{t('cart.subtotal')}</span>
+            <span className="text-gray-900 dark:text-white font-mono font-medium">{formatCurrency(subtotal)}</span>
           </div>
 
           <button
             onClick={onOpenDiscount}
-            className="flex justify-between text-[11px] w-full hover:bg-gray-50 -mx-0.5 px-0.5 py-0 rounded-lg transition-colors"
+            className="flex justify-between text-[11px] w-full hover:bg-gray-100 dark:hover:bg-slate-800 -mx-1 px-1 py-0.5 rounded-lg transition-colors"
           >
-            <span className="text-gray-600 flex items-center gap-0.5 flex-wrap">
-              <Tag size={10} />
-              {t('cart.discount')}
+            <span className="text-gray-600 dark:text-slate-400 flex items-center gap-1 flex-wrap">
+              <Tag size={11} className="text-amber-500" />
+              <span>{t('cart.discount')}</span>
               {discount?.reason?.startsWith('Auto:') ? (
-                <span className="text-[9px] font-semibold bg-green-100 text-green-700 px-1 py-0 rounded-full">
+                <span className="text-[9px] font-semibold bg-green-100 dark:bg-emerald-950/80 text-green-700 dark:text-emerald-300 px-1.5 py-0 rounded-full">
                   🎉 {discount.reason.replace('Auto: ', '')}
                 </span>
               ) : discount ? (
-                <span className="text-[10px] text-green-600">
+                <span className="text-[10px] text-green-600 dark:text-emerald-400">
                   ({discount.type === 'percent' ? `${discount.value}%` : t('cart.flat')})
                 </span>
               ) : null}
             </span>
-            <span className={discountAmount > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}>
+            <span className={discountAmount > 0 ? 'text-green-600 dark:text-emerald-400 font-mono font-medium' : 'text-gray-400 dark:text-slate-500 font-mono'}>
               {discountAmount > 0 ? `- ${formatCurrency(discountAmount)}` : formatCurrency(0)}
             </span>
           </button>
 
           {taxBreakdown.filter((tax) => tax.total > 0).map((tax) => (
-            <div key={tax.rate} className="flex justify-between text-[10px] text-gray-500">
+            <div key={tax.rate} className="flex justify-between text-[10px] text-gray-500 dark:text-slate-400">
               <span>
                 {showIndiaGstSplit ? (
                   <>
@@ -1512,27 +1512,27 @@ const CartPanel: React.FC<CartPanelProps> = ({
                   t('cart.taxSlabSimple', { scheme: taxTerms.scheme, rate: tax.rate })
                 )}
               </span>
-              <span>{formatCurrency(tax.total)}</span>
+              <span className="font-mono">{formatCurrency(tax.total)}</span>
             </div>
           ))}
 
           {roundOff !== 0 && (
-            <div className="flex justify-between text-[10px] text-gray-500">
+            <div className="flex justify-between text-[10px] text-gray-500 dark:text-slate-400">
               <span>{t('cart.roundOff')}</span>
-              <span>{roundOff > 0 ? '+' : ''}{formatCurrency(roundOff)}</span>
+              <span className="font-mono">{roundOff > 0 ? '+' : ''}{formatCurrency(roundOff)}</span>
             </div>
           )}
 
-          <div className="flex justify-between pt-1 border-t border-gray-200">
-            <span className="text-xs font-bold text-gray-900">{t('cart.grandTotal')}</span>
-            <span className="text-sm font-bold text-gray-900">{formatCurrency(grandTotal)}</span>
+          <div className="flex justify-between pt-1.5 border-t border-gray-200 dark:border-slate-800">
+            <span className="text-xs font-bold text-gray-900 dark:text-white">{t('cart.grandTotal')}</span>
+            <span className="text-base font-mono font-bold text-gray-900 dark:text-white tracking-tight">{formatCurrency(grandTotal)}</span>
           </div>
         </div>
       </div>
 
       {/* Action buttons */}
-      <div data-tour="cart-actions" className="px-3 py-1.5 border-t border-gray-200 flex-shrink-0">
-        <div className="grid grid-cols-3 gap-1.5 mb-1.5">
+      <div data-tour="cart-actions" className="px-3.5 py-2.5 border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
+        <div className="grid grid-cols-3 gap-1.5 mb-2">
           {orderStatus === 'hold' ? (
             <Button
               variant="warning"
@@ -1573,22 +1573,23 @@ const CartPanel: React.FC<CartPanelProps> = ({
             {t('cart.printKot')}
           </Button>
         </div>
-        <div className="grid grid-cols-[1fr,auto] gap-1.5">
+        <div className="grid grid-cols-[1fr,auto] gap-2">
           <Button
             variant="success"
-            size="sm"
-            icon={<CreditCard size={14} />}
+            size="md"
+            icon={<CreditCard size={16} />}
             onClick={onPay}
             fullWidth
+            className="py-2.5 font-bold shadow-xs text-sm"
           >
             {t('cart.pay')} {formatCurrency(grandTotal)}
           </Button>
           <Button
             variant="danger"
-            size="sm"
-            icon={<Trash2 size={13} />}
+            size="md"
+            icon={<Trash2 size={15} />}
             onClick={onCancelOrder}
-            className="px-3.5"
+            className="px-3.5 py-2.5"
           >
             <span className="sr-only sm:not-sr-only">{t('cart.cancel')}</span>
           </Button>

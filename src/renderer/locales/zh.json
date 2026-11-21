@@ -12,7 +12,10 @@
     "logout": "退出登录",
     "collapseSidebar": "收起侧边栏",
     "expandSidebar": "展开侧边栏",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "营业中",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "订单 #{{number}}",
     "itemCount_one": "{{count}} 项",
     "itemCount_other": "{{count}} 项",
-    "itemCount": "{{count}} 件"
+    "itemCount": "{{count}} 件",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "接受订单",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "此配方未配置任何原料",
     "selectItemForRecipe": "选择一个菜单菜品以查看或配置其原料配方",
     "notes": "备注",
-    "consumption": "消耗报告"
+    "consumption": "消耗报告",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "订单历史",
@@ -763,7 +773,19 @@
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "菜单已成功替换为上传的文件！",
     "station": "出品档口",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "账单预览",

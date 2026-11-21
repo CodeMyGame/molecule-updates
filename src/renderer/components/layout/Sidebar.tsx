@@ -28,17 +28,47 @@ import Tooltip from '../common/Tooltip';
 import { useTranslation } from 'react-i18next';
 import { currencySymbolForLanguage } from '../../lib/currencyLocale';
 
-const NAV_KEYS = [
-  { key: 'billing' as const, path: '/billing', icon: <Receipt size={16} /> },
-  { key: 'tables' as const, path: '/tables', icon: <LayoutGrid size={16} /> },
-  { key: 'menu' as const, path: '/menu', icon: <UtensilsCrossed size={16} /> },
-  { key: 'qrMenu' as const, path: '/qr-menu', icon: <QrCode size={16} /> },
-  { key: 'inventory' as const, path: '/inventory', icon: <Package size={16} /> },
-  { key: 'kitchen' as const, path: '/kitchen', icon: <ChefHat size={16} /> },
-  { key: 'customers' as const, path: '/customers', icon: <Users size={16} /> },
-  { key: 'staff' as const, path: '/staff', icon: <UserCog size={16} /> },
-  { key: 'reports' as const, path: '/reports', icon: <BarChart3 size={16} /> },
-  { key: 'settings' as const, path: '/settings', icon: <Settings size={16} /> },
+interface NavItem {
+  key: string;
+  path: string;
+  icon: React.ReactNode;
+}
+
+interface NavGroup {
+  groupKey: string;
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    groupKey: 'pos',
+    label: 'Point of Sale',
+    items: [
+      { key: 'billing', path: '/billing', icon: <Receipt size={17} /> },
+      { key: 'tables', path: '/tables', icon: <LayoutGrid size={17} /> },
+      { key: 'kitchen', path: '/kitchen', icon: <ChefHat size={17} /> },
+    ],
+  },
+  {
+    groupKey: 'catalog',
+    label: 'Menu & Stock',
+    items: [
+      { key: 'menu', path: '/menu', icon: <UtensilsCrossed size={17} /> },
+      { key: 'qrMenu', path: '/qr-menu', icon: <QrCode size={17} /> },
+      { key: 'inventory', path: '/inventory', icon: <Package size={17} /> },
+    ],
+  },
+  {
+    groupKey: 'management',
+    label: 'Management',
+    items: [
+      { key: 'customers', path: '/customers', icon: <Users size={17} /> },
+      { key: 'staff', path: '/staff', icon: <UserCog size={17} /> },
+      { key: 'reports', path: '/reports', icon: <BarChart3 size={17} /> },
+      { key: 'settings', path: '/settings', icon: <Settings size={17} /> },
+    ],
+  },
 ];
 
 const Sidebar: React.FC = () => {
@@ -52,6 +82,15 @@ const Sidebar: React.FC = () => {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+
+  const getGroupLabel = (groupKey: string): string => {
+    switch (groupKey) {
+      case 'pos': return t('nav.groupPos', 'Point of Sale');
+      case 'catalog': return t('nav.groupCatalog', 'Menu & Stock');
+      case 'management': return t('nav.groupManagement', 'Management');
+      default: return '';
+    }
+  };
 
   useEffect(() => {
     fetchDaySession();
@@ -103,30 +142,37 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`pos-sidebar transition-all duration-200 z-30 relative ${
-        sidebarCollapsed ? 'w-14' : 'w-36'
+      className={`pos-sidebar transition-all duration-200 z-30 relative select-none ${
+        sidebarCollapsed ? 'w-16' : 'w-52'
       }`}
     >
-      {/* Restaurant name + toggle */}
-      <div className="px-3 py-2.5 border-b border-gray-700 flex items-center justify-between">
+      {/* Restaurant branding + toggle */}
+      <div className="px-3.5 py-2.5 border-b border-gray-800 flex items-center justify-between">
         {sidebarCollapsed ? (
           <Tooltip text={t('nav.expandSidebar')} position="right" className="w-full">
             <button
               onClick={toggleSidebar}
               title={t('nav.expandSidebar')}
-              className="w-full flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+              className="w-full flex items-center justify-center py-1 text-gray-400 hover:text-white transition-colors"
             >
-              <Menu size={16} />
+              <Menu size={18} />
             </button>
           </Tooltip>
         ) : (
           <>
-            <h1 className="text-sm font-bold text-white truncate">Molecule</h1>
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-xs shadow-xs">
+                M
+              </div>
+              <span className="text-sm font-bold text-white tracking-tight truncate">
+                Molecule POS
+              </span>
+            </div>
             <Tooltip text={t('nav.collapseSidebar')} position="bottom">
               <button
                 onClick={toggleSidebar}
                 title={t('nav.collapseSidebar')}
-                className="p-0.5 text-gray-400 hover:text-white transition-colors rounded-xl hover:bg-gray-800"
+                className="p-1 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-800"
               >
                 <Menu size={16} />
               </button>
@@ -136,71 +182,85 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* Navigation */}
-      <nav data-tour="sidebar-nav" className="flex-1 py-1 overflow-y-auto">
-        {NAV_KEYS.map((item) => (
-          sidebarCollapsed ? (
-            <Tooltip key={item.path} text={t(`nav.${item.key}`)} position="right" className="w-full block">
-              <NavLink
-                to={item.path}
-                title={t(`nav.${item.key}`)}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 py-2 mx-1.5 my-px rounded-xl transition-colors duration-150 tap-target justify-center px-1.5 ${
-                    isActive
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }`
-                }
-              >
-                <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                  {item.icon}
-                </span>
-              </NavLink>
-            </Tooltip>
-          ) : (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2 mx-1.5 my-px rounded-xl transition-colors duration-150 min-h-[36px] justify-start ${
-                  isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                }`
-              }
-            >
-              <span className="w-4 h-4 flex items-center justify-center flex-shrink-0">
-                {item.icon}
-              </span>
-              <span className="text-xs font-medium">{t(`nav.${item.key}`)}</span>
-            </NavLink>
-          )
+      <nav data-tour="sidebar-nav" className="flex-1 py-1.5 overflow-y-auto no-scrollbar">
+        {NAV_GROUPS.map((group, groupIdx) => (
+          <div key={group.groupKey} className="mb-2">
+            {!sidebarCollapsed && (
+              <div className="px-3.5 pt-2.5 pb-1 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                {getGroupLabel(group.groupKey)}
+              </div>
+            )}
+            {sidebarCollapsed && groupIdx > 0 && (
+              <div className="border-t border-gray-800/80 my-1.5 mx-3" />
+            )}
+            <div className="space-y-0.5">
+              {group.items.map((item) => (
+                sidebarCollapsed ? (
+                  <Tooltip key={item.path} text={t(`nav.${item.key}`)} position="right" className="w-full block">
+                    <NavLink
+                      to={item.path}
+                      title={t(`nav.${item.key}`)}
+                      className={({ isActive }) =>
+                        `flex items-center justify-center w-10 h-10 mx-auto rounded-xl transition-all duration-150 ${
+                          isActive
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'text-gray-400 hover:bg-gray-800/80 hover:text-white'
+                        }`
+                      }
+                    >
+                      <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                        {item.icon}
+                      </span>
+                    </NavLink>
+                  </Tooltip>
+                ) : (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3.5 py-2 mx-2 rounded-xl transition-all duration-150 min-h-[38px] ${
+                        isActive
+                          ? 'bg-blue-600 text-white font-medium shadow-xs'
+                          : 'text-gray-300 hover:bg-gray-800/80 hover:text-white'
+                      }`
+                    }
+                  >
+                    <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                      {item.icon}
+                    </span>
+                    <span className="text-xs tracking-tight">{t(`nav.${item.key}`)}</span>
+                  </NavLink>
+                )
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 
       {/* Action buttons */}
-      <div data-tour="day-session-toggle" className="border-t border-gray-700 px-1.5 py-1.5 flex flex-col gap-1">
+      <div data-tour="day-session-toggle" className="border-t border-gray-800/80 px-2.5 py-2 flex flex-col gap-1.5 bg-gray-950/40">
         {sidebarCollapsed ? (
           <>
             <Tooltip text={t('header.newOrder')} position="right" className="w-full">
               <button
                 onClick={handleNewOrder}
                 title={t('header.newOrder')}
-                className="flex items-center justify-center w-full py-1.5 rounded-xl text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
+                className="flex items-center justify-center w-10 h-10 mx-auto rounded-xl text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition-colors shadow-xs"
               >
-                <Plus size={14} />
+                <Plus size={16} />
               </button>
             </Tooltip>
             <Tooltip text={isDayOpen ? t('header.closeDay') : t('header.openDay')} position="right" className="w-full">
               <button
                 onClick={handleDayToggle}
                 title={isDayOpen ? t('header.closeDay') : t('header.openDay')}
-                className={`flex items-center justify-center w-full py-1.5 rounded-xl transition-colors
-                  ${isDayOpen
-                    ? 'text-red-400 hover:bg-red-900/30'
-                    : 'text-green-400 hover:bg-green-900/30'
-                  }`}
+                className={`flex items-center justify-center w-10 h-10 mx-auto rounded-xl transition-colors ${
+                  isDayOpen
+                    ? 'text-red-400 hover:bg-red-950/40 border border-red-900/30'
+                    : 'text-emerald-400 hover:bg-emerald-950/40 border border-emerald-900/30'
+                }`}
               >
-                {isDayOpen ? <Moon size={14} /> : <Sun size={14} />}
+                {isDayOpen ? <Moon size={15} /> : <Sun size={15} />}
               </button>
             </Tooltip>
           </>
@@ -208,55 +268,64 @@ const Sidebar: React.FC = () => {
           <>
             <button
               onClick={handleNewOrder}
-              className="flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-xl text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 transition-all shadow-xs"
             >
-              <Plus size={13} />
-              {t('header.newOrder')}
+              <Plus size={14} />
+              <span>{t('header.newOrder')}</span>
             </button>
             <button
               onClick={handleDayToggle}
-              className={`flex items-center gap-1.5 w-full px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors
-                ${isDayOpen
-                  ? 'text-red-400 hover:bg-red-900/30'
-                  : 'text-green-400 hover:bg-green-900/30'
-                }`}
+              className={`flex items-center justify-between w-full py-1.5 px-3 rounded-xl text-xs font-medium border transition-colors ${
+                isDayOpen
+                  ? 'text-red-300 bg-red-950/20 hover:bg-red-950/40 border-red-800/40'
+                  : 'text-emerald-300 bg-emerald-950/20 hover:bg-emerald-950/40 border-emerald-800/40'
+              }`}
             >
-              {isDayOpen ? <Moon size={13} /> : <Sun size={13} />}
-              {isDayOpen ? t('header.closeDay') : t('header.openDay')}
+              <div className="flex items-center gap-2">
+                <span className={`w-1.5 h-1.5 rounded-full ${isDayOpen ? 'bg-emerald-500 animate-pulse' : 'bg-red-400'}`} />
+                <span>{isDayOpen ? t('header.closeDay') : t('header.openDay')}</span>
+              </div>
+              {isDayOpen ? <Moon size={13} className="text-red-400" /> : <Sun size={13} className="text-emerald-400" />}
             </button>
           </>
         )}
       </div>
 
       {/* Current user */}
-      <div className="border-t border-gray-700 px-3 py-2">
+      <div className="border-t border-gray-800/80 px-2.5 py-2.5 bg-gray-950/60">
         {sidebarCollapsed ? (
-          <Tooltip text={t('nav.logout')} position="right" className="w-full">
+          <Tooltip text={`${currentUser?.name ?? t('common.unknown')} (${t('nav.logout')})`} position="right" className="w-full">
             <button
               onClick={handleLogout}
-              title={t('nav.logout')}
-              className="flex items-center justify-center w-full tap-target text-gray-400 hover:text-red-400 transition-colors"
+              className="w-full flex items-center justify-center py-1 text-gray-400 hover:text-red-400 transition-colors"
             >
-              <LogOut size={16} />
+              <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-xs font-bold text-gray-200 hover:border-red-500 transition-colors">
+                {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
             </button>
           </Tooltip>
         ) : (
-          <div className="flex items-center justify-between">
-            <div className="min-w-0">
-              <p className="text-xs font-medium text-white truncate">
-                {currentUser?.name ?? t('common.unknown')}
-              </p>
-              <p className="text-[10px] text-gray-400 truncate">
-                {currentUser?.role ?? ''}
-              </p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-700 to-indigo-600 border border-blue-400/30 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-white truncate leading-tight">
+                  {currentUser?.name ?? t('common.unknown')}
+                </p>
+                <span className="inline-block text-[10px] font-medium text-gray-400 capitalize truncate">
+                  {currentUser?.role ?? ''}
+                </span>
+              </div>
             </div>
             <Tooltip text={t('nav.logout')} position="top">
               <button
                 onClick={handleLogout}
                 title={t('nav.logout')}
-                className="p-1.5 text-gray-400 hover:text-red-400 transition-colors rounded-xl hover:bg-gray-800"
+                className="p-1.5 text-gray-400 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-800 shrink-0"
               >
-                <LogOut size={14} />
+                <LogOut size={15} />
               </button>
             </Tooltip>
           </div>

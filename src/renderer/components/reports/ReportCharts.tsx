@@ -297,7 +297,7 @@ interface BusyHoursBarChartProps {
   title: string;
   data: any[];
   ordersLabel: string;
-  busyHoursView: 'hour' | 'day';
+  busyHoursView: 'hour' | 'day' | 'week' | 'month' | 'year';
 }
 
 export const BusyHoursBarChart: React.FC<BusyHoursBarChartProps> = ({

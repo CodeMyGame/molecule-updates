@@ -12,7 +12,10 @@
     "logout": "लॉग आउट",
     "collapseSidebar": "साइडबार संकुचित करें",
     "expandSidebar": "साइडबार विस्तृत करें",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "दिन खुला",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "ऑर्डर #{{number}}",
     "itemCount_one": "{{count}} आइटम",
     "itemCount_other": "{{count}} आइटम",
-    "itemCount": "{{count}} वस्तुएं"
+    "itemCount": "{{count}} वस्तुएं",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "ऑर्डर लें",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "इस रेसिपी के लिए कोई सामग्री कॉन्फ़िगर नहीं है",
     "selectItemForRecipe": "रेसिपी देखने या कॉन्फ़िगर करने के लिए एक मेनू आइटम चुनें",
     "notes": "नोट्स",
-    "consumption": "खपत रिपोर्ट"
+    "consumption": "खपत रिपोर्ट",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "ऑर्डर इतिहास",
@@ -763,7 +773,19 @@
     "importFailed": "मेनू आयात नहीं हो सका। कृपया मान्य Excel या CSV फ़ाइल जांचें।",
     "importSuccessBulk": "अपलोड किए गए मेनू से मेनू सफलतापूर्वक बदल दिया गया!",
     "station": "स्टेशन",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "बिल पूर्वावलोकन",

@@ -12,7 +12,10 @@
     "logout": "లాగ్అవుట్",
     "collapseSidebar": "సైడ్‌బార్ కుదించు",
     "expandSidebar": "సైడ్‌బార్ విస్తరించు",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "రోజు తెరిచి ఉంది",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "ఆర్డర్ #{{number}}",
     "itemCount_one": "{{count}} అంశం",
     "itemCount_other": "{{count}} అంశాలు",
-    "itemCount": "{{count}} అంశాలు"
+    "itemCount": "{{count}} అంశాలు",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "ఆర్డర్ తీసుకోండి",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "ఈ వంటకం కోసం ఎటువంటి పదార్థాలు కాన్ఫిగర్ చేయబడలేదు",
     "selectItemForRecipe": "వంటకాన్ని వీక్షించడానికి లేదా కాన్ఫిగర్ చేయడానికి మెను అంశాన్ని ఎంచుకోండి",
     "notes": "గమనికలు",
-    "consumption": "వినియోగ నివేదిక"
+    "consumption": "వినియోగ నివేదిక",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "ఆర్డర్ చరిత్ర",
@@ -763,7 +773,19 @@
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "అప్‌లోడ్ చేసిన ఫైల్‌తో మెను విజయవంతంగా భర్తీ చేయబడింది!",
     "station": "స్టేషన్",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "బిల్ ప్రివ్యూ",

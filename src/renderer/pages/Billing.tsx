@@ -1677,12 +1677,12 @@ const Billing: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-white">
       {/* Top bar (2nd Header - Order type, filters, view mode) */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-1.5">
-        <div className="flex items-center gap-2.5">
+      <div className="flex-shrink-0 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 px-3.5 py-1.5 shadow-2xs">
+        <div className="flex items-center gap-2.5 flex-wrap">
           {/* Order type selector */}
-          <div className="flex bg-gray-200/90 rounded-md p-0.5 gap-0.5 border border-gray-300/60 shadow-2xs">
+          <div className="flex bg-gray-200/90 dark:bg-slate-800/90 rounded-xl p-0.5 gap-1 border border-gray-300/60 dark:border-slate-700/60 shadow-2xs">
             {ORDER_TYPE_KEYS.map(({ key, tKey, icon: Icon }) => {
               const isTakeaway = key === 'takeaway';
               const isDineIn = key === 'dine_in';
@@ -1697,19 +1697,19 @@ const Billing: React.FC = () => {
                         setOrderType(key);
                       }
                     }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold leading-none
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold leading-none
                       transition-all select-none cursor-pointer
                       ${
                         isSelected
                           ? isTakeaway
                             ? 'bg-emerald-600 text-white shadow-xs'
                             : 'bg-blue-600 text-white shadow-xs'
-                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-300/50'
+                          : 'text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300/50 dark:hover:bg-slate-700/50'
                       }`}
                   >
                     <Icon
                       size={13}
-                      className={isSelected ? 'text-white' : 'text-gray-400'}
+                      className={isSelected ? 'text-white' : 'text-gray-400 dark:text-slate-400'}
                     />
                     <span>{t(tKey)}</span>
                     {count > 0 && (
@@ -1719,7 +1719,7 @@ const Billing: React.FC = () => {
                             ? isTakeaway
                               ? 'bg-white text-emerald-700 shadow-2xs'
                               : 'bg-white text-blue-700 shadow-2xs'
-                            : 'bg-gray-300/80 text-gray-700'
+                            : 'bg-gray-300/80 dark:bg-slate-700 text-gray-700 dark:text-slate-300'
                         }`}
                       >
                         {count}
@@ -1746,18 +1746,18 @@ const Billing: React.FC = () => {
               onClick={() => {
                 setNameSort((prev) => (prev === 'none' ? 'asc' : prev === 'asc' ? 'desc' : 'none'));
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-colors select-none ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors select-none ${
                 nameSort !== 'none'
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-xs'
-                  : 'bg-gray-100 text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                  ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-xs'
+                  : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-slate-700 border border-transparent dark:border-slate-700/60'
               }`}
             >
               {nameSort === 'asc' ? (
-                <ArrowDownAZ size={13} className="text-blue-600" />
+                <ArrowDownAZ size={13} className="text-blue-600 dark:text-blue-400" />
               ) : nameSort === 'desc' ? (
-                <ArrowUpZA size={13} className="text-blue-600" />
+                <ArrowUpZA size={13} className="text-blue-600 dark:text-blue-400" />
               ) : (
-                <ArrowUpDown size={12} className="text-gray-500" />
+                <ArrowUpDown size={12} className="text-gray-500 dark:text-slate-400" />
               )}
               <span>
                 {nameSort === 'asc' ? 'A → Z' : nameSort === 'desc' ? 'Z → A' : 'Sort'}
@@ -1766,19 +1766,19 @@ const Billing: React.FC = () => {
           </Tooltip>
 
           {/* Veg / Non-veg filter */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-xl border border-gray-200 dark:border-slate-700">
             {([
-              { key: 'all' as const, label: t('menuGrid.all'), color: 'bg-gray-600' },
+              { key: 'all' as const, label: t('menuGrid.all'), color: 'bg-gray-600 dark:bg-slate-600' },
               { key: 'veg' as const, label: t('menu.veg'), color: 'bg-green-600' },
               { key: 'nonveg' as const, label: t('menu.nonVeg'), color: 'bg-red-600' },
             ] as const).map(({ key, label, color }) => (
               <button
                 key={key}
                 onClick={() => setVegFilter(key)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-medium transition-colors
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors
                   ${vegFilter === key
-                    ? `${color} text-white`
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? `${color} text-white shadow-2xs`
+                    : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
                   }`}
               >
                 {key === 'veg' && <CircleDot size={8} className={vegFilter === key ? 'text-white' : 'text-green-600'} />}
@@ -1789,16 +1789,16 @@ const Billing: React.FC = () => {
           </div>
 
           {/* Grid / List view toggle */}
-          <div className="flex bg-gray-100 rounded p-0.5 gap-0.5">
+          <div className="flex bg-gray-100 dark:bg-slate-800 rounded-xl p-0.5 gap-0.5 border border-gray-200 dark:border-slate-700">
             <button
               onClick={() => setMenuViewMode('grid')}
-              className={`p-1.5 rounded transition-colors ${menuViewMode === 'grid' ? 'bg-white text-blue-600 shadow-xs' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`p-1.5 rounded-lg transition-colors ${menuViewMode === 'grid' ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-xs' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
             >
               <Grid3X3 size={12} />
             </button>
             <button
               onClick={() => setMenuViewMode('list')}
-              className={`p-1.5 rounded transition-colors ${menuViewMode === 'list' ? 'bg-white text-blue-600 shadow-xs' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`p-1.5 rounded-lg transition-colors ${menuViewMode === 'list' ? 'bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-xs' : 'text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
             >
               <List size={12} />
             </button>
@@ -1808,8 +1808,8 @@ const Billing: React.FC = () => {
           <Tooltip text={t('billing.customItemTooltip', 'Add an unlisted dish in order (Ctrl+T)')} position="bottom">
             <button
               onClick={() => setShowTempItemModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1 text-xs text-orange-600 bg-orange-50
-                hover:bg-orange-100 border border-orange-200 rounded-md transition-colors font-semibold"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-orange-700 dark:text-orange-300 bg-orange-50 dark:bg-orange-950/40
+                hover:bg-orange-100 dark:hover:bg-orange-900/50 border border-orange-200 dark:border-orange-800/60 rounded-xl transition-colors font-bold"
             >
               <PlusCircle size={13} />
               {t('billing.tempItem', 'Custom Item')}
@@ -1820,10 +1820,10 @@ const Billing: React.FC = () => {
           <Tooltip text={t('billing.newParcelTooltip', 'Start a new takeaway parcel order')} position="bottom">
             <button
               onClick={handleNewParcel}
-              className="flex items-center gap-1.5 px-3 py-1 text-xs text-emerald-700 bg-emerald-50
-                hover:bg-emerald-100 border border-emerald-200 rounded-md transition-colors font-semibold shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40
+                hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800/60 rounded-xl transition-colors font-bold shadow-2xs"
             >
-              <ShoppingBag size={13} className="text-emerald-600" />
+              <ShoppingBag size={13} className="text-emerald-600 dark:text-emerald-400" />
               <span>{t('tables.newParcel', '+ New Parcel')}</span>
             </button>
           </Tooltip>

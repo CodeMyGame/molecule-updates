@@ -12,7 +12,10 @@
     "logout": "Cerrar sesión",
     "collapseSidebar": "Contraer barra lateral",
     "expandSidebar": "Expandir barra lateral",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "Día abierto",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "Pedido n.º {{number}}",
     "itemCount_one": "{{count}} artículo",
     "itemCount_other": "{{count}} artículos",
-    "itemCount": "{{count}} artículos"
+    "itemCount": "{{count}} artículos",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "Tomar pedido",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "No hay ingredientes configurados para esta receta",
     "selectItemForRecipe": "Seleccione un artículo del menú para ver o configurar su receta",
     "notes": "Notas",
-    "consumption": "Informe de consumo"
+    "consumption": "Informe de consumo",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "Historial de pedidos",
@@ -763,7 +773,19 @@
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "¡Menú reemplazado con éxito con el archivo subido!",
     "station": "Estación",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "Vista previa de cuenta",

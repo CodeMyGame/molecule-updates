@@ -69,19 +69,19 @@ function getStockBadge(status: 'ok' | 'low' | 'out', t: TFunction) {
   switch (status) {
     case 'out':
       return (
-        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900/50">
           {t('inventory.stockStatusOut')}
         </span>
       );
     case 'low':
       return (
-        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50">
           {t('inventory.stockStatusLow')}
         </span>
       );
     default:
       return (
-        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50">
           {t('inventory.stockStatusOk')}
         </span>
       );
@@ -90,13 +90,13 @@ function getStockBadge(status: 'ok' | 'low' | 'out', t: TFunction) {
 
 function getPOStatusBadge(status: POStatus, t: TFunction) {
   const styles: Record<POStatus, string> = {
-    [POStatus.DRAFT]: 'bg-gray-100 text-gray-700',
-    [POStatus.ORDERED]: 'bg-blue-100 text-blue-700',
-    [POStatus.RECEIVED]: 'bg-green-100 text-green-700',
-    [POStatus.CANCELLED]: 'bg-red-100 text-red-700',
+    [POStatus.DRAFT]: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
+    [POStatus.ORDERED]: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50',
+    [POStatus.RECEIVED]: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/50',
+    [POStatus.CANCELLED]: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900/50',
   };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize ${styles[status]}`}>
+    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border capitalize ${styles[status]}`}>
       {t(`inventory.poStatus.${status}`)}
     </span>
   );
@@ -232,48 +232,93 @@ const Inventory: React.FC = () => {
   // ============= RENDER =============
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-950">
       {/* Page header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-1.5">
-          <Package size={15} className="text-blue-600 shrink-0" />
-          <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('inventory.pageTitle')}</h1>
-          {lowStockCount > 0 && (
-            <span className="flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
-              <AlertTriangle size={11} />
-              {t('inventory.lowStockBadge', { count: lowStockCount })}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-2xs">
+            <Package size={16} />
+          </div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xs font-bold text-gray-900 dark:text-white tracking-tight">
+              {t('inventory.pageTitle')}
+            </h1>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+              {t('inventory.itemsCount', { count: inv.items.length })}
             </span>
-          )}
+            {lowStockCount > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab('stock');
+                  setStockFilter('low');
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors cursor-pointer animate-pulse"
+                title="Click to view low stock items"
+              >
+                <AlertTriangle size={12} className="text-amber-600 dark:text-amber-400" />
+                <span>{t('inventory.lowStockBadge', { count: lowStockCount })}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Global Action Quick Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowAdjustStock(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-2xs"
+          >
+            <ArrowDownUp size={12} className="text-gray-500 dark:text-slate-400" />
+            <span>{t('inventory.stockAdjustment')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAddItem(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors"
+          >
+            <Plus size={12} />
+            <span>{t('inventory.addItem')}</span>
+          </button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50/80 border-b border-gray-200 overflow-x-auto no-scrollbar">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => {
-              setActiveTab(tab.key);
-              setSearchQuery('');
-            }}
-            className={`
-              flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-full
-              transition-colors select-none
-              ${
-                activeTab === tab.key
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-              }
-            `}
-          >
-            {React.cloneElement(tab.icon as React.ReactElement, { size: 12 })}
-            <span>{tab.label}</span>
-          </button>
-        ))}
+      <div className="flex items-center gap-1.5 px-4 py-2 bg-slate-100/70 dark:bg-slate-900/50 border-b border-gray-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1 p-0.5 bg-gray-200/60 dark:bg-slate-800/80 rounded-xl">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  setSearchQuery('');
+                }}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg
+                  transition-all select-none
+                  ${
+                    isActive
+                      ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-2xs'
+                      : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-700/50'
+                  }
+                `}
+              >
+                {React.cloneElement(tab.icon as React.ReactElement, { size: 13 })}
+                <span>{tab.label}</span>
+                {tab.key === 'stock' && lowStockCount > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto p-3 bg-gray-50/50">
+      <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-950">
         {inv.loading ? (
           <div className="space-y-3">
             {/* Filter toolbar shimmer */}
@@ -560,12 +605,20 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
       accessor: 'name',
       render: (item: InventoryItem) => (
         <div>
-          <div className="font-medium text-gray-900">{item.name}</div>
-          {item.sku && <div className="text-xs text-gray-400">{item.sku}</div>}
+          <div className="font-semibold text-gray-900 dark:text-slate-100">{item.name}</div>
+          {item.sku && <div className="text-[11px] text-gray-400 dark:text-slate-500 font-mono">{item.sku}</div>}
         </div>
       ),
     },
-    { header: t('inventory.category'), accessor: 'category' },
+    {
+      header: t('inventory.category'),
+      accessor: 'category',
+      render: (item: InventoryItem) => (
+        <span className="text-xs text-gray-600 dark:text-slate-300 font-medium">
+          {item.category || '—'}
+        </span>
+      ),
+    },
     {
       header: t('inventory.currentStock'),
       accessor: 'currentStock',
@@ -574,12 +627,12 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
         const status = getStockStatus(item);
         return (
           <span
-            className={`font-semibold ${
+            className={`font-semibold font-mono ${
               status === 'out'
-                ? 'text-red-600'
+                ? 'text-red-600 dark:text-red-400 font-bold'
                 : status === 'low'
-                ? 'text-orange-600'
-                : 'text-gray-900'
+                ? 'text-amber-600 dark:text-amber-400 font-bold'
+                : 'text-gray-900 dark:text-slate-100'
             }`}
           >
             {item.currentStock} {item.unit}
@@ -592,7 +645,7 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
       accessor: 'minStock',
       align: 'right' as const,
       render: (item: InventoryItem) => (
-        <span className="text-gray-500">
+        <span className="text-gray-500 dark:text-slate-400 font-mono">
           {item.minStock} {item.unit}
         </span>
       ),
@@ -601,7 +654,11 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
       header: t('inventory.costPerUnit'),
       accessor: 'costPerUnit',
       align: 'right' as const,
-      render: (item: InventoryItem) => formatCurrency(item.costPerUnit),
+      render: (item: InventoryItem) => (
+        <span className="font-mono text-gray-700 dark:text-slate-300">
+          {formatCurrency(item.costPerUnit)}
+        </span>
+      ),
     },
     {
       header: t('inventory.status'),
@@ -612,77 +669,111 @@ const StockOverviewTab: React.FC<StockOverviewTabProps> = ({
       header: t('inventory.actions'),
       accessor: 'actions',
       sortable: false,
-      width: '120px',
+      width: '100px',
       render: (item: InventoryItem) => (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 justify-end">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onEditItem(item);
             }}
-            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             title={t('common.edit')}
           >
-            <Edit2 size={15} />
+            <Edit2 size={14} />
           </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
               if (confirm(t('inventory.deleteItemConfirm', { name: item.name }))) onDeleteItem(item);
             }}
-            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+            className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             title={t('common.delete')}
           >
-            <Trash2 size={15} />
+            <Trash2 size={14} />
           </button>
         </div>
       ),
     },
   ];
 
+  const lowCount = useMemo(() => allItems.filter((i) => i.isActive && getStockStatus(i) === 'low').length, [allItems]);
+  const outCount = useMemo(() => allItems.filter((i) => i.isActive && getStockStatus(i) === 'out').length, [allItems]);
+
   return (
     <div className="space-y-3">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2.5 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
         <SearchInput
           placeholder={t('inventory.searchPlaceholder')}
           onChange={onSearchChange}
           className="w-56"
         />
-        <select
-          value={categoryFilter}
-          onChange={(e) => onCategoryFilterChange(e.target.value)}
-          className="px-2 py-1 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="all">{t('inventory.allCategories')}</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <select
-          value={stockFilter}
-          onChange={(e) => onStockFilterChange(e.target.value)}
-          className="px-2 py-1 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          <option value="all">{t('inventory.allStatus')}</option>
-          <option value="low">{t('inventory.stockStatusLow')}</option>
-          <option value="out">{t('inventory.stockStatusOut')}</option>
-        </select>
+        <div className="flex items-center gap-1 text-xs">
+          <select
+            value={categoryFilter}
+            onChange={(e) => onCategoryFilterChange(e.target.value)}
+            className="px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            <option value="all">{t('inventory.allCategories')}</option>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Quick status filter pills */}
+        <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs">
+          <button
+            type="button"
+            onClick={() => onStockFilterChange('all')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              stockFilter === 'all'
+                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 font-bold shadow-2xs'
+                : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            {t('inventory.allStatus')} ({allItems.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => onStockFilterChange('low')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              stockFilter === 'low'
+                ? 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 font-bold shadow-2xs'
+                : 'text-gray-600 dark:text-slate-400 hover:text-amber-600'
+            }`}
+          >
+            {t('inventory.stockStatusLow')} ({lowCount})
+          </button>
+          <button
+            type="button"
+            onClick={() => onStockFilterChange('out')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              stockFilter === 'out'
+                ? 'bg-red-100 dark:bg-red-950/70 text-red-900 dark:text-red-200 font-bold shadow-2xs'
+                : 'text-gray-600 dark:text-slate-400 hover:text-red-600'
+            }`}
+          >
+            {t('inventory.stockStatusOut')} ({outCount})
+          </button>
+        </div>
+
         <div className="flex-1" />
         <button
           onClick={onAdjustStock}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-2xs cursor-pointer"
         >
-          <ArrowDownUp size={11} className="text-gray-500" />
+          <ArrowDownUp size={12} className="text-gray-500 dark:text-slate-400" />
           <span>{t('inventory.stockAdjustment')}</span>
         </button>
         <button
           onClick={onAddItem}
-          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors cursor-pointer"
         >
-          <Plus size={11} />
+          <Plus size={12} />
           <span>{t('inventory.addItem')}</span>
         </button>
       </div>
@@ -773,10 +864,10 @@ const PurchaseOrdersTab: React.FC<PurchaseOrdersTabProps> = ({
               e.stopPropagation();
               onView(po);
             }}
-            className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+            className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
             title={t('inventory.viewDetails')}
           >
-            <Eye size={13} />
+            <Eye size={14} />
           </button>
           {po.status === POStatus.ORDERED && (
             <button
@@ -784,10 +875,10 @@ const PurchaseOrdersTab: React.FC<PurchaseOrdersTabProps> = ({
                 e.stopPropagation();
                 onReceive(po);
               }}
-              className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+              className="p-1.5 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
               title={t('inventory.receive')}
             >
-              <CheckCircle2 size={13} />
+              <CheckCircle2 size={14} />
             </button>
           )}
         </div>
@@ -798,12 +889,12 @@ const PurchaseOrdersTab: React.FC<PurchaseOrdersTabProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-bold text-gray-900">{t('inventory.purchaseOrders')}</h2>
+        <h2 className="text-xs font-bold text-gray-900 dark:text-white">{t('inventory.purchaseOrders')}</h2>
         <button
           onClick={onCreate}
-          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors cursor-pointer"
         >
-          <Plus size={11} />
+          <Plus size={12} />
           <span>{t('inventory.createPurchaseOrder')}</span>
         </button>
       </div>
@@ -833,7 +924,7 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
     {
       header: t('inventory.name'),
       accessor: 'name',
-      render: (s: Supplier) => <span className="font-semibold text-gray-900">{s.name}</span>,
+      render: (s: Supplier) => <span className="font-semibold text-gray-900 dark:text-slate-100">{s.name}</span>,
     },
     { header: t('inventory.phone'), accessor: 'phone' },
     { header: t('inventory.email'), accessor: 'email' },
@@ -843,11 +934,11 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
       accessor: 'isActive',
       render: (s: Supplier) =>
         (s.isActive ?? (s as any).is_active === 1) ? (
-          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50">
             {t('common.active')}
           </span>
         ) : (
-          <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-500">
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
             {t('common.inactive')}
           </span>
         ),
@@ -863,10 +954,10 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
             e.stopPropagation();
             onEdit(s);
           }}
-          className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+          className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
           title={t('common.edit')}
         >
-          <Edit2 size={13} />
+          <Edit2 size={14} />
         </button>
       ),
     },
@@ -875,12 +966,12 @@ const SuppliersTab: React.FC<SuppliersTabProps> = ({ suppliers, onAdd, onEdit })
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-bold text-gray-900">{t('inventory.suppliers')}</h2>
+        <h2 className="text-xs font-bold text-gray-900 dark:text-white">{t('inventory.suppliers')}</h2>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors cursor-pointer"
         >
-          <Plus size={11} />
+          <Plus size={12} />
           <span>{t('inventory.addSupplier')}</span>
         </button>
       </div>
@@ -983,8 +1074,8 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
       {/* Menu item selector */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-semibold text-gray-700">{t('inventory.menuItems')}</h3>
-          <span className="text-[10px] text-gray-400">({filteredMenuItems.length})</span>
+          <h3 className="text-xs font-bold text-gray-900 dark:text-white">{t('inventory.menuItems')}</h3>
+          <span className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">({filteredMenuItems.length})</span>
         </div>
         {items.length > 10 && (
           <input
@@ -992,28 +1083,28 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
             placeholder={t('common.searchPlaceholder', 'Search...')}
             value={recipeMenuSearch}
             onChange={(e) => setRecipeMenuSearch(e.target.value)}
-            className="w-full px-2.5 py-1 text-xs border border-gray-200 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400/30"
           />
         )}
-        <div className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 divide-y divide-gray-100 dark:divide-slate-800 max-h-[600px] overflow-y-auto shadow-2xs">
           {menuScroll.visibleItems.map((item) => {
             const hasRecipe = recipes.some((r) => (r.menuItemId ?? (r as any).menu_item_id) === item.id);
             return (
               <button
                 key={item.id}
                 onClick={() => handleItemSelect(item.id)}
-                className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors ${
+                className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors cursor-pointer ${
                   selectedMenuItemId === item.id
-                    ? 'bg-blue-50 text-blue-700 font-semibold'
-                    : 'hover:bg-gray-50 text-gray-700'
+                    ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold'
+                    : 'hover:bg-gray-50 dark:hover:bg-slate-800/60 text-gray-700 dark:text-slate-300'
                 }`}
               >
                 <span className="truncate pr-2">{item.name}</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium shrink-0 ${
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium shrink-0 border ${
                     hasRecipe
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-400'
+                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50'
+                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   {hasRecipe ? t('inventory.recipeConfigured') : t('inventory.noRecipe')}
@@ -1022,14 +1113,14 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
             );
           })}
           {menuScroll.hasMore && (
-            <div ref={menuScroll.observerTarget} className="py-2.5 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5">
+            <div ref={menuScroll.observerTarget} className="py-2.5 text-center text-xs text-gray-400 dark:text-slate-500 flex items-center justify-center gap-1.5">
               <Loader2 size={12} className="animate-spin text-blue-500" />
               <span>{t('common.loading')}</span>
             </div>
           )}
         </div>
         {filteredMenuItems.length > 30 && (
-          <div className="px-2 py-1 text-[11px] text-gray-500 flex items-center justify-between select-none">
+          <div className="px-2 py-1 text-[11px] text-gray-500 dark:text-slate-400 flex items-center justify-between select-none">
             <span>
               {t('common.showingCount', {
                 count: menuScroll.displayCount,
@@ -1041,7 +1132,7 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
               <button
                 type="button"
                 onClick={menuScroll.loadMore}
-                className="text-blue-600 hover:text-blue-700 hover:underline font-medium"
+                className="text-blue-600 hover:text-blue-700 hover:underline font-medium cursor-pointer"
               >
                 {t('common.loadMore', 'Load more')}
               </button>
@@ -1055,28 +1146,28 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
         {selectedItem ? (
           <>
             {/* Cost summary cards */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-white p-2.5 rounded-lg border border-gray-200">
-                <span className="text-[10px] text-gray-500 block">{t('inventory.menuPrice')}</span>
-                <span className="text-sm font-bold text-gray-900">
+            <div className="grid grid-cols-3 gap-2.5">
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+                <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block">{t('inventory.menuPrice')}</span>
+                <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
                   {formatCurrency(selectedItem.basePrice)}
                 </span>
               </div>
-              <div className="bg-white p-2.5 rounded-lg border border-gray-200">
-                <span className="text-[10px] text-gray-500 block">{t('inventory.recipeCost')}</span>
-                <span className="text-sm font-bold text-blue-600">
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+                <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block">{t('inventory.recipeCost')}</span>
+                <span className="text-sm font-bold text-blue-600 dark:text-blue-400 font-mono">
                   {formatCurrency(totalCost)}
                 </span>
               </div>
-              <div className="bg-white p-2.5 rounded-lg border border-gray-200">
-                <span className="text-[10px] text-gray-500 block">{t('inventory.foodCostPercent')}</span>
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+                <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block">{t('inventory.foodCostPercent')}</span>
                 <div
-                  className={`text-sm font-bold ${
+                  className={`text-sm font-bold font-mono ${
                     foodCostPct > 35
-                      ? 'text-red-600'
+                      ? 'text-red-600 dark:text-red-400'
                       : foodCostPct > 25
-                      ? 'text-amber-600'
-                      : 'text-green-600'
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-emerald-600 dark:text-emerald-400'
                   }`}
                 >
                   {foodCostPct.toFixed(1)}%
@@ -1086,12 +1177,12 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
 
             {/* Recipe ingredients table */}
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-gray-700">{t('inventory.ingredients')}</h3>
+              <h3 className="text-xs font-bold text-gray-900 dark:text-white">{t('inventory.ingredients')}</h3>
               <button
                 onClick={onAddRecipe}
-                className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors cursor-pointer"
               >
-                <Plus size={11} />
+                <Plus size={12} />
                 <span>{t('inventory.addIngredient')}</span>
               </button>
             </div>
@@ -1148,10 +1239,10 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
                           onDeleteRecipe(r.id);
                         }
                       }}
-                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                      className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
                       title={t('common.delete')}
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={14} />
                     </button>
                   ),
                 },
@@ -1162,8 +1253,8 @@ const RecipesTab: React.FC<RecipesTabProps> = ({
             />
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-48 text-gray-400 bg-white rounded-lg border border-gray-200">
-            <UtensilsCrossed size={32} className="mb-2" />
+          <div className="flex flex-col items-center justify-center h-48 text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+            <UtensilsCrossed size={32} className="mb-2 text-gray-300 dark:text-slate-600" />
             <p className="text-xs">{t('inventory.selectItemForRecipe')}</p>
           </div>
         )}
@@ -1496,35 +1587,35 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
     <div className="space-y-3.5">
       {/* Metric Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <div className="bg-white p-3 rounded-lg border border-gray-200">
-          <span className="text-[10px] text-gray-500 block">Total Stock Cost</span>
-          <span className="text-base font-bold text-gray-900 block mt-0.5">{formatCurrency(metrics.totalCost)}</span>
-          <span className="text-[10px] text-gray-400 mt-0.5 block">Ingredients value consumed</span>
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block">Total Stock Cost</span>
+          <span className="text-base font-bold text-gray-900 dark:text-white font-mono block mt-0.5">{formatCurrency(metrics.totalCost)}</span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 block">Ingredients value consumed</span>
         </div>
-        <div className="bg-white p-3 rounded-lg border border-gray-200">
-          <span className="text-[10px] text-gray-500 block">Portions Prepared</span>
-          <span className="text-base font-bold text-blue-600 block mt-0.5">{metrics.totalPortions}</span>
-          <span className="text-[10px] text-gray-400 mt-0.5 block">Menu items ordered</span>
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block">Portions Prepared</span>
+          <span className="text-base font-bold text-blue-600 dark:text-blue-400 font-mono block mt-0.5">{metrics.totalPortions}</span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 block">Menu items ordered</span>
         </div>
-        <div className="bg-white p-3 rounded-lg border border-gray-200">
-          <span className="text-[10px] text-gray-500 block">Ingredients Utilized</span>
-          <span className="text-base font-bold text-emerald-600 block mt-0.5">{metrics.uniqueIngredients} items</span>
-          <span className="text-[10px] text-gray-400 mt-0.5 block">Distinct raw items used</span>
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block">Ingredients Utilized</span>
+          <span className="text-base font-bold text-emerald-600 dark:text-emerald-400 font-mono block mt-0.5">{metrics.uniqueIngredients} items</span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 block">Distinct raw items used</span>
         </div>
-        <div className="bg-white p-3 rounded-lg border border-gray-200">
-          <span className="text-[10px] text-gray-500 block">Top Consuming Dish</span>
-          <span className="text-xs font-bold text-amber-600 truncate block mt-0.5" title={metrics.topDish}>
+        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs">
+          <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block">Top Consuming Dish</span>
+          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 truncate block mt-0.5" title={metrics.topDish}>
             {metrics.topDish}
           </span>
-          <span className="text-[10px] text-gray-400 mt-0.5 block">{formatCurrency(metrics.topCost)} consumed</span>
+          <span className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 block">{formatCurrency(metrics.topCost)} consumed</span>
         </div>
       </div>
 
       {/* Control Bar */}
-      <div className="bg-white p-3 rounded-lg border border-gray-200 space-y-2.5">
+      <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-gray-200 dark:border-slate-800 shadow-2xs space-y-2.5">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
           {/* Date range presets */}
-          <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-xs font-semibold">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
             {[
               { key: 'today', label: 'Today' },
               { key: 'yesterday', label: 'Yesterday' },
@@ -1536,10 +1627,10 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
               <button
                 key={p.key}
                 onClick={() => setDatePreset(p.key as DatePreset)}
-                className={`px-2.5 py-1 rounded text-xs transition-all ${
+                className={`px-2.5 py-1 rounded-md text-xs transition-all cursor-pointer ${
                   datePreset === p.key
-                    ? 'bg-white text-blue-600 shadow-xs font-bold'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-2xs font-bold'
+                    : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 {p.label}
@@ -1551,38 +1642,38 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
           <button
             onClick={handleExportCSV}
             disabled={filteredRecords.length === 0}
-            className="flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
-            <Download size={12} className="text-gray-500" />
+            <Download size={12} className="text-gray-500 dark:text-slate-400" />
             <span>Export CSV</span>
           </button>
         </div>
 
         {/* Custom date range inputs */}
         {datePreset === 'custom' && (
-          <div className="flex items-center gap-2 pt-2 border-t border-gray-100 text-xs">
-            <span className="text-gray-500 font-medium">From:</span>
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-slate-800 text-xs">
+            <span className="text-gray-500 dark:text-slate-400 font-medium">From:</span>
             <input
               type="date"
               value={customStart}
               onChange={(e) => setCustomStart(e.target.value)}
-              className="px-2 py-0.5 border border-gray-200 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="px-2.5 py-1 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <span className="text-gray-500 font-medium">To:</span>
+            <span className="text-gray-500 dark:text-slate-400 font-medium">To:</span>
             <input
               type="date"
               value={customEnd}
               onChange={(e) => setCustomEnd(e.target.value)}
-              className="px-2 py-0.5 border border-gray-200 rounded text-xs bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="px-2.5 py-1 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <Button size="sm" onClick={loadData}>Apply</Button>
           </div>
         )}
 
         {/* Sub-bar: View Switcher and Search */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-gray-100">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-gray-100 dark:border-slate-800">
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-semibold text-gray-500 mr-1">View:</span>
+            <span className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 mr-1">View:</span>
             {[
               { key: 'item', label: 'By Menu Item' },
               { key: 'date', label: 'Date-Wise' },
@@ -1592,10 +1683,10 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
               <button
                 key={v.key}
                 onClick={() => setView(v.key as ConsumptionView)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   view === v.key
                     ? 'bg-blue-600 text-white shadow-xs font-semibold'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'
                 }`}
               >
                 {v.label}
@@ -1625,19 +1716,19 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
           ))}
         </div>
       ) : filteredRecords.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-10 text-center text-gray-400">
-          <BarChart2 size={32} className="mx-auto mb-2 text-gray-300" />
-          <p className="text-xs font-semibold text-gray-700">No stock consumption recorded</p>
-          <p className="text-[11px] text-gray-400 mt-1 max-w-sm mx-auto">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-10 text-center text-gray-400 dark:text-slate-500 shadow-2xs">
+          <BarChart2 size={32} className="mx-auto mb-2 text-gray-300 dark:text-slate-600" />
+          <p className="text-xs font-semibold text-gray-700 dark:text-slate-300">No stock consumption recorded</p>
+          <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-1 max-w-sm mx-auto">
             Stock consumption is automatically tracked when menu items with configured recipes are ordered.
           </p>
         </div>
       ) : view === 'item' ? (
         /* ================== VIEW 1: BY MENU ITEM ================== */
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 font-semibold">
+              <thead className="bg-gray-50 dark:bg-slate-800/80 text-gray-600 dark:text-slate-300 border-b border-gray-200 dark:border-slate-800 font-semibold">
                 <tr>
                   <th className="py-2.5 px-3">Menu Item</th>
                   <th className="py-2.5 px-3">Category</th>
@@ -1647,7 +1738,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                   <th className="py-2.5 px-3 text-right">Avg / Portion</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {itemScroll.visibleItems.map((g) => {
                   const isExpanded = expandedRows.has(g.menuItemName);
                   const avgCost = g.portionsSold > 0 ? Math.round(g.totalCost / g.portionsSold) : 0;
@@ -1655,24 +1746,24 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                     <React.Fragment key={g.menuItemName}>
                       <tr
                         onClick={() => toggleExpand(g.menuItemName)}
-                        className="hover:bg-blue-50/40 cursor-pointer transition-colors"
+                        className="hover:bg-blue-50/40 dark:hover:bg-blue-950/20 cursor-pointer transition-colors"
                       >
-                        <td className="py-2.5 px-3 font-semibold text-gray-900">
+                        <td className="py-2.5 px-3 font-semibold text-gray-900 dark:text-slate-100">
                           <div className="flex items-center gap-1.5">
                             {isExpanded ? (
-                              <ChevronDown size={14} className="text-blue-600 shrink-0" />
+                              <ChevronDown size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
                             ) : (
-                              <ChevronRight size={14} className="text-gray-400 shrink-0" />
+                              <ChevronRight size={14} className="text-gray-400 dark:text-slate-500 shrink-0" />
                             )}
                             <span>{g.menuItemName}</span>
                           </div>
                         </td>
                         <td className="py-2.5 px-3">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700">
                             {g.categoryName}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-gray-700">
+                        <td className="py-2.5 px-3 font-semibold text-gray-700 dark:text-slate-300">
                           {g.portionsSold} portions
                         </td>
                         <td className="py-2.5 px-3">
@@ -1680,48 +1771,48 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                             {g.ingredients.map((ing) => (
                               <span
                                 key={ing.inventoryItemId}
-                                className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-medium border border-blue-100"
+                                className="px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-medium border border-blue-100 dark:border-blue-900/40"
                               >
                                 {ing.ingredientName}: {ing.quantityConsumed} {ing.unit}
                               </span>
                             ))}
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 font-bold text-gray-900 text-right">
+                        <td className="py-2.5 px-3 font-bold text-gray-900 dark:text-white font-mono text-right">
                           {formatCurrency(g.totalCost)}
                         </td>
-                        <td className="py-2.5 px-3 text-gray-500 text-right font-medium">
+                        <td className="py-2.5 px-3 text-gray-500 dark:text-slate-400 text-right font-medium font-mono">
                           {formatCurrency(avgCost)}
                         </td>
                       </tr>
                       {/* Expanded Ingredient Breakdown Table */}
                       {isExpanded && (
-                        <tr className="bg-gray-50/70">
-                          <td colSpan={6} className="py-2.5 px-6 border-b border-gray-100">
-                            <div className="bg-white rounded-md border border-gray-200 p-2.5 space-y-1.5 shadow-2xs">
-                              <span className="text-[11px] font-bold text-gray-700 block">
+                        <tr className="bg-gray-50/70 dark:bg-slate-950/50">
+                          <td colSpan={6} className="py-2.5 px-6 border-b border-gray-100 dark:border-slate-800">
+                            <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-2.5 space-y-1.5 shadow-2xs">
+                              <span className="text-[11px] font-bold text-gray-700 dark:text-slate-300 block">
                                 Recipe Stock Breakdown for &ldquo;{g.menuItemName}&rdquo;
                               </span>
                               <table className="w-full text-left text-[11px]">
                                 <thead>
-                                  <tr className="border-b border-gray-100 text-gray-500 font-medium">
+                                  <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 font-medium">
                                     <th className="py-1">Raw Ingredient</th>
                                     <th className="py-1">Total Quantity Consumed</th>
                                     <th className="py-1 text-right">Cost per Unit</th>
                                     <th className="py-1 text-right">Total Ingredient Cost</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                                   {g.ingredients.map((ing) => (
                                     <tr key={ing.inventoryItemId}>
-                                      <td className="py-1 font-semibold text-gray-800">{ing.ingredientName}</td>
-                                      <td className="py-1 text-gray-700">
+                                      <td className="py-1 font-semibold text-gray-800 dark:text-slate-200">{ing.ingredientName}</td>
+                                      <td className="py-1 text-gray-700 dark:text-slate-300">
                                         {ing.quantityConsumed} {ing.unit}
                                       </td>
-                                      <td className="py-1 text-right text-gray-500">
+                                      <td className="py-1 text-right text-gray-500 dark:text-slate-400 font-mono">
                                         {formatCurrency(ing.costPerUnit)} / {ing.unit}
                                       </td>
-                                      <td className="py-1 text-right font-bold text-blue-600">
+                                      <td className="py-1 text-right font-bold text-blue-600 dark:text-blue-400 font-mono">
                                         {formatCurrency(ing.totalCost)}
                                       </td>
                                     </tr>
@@ -1782,10 +1873,10 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
         </div>
       ) : view === 'date' ? (
         /* ================== VIEW 2: DATE-WISE ================== */
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 font-semibold">
+              <thead className="bg-gray-50 dark:bg-slate-800/80 text-gray-600 dark:text-slate-300 border-b border-gray-200 dark:border-slate-800 font-semibold">
                 <tr>
                   <th className="py-2.5 px-3">Date</th>
                   <th className="py-2.5 px-3">Menu Items Prepared</th>
@@ -1794,30 +1885,30 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                   <th className="py-2.5 px-3 text-right">Day Stock Cost</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {dateScroll.visibleItems.map((dg) => {
                   const isExpanded = expandedRows.has(dg.date);
                   return (
                     <React.Fragment key={dg.date}>
                       <tr
                         onClick={() => toggleExpand(dg.date)}
-                        className="hover:bg-blue-50/40 cursor-pointer transition-colors"
+                        className="hover:bg-blue-50/40 dark:hover:bg-blue-950/20 cursor-pointer transition-colors"
                       >
-                        <td className="py-2.5 px-3 font-semibold text-gray-900">
+                        <td className="py-2.5 px-3 font-semibold text-gray-900 dark:text-slate-100">
                           <div className="flex items-center gap-1.5">
                             {isExpanded ? (
-                              <ChevronDown size={14} className="text-blue-600 shrink-0" />
+                              <ChevronDown size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
                             ) : (
-                              <ChevronRight size={14} className="text-gray-400 shrink-0" />
+                              <ChevronRight size={14} className="text-gray-400 dark:text-slate-500 shrink-0" />
                             )}
-                            <Calendar size={13} className="text-gray-400" />
+                            <Calendar size={13} className="text-gray-400 dark:text-slate-500" />
                             <span>{formatDate(dg.date)}</span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 text-gray-700">
+                        <td className="py-2.5 px-3 text-gray-700 dark:text-slate-300">
                           {dg.dishes.length} distinct dishes
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-gray-700">
+                        <td className="py-2.5 px-3 font-semibold text-gray-700 dark:text-slate-300">
                           {dg.totalPortions} portions
                         </td>
                         <td className="py-2.5 px-3">
@@ -1825,46 +1916,46 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                             {dg.dishes.map((dish) => (
                               <span
                                 key={dish.menuItemName}
-                                className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px] font-medium"
+                                className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 text-[10px] font-medium border border-gray-200 dark:border-slate-700"
                               >
                                 {dish.menuItemName} ({dish.portionsSold})
                               </span>
                             ))}
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 font-bold text-gray-900 text-right">
+                        <td className="py-2.5 px-3 font-bold text-gray-900 dark:text-white font-mono text-right">
                           {formatCurrency(dg.totalCost)}
                         </td>
                       </tr>
                       {/* Expanded Date Details */}
                       {isExpanded && (
-                        <tr className="bg-gray-50/70">
-                          <td colSpan={5} className="py-2.5 px-6 border-b border-gray-100">
-                            <div className="bg-white rounded-md border border-gray-200 p-2.5 space-y-2 shadow-2xs">
-                              <span className="text-[11px] font-bold text-gray-700 block">
+                        <tr className="bg-gray-50/70 dark:bg-slate-950/50">
+                          <td colSpan={5} className="py-2.5 px-6 border-b border-gray-100 dark:border-slate-800">
+                            <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-2.5 space-y-2 shadow-2xs">
+                              <span className="text-[11px] font-bold text-gray-700 dark:text-slate-300 block">
                                 Dishes Prepared on {formatDate(dg.date)}
                               </span>
                               <div className="space-y-1.5">
                                 {dg.dishes.map((dish) => (
                                    <div
                                      key={dish.menuItemName}
-                                     className="p-2 rounded bg-gray-50 border border-gray-100 flex items-center justify-between text-[11px]"
+                                     className="p-2 rounded-lg bg-gray-50 dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700 flex items-center justify-between text-[11px]"
                                    >
                                      <div>
-                                       <span className="font-semibold text-gray-900">{dish.menuItemName}</span>
-                                       <span className="text-gray-500 ml-2">({dish.portionsSold} portions)</span>
+                                       <span className="font-semibold text-gray-900 dark:text-slate-100">{dish.menuItemName}</span>
+                                       <span className="text-gray-500 dark:text-slate-400 ml-2">({dish.portionsSold} portions)</span>
                                        <div className="flex flex-wrap gap-1 mt-1">
                                          {dish.ingredients.map((ing) => (
                                            <span
                                              key={ing.name}
-                                             className="px-1.5 py-0.2 rounded bg-white text-blue-700 text-[10px] border border-blue-200 font-medium"
+                                             className="px-1.5 py-0.2 rounded bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-300 text-[10px] border border-blue-200 dark:border-blue-900/40 font-medium"
                                            >
                                              {ing.name}: {ing.qty} {ing.unit} ({formatCurrency(ing.cost)})
                                            </span>
                                          ))}
                                        </div>
                                      </div>
-                                     <div className="font-bold text-gray-900">
+                                     <div className="font-bold text-gray-900 dark:text-white font-mono">
                                        {formatCurrency(dish.cost)}
                                      </div>
                                    </div>
@@ -1882,7 +1973,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                     <td colSpan={5} className="p-0 border-none">
                       <div
                         ref={dateScroll.observerTarget}
-                        className="py-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5"
+                        className="py-3 text-center text-xs text-gray-400 dark:text-slate-500 flex items-center justify-center gap-1.5"
                       >
                         <Loader2 size={13} className="animate-spin text-blue-500" />
                         <span>{t('common.loading')}</span>
@@ -1924,10 +2015,10 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
          </div>
       ) : view === 'ingredient' ? (
         /* ================== VIEW 3: BY INGREDIENT ================== */
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-50 text-gray-600 border-b border-gray-200 font-semibold">
+              <thead className="bg-gray-50 dark:bg-slate-800/80 text-gray-600 dark:text-slate-300 border-b border-gray-200 dark:border-slate-800 font-semibold">
                 <tr>
                   <th className="py-2.5 px-3">Raw Ingredient</th>
                   <th className="py-2.5 px-3">Unit Cost Rate</th>
@@ -1936,7 +2027,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                   <th className="py-2.5 px-3 text-right">Total Ingredient Cost</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {ingredientScroll.visibleItems.map((ig) => {
                   const key = String(ig.inventoryItemId);
                   const isExpanded = expandedRows.has(key);
@@ -1944,23 +2035,23 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                     <React.Fragment key={ig.inventoryItemId}>
                       <tr
                         onClick={() => toggleExpand(key)}
-                        className="hover:bg-blue-50/40 cursor-pointer transition-colors"
+                        className="hover:bg-blue-50/40 dark:hover:bg-blue-950/20 cursor-pointer transition-colors"
                       >
-                        <td className="py-2.5 px-3 font-semibold text-gray-900">
+                        <td className="py-2.5 px-3 font-semibold text-gray-900 dark:text-slate-100">
                           <div className="flex items-center gap-1.5">
                             {isExpanded ? (
-                              <ChevronDown size={14} className="text-blue-600 shrink-0" />
+                              <ChevronDown size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
                             ) : (
-                              <ChevronRight size={14} className="text-gray-400 shrink-0" />
+                              <ChevronRight size={14} className="text-gray-400 dark:text-slate-500 shrink-0" />
                             )}
-                            <Package size={13} className="text-gray-400" />
+                            <Package size={13} className="text-gray-400 dark:text-slate-500" />
                             <span>{ig.ingredientName}</span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 text-gray-600">
+                        <td className="py-2.5 px-3 text-gray-600 dark:text-slate-400 font-mono">
                           {formatCurrency(ig.costPerUnit)} / {ig.unit}
                         </td>
-                        <td className="py-2.5 px-3 font-bold text-gray-800">
+                        <td className="py-2.5 px-3 font-bold text-gray-800 dark:text-slate-200 font-mono">
                           {ig.totalQuantity} {ig.unit}
                         </td>
                         <td className="py-2.5 px-3">
@@ -1968,43 +2059,43 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                             {ig.dishes.map((d) => (
                               <span
                                 key={d.menuItemName}
-                                className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-medium border border-emerald-100"
+                                className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[10px] font-medium border border-emerald-100 dark:border-emerald-900/40"
                               >
                                 {d.menuItemName}: {d.quantity} {ig.unit}
                               </span>
                             ))}
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 font-bold text-gray-900 text-right">
+                        <td className="py-2.5 px-3 font-bold text-gray-900 dark:text-white font-mono text-right">
                           {formatCurrency(ig.totalCost)}
                         </td>
                       </tr>
                       {/* Expanded Ingredient Breakdown */}
                       {isExpanded && (
-                        <tr className="bg-gray-50/70">
-                          <td colSpan={5} className="py-2.5 px-6 border-b border-gray-100">
-                            <div className="bg-white rounded-md border border-gray-200 p-2.5 space-y-1.5 shadow-2xs">
-                              <span className="text-[11px] font-bold text-gray-700 block">
+                        <tr className="bg-gray-50/70 dark:bg-slate-950/50">
+                          <td colSpan={5} className="py-2.5 px-6 border-b border-gray-100 dark:border-slate-800">
+                            <div className="bg-white dark:bg-slate-900 rounded-lg border border-gray-200 dark:border-slate-800 p-2.5 space-y-1.5 shadow-2xs">
+                              <span className="text-[11px] font-bold text-gray-700 dark:text-slate-300 block">
                                 Menu Items Consuming &ldquo;{ig.ingredientName}&rdquo;
                               </span>
                               <table className="w-full text-left text-[11px]">
                                 <thead>
-                                  <tr className="border-b border-gray-100 text-gray-500 font-medium">
+                                  <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 font-medium">
                                     <th className="py-1">Menu Item</th>
                                     <th className="py-1">Category</th>
                                     <th className="py-1">Stock Consumed</th>
                                     <th className="py-1 text-right">Value Consumed</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                                   {ig.dishes.map((d) => (
                                     <tr key={d.menuItemName}>
-                                      <td className="py-1 font-semibold text-gray-800">{d.menuItemName}</td>
-                                      <td className="py-1 text-gray-500">{d.categoryName}</td>
-                                      <td className="py-1 font-medium text-gray-700">
+                                      <td className="py-1 font-semibold text-gray-800 dark:text-slate-200">{d.menuItemName}</td>
+                                      <td className="py-1 text-gray-500 dark:text-slate-400">{d.categoryName}</td>
+                                      <td className="py-1 font-medium text-gray-700 dark:text-slate-300">
                                         {d.quantity} {ig.unit}
                                       </td>
-                                      <td className="py-1 text-right font-bold text-emerald-600">
+                                      <td className="py-1 text-right font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                                         {formatCurrency(d.cost)}
                                       </td>
                                     </tr>
@@ -2023,7 +2114,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
                     <td colSpan={5} className="p-0 border-none">
                       <div
                         ref={ingredientScroll.observerTarget}
-                        className="py-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1.5"
+                        className="py-3 text-center text-xs text-gray-400 dark:text-slate-500 flex items-center justify-center gap-1.5"
                       >
                         <Loader2 size={13} className="animate-spin text-blue-500" />
                         <span>{t('common.loading')}</span>
@@ -2035,7 +2126,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
             </table>
           </div>
           {ingredientGroups.length > 30 && (
-            <div className="px-4 py-2 bg-gray-50/90 border-t border-gray-200 text-xs text-gray-500 flex items-center justify-between select-none">
+            <div className="px-4 py-2 bg-gray-50/90 dark:bg-slate-800/80 border-t border-gray-200 dark:border-slate-800 text-xs text-gray-500 dark:text-slate-400 flex items-center justify-between select-none">
               <span>
                 {t('common.showingCount', {
                   count: ingredientScroll.displayCount,
@@ -2072,8 +2163,8 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
               accessor: 'timestamp',
               render: (r: ItemStockConsumptionRecord) => (
                 <div>
-                  <span className="font-semibold text-gray-900 block">{formatDate(r.date)}</span>
-                  <span className="text-[10px] text-gray-400 block">{r.timestamp?.split(' ')[1] || ''}</span>
+                  <span className="font-semibold text-gray-900 dark:text-slate-100 block">{formatDate(r.date)}</span>
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500 block font-mono">{r.timestamp?.split(' ')[1] || ''}</span>
                 </div>
               ),
             },
@@ -2081,7 +2172,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
               header: 'Order #',
               accessor: 'orderNumber',
               render: (r: ItemStockConsumptionRecord) => (
-                <span className="font-mono text-xs text-blue-700 font-semibold bg-blue-50 px-2 py-0.5 rounded">
+                <span className="font-mono text-xs text-blue-700 dark:text-blue-300 font-semibold bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 px-2 py-0.5 rounded">
                   {r.orderNumber || '—'}
                 </span>
               ),
@@ -2091,8 +2182,8 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
               accessor: 'menuItemName',
               render: (r: ItemStockConsumptionRecord) => (
                 <div>
-                  <span className="font-semibold text-gray-900 block">{r.menuItemName}</span>
-                  <span className="text-[10px] text-gray-400">{r.categoryName}</span>
+                  <span className="font-semibold text-gray-900 dark:text-slate-100 block">{r.menuItemName}</span>
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500">{r.categoryName}</span>
                 </div>
               ),
             },
@@ -2100,21 +2191,21 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
               header: 'Portions Sold',
               accessor: 'portionsSold',
               render: (r: ItemStockConsumptionRecord) => (
-                <span className="text-gray-700 font-medium">{r.portionsSold}</span>
+                <span className="text-gray-700 dark:text-slate-300 font-medium">{r.portionsSold}</span>
               ),
             },
             {
               header: 'Ingredient',
               accessor: 'ingredientName',
               render: (r: ItemStockConsumptionRecord) => (
-                <span className="font-semibold text-gray-900">{r.ingredientName}</span>
+                <span className="font-semibold text-gray-900 dark:text-slate-100">{r.ingredientName}</span>
               ),
             },
             {
               header: 'Quantity Consumed',
               accessor: 'quantityConsumed',
               render: (r: ItemStockConsumptionRecord) => (
-                <span className="font-bold text-gray-800">
+                <span className="font-bold text-gray-800 dark:text-slate-200 font-mono">
                   {r.quantityConsumed} {r.unit}
                 </span>
               ),
@@ -2123,7 +2214,7 @@ const ConsumptionTab: React.FC<ConsumptionTabProps> = ({ getItemStockConsumption
               header: 'Total Cost',
               accessor: 'totalCost',
               render: (r: ItemStockConsumptionRecord) => (
-                <span className="font-bold text-gray-900">{formatCurrency(r.totalCost)}</span>
+                <span className="font-bold text-gray-900 dark:text-white font-mono">{formatCurrency(r.totalCost)}</span>
               ),
             },
           ]}
@@ -2151,7 +2242,9 @@ const WastageTab: React.FC<WastageTabProps> = ({ items, history, onLogWastage })
     {
       header: t('inventory.date'),
       accessor: 'createdAt',
-      render: (tx: StockTransaction) => formatDate(tx.createdAt),
+      render: (tx: StockTransaction) => (
+        <span className="font-mono text-xs text-gray-700 dark:text-slate-300">{formatDate(tx.createdAt)}</span>
+      ),
     },
     {
       header: t('inventory.item'),
@@ -2159,7 +2252,7 @@ const WastageTab: React.FC<WastageTabProps> = ({ items, history, onLogWastage })
       render: (tx: StockTransaction) => {
         const item = items.find((i) => i.id === tx.inventoryItemId);
         const name = item?.name ?? tx.itemName ?? `#${tx.inventoryItemId}`;
-        return <span className="font-semibold text-gray-900">{name}</span>;
+        return <span className="font-semibold text-gray-900 dark:text-slate-100">{name}</span>;
       },
     },
     {
@@ -2169,7 +2262,7 @@ const WastageTab: React.FC<WastageTabProps> = ({ items, history, onLogWastage })
         const item = items.find((i) => i.id === tx.inventoryItemId);
         const unit = item?.unit ?? tx.unit ?? '';
         return (
-          <span className="font-semibold text-red-600">
+          <span className="font-semibold font-mono text-red-600 dark:text-red-400">
             -{tx.quantity} {unit}
           </span>
         );
@@ -2179,7 +2272,7 @@ const WastageTab: React.FC<WastageTabProps> = ({ items, history, onLogWastage })
       header: t('inventory.reason'),
       accessor: 'reason',
       render: (tx: StockTransaction) => (
-        <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-red-100 text-red-700">
+        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900/50">
           {t('inventory.wastage')}
         </span>
       ),
@@ -2187,19 +2280,21 @@ const WastageTab: React.FC<WastageTabProps> = ({ items, history, onLogWastage })
     {
       header: t('inventory.notes'),
       accessor: 'notes',
-      render: (tx: StockTransaction) => tx.notes || '-',
+      render: (tx: StockTransaction) => (
+        <span className="text-gray-600 dark:text-slate-400">{tx.notes || '-'}</span>
+      ),
     },
   ];
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs font-bold text-gray-900">{t('inventory.wastageLog')}</h2>
+        <h2 className="text-xs font-bold text-gray-900 dark:text-white">{t('inventory.wastageLog')}</h2>
         <button
           onClick={onLogWastage}
-          className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 shadow-xs transition-colors cursor-pointer"
         >
-          <Plus size={11} />
+          <Plus size={12} />
           <span>{t('inventory.logWastage')}</span>
         </button>
       </div>
@@ -2275,30 +2370,30 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, onClose, 
     >
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.name')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.name')} *</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('inventory.itemNamePlaceholder')}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.sku')}</label>
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('inventory.sku')}</label>
             <input
               value={sku}
               onChange={(e) => setSku(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.skuPlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.unit')} *</label>
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.unit')} *</label>
             <select
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value="kg">{t('inventory.units.kg')}</option>
               <option value="g">{t('inventory.units.g')}</option>
@@ -2312,50 +2407,50 @@ const InventoryItemModal: React.FC<InventoryItemModalProps> = ({ item, onClose, 
           </div>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.category')}</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.category')}</label>
           <input
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('inventory.categoryPlaceholder')}
           />
         </div>
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
               {item ? t('inventory.currentStock') : t('inventory.openingStock')}
             </label>
             <input
               type="number"
               value={currentStock}
               onChange={(e) => setCurrentStock(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
               min="0"
               step="any"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
               {t('inventory.minStock')} *
             </label>
             <input
               type="number"
               value={minStock}
               onChange={(e) => setMinStock(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
               min="0"
               step="any"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
               {t('inventory.costPerUnitLabel')} *
             </label>
             <input
               type="number"
               value={costPerUnit}
               onChange={(e) => setCostPerUnit(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
               min="0"
               step="0.01"
             />
@@ -2419,11 +2514,11 @@ const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
     >
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.item')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('inventory.item')} *</label>
           <select
             value={selectedItemId}
             onChange={(e) => setSelectedItemId(Number(e.target.value) || '')}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectItemOption')}</option>
             {items.map((item) => (
@@ -2435,22 +2530,22 @@ const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.quantity')} *</label>
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.quantity')} *</label>
             <input
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
               placeholder={t('inventory.quantityAdjustPlaceholder')}
               step="any"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.type')} *</label>
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.type')} *</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as StockTransactionType)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             >
               <option value={StockTransactionType.PURCHASE}>{t('inventory.movementType.purchase')}</option>
               <option value={StockTransactionType.ADJUSTMENT}>{t('inventory.movementType.adjustment')}</option>
@@ -2459,11 +2554,11 @@ const StockAdjustmentModal: React.FC<StockAdjustmentModalProps> = ({
           </div>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.notes')}</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.notes')}</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={2}
             placeholder={t('inventory.adjustmentReason')}
           />
@@ -2526,50 +2621,50 @@ const SupplierModal: React.FC<SupplierModalProps> = ({ supplier, onClose, onSave
     >
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.name')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.name')} *</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             placeholder={t('inventory.supplierNamePlaceholder')}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.phone')}</label>
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('inventory.phone')}</label>
             <input
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
               placeholder={t('inventory.phonePlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.email')}</label>
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('inventory.email')}</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder={t('inventory.emailPlaceholder')}
             />
           </div>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{taxTerms.businessTaxId}</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{taxTerms.businessTaxId}</label>
           <input
             value={gstin}
             onChange={(e) => setGstin(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
             placeholder={t('inventory.gstinPlaceholder')}
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.address')}</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('inventory.address')}</label>
           <textarea
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={2}
           />
         </div>
@@ -2651,8 +2746,8 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
       footer={
         <>
           <div className="flex-1 text-left">
-            <span className="text-xs text-gray-500">{t('inventory.totalLabel')}</span>
-            <span className="text-sm font-bold text-gray-900 ml-1">
+            <span className="text-xs text-gray-500 dark:text-slate-400">{t('inventory.totalLabel')}</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white font-mono ml-1">
               {formatCurrency(Math.round(total * 100))}
             </span>
           </div>
@@ -2667,11 +2762,11 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
     >
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.supplier')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('inventory.supplier')} *</label>
           <select
             value={supplierId}
             onChange={(e) => setSupplierId(Number(e.target.value) || '')}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectSupplierOption')}</option>
             {suppliers.map((s) => (
@@ -2684,7 +2779,7 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
 
         {/* Line items */}
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1.5">{t('inventory.items')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1.5">{t('inventory.items')} *</label>
           <div className="space-y-1.5">
             {lineItems.map((li, idx) => (
               <div key={idx} className="flex items-center gap-2">
@@ -2693,7 +2788,7 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
                   onChange={(e) =>
                     updateLine(idx, 'inventoryItemId', Number(e.target.value))
                   }
-                  className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="flex-1 px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                   <option value="">{t('inventory.selectItemPlaceholder')}</option>
                   {items.map((item) => (
@@ -2707,7 +2802,7 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
                   placeholder={t('common.qty')}
                   value={li.quantity || ''}
                   onChange={(e) => updateLine(idx, 'quantity', Number(e.target.value))}
-                  className="w-20 px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-20 px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
                   min="0"
                 />
                 <input
@@ -2715,16 +2810,16 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
                   placeholder={t('inventory.costRs')}
                   value={li.unitCost || ''}
                   onChange={(e) => updateLine(idx, 'unitCost', Number(e.target.value))}
-                  className="w-24 px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-24 px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
                   min="0"
                   step="0.01"
                 />
-                <span className="text-xs font-semibold text-gray-700 w-20 text-right">
+                <span className="text-xs font-semibold text-gray-700 dark:text-slate-200 font-mono w-20 text-right">
                   {formatCurrency(Math.round(li.quantity * li.unitCost * 100))}
                 </span>
                 <button
                   onClick={() => removeLine(idx)}
-                  className="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
+                  className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded transition-colors"
                   disabled={lineItems.length <= 1}
                 >
                   <XCircle size={14} />
@@ -2738,11 +2833,11 @@ const CreatePOModal: React.FC<CreatePOModalProps> = ({
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.notes')}</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.notes')}</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={2}
           />
         </div>
@@ -2771,25 +2866,26 @@ const ViewPOModal: React.FC<ViewPOModalProps> = ({ po, suppliers, items, onClose
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div>
-            <span className="text-gray-500">{t('inventory.supplier')}:</span>{' '}
-            <span className="font-semibold text-gray-900">{supplierName}</span>
+            <span className="text-gray-500 dark:text-slate-400">{t('inventory.supplier')}:</span>{' '}
+            <span className="font-semibold text-gray-900 dark:text-slate-100">{supplierName}</span>
           </div>
           <div>
-            <span className="text-gray-500">{t('inventory.status')}:</span> {getPOStatusBadge(po.status, t)}
+            <span className="text-gray-500 dark:text-slate-400">{t('inventory.status')}:</span> {getPOStatusBadge(po.status, t)}
           </div>
           <div>
-            <span className="text-gray-500">{t('inventory.ordered')}:</span>{' '}
-            {po.orderedAt ? formatDate(po.orderedAt) : '-'}
+            <span className="text-gray-500 dark:text-slate-400">{t('inventory.ordered')}:</span>{' '}
+            <span className="font-mono text-gray-700 dark:text-slate-300">{po.orderedAt ? formatDate(po.orderedAt) : '-'}</span>
           </div>
           <div>
-            <span className="text-gray-500">{t('inventory.received')}:</span>{' '}
-            {po.receivedAt ? formatDate(po.receivedAt) : '-'}
+            <span className="text-gray-500 dark:text-slate-400">{t('inventory.received')}:</span>{' '}
+            <span className="font-mono text-gray-700 dark:text-slate-300">{po.receivedAt ? formatDate(po.receivedAt) : '-'}</span>
           </div>
         </div>
 
         {po.notes && (
           <div className="text-xs">
-            <span className="text-gray-500">{t('inventory.notesLabel')}</span> {po.notes}
+            <span className="text-gray-500 dark:text-slate-400">{t('inventory.notesLabel')}</span>{' '}
+            <span className="text-gray-800 dark:text-slate-200">{po.notes}</span>
           </div>
         )}
 
@@ -2823,9 +2919,9 @@ const ViewPOModal: React.FC<ViewPOModalProps> = ({ po, suppliers, items, onClose
           keyExtractor={(item) => item.id}
         />
 
-        <div className="text-right pt-2 border-t border-gray-200">
-          <span className="text-gray-500 text-xs">{t('inventory.totalLabel')}</span>
-          <span className="text-sm font-bold text-gray-900 ml-1">{formatCurrency(po.totalAmount)}</span>
+        <div className="text-right pt-2 border-t border-gray-200 dark:border-slate-700">
+          <span className="text-gray-500 dark:text-slate-400 text-xs">{t('inventory.totalLabel')}</span>
+          <span className="text-sm font-bold text-gray-900 dark:text-white font-mono ml-1">{formatCurrency(po.totalAmount)}</span>
         </div>
       </div>
     </Modal>
@@ -2886,19 +2982,19 @@ const ReceivePOModal: React.FC<ReceivePOModalProps> = ({ po, items, onClose, onS
       }
     >
       <div className="space-y-3">
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 dark:text-slate-400">
           {t('inventory.receiveInstructions')}
         </p>
         {(po.items ?? []).map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between gap-3 py-1.5 border-b border-gray-100"
+            className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 dark:border-slate-700/60"
           >
             <div className="flex-1">
-              <div className="font-semibold text-gray-900 text-xs">
+              <div className="font-semibold text-gray-900 dark:text-slate-100 text-xs">
                 {getItemName(item.inventoryItemId)}
               </div>
-              <div className="text-[10px] text-gray-400">
+              <div className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">
                 {t('inventory.receiveOrderedReceived', { ordered: item.quantity, received: item.receivedQty })}
               </div>
             </div>
@@ -2908,7 +3004,7 @@ const ReceivePOModal: React.FC<ReceivePOModalProps> = ({ po, items, onClose, onS
               onChange={(e) =>
                 setReceivedQtys({ ...receivedQtys, [item.id]: Number(e.target.value) })
               }
-              className="w-20 px-2.5 py-1 text-xs border border-gray-300 rounded-md text-right focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-20 px-2.5 py-1 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white font-mono text-right focus:outline-none focus:ring-2 focus:ring-blue-400"
               min="0"
               max={item.quantity}
             />
@@ -2963,11 +3059,11 @@ const WastageLogModal: React.FC<WastageLogModalProps> = ({ items, onClose, onSav
     >
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">{t('inventory.item')} *</label>
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('inventory.item')} *</label>
           <select
             value={selectedItemId}
             onChange={(e) => setSelectedItemId(Number(e.target.value) || '')}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectItemOption')}</option>
             {items.map((item) => (
@@ -2978,26 +3074,26 @@ const WastageLogModal: React.FC<WastageLogModalProps> = ({ items, onClose, onSav
           </select>
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
             {t('inventory.quantityWasted')} *
           </label>
           <input
             type="number"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
             min="0"
             step="any"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
             {t('inventory.reason')}
           </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={2}
             placeholder={t('inventory.wastageReasonPlaceholder')}
           />
@@ -3075,13 +3171,13 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
     >
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
             {t('inventory.inventoryItem')} *
           </label>
           <select
             value={selectedItemId}
             onChange={(e) => handleItemChange(Number(e.target.value) || '')}
-            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t('inventory.selectIngredientOption')}</option>
             {inventoryItems.map((item) => (
@@ -3093,33 +3189,33 @@ const AddRecipeModal: React.FC<AddRecipeModalProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
               {t('inventory.quantityUsed')} * {selectedInvItem ? `(${selectedInvItem.unit})` : ''}
             </label>
             <input
               type="number"
               value={quantityUsed}
               onChange={(e) => setQuantityUsed(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
               min="0"
               step="any"
               placeholder={selectedInvItem ? `e.g. 0.25 ${selectedInvItem.unit}` : 'Quantity'}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1">{t('common.unit')}</label>
+            <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">{t('common.unit')}</label>
             <input
               value={unit || selectedInvItem?.unit || ''}
               readOnly
-              className="w-full px-2.5 py-1.5 text-xs border border-gray-200 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+              className="w-full px-2.5 py-1.5 text-xs border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400 cursor-not-allowed font-mono"
               placeholder={t('inventory.unitPlaceholder')}
             />
           </div>
         </div>
         {selectedInvItem && quantityUsed && (
-          <div className="bg-blue-50 rounded-md px-3 py-2 text-xs">
-            <span className="text-gray-600">{t('inventory.ingredientCostLabel')}</span>
-            <span className="font-bold text-gray-900 ml-1">
+          <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/40 rounded-lg px-3 py-2 text-xs flex items-center justify-between">
+            <span className="text-gray-600 dark:text-slate-400">{t('inventory.ingredientCostLabel')}</span>
+            <span className="font-bold text-gray-900 dark:text-white font-mono ml-1">
               {formatCurrency(Number(quantityUsed) * selectedInvItem.costPerUnit)}
             </span>
           </div>

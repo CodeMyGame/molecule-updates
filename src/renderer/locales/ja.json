@@ -12,7 +12,10 @@
     "logout": "ログアウト",
     "collapseSidebar": "サイドバーを閉じる",
     "expandSidebar": "サイドバーを開く",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "営業中",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "注文 #{{number}}",
     "itemCount_one": "{{count}}件",
     "itemCount_other": "{{count}}件",
-    "itemCount": "{{count}} 点"
+    "itemCount": "{{count}} 点",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "注文を取る",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "このレシピには原材料が設定されていません",
     "selectItemForRecipe": "レシピの確認または設定を行うメニュー商品を選択してください",
     "notes": "備考",
-    "consumption": "消費レポート"
+    "consumption": "消費レポート",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "注文履歴",
@@ -763,7 +773,19 @@
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "アップロードされたファイルでメニューが正常に置き換えられました！",
     "station": "ステーション",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "伝票プレビュー",

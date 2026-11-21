@@ -25,27 +25,27 @@ const STATUS_STYLES: Record<
   { bg: string; border: string; badge: string; labelKey: string }
 > = {
   [TableStatus.FREE]: {
-    bg: 'bg-green-50',
-    border: 'border-green-400',
-    badge: 'bg-green-500 text-white',
+    bg: 'bg-emerald-50/80 dark:bg-emerald-950/30 hover:bg-emerald-100/70 dark:hover:bg-emerald-900/40',
+    border: 'border-emerald-300 dark:border-emerald-800/60',
+    badge: 'bg-emerald-600 text-white',
     labelKey: 'tables.statusFree',
   },
   [TableStatus.OCCUPIED]: {
-    bg: 'bg-red-50',
-    border: 'border-red-400',
-    badge: 'bg-red-500 text-white',
+    bg: 'bg-rose-50/80 dark:bg-rose-950/30 hover:bg-rose-100/70 dark:hover:bg-rose-900/40',
+    border: 'border-rose-300 dark:border-rose-800/60',
+    badge: 'bg-rose-600 text-white',
     labelKey: 'tables.statusOccupied',
   },
   [TableStatus.RESERVED]: {
-    bg: 'bg-yellow-50',
-    border: 'border-yellow-400',
-    badge: 'bg-yellow-500 text-white',
+    bg: 'bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/70 dark:hover:bg-amber-900/40',
+    border: 'border-amber-300 dark:border-amber-800/60',
+    badge: 'bg-amber-600 text-white',
     labelKey: 'tables.statusReserved',
   },
   [TableStatus.DIRTY]: {
-    bg: 'bg-gray-100',
-    border: 'border-gray-400',
-    badge: 'bg-gray-500 text-white',
+    bg: 'bg-slate-100/80 dark:bg-slate-800/60 hover:bg-slate-200/60 dark:hover:bg-slate-700/60',
+    border: 'border-slate-300 dark:border-slate-700',
+    badge: 'bg-slate-600 text-white',
     labelKey: 'tables.statusDirty',
   },
 };
@@ -56,9 +56,9 @@ function getElapsedMinutes(startedAt: string): number {
 }
 
 function getWaitTimeColor(minutes: number): { text: string; bg: string } {
-  if (minutes < 30) return { text: 'text-green-600', bg: '' };
-  if (minutes < 60) return { text: 'text-yellow-600', bg: '' };
-  return { text: 'text-red-600', bg: 'bg-red-50' };
+  if (minutes < 30) return { text: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/40' };
+  if (minutes < 60) return { text: 'text-amber-700 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/40' };
+  return { text: 'text-rose-700 dark:text-rose-400 font-bold', bg: 'bg-rose-50 dark:bg-rose-950/40' };
 }
 
 // Tables occupied this long (minutes) get a pulsing alert animation.
@@ -103,7 +103,7 @@ const TableCard: React.FC<TableCardProps> = ({
   const isHold = isOccupied && orderStatus === 'hold';
   const hasOrderInfo = isOccupied && orderTotal !== undefined;
   const elapsedMins = orderStartedAt ? getElapsedMinutes(orderStartedAt) : 0;
-  const waitColor = isHold ? { text: 'text-amber-600', bg: 'bg-amber-50' } : getWaitTimeColor(elapsedMins);
+  const waitColor = isHold ? { text: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/40' } : getWaitTimeColor(elapsedMins);
   // Flag tables sitting for 2+ hours so the admin notices them at a glance (unless on hold)
   const isLongHour = isOccupied && !isHold && elapsedMins >= LONG_HOUR_MINUTES;
 
@@ -112,12 +112,14 @@ const TableCard: React.FC<TableCardProps> = ({
   const badgeLetter = isHold ? 'H' : (config.label.length > 0 ? Array.from(config.label)[0]!.toUpperCase() : '?');
 
   const cardBorderAndBg = isHold
-    ? 'border-amber-400 bg-amber-50 hover:bg-amber-100/70 hover:border-amber-500'
+    ? 'border-amber-400 dark:border-amber-600 bg-amber-50/90 dark:bg-amber-950/40 hover:bg-amber-100/70'
     : isOccupied && elapsedMins >= 60
-      ? 'border-red-500 bg-red-50'
+      ? 'border-rose-500 dark:border-rose-500 bg-rose-100/80 dark:bg-rose-950/60'
       : isOccupied && elapsedMins >= 30
-        ? 'border-yellow-500 bg-yellow-50'
+        ? 'border-amber-400 dark:border-amber-600 bg-amber-50/90 dark:bg-amber-950/40'
         : `${config.border} ${config.bg}`;
+
+  const isRound = table.shape === 'round' || table.shape === 'circle';
 
   return (
     <button
@@ -127,8 +129,8 @@ const TableCard: React.FC<TableCardProps> = ({
       onContextMenu={onContextMenu ? (e) => { e.preventDefault(); onContextMenu(e, table); } : undefined}
       className={`
         table-card relative flex flex-col items-center justify-center
-        rounded-lg w-full border
-        ${compact ? 'min-h-[68px] p-1.5' : 'min-h-[72px] p-1.5'}
+        ${isRound ? 'rounded-2xl' : 'rounded-xl'} w-full border
+        ${compact ? 'min-h-[68px] p-1.5' : 'min-h-[74px] p-2'}
         ${
           isSelected
             ? 'is-selected table-selected !border-blue-500 dark:!border-sky-400 bg-blue-50/95 dark:bg-blue-950/85 ring-2 ring-blue-500 dark:ring-sky-400 shadow-md dark:shadow-[0_0_16px_rgba(56,189,248,0.45)] z-10 scale-[1.02]'
@@ -137,7 +139,7 @@ const TableCard: React.FC<TableCardProps> = ({
         transition-all duration-150
         active:scale-95
         cursor-pointer select-none
-        ${isEditMode ? 'ring-2 ring-dashed ring-blue-300' : ''}
+        ${isEditMode ? 'ring-2 ring-dashed ring-blue-400 bg-blue-50/40' : ''}
         ${isLongHour && !isSelected ? 'animate-long-hour' : ''}
         tap-target
       `}
@@ -163,15 +165,22 @@ const TableCard: React.FC<TableCardProps> = ({
         </span>
       )}
 
-      {/* Pinned Icon */}
-      {table.isPinned && (
-        <span
-          className={`absolute ${isSelected ? (compact ? 'top-3.5 -left-1' : 'top-4 -left-1') : '-top-1 -left-1'} bg-blue-500 text-white rounded-full p-0.5 shadow-xs`}
-          title={t('common.pinned')}
-        >
-          <Pin size={compact ? 7 : 9} className="fill-current" />
-        </span>
-      )}
+      {/* Table Capacity & Pin indicators */}
+      <div className="absolute top-1 left-1.5 flex items-center gap-1 z-10 pointer-events-none">
+        {table.isPinned && !isSelected && (
+          <span
+            className="bg-blue-500 text-white rounded-full p-0.5 shadow-xs"
+            title={t('common.pinned', 'Pinned')}
+          >
+            <Pin size={compact ? 7 : 8} className="fill-current" />
+          </span>
+        )}
+        {table.capacity > 0 && !compact && (
+          <span className="text-[9px] font-semibold text-gray-400 dark:text-gray-500">
+            {table.capacity}p
+          </span>
+        )}
+      </div>
 
       {/* Table Name */}
       <span
@@ -180,21 +189,28 @@ const TableCard: React.FC<TableCardProps> = ({
         } ${
           isSelected
             ? 'text-blue-900 dark:text-sky-100 font-extrabold tracking-wide'
-            : 'text-gray-800 dark:text-gray-100'
+            : 'text-gray-900 dark:text-gray-100'
         }`}
       >
         {table.name}
       </span>
 
+      {/* If Free: subtle status note */}
+      {!isOccupied && !compact && (
+        <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-medium">
+          {t('tables.statusFree', 'Free')}
+        </span>
+      )}
+
       {hasOrderInfo && (
-        <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-1 gap-0.5'}`}>
+        <div className={`flex flex-col items-center w-full ${compact ? 'mt-0.5 gap-0' : 'mt-0.5 gap-0.5'}`}>
           <span
-            className={`font-bold ${
+            className={`font-bold font-mono ${
               isHold
                 ? 'text-amber-800 dark:text-amber-300'
                 : isSelected
                   ? 'text-blue-950 dark:text-amber-300 font-extrabold'
-                  : 'text-red-700 dark:text-red-400'
+                  : 'text-rose-700 dark:text-rose-400'
             } ${compact ? 'text-[10px]' : 'text-xs'}`}
           >
             {formatPaise(orderTotal!)}

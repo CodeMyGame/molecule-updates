@@ -12,7 +12,10 @@
     "logout": "ಲಾಗ್ ಔಟ್",
     "collapseSidebar": "ಸೈಡ್‌ಬಾರ್ ಸಂಕುಚಿಸಿ",
     "expandSidebar": "ಸೈಡ್‌ಬಾರ್ ವಿಸ್ತರಿಸಿ",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "ದಿನ ತೆರೆದಿದೆ",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "ಆರ್ಡರ್ #{{number}}",
     "itemCount_one": "{{count}} ಐಟಂ",
     "itemCount_other": "{{count}} ಐಟಂಗಳು",
-    "itemCount": "{{count}} ವಸ್ತುಗಳು"
+    "itemCount": "{{count}} ವಸ್ತುಗಳು",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "ಆದೇಶ ತೆಗೆದುಕೊಳ್ಳಿ",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "ಈ ಪಾಕವಿಧಾನಕ್ಕಾಗಿ ಯಾವುದೇ ಪದಾರ್ಥಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿಲ್ಲ",
     "selectItemForRecipe": "ಪಾಕವಿಧಾನವನ್ನು ವೀಕ್ಷಿಸಲು ಅಥವಾ ಕಾನ್ಫಿಗರ್ ಮಾಡಲು ಮೆನು ಐಟಂ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ",
     "notes": "ಟಿಪ್ಪಣಿಗಳು",
-    "consumption": "ಬಳಕೆಯ ವರದಿ"
+    "consumption": "ಬಳಕೆಯ ವರದಿ",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "ಆದೇಶ ಇತಿಹಾಸ",
@@ -763,7 +773,19 @@
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್‌ನೊಂದಿಗೆ ಮೆನುವನ್ನು ಯಶಸ್ವಿಯಾಗಿ ಬದಲಾಯಿಸಲಾಗಿದೆ!",
     "station": "ನಿಲ್ದಾಣ",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "ಬಿಲ್ ಪೂರ್ವವೀಕ್ಷಣೆ",

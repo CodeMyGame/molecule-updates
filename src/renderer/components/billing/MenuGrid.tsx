@@ -797,62 +797,74 @@ const MenuGrid: React.FC<MenuGridProps> = ({
           if (viewMode === 'list') {
             return (
               <div className="columns-2 xl:columns-3 2xl:columns-4 gap-1">
-                {displayItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleItemClick(item)}
-                    disabled={loadingItem === item.id}
-                    className="menu-item-card relative w-full flex items-center gap-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-                      rounded-lg px-2 py-[5px] text-left transition-all duration-100
-                      hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50/80 dark:hover:bg-gray-750 active:scale-[0.98]
-                      focus:outline-none focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500
-                      disabled:opacity-60 disabled:cursor-wait select-none mb-0.5 break-inside-avoid"
-                  >
-                    {item.isVeg ? (
-                      <div className="flex-shrink-0 w-2.5 h-2.5 border-[1.5px] border-green-600 rounded-sm flex items-center justify-center">
-                        <CircleDot size={5} className="text-green-600" />
-                      </div>
-                    ) : (
-                      <div className="flex-shrink-0 w-2.5 h-2.5 border-[1.5px] border-red-600 rounded-sm flex items-center justify-center">
-                        <CircleDot size={5} className="text-red-600" />
-                      </div>
-                    )}
-                    <span className="flex-1 font-medium text-gray-900 dark:text-gray-100 text-[11px] leading-tight truncate">
-                      {getName(item)}
-                    </span>
-                    {showPrices && (
-                      <span className="flex-shrink-0 font-semibold text-blue-700 dark:text-blue-400 text-[11px]">
-                        {formatCurrency(item.basePrice)}
-                      </span>
-                    )}
-                    <span
-                      onClick={(e) => toggleFavorite(e, item.id)}
-                      className={`flex-shrink-0 cursor-pointer transition-colors ${favoriteIds.includes(item.id) ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600 hover:text-amber-300 dark:hover:text-amber-400'}`}
+                {displayItems.map((item) => {
+                  const isAvailable = item.isAvailable !== false;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => isAvailable && handleItemClick(item)}
+                      disabled={!isAvailable || loadingItem === item.id}
+                      className={`menu-item-card relative w-full flex items-center gap-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
+                        rounded-lg px-2 py-[5px] text-left transition-all duration-100
+                        hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50/80 dark:hover:bg-gray-750 active:scale-[0.98]
+                        focus:outline-none focus:ring-1 focus:ring-blue-300 dark:focus:ring-blue-500
+                        disabled:opacity-50 disabled:cursor-not-allowed select-none mb-0.5 break-inside-avoid
+                        ${!isAvailable ? 'opacity-50 bg-gray-100 dark:bg-gray-800/50' : ''}`}
                     >
-                      <Star size={10} fill={favoriteIds.includes(item.id) ? 'currentColor' : 'none'} />
-                    </span>
-                    {loadingItem === item.id && (
-                      <Loader2 size={12} className="flex-shrink-0 text-blue-500 animate-spin" />
-                    )}
-                  </button>
-                ))}
+                      {item.isVeg ? (
+                        <div className="flex-shrink-0 w-2.5 h-2.5 border-[1.5px] border-green-600 rounded-sm flex items-center justify-center">
+                          <CircleDot size={5} className="text-green-600" />
+                        </div>
+                      ) : (
+                        <div className="flex-shrink-0 w-2.5 h-2.5 border-[1.5px] border-red-600 rounded-sm flex items-center justify-center">
+                          <CircleDot size={5} className="text-red-600" />
+                        </div>
+                      )}
+                      <span className="flex-1 font-medium text-gray-900 dark:text-gray-100 text-[11px] leading-tight truncate">
+                        {getName(item)}
+                      </span>
+                      {!isAvailable && (
+                        <span className="px-1.5 py-0.2 rounded bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 text-[9px] font-bold">
+                          86'd
+                        </span>
+                      )}
+                      {showPrices && (
+                        <span className="flex-shrink-0 font-semibold text-blue-700 dark:text-blue-400 text-[11px]">
+                          {formatCurrency(item.basePrice)}
+                        </span>
+                      )}
+                      <span
+                        onClick={(e) => toggleFavorite(e, item.id)}
+                        className={`flex-shrink-0 cursor-pointer transition-colors ${favoriteIds.includes(item.id) ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600 hover:text-amber-300 dark:hover:text-amber-400'}`}
+                      >
+                        <Star size={10} fill={favoriteIds.includes(item.id) ? 'currentColor' : 'none'} />
+                      </span>
+                      {loadingItem === item.id && (
+                        <Loader2 size={12} className="flex-shrink-0 text-blue-500 animate-spin" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             );
           }
           return (
           <div className={`grid ${compact ? 'grid-cols-[repeat(auto-fill,minmax(108px,1fr))] gap-1.5' : 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2'}`}>
-            {displayItems.map((item) => (
+            {displayItems.map((item) => {
+              const isAvailable = item.isAvailable !== false;
+              return (
               <button
                 key={item.id}
-                onClick={() => handleItemClick(item)}
+                onClick={() => isAvailable && handleItemClick(item)}
                 onContextMenu={(e) => { e.preventDefault(); openItemContextMenu(e, item); }}
-                disabled={loadingItem === item.id}
+                disabled={!isAvailable || loadingItem === item.id}
                 className={`menu-item-card relative flex flex-col items-start bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
                   rounded-lg text-left transition-all duration-150
                   hover:border-blue-400 dark:hover:border-blue-400 hover:bg-blue-50/40 dark:hover:bg-gray-750 hover:shadow-md dark:hover:shadow-blue-950/40 active:scale-[0.97] active:shadow-sm
                   focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-500
-                  disabled:opacity-60 disabled:cursor-wait select-none
-                  ${compact ? 'p-2 min-h-[68px]' : 'p-2.5 min-h-[80px]'}`}
+                  disabled:opacity-50 disabled:cursor-not-allowed select-none
+                  ${compact ? 'p-2 min-h-[68px]' : 'p-2.5 min-h-[80px]'}
+                  ${!isAvailable ? 'opacity-50 bg-gray-50/80 dark:bg-gray-800/40' : ''}`}
               >
                 {/* Veg / Non-veg indicator */}
                 <div className={`absolute ${compact ? 'top-1 right-1' : 'top-1.5 right-1.5'}`}>
@@ -874,7 +886,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                 )}
 
                 {loadingItem === item.id && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 rounded-xl">
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 rounded-xl z-20">
                     <Loader2 size={16} className="text-blue-500 animate-spin" />
                   </div>
                 )}
@@ -906,8 +918,15 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                     {item.has_variations ? t('menuGrid.customizable') : t('menuGrid.addonsShort')}
                   </span>
                 )}
+
+                {!isAvailable && (
+                  <span className="absolute inset-x-1.5 bottom-1 text-center py-0.5 rounded bg-rose-600/90 text-white font-bold text-[9px] uppercase tracking-wider shadow-2xs z-10">
+                    86'd
+                  </span>
+                )}
               </button>
-            ))}
+            );
+          })}
             {/* Add new item card — only for real categories, not virtual views */}
             {selectedCategoryId !== null && !showTopSelling && !showFavorites && <button
               onClick={() => setShowAddItemDialog(true)}

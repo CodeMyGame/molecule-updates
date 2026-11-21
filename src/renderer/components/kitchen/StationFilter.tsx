@@ -40,7 +40,7 @@ const StationFilter: React.FC<StationFilterProps> = ({
   );
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="inline-flex items-center p-1 bg-gray-100 dark:bg-slate-800/90 rounded-xl border border-gray-200/80 dark:border-slate-700/70 shadow-2xs gap-1 overflow-x-auto no-scrollbar max-w-full">
       {stations.map((station) => {
         const isActive = selectedStation === station.key;
         const count = counts[station.key] ?? 0;
@@ -51,26 +51,28 @@ const StationFilter: React.FC<StationFilterProps> = ({
             type="button"
             onClick={() => onSelect(station.key)}
             className={`
-              relative flex items-center gap-2 px-3.5 py-2 rounded-lg font-semibold text-sm
-              transition-all duration-150 select-none
+              relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold
+              transition-all duration-150 select-none whitespace-nowrap
               ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                  : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white border border-transparent dark:border-slate-700/60'
+                  ? 'bg-white dark:bg-blue-600 text-gray-900 dark:text-white shadow-xs border border-gray-200/60 dark:border-blue-500/50'
+                  : 'text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700/50 border border-transparent'
               }
             `}
           >
-            {station.icon}
-            <span className="hidden md:inline">{station.label}</span>
+            <span className={isActive ? 'text-blue-600 dark:text-white' : 'text-gray-500 dark:text-slate-400'}>
+              {station.icon}
+            </span>
+            <span>{station.label}</span>
             {count > 0 && (
               <span
                 className={`
-                  inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5
-                  rounded-full text-xs font-bold
+                  inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5
+                  rounded-full text-[11px] font-bold tabular-nums
                   ${
                     isActive
-                      ? 'bg-white/25 text-white'
-                      : 'bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200'
+                      ? 'bg-blue-600 text-white dark:bg-white dark:text-blue-700'
+                      : 'bg-gray-200/90 text-gray-700 dark:bg-slate-700 dark:text-slate-200'
                   }
                 `}
               >

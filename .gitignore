@@ -51,6 +51,7 @@ package/
 
 # Local menu dumps
 menu-*.json
+web-dashboard/public/menus/
 
 # IDEs and editors
 .idea/

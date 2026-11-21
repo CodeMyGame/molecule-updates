@@ -62,17 +62,17 @@ const SearchInput: React.FC<SearchInputProps> = ({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder ?? t('common.searchPlaceholder')}
-        className="w-full pl-10 pr-9 py-2.5 text-sm bg-white border border-gray-300
-          rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400
-          placeholder:text-gray-400 transition-shadow"
+        className="w-full pl-10 pr-9 py-2 text-xs bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700
+          text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400/30 focus:border-blue-500
+          placeholder:text-gray-400 dark:placeholder:text-slate-500 transition-all shadow-2xs"
       />
       {value && (
         <button
           onClick={handleClear}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-gray-400
-            hover:text-gray-600 rounded-lg transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400
+            hover:text-gray-600 dark:hover:text-gray-300 rounded-md transition-colors"
         >
-          <X size={16} />
+          <X size={14} />
         </button>
       )}
     </div>

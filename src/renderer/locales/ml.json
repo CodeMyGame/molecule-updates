@@ -12,7 +12,10 @@
     "logout": "ലോഗ് ഔട്ട്",
     "collapseSidebar": "സൈഡ്‌ബാർ ചുരുക്കുക",
     "expandSidebar": "സൈഡ്‌ബാർ വികസിപ്പിക്കുക",
-    "qrMenu": "QR Menu"
+    "qrMenu": "QR Menu",
+    "groupPos": "Point of Sale",
+    "groupCatalog": "Menu & Stock",
+    "groupManagement": "Management"
   },
   "header": {
     "dayOpen": "ദിവസം തുറന്നു",
@@ -273,7 +276,13 @@
     "orderNumberPrefix": "ഓർഡർ #{{number}}",
     "itemCount_one": "{{count}} ഇനം",
     "itemCount_other": "{{count}} ഇനങ്ങൾ",
-    "itemCount": "{{count}} ഇനങ്ങൾ"
+    "itemCount": "{{count}} ഇനങ്ങൾ",
+    "liveSync": "Live Sync",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit Fullscreen",
+    "reprintKot": "Reprint Ticket",
+    "ticketReprinted": "KOT ticket reprinted",
+    "statusOverdue": "Overdue"
   },
   "waiter": {
     "takeOrder": "ഓർഡർ എടുക്കുക",
@@ -526,7 +535,8 @@
     "noIngredientsConfigured": "ഈ പാചകക്കുറിപ്പിനായി ചേരുവകളൊന്നും ക്രമീകരിച്ചിട്ടില്ല",
     "selectItemForRecipe": "പാചകക്കുറിപ്പ് കാണുന്നതിനോ ക്രമീകരിക്കുന്നതിനോ ഒരു മെനു ഇനം തിരഞ്ഞെടുക്കുക",
     "notes": "കുറിപ്പുകൾ",
-    "consumption": "ഉപഭോഗ റിപ്പോർട്ട്"
+    "consumption": "ഉപഭോഗ റിപ്പോർട്ട്",
+    "itemsCount": "{{count}} Items"
   },
   "reports": {
     "orderHistory": "ഓർഡർ ചരിത്രം",
@@ -763,7 +773,19 @@
     "importFailed": "Failed to import menu data. Please check the file format.",
     "importSuccessBulk": "അപ്‌ലോഡ് ചെയ്ത ഫയൽ ഉപയോഗിച്ച് മെനു വിജയകരമായി മാറ്റിസ്ഥാപിച്ചു!",
     "station": "സ്റ്റേഷൻ",
-    "qrMenu": "QR Menu & Stands"
+    "qrMenu": "QR Menu & Stands",
+    "inStock": "In Stock",
+    "outOfStock": "86'd / Out of Stock",
+    "stock86": "86'd",
+    "allTypes": "All Types",
+    "totalItems": "Total Items",
+    "activeCount": "In Stock",
+    "outOfStockCount": "86'd",
+    "manageVariations": "Variations",
+    "manageAddons": "Add-ons",
+    "categorySearch": "Filter categories...",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items"
   },
   "bill": {
     "preview": "ബിൽ പ്രിവ്യൂ",

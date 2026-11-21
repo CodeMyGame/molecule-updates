@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   MonitorPlay,
@@ -7,6 +7,13 @@ import {
   RefreshCw,
   Volume2,
   VolumeX,
+  Maximize2,
+  Minimize2,
+  AlertTriangle,
+  Flame,
+  CheckCircle2,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import { useKOTStore } from '../stores/kot.store';
 import { KOTStatus } from '../../shared/enums';
@@ -29,13 +36,15 @@ const KitchenClock: React.FC = React.memo(() => {
   });
 
   return (
-    <div className="text-right">
-      <div className="text-2xl font-mono font-bold text-gray-900 dark:text-white tabular-nums">
+    <div className="text-right pl-1">
+      <div className="text-lg font-mono font-bold text-gray-900 dark:text-white tabular-nums tracking-tight leading-none">
         {timeString}
       </div>
     </div>
   );
 });
+
+type StatusFilterKey = 'all' | 'pending' | 'preparing' | 'ready' | 'overdue';
 
 const KitchenDisplay: React.FC = () => {
   const { t } = useTranslation();
@@ -49,11 +58,33 @@ const KitchenDisplay: React.FC = () => {
     setStation,
     getFilteredKOTs,
     getStationCounts,
-    startAutoRefresh,
-    stopAutoRefresh,
   } = useKOTStore();
 
   const [showCompleted, setShowCompleted] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<StatusFilterKey>('all');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Fullscreen event listener
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      }
+    } catch {
+      // Ignore if fullscreen request is denied
+    }
+  };
+
   // Persist sound preference across navigation/reload.
   const [soundEnabled, setSoundEnabledState] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -73,7 +104,6 @@ const KitchenDisplay: React.FC = () => {
   }, []);
 
   // Detect newly-arrived KOTs from polling diffs and play a sound.
-  // Works in both Electron and browser modes, doesn't depend on push events.
   const seenKotIds = useRef<Set<number> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const audioUnlockedRef = useRef(false);
@@ -108,6 +138,7 @@ const KitchenDisplay: React.FC = () => {
       events.forEach((e) => document.removeEventListener(e, unlock));
     };
   }, []);
+
   useEffect(() => {
     const ids = new Set(activeKOTs.map((k) => k.id));
 
@@ -130,7 +161,6 @@ const KitchenDisplay: React.FC = () => {
         const ctx: AudioContext = audioCtxRef.current ?? new Ctor();
         audioCtxRef.current = ctx;
         if (ctx.state === 'suspended') {
-          // Will only succeed if the user has already interacted with the page.
           ctx.resume().catch(() => {});
         }
         if (ctx.state !== 'running') return;
@@ -138,8 +168,6 @@ const KitchenDisplay: React.FC = () => {
         const t0 = ctx.currentTime;
         const DURATION = 2.0;
 
-        // Two oscillators stacked an octave apart for a richer, louder timbre
-        // that cuts through kitchen background noise.
         const lowOsc = ctx.createOscillator();
         const highOsc = ctx.createOscillator();
         lowOsc.type = 'square';
@@ -170,49 +198,280 @@ const KitchenDisplay: React.FC = () => {
   const filteredKOTs = getFilteredKOTs();
   const stationCounts = getStationCounts();
 
+  // Helper to calculate elapsed minutes for overdue checks
+  const getElapsedMins = (createdAt: string): number => {
+    if (!createdAt) return 0;
+    const ts = createdAt.endsWith('Z') ? createdAt : createdAt.replace(' ', 'T') + 'Z';
+    const created = new Date(ts).getTime();
+    return Math.floor((Date.now() - created) / 60000);
+  };
+
+  // Status Queue Breakdown for the active station view
+  const statusCounts = useMemo(() => {
+    let pending = 0;
+    let preparing = 0;
+    let ready = 0;
+    let overdue = 0;
+
+    for (const kot of activeKOTs) {
+      if (selectedStation !== 'all' && kot.station !== selectedStation) {
+        continue;
+      }
+      if (kot.status === KOTStatus.PENDING || kot.status === KOTStatus.SENT) {
+        pending++;
+      } else if (kot.status === KOTStatus.PREPARING) {
+        preparing++;
+      } else if (kot.status === KOTStatus.READY) {
+        ready++;
+      }
+
+      if (getElapsedMins(kot.createdAt) >= 20) {
+        overdue++;
+      }
+    }
+
+    return {
+      all: filteredKOTs.length,
+      pending,
+      preparing,
+      ready,
+      overdue,
+    };
+  }, [activeKOTs, filteredKOTs.length, selectedStation]);
+
+  // Filtered displayed KOTs based on selected station AND status filter
+  const displayedKOTs = useMemo(() => {
+    if (statusFilter === 'all') return filteredKOTs;
+    if (statusFilter === 'pending') {
+      return filteredKOTs.filter((k) => k.status === KOTStatus.PENDING || k.status === KOTStatus.SENT);
+    }
+    if (statusFilter === 'preparing') {
+      return filteredKOTs.filter((k) => k.status === KOTStatus.PREPARING);
+    }
+    if (statusFilter === 'ready') {
+      return filteredKOTs.filter((k) => k.status === KOTStatus.READY);
+    }
+    if (statusFilter === 'overdue') {
+      return filteredKOTs.filter((k) => getElapsedMins(k.createdAt) >= 20);
+    }
+    return filteredKOTs;
+  }, [filteredKOTs, statusFilter]);
+
   const handleUpdateStatus = (id: number, status: KOTStatus) => {
     updateKOTStatus(id, status);
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-white overflow-hidden">
-      {/* Header */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <MonitorPlay size={28} className="text-blue-600 dark:text-blue-400" />
-          <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">{t('kitchen.title')}</h1>
+    <div className="h-full flex flex-col bg-gray-100 dark:bg-slate-950 text-gray-900 dark:text-white overflow-hidden select-none">
+      {/* Enterprise Header */}
+      <header className="flex-shrink-0 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-2xs">
+        <div className="flex items-center justify-between px-5 py-2.5 gap-4">
+          {/* Left: Branding & Live Sync indicator */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-2xs">
+              <MonitorPlay size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-bold tracking-tight text-gray-900 dark:text-white leading-tight">
+                  {t('kitchen.title', 'Kitchen Display')}
+                </h1>
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{t('kitchen.liveSync', 'Live Sync')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Center: Station Filter Capsule */}
+          <div className="flex-1 flex justify-center">
+            <StationFilter
+              selectedStation={selectedStation}
+              onSelect={setStation}
+              counts={stationCounts}
+            />
+          </div>
+
+          {/* Right Controls: Sound, Manual Refresh, Fullscreen, Clock */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className={`p-2 rounded-lg transition-colors border ${
+                soundEnabled
+                  ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 shadow-2xs'
+                  : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:text-gray-900 dark:hover:text-white'
+              }`}
+              title={soundEnabled ? t('kitchen.muteSound') : t('kitchen.unmuteSound')}
+            >
+              {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </button>
+            <button
+              onClick={fetchKOTs}
+              disabled={loading}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-slate-700 disabled:opacity-50"
+              title={t('common.refresh')}
+            >
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            </button>
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-slate-700"
+              title={isFullscreen ? t('kitchen.exitFullscreen', 'Exit Fullscreen') : t('kitchen.fullscreen', 'Fullscreen')}
+            >
+              {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            </button>
+            <div className="h-6 w-px bg-gray-200 dark:bg-slate-700 mx-1" />
+            <KitchenClock />
+          </div>
         </div>
 
-        <StationFilter
-          selectedStation={selectedStation}
-          onSelect={setStation}
-          counts={stationCounts}
-        />
+        {/* Status Queue Filter Ribbon */}
+        <div className="px-5 py-2 bg-gray-50/90 dark:bg-slate-900/90 border-t border-gray-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            {/* All */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter('all')}
+              className={`
+                px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all
+                ${
+                  statusFilter === 'all'
+                    ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
+                }
+              `}
+            >
+              <span>{t('kitchen.stationAll', 'All')}</span>
+              <span
+                className={`text-[11px] font-bold px-1.5 py-0.2 rounded-full ${
+                  statusFilter === 'all'
+                    ? 'bg-white/20 dark:bg-black/15 text-inherit'
+                    : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300'
+                }`}
+              >
+                {statusCounts.all}
+              </span>
+            </button>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white"
-            title={soundEnabled ? t('kitchen.muteSound') : t('kitchen.unmuteSound')}
-          >
-            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-          </button>
-          <button
-            onClick={fetchKOTs}
-            disabled={loading}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white disabled:opacity-50"
-            title={t('common.refresh')}
-          >
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-          </button>
-          <KitchenClock />
+            {/* New / Pending */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
+              className={`
+                px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all
+                ${
+                  statusFilter === 'pending'
+                    ? 'bg-blue-600 text-white shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700 border border-blue-200/70 dark:border-blue-900/40'
+                }
+              `}
+            >
+              <Sparkles size={13} />
+              <span>{t('kitchen.kotStatusNew', 'New')}</span>
+              <span
+                className={`text-[11px] font-bold px-1.5 py-0.2 rounded-full ${
+                  statusFilter === 'pending'
+                    ? 'bg-white/25 text-white'
+                    : 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300'
+                }`}
+              >
+                {statusCounts.pending}
+              </span>
+            </button>
+
+            {/* Preparing */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter(statusFilter === 'preparing' ? 'all' : 'preparing')}
+              className={`
+                px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all
+                ${
+                  statusFilter === 'preparing'
+                    ? 'bg-amber-600 text-white shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-700 border border-amber-200/70 dark:border-amber-900/40'
+                }
+              `}
+            >
+              <Flame size={13} />
+              <span>{t('kitchen.kotStatusPreparing', 'Preparing')}</span>
+              <span
+                className={`text-[11px] font-bold px-1.5 py-0.2 rounded-full ${
+                  statusFilter === 'preparing'
+                    ? 'bg-white/25 text-white'
+                    : 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300'
+                }`}
+              >
+                {statusCounts.preparing}
+              </span>
+            </button>
+
+            {/* Ready */}
+            <button
+              type="button"
+              onClick={() => setStatusFilter(statusFilter === 'ready' ? 'all' : 'ready')}
+              className={`
+                px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all
+                ${
+                  statusFilter === 'ready'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700 border border-emerald-200/70 dark:border-emerald-900/40'
+                }
+              `}
+            >
+              <CheckCircle2 size={13} />
+              <span>{t('kitchen.kotStatusReady', 'Ready')}</span>
+              <span
+                className={`text-[11px] font-bold px-1.5 py-0.2 rounded-full ${
+                  statusFilter === 'ready'
+                    ? 'bg-white/25 text-white'
+                    : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                }`}
+              >
+                {statusCounts.ready}
+              </span>
+            </button>
+
+            {/* Overdue (>20 min) */}
+            {statusCounts.overdue > 0 && (
+              <button
+                type="button"
+                onClick={() => setStatusFilter(statusFilter === 'overdue' ? 'all' : 'overdue')}
+                className={`
+                  px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all
+                  ${
+                    statusFilter === 'overdue'
+                      ? 'bg-rose-600 text-white shadow-2xs ring-2 ring-rose-400'
+                      : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 hover:bg-rose-100 border border-rose-300 dark:border-rose-800 animate-pulse'
+                  }
+                `}
+              >
+                <AlertTriangle size={13} />
+                <span>{t('kitchen.statusOverdue', 'Overdue')}</span>
+                <span
+                  className={`text-[11px] font-bold px-1.5 py-0.2 rounded-full ${
+                    statusFilter === 'overdue'
+                      ? 'bg-white/25 text-white'
+                      : 'bg-rose-200 dark:bg-rose-900 text-rose-900 dark:text-rose-100'
+                  }`}
+                >
+                  {statusCounts.overdue}
+                </span>
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400 shrink-0">
+            <Clock size={13} />
+            <span>5s Auto-sync</span>
+          </div>
         </div>
       </header>
 
-      {/* KOT Grid */}
+      {/* KOT Main Surface */}
       <main className="flex-1 overflow-y-auto p-4">
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-auto">
+        {loading && activeKOTs.length === 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-max items-start">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={`kot-shimmer-${i}`}
@@ -240,15 +499,31 @@ const KitchenDisplay: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : filteredKOTs.length === 0 ? (
+        ) : displayedKOTs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-slate-500">
-            <MonitorPlay size={64} className="mb-4 opacity-40" />
-            <p className="text-xl font-medium text-gray-700 dark:text-slate-300">{t('kitchen.noActiveOrders')}</p>
-            <p className="text-sm mt-1 text-gray-500 dark:text-slate-400">{t('kitchen.noActiveOrdersDesc')}</p>
+            <MonitorPlay size={64} className="mb-4 opacity-40 text-blue-500" />
+            <p className="text-xl font-medium text-gray-700 dark:text-slate-300">
+              {statusFilter !== 'all'
+                ? `No orders matching status filter`
+                : t('kitchen.noActiveOrders')}
+            </p>
+            <p className="text-sm mt-1 text-gray-500 dark:text-slate-400">
+              {statusFilter !== 'all' ? (
+                <button
+                  type="button"
+                  onClick={() => setStatusFilter('all')}
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                >
+                  View all active orders ({filteredKOTs.length})
+                </button>
+              ) : (
+                t('kitchen.noActiveOrdersDesc')
+              )}
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-auto">
-            {filteredKOTs.map((kot) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-max items-start">
+            {displayedKOTs.map((kot) => (
               <KOTCard
                 key={kot.id}
                 kot={kot}
@@ -261,42 +536,45 @@ const KitchenDisplay: React.FC = () => {
 
       {/* Completed KOTs (collapsible) */}
       {completedKOTs.length > 0 && (
-        <div className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800">
+        <div className="flex-shrink-0 border-t border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-lg">
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="w-full flex items-center justify-between px-6 py-2.5 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm"
+            className="w-full flex items-center justify-between px-6 py-2.5 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800/80 transition-colors text-sm"
           >
-            <span className="text-gray-600 dark:text-slate-400 font-medium">
-              {t('kitchen.recentlyCompleted', { count: completedKOTs.length })}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-gray-700 dark:text-slate-300 font-semibold text-xs tracking-wide">
+                {t('kitchen.recentlyCompleted', { count: completedKOTs.length })}
+              </span>
+            </div>
             {showCompleted ? (
-              <ChevronUp size={18} className="text-gray-400 dark:text-slate-500" />
+              <ChevronUp size={16} className="text-gray-400 dark:text-slate-500" />
             ) : (
-              <ChevronDown size={18} className="text-gray-400 dark:text-slate-500" />
+              <ChevronDown size={16} className="text-gray-400 dark:text-slate-500" />
             )}
           </button>
 
           {showCompleted && (
-            <div className="bg-gray-50 dark:bg-slate-900/60 px-4 py-3 max-h-60 overflow-y-auto border-t border-gray-100 dark:border-slate-800/80">
+            <div className="bg-gray-50/90 dark:bg-slate-900/60 px-5 py-3 max-h-56 overflow-y-auto border-t border-gray-100 dark:border-slate-800/80">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
                 {completedKOTs.map((kot) => (
                   <div
                     key={kot.id}
-                    className="bg-white dark:bg-slate-800/80 rounded-lg px-3 py-2 border border-gray-200 dark:border-slate-700/60 shadow-xs"
+                    className="bg-white dark:bg-slate-800/90 rounded-xl px-3 py-2 border border-gray-200/80 dark:border-slate-700/60 shadow-2xs"
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-gray-900 dark:text-white font-bold text-sm">
                         #{kot.kotNumber}
                       </span>
-                      <span className="text-xs bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-1.5 py-0.5 rounded-full font-medium">
+                      <span className="text-[11px] bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-1.5 py-0.5 rounded font-semibold">
                         {t('kitchen.served')}
                       </span>
                     </div>
-                    <div className="text-gray-600 dark:text-slate-400 text-xs">
+                    <div className="text-gray-600 dark:text-slate-400 text-xs truncate">
                       {t('kitchen.orderNumberPrefix', { number: kot.orderNumber })}
                       {kot.tableName && ` - ${kot.tableName}`}
                     </div>
-                    <div className="text-gray-400 dark:text-slate-500 text-xs mt-0.5">
+                    <div className="text-gray-400 dark:text-slate-500 text-[11px] mt-0.5">
                       {t('kitchen.itemCount', { count: kot.items.length })}
                     </div>
                   </div>

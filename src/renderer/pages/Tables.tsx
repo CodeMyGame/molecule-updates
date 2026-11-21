@@ -21,6 +21,9 @@ import {
   Clock,
   Banknote,
   QrCode,
+  Search,
+  Move,
+  Check,
 } from 'lucide-react';
 import TransferMergeModal from '../components/tables/TransferMergeModal';
 import { TableStatus } from '../../shared/enums';
@@ -172,6 +175,7 @@ const Tables: React.FC = () => {
 
   const [activeFloorId, setActiveFloorId] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [tableSearch, setTableSearch] = useState('');
 
   // Right-click context menus
   const [tableContextMenu, setTableContextMenu] = useState<{
@@ -723,10 +727,15 @@ const Tables: React.FC = () => {
 
   // Resolve active floor
   const currentFloorId = activeFloorId ?? floors[0]?.id ?? null;
-  const currentTables = useMemo(
-    () => (currentFloorId !== null ? tablesByFloor(currentFloorId) : []),
-    [currentFloorId, tablesByFloor]
-  );
+  const currentTables = useMemo(() => {
+    if (currentFloorId === null) return [];
+    let list = tablesByFloor(currentFloorId);
+    if (tableSearch.trim()) {
+      const q = tableSearch.toLowerCase().trim();
+      list = list.filter((t) => t.name.toLowerCase().includes(q));
+    }
+    return list;
+  }, [currentFloorId, tablesByFloor, tableSearch]);
 
   // --- Handlers ---
 
@@ -939,24 +948,61 @@ const Tables: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-1.5">
-          <LayoutGrid size={15} className="text-blue-600 shrink-0" />
-          <h1 className="text-xs font-bold text-gray-900 tracking-tight">{t('tables.title')}</h1>
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-gray-200 bg-white dark:bg-slate-900 dark:border-slate-800">
+        <div className="flex items-center gap-2">
+          <LayoutGrid size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
+          <h1 className="text-xs font-bold text-gray-900 dark:text-white tracking-tight">{t('tables.title')}</h1>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            {tables.length} {t('tables.tablesLabel', 'Tables')}
+          </span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {/* Quick Table Search */}
+          <div className="relative flex items-center">
+            <Search size={11} className="absolute left-2.5 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              value={tableSearch}
+              onChange={(e) => setTableSearch(e.target.value)}
+              placeholder={t('tables.searchPlaceholder', 'Find table...')}
+              className="pl-7 pr-6 py-1 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-full focus:bg-white dark:focus:bg-slate-900 focus:ring-1 focus:ring-blue-500 outline-none w-28 sm:w-36 text-gray-800 dark:text-gray-100 placeholder-gray-400 transition-all"
+            />
+            {tableSearch && (
+              <button
+                onClick={() => setTableSearch('')}
+                className="absolute right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                <X size={10} />
+              </button>
+            )}
+          </div>
+
+          {/* Arrange Canvas Mode Toggle */}
+          <button
+            onClick={() => setIsEditMode((prev) => !prev)}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+              isEditMode
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-slate-700'
+            }`}
+            title="Toggle drag-and-drop floor plan canvas arrangement"
+          >
+            {isEditMode ? <Check size={12} strokeWidth={2.5} /> : <Move size={12} />}
+            <span>{isEditMode ? t('tables.doneArranging', 'Done') : t('tables.arrangeFloor', 'Arrange Canvas')}</span>
+          </button>
+
           <button
             onClick={() => navigate('/qr-menu')}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-800 hover:bg-amber-500/20 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 dark:bg-amber-950/40 border border-amber-500/30 dark:border-amber-700 text-amber-800 dark:text-amber-300 hover:bg-amber-500/20 transition-colors"
             title="Generate and print physical Table QR stands and menu cards"
           >
-            <QrCode size={12} className="text-amber-600" />
+            <QrCode size={12} className="text-amber-600 dark:text-amber-400" />
             <span>{t('tables.tableQrs', 'Table QR Stands')}</span>
           </button>
           <button
             onClick={handleNewParcel}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors"
           >
             <ShoppingBag size={12} />
             <span>{t('tables.newParcel')}</span>
@@ -966,22 +1012,22 @@ const Tables: React.FC = () => {
               refetch();
               fetchActiveParcels();
             }}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+            title={t('common.refresh')}
           >
-            <RefreshCw size={12} className="text-gray-500" />
-            <span>{t('common.refresh')}</span>
+            <RefreshCw size={12} className="text-gray-500 dark:text-gray-400" />
           </button>
           <button
             onClick={() => setShowFloorModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
           >
-            <Plus size={12} className="text-gray-500" />
+            <Plus size={12} className="text-gray-500 dark:text-gray-400" />
             <span>{t('tables.addFloor')}</span>
           </button>
           <button
             onClick={openAddTableModal}
             disabled={!currentFloorId}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-xs transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 shadow-xs transition-colors"
           >
             <Plus size={12} />
             <span>{t('tables.addTable')}</span>
@@ -1109,40 +1155,55 @@ const Tables: React.FC = () => {
 
       {/* Floor tabs */}
       {floors.length > 0 && (
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50/80 border-b border-gray-200 overflow-x-auto no-scrollbar">
-          {floors.map((floor) => (
-            <button
-              key={floor.id}
-              onClick={() => setActiveFloorId(floor.id)}
-              onContextMenu={(e) => handleFloorContextMenu(e, floor)}
-              className={`
-                relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold
-                transition-colors select-none
-                ${
-                  currentFloorId === floor.id
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                }
-              `}
-            >
-              <Layers size={13} />
-              <span>{floor.name}</span>
-              <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-medium ${currentFloorId === floor.id ? 'bg-blue-500/80 text-white' : 'bg-gray-200 text-gray-600'}`}>
-                {tablesByFloor(floor.id).length}
-              </span>
-              {isEditMode && floors.length > 1 && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteFloor(floor.id);
-                  }}
-                  className="ml-0.5 p-0.5 rounded-full hover:bg-white/20"
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50/80 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
+          {floors.map((floor) => {
+            const floorTables = tablesByFloor(floor.id);
+            const occupiedFloorCount = floorTables.filter((t) => t.status === TableStatus.OCCUPIED).length;
+            const isFloorActive = currentFloorId === floor.id;
+
+            return (
+              <button
+                key={floor.id}
+                onClick={() => setActiveFloorId(floor.id)}
+                onContextMenu={(e) => handleFloorContextMenu(e, floor)}
+                className={`
+                  relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold
+                  transition-all select-none
+                  ${
+                    isFloorActive
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700'
+                  }
+                `}
+              >
+                <Layers size={13} className={isFloorActive ? 'text-white' : 'text-gray-400'} />
+                <span>{floor.name}</span>
+                <span
+                  className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${
+                    isFloorActive
+                      ? 'bg-white/20 text-white'
+                      : occupiedFloorCount > 0
+                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300'
+                        : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400'
+                  }`}
                 >
-                  <X size={10} />
-                </button>
-              )}
-            </button>
-          ))}
+                  {occupiedFloorCount}/{floorTables.length}
+                </span>
+                {isEditMode && floors.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteFloor(floor.id);
+                    }}
+                    className="ml-0.5 p-0.5 rounded-full hover:bg-white/20"
+                    title="Delete Floor"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -1313,52 +1374,55 @@ const Tables: React.FC = () => {
               <div className="space-y-3">
                 {/* Order details */}
                 {orderLoading ? (
-                  <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-                    {/* Order header shimmer */}
-                    <div className="flex items-center justify-between px-3 py-2 bg-gray-100 border-b border-gray-200">
-                      <div className="shimmer h-4 w-16" />
-                      <div className="shimmer h-4 w-14" />
+                  <div className="bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="shimmer h-4 w-20 rounded" />
+                      <div className="shimmer h-4 w-16 rounded" />
                     </div>
-                    {/* Order items shimmer */}
-                    <div className="px-3 py-2 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <div className="shimmer h-3.5 w-28" />
-                        <div className="shimmer h-3.5 w-12" />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <div className="shimmer h-3.5 w-20" />
-                        <div className="shimmer h-3.5 w-10" />
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <div className="shimmer h-3.5 w-24" />
-                        <div className="shimmer h-3.5 w-14" />
-                      </div>
+                    <div className="space-y-1.5 pt-2">
+                      <div className="shimmer h-3.5 w-full rounded" />
+                      <div className="shimmer h-3.5 w-3/4 rounded" />
                     </div>
                   </div>
                 ) : tableOrder ? (
-                  <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden shadow-2xs">
                     {/* Order header */}
-                    <div className="flex items-center justify-between px-3 py-2 bg-gray-100 border-b border-gray-200">
-                      <span className="text-sm font-semibold text-gray-800">
-                        #{tableOrder.orderNumber}
-                      </span>
-                      <span className="text-sm font-bold text-gray-900">
-                        {formatCurrency(tableOrder.grandTotal)}
-                      </span>
+                    <div className="flex items-center justify-between px-3.5 py-2.5 bg-gray-100/80 dark:bg-slate-750 border-b border-gray-200 dark:border-slate-700">
+                      <div>
+                        <span className="text-xs font-bold text-gray-800 dark:text-gray-100">
+                          #{tableOrder.orderNumber}
+                        </span>
+                        {tableOrder.createdAt && (
+                          <div className="flex items-center gap-1 text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                            <Clock size={10} />
+                            <span>{formatElapsedDuration(getElapsedMinutes(tableOrder.createdAt))}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
+                          {formatCurrency(tableOrder.grandTotal)}
+                        </span>
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                          {tableOrder.items.length} {t('common.items', 'items')}
+                        </div>
+                      </div>
                     </div>
                     {/* Order items */}
-                    <div className="px-3 py-2 space-y-1 max-h-40 overflow-y-auto">
+                    <div className="px-3.5 py-2 space-y-1.5 max-h-48 overflow-y-auto no-scrollbar">
                       {tableOrder.items.map((item) => (
-                        <div key={item.id} className="flex justify-between text-sm">
-                          <span className="text-gray-700">
-                            <span className="font-medium text-gray-500 mr-1.5">{item.quantity}x</span>
+                        <div key={item.id} className="flex justify-between items-center text-xs">
+                          <span className="text-gray-700 dark:text-gray-200 truncate pr-2">
+                            <span className="font-semibold text-gray-500 dark:text-gray-400 mr-1.5">{item.quantity}x</span>
                             {item.name}
                           </span>
-                          <span className="text-gray-600 text-xs">{formatCurrency(item.total)}</span>
+                          <span className="text-gray-900 dark:text-gray-100 font-mono text-xs font-medium shrink-0">
+                            {formatCurrency(item.total)}
+                          </span>
                         </div>
                       ))}
                       {tableOrder.items.length === 0 && (
-                        <p className="text-xs text-gray-400 text-center py-1">{t('tables.noItems')}</p>
+                        <p className="text-xs text-gray-400 text-center py-2">{t('tables.noItems')}</p>
                       )}
                     </div>
                   </div>
@@ -1366,13 +1430,27 @@ const Tables: React.FC = () => {
                   <p className="text-sm text-gray-400 text-center py-2">{t('tables.noActiveOrder')}</p>
                 )}
 
-                {/* Action buttons */}
+                {/* Primary Action: View / Edit Order */}
+                <Button
+                  variant="primary"
+                  fullWidth
+                  size="md"
+                  icon={<ChevronRight size={17} />}
+                  onClick={() => {
+                    setShowStatusModal(false);
+                    handleGoToBilling(selectedTable.id, tableOrder?.id);
+                  }}
+                >
+                  {t('tables.viewEditOrder')}
+                </Button>
+
+                {/* Print and Settle Actions */}
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     variant="secondary"
                     fullWidth
-                    size="md"
-                    icon={<Printer size={16} />}
+                    size="sm"
+                    icon={<Printer size={14} />}
                     onClick={handlePrintKotFromTable}
                     disabled={!tableOrder}
                   >
@@ -1381,8 +1459,8 @@ const Tables: React.FC = () => {
                   <Button
                     variant="success"
                     fullWidth
-                    size="md"
-                    icon={<CurrencyIcon size={16} />}
+                    size="sm"
+                    icon={<CurrencyIcon size={14} />}
                     onClick={() => {
                       if (tableOrder) {
                         setShowStatusModal(false);
@@ -1397,49 +1475,36 @@ const Tables: React.FC = () => {
 
                 {/* Table order actions: Transfer / Merge / Split / Free Table */}
                 {tableOrder && (
-                  <div className="grid grid-cols-3 gap-2 pt-1 border-t border-gray-100">
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100 dark:border-slate-800">
                     <Button
                       variant="secondary"
                       size="sm"
                       fullWidth
-                      icon={<ArrowRightLeft size={14} className="text-blue-600" />}
+                      icon={<ArrowRightLeft size={13} className="text-blue-600 dark:text-blue-400" />}
                       onClick={() => handleOpenTransfer(selectedTable, tableOrder.id)}
                     >
-                      {t('billingPage.transferOrder')}
+                      {t('billingPage.transferOrder', 'Transfer')}
                     </Button>
                     <Button
                       variant="secondary"
                       size="sm"
                       fullWidth
-                      icon={<Split size={14} className="text-orange-600" />}
+                      icon={<Split size={13} className="text-amber-600 dark:text-amber-400" />}
                       onClick={() => handleOpenSplitBill(selectedTable, tableOrder.id)}
                     >
-                      {t('billingPage.splitBill')}
+                      {t('billingPage.splitBill', 'Split')}
                     </Button>
                     <Button
                       variant="secondary"
                       size="sm"
                       fullWidth
-                      icon={<Unlock size={14} className="text-red-500" />}
+                      icon={<Unlock size={13} className="text-rose-600 dark:text-rose-400" />}
                       onClick={() => handleFreeTable(selectedTable, tableOrder.id)}
                     >
-                      {t('billingPage.freeTable')}
+                      {t('billingPage.freeTable', 'Free')}
                     </Button>
                   </div>
                 )}
-
-                <Button
-                  variant="primary"
-                  fullWidth
-                  size="md"
-                  icon={<ChevronRight size={18} />}
-                  onClick={() => {
-                    setShowStatusModal(false);
-                    handleGoToBilling(selectedTable.id, tableOrder?.id);
-                  }}
-                >
-                  {t('tables.viewEditOrder')}
-                </Button>
               </div>
             )}
 
