@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "コインを割引として利用",
     "maxPlaceholder": "最大 {{count}}",
     "useAll": "すべて使用",
-    "coinsEarnPreview": "この会計でお客様は{{count}}コインを獲得します"
+    "coinsEarnPreview": "この会計でお客様は{{count}}コインを獲得します",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "割引を適用",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "注文記録のエクスポート",
     "exportOrdersDesc": "過去のすべての売上および注文データを Excel 対応の CSV ファイルにダウンロードします。",
     "showActiveOrdersHeaderTitle": "ヘッダーにアクティブな注文を表示",
-    "showActiveOrdersHeaderDesc": "トップナビゲーションバーに進行中の注文バッジとキッチンのKOTステータスを表示"
+    "showActiveOrdersHeaderDesc": "トップナビゲーションバーに進行中の注文バッジとキッチンのKOTステータスを表示",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "保存",

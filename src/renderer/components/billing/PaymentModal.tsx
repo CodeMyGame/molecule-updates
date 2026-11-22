@@ -13,6 +13,8 @@ import {
   Check,
   RotateCcw,
   Plus,
+  Calculator,
+  EyeOff,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
@@ -112,6 +114,12 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
   // Cash Tender State
   const [cashTenderedInput, setCashTenderedInput] = useState('');
   const cashInputRef = useRef<HTMLInputElement>(null);
+  const [defaultCashCalcSetting, setDefaultCashCalcSetting] = useState<boolean>(() => {
+    return localStorage.getItem('enable_cash_calculator') === 'true';
+  });
+  const [showCashCalc, setShowCashCalc] = useState<boolean>(() => {
+    return localStorage.getItem('enable_cash_calculator') === 'true';
+  });
 
   // Split Tender State
   const [splitCash, setSplitCash] = useState('');
@@ -166,10 +174,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         ipc<string | null>(window.electronAPI.settings.get('coin_slabs')),
         ipc<string | null>(window.electronAPI.settings.get('whatsapp_enabled')),
         ipc<string | null>(window.electronAPI.settings.get('chatmitra_api_key')),
+        ipc<string | null>(window.electronAPI.settings.get('enable_cash_calculator')),
       ])
-        .then(([coinsVal, slabsVal, waEnabled, waKey]) => {
+        .then(([coinsVal, slabsVal, waEnabled, waKey, cashCalcVal]) => {
           setCoinsEnabled(coinsVal === 'true');
           setWhatsappAvailable(WHATSAPP_FEATURE_ENABLED && waEnabled === 'true' && !!waKey);
+          const isCashCalc = cashCalcVal === 'true';
+          setDefaultCashCalcSetting(isCashCalc);
+          setShowCashCalc(isCashCalc);
+          localStorage.setItem('enable_cash_calculator', isCashCalc ? 'true' : 'false');
           try {
             const parsed = slabsVal ? JSON.parse(slabsVal) : [];
             setCoinSlabs(Array.isArray(parsed) ? parsed : []);
@@ -180,12 +193,16 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         .catch(() => {
           setCoinsEnabled(false);
           setWhatsappAvailable(false);
+          setDefaultCashCalcSetting(false);
+          setShowCashCalc(false);
         });
 
-      // Auto-focus cash tender input when opening modal
+      // Auto-focus cash tender input when opening modal (if calculator is on)
       setTimeout(() => {
-        cashInputRef.current?.focus();
-        cashInputRef.current?.select();
+        if (localStorage.getItem('enable_cash_calculator') === 'true') {
+          cashInputRef.current?.focus();
+          cashInputRef.current?.select();
+        }
       }, 50);
     }
   }, [isOpen]);
@@ -328,7 +345,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
     // Cash mode validation
     if (activeMode === 'cash') {
-      if (isCashUnderpaid) {
+      if (showCashCalc && isCashUnderpaid) {
         toast.error(t('paymentModal.underpaidError', 'Cash received is less than total bill'));
         return;
       }
@@ -337,7 +354,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         mode: 'cash',
         amount: totalWithTip,
         reference:
-          changePaise > 0
+          showCashCalc && changePaise > 0
             ? `Received: ${formatCurrency(cashTenderedPaise)} | Change: ${formatCurrency(changePaise)}`
             : undefined,
       };
@@ -351,7 +368,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         parsedRedeemAmount > 0 ? parsedRedeemAmount : undefined
       );
 
-      if (changePaise > 0) {
+      if (showCashCalc && changePaise > 0) {
         toast.success(
           t('paymentModal.changeNotice', {
             amount: formatCurrency(changePaise),
@@ -396,6 +413,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     splitUpiPaise,
     splitCardRef,
     splitUpiRef,
+    showCashCalc,
     isCashUnderpaid,
     changePaise,
     cashTenderedPaise,
@@ -423,7 +441,16 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title={t('paymentModal.title', 'Checkout & Settlement')} size="lg" closeOnOverlay={false}>
-      <div className="flex flex-col gap-3.5">
+      <div
+        className="flex flex-col gap-3.5"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && activeMode === 'cash' && !showCashCalc && !isProcessing) {
+            if (e.target instanceof HTMLInputElement && e.target === phoneInputRef.current) return;
+            e.preventDefault();
+            handleComplete();
+          }
+        }}
+      >
         {/* Order Summary & Net Payable Banner */}
         <div className="bg-gray-50 dark:bg-gray-800/90 border border-gray-200/80 dark:border-gray-700 rounded-xl p-3.5 space-y-2">
           <div className="flex items-center justify-between pb-2 border-b border-gray-200/60 dark:border-gray-700">
@@ -525,7 +552,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                   onClick={() => {
                     setActiveMode(key);
                     setReferenceError('');
-                    if (key === 'cash') {
+                    if (key === 'cash' && showCashCalc) {
                       setTimeout(() => cashInputRef.current?.focus(), 50);
                     }
                   }}
@@ -546,7 +573,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         {/* =========================================================================
             CASH PAYMENT & CHANGE RETURN
         ========================================================================= */}
-        {activeMode === 'cash' && (
+        {activeMode === 'cash' && showCashCalc && (
           <div className="bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/80 rounded-xl p-3.5 space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
@@ -554,16 +581,31 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 <span>Cash Received from Customer</span>
               </label>
 
-              {cashTenderedInput.trim() !== '' && (
-                <button
-                  type="button"
-                  onClick={() => setCashTenderedInput('')}
-                  className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1"
-                >
-                  <RotateCcw size={11} />
-                  <span>Reset to Exact</span>
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {cashTenderedInput.trim() !== '' && (
+                  <button
+                    type="button"
+                    onClick={() => setCashTenderedInput('')}
+                    className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                  >
+                    <RotateCcw size={11} />
+                    <span>Reset to Exact</span>
+                  </button>
+                )}
+                {!defaultCashCalcSetting && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCashCalc(false);
+                      setCashTenderedInput('');
+                    }}
+                    className="text-[11px] font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:underline flex items-center gap-1"
+                  >
+                    <EyeOff size={11} />
+                    <span>Hide</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Quick Cash Denomination Chips */}
@@ -674,6 +716,30 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 <span className="font-mono font-bold">{formatCurrency(cashTenderedPaise)}</span>
               </div>
             )}
+          </div>
+        )}
+
+        {/* COMPACT CASH VIEW WHEN CALCULATOR IS OFF */}
+        {activeMode === 'cash' && !showCashCalc && (
+          <div className="bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/60 rounded-xl px-3.5 py-2.5 flex items-center justify-between">
+            <span className="text-xs text-emerald-900 dark:text-emerald-200 font-medium flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+              <span>{t('paymentModal.cashExact', 'Paying exact amount in cash')}: <strong className="font-mono font-bold">{formatCurrency(totalWithTip)}</strong></span>
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setShowCashCalc(true);
+                setTimeout(() => {
+                  cashInputRef.current?.focus();
+                  cashInputRef.current?.select();
+                }, 50);
+              }}
+              className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-white flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-emerald-100/70 dark:bg-emerald-900/40 hover:bg-emerald-200/80 transition-colors"
+            >
+              <Calculator size={13} />
+              <span>{t('paymentModal.openCashCalculator', 'Cash Calculator')}</span>
+            </button>
           </div>
         )}
 
@@ -1000,7 +1066,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           disabled={
             (customerPhone.length > 0 && customerPhone.length < 10) ||
             isProcessing ||
-            (activeMode === 'cash' && isCashUnderpaid) ||
+            (activeMode === 'cash' && showCashCalc && isCashUnderpaid) ||
             (activeMode === 'split' && splitRemainingPaise !== 0)
           }
           loading={isProcessing}
@@ -1009,7 +1075,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
           {isProcessing
             ? t('paymentModal.processing', 'Processing Payment...')
             : activeMode === 'cash'
-            ? changePaise > 0
+            ? showCashCalc && changePaise > 0
               ? `Complete Payment • Return ${formatCurrency(changePaise)}`
               : `Complete Cash Payment • ${formatCurrency(totalWithTip)}`
             : activeMode === 'split'

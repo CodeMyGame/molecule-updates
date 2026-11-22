@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "காயின்களை தள்ளுபடியாக மீட்டெடு",
     "maxPlaceholder": "அதிகபட்சம் {{count}}",
     "useAll": "அனைத்தையும் பயன்படுத்து",
-    "coinsEarnPreview": "வாடிக்கையாளர் இந்த பில்லில் {{count}} காயின்கள் பெறுவார்"
+    "coinsEarnPreview": "வாடிக்கையாளர் இந்த பில்லில் {{count}} காயின்கள் பெறுவார்",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "தள்ளுபடியைப் பயன்படுத்து",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "ஆர்டர் பதிவுகளை ஏற்றுமதி செய்க",
     "exportOrdersDesc": "அனைத்து வரலாற்று விற்பனை மற்றும் ஆர்டர் தரவையும் எக்செல்-இணக்கமான CSV கோப்பில் பதிவிறக்கவும்.",
     "showActiveOrdersHeaderTitle": "தலைப்பில் செயலில் உள்ள ஆர்டர்களைக் காட்டு",
-    "showActiveOrdersHeaderDesc": "மேல் வழிசெலுத்தல் பட்டியில் இயங்கும் ஆர்டர் பேட்ஜ்கள் மற்றும் நேரடி சமையலறை KOT நிலைகளைக் காண்பி"
+    "showActiveOrdersHeaderDesc": "மேல் வழிசெலுத்தல் பட்டியில் இயங்கும் ஆர்டர் பேட்ஜ்கள் மற்றும் நேரடி சமையலறை KOT நிலைகளைக் காண்பி",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "சேமி",

@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "కాయిన్‌లను డిస్కౌంట్‌గా రిడీమ్ చేయి",
     "maxPlaceholder": "గరిష్టం {{count}}",
     "useAll": "అన్నీ వాడు",
-    "coinsEarnPreview": "ఈ బిల్లుపై కస్టమర్ {{count}} కాయిన్‌లు సంపాదిస్తారు"
+    "coinsEarnPreview": "ఈ బిల్లుపై కస్టమర్ {{count}} కాయిన్‌లు సంపాదిస్తారు",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "డిస్కౌంట్ వర్తింపజేయి",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "ఆర్డర్ రికార్డులను ఎగుమతి చేయండి",
     "exportOrdersDesc": "అన్ని చారిత్రక విక్రయాలు మరియు ఆర్డర్ డేటాను Excel-అనుకూల CSV ఫైల్‌కి డౌన్‌లోడ్ చేయండి.",
     "showActiveOrdersHeaderTitle": "హెడర్‌లో యాక్టివ్ ఆర్డర్‌లను చూపించు",
-    "showActiveOrdersHeaderDesc": "ఎగువ నావిగేషన్ బార్‌లో నడుస్తున్న ఆర్డర్ బ్యాడ్జ్‌లు మరియు ప్రత్యక్ష వంటగది KOT స్థితిని ప్రదర్శించండి"
+    "showActiveOrdersHeaderDesc": "ఎగువ నావిగేషన్ బార్‌లో నడుస్తున్న ఆర్డర్ బ్యాడ్జ్‌లు మరియు ప్రత్యక్ష వంటగది KOT స్థితిని ప్రదర్శించండి",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "సేవ్",

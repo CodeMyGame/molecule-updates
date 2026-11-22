@@ -39,6 +39,7 @@ import { useReports, type DatePreset } from '../hooks/useReports';
 import { useTaxTerminology } from '../hooks/useTaxTerminology';
 import { useLocaleCurrencyIcon } from '../hooks/useLocaleCurrencyIcon';
 import { currencySymbolForLanguage } from '../lib/currencyLocale';
+import { MASTER_PASSWORD } from '../lib/constants';
 
 const DailySalesChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.DailySalesChart })));
 const TopItemsBarChart = React.lazy(() => import('../components/reports/ReportCharts').then((m) => ({ default: m.TopItemsBarChart })));
@@ -348,7 +349,7 @@ const Reports: React.FC = () => {
 
   const confirmDeleteOrder = async () => {
     if (!deleteModal) return;
-    if (deletePassword !== 'zblack') {
+    if (deletePassword !== MASTER_PASSWORD) {
       toast.error(t('reports.incorrectPassword'));
       return;
     }

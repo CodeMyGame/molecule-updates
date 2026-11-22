@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "استبدال النقاط كخصم",
     "maxPlaceholder": "الحد الأقصى {{count}}",
     "useAll": "استخدام الكل",
-    "coinsEarnPreview": "سيكسب العميل {{count}} نقطة على هذه الفاتورة"
+    "coinsEarnPreview": "سيكسب العميل {{count}} نقطة على هذه الفاتورة",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "تطبيق الخصم",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "تصدير سجلات الطلبات",
     "exportOrdersDesc": "تنزيل جميع بيانات المبيعات والطلبات السابقة في ملف CSV متوافق مع Excel.",
     "showActiveOrdersHeaderTitle": "إظهار الطلبات النشطة في الشريط العلوي",
-    "showActiveOrdersHeaderDesc": "عرض شارات الطلبات الجارية وحالات مطبخ KOT المباشرة في شريط التنقل العلوي"
+    "showActiveOrdersHeaderDesc": "عرض شارات الطلبات الجارية وحالات مطبخ KOT المباشرة في شريط التنقل العلوي",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "حفظ",

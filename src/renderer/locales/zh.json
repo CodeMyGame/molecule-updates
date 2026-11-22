@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "将积分兑换为折扣",
     "maxPlaceholder": "最多 {{count}}",
     "useAll": "全部使用",
-    "coinsEarnPreview": "顾客将在此账单获得 {{count}} 积分"
+    "coinsEarnPreview": "顾客将在此账单获得 {{count}} 积分",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "应用折扣",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "导出订单记录",
     "exportOrdersDesc": "将所有历史销售和订单数据下载为兼容 Excel 的 CSV 文件。",
     "showActiveOrdersHeaderTitle": "在顶部栏显示进行中订单",
-    "showActiveOrdersHeaderDesc": "在顶部导航栏显示进行中订单标签和实时厨房KOT状态"
+    "showActiveOrdersHeaderDesc": "在顶部导航栏显示进行中订单标签和实时厨房KOT状态",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "保存",

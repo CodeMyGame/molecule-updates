@@ -1119,6 +1119,41 @@ suite('8. Void Audit Logging, Post-Prep Wastage & Order Cancellations', () => {
     const loggedVoid = db.prepare("SELECT * FROM void_items WHERE order_number = 'ORD-MGR-AUTH'").get();
     assertEqual(loggedVoid.staff_name, 'Owner Authorized');
   });
+
+  test('VOD-06 Flag in settings to disable cancellation password check with master authorization', () => {
+    // Default: require_cancel_password is not set or true -> password required
+    const isPasswordRequired = (val) => val !== 'false';
+    assertEqual(isPasswordRequired(undefined), true, 'Default requires password');
+    assertEqual(isPasswordRequired('true'), true, 'Explicitly true requires password');
+
+    // Attempting to disable without correct password must fail
+    function attemptDisablePasswordCheck(pwd) {
+      if (pwd !== 'zblack') {
+        return { success: false, error: 'INCORRECT_PASSWORD' };
+      }
+      db.prepare("INSERT OR REPLACE INTO settings (key, value, category) VALUES ('require_cancel_password', 'false', 'billing')").run();
+      return { success: true };
+    }
+
+    // Wrong password rejects disable attempt
+    assertEqual(attemptDisablePasswordCheck('wrong').success, false);
+    assertEqual(attemptDisablePasswordCheck('1234').success, false);
+    assertEqual(attemptDisablePasswordCheck('').success, false);
+
+    // Correct master password allows disabling
+    const disableResult = attemptDisablePasswordCheck('zblack');
+    assertEqual(disableResult.success, true, 'Master password authorizes disabling password check');
+
+    const settingVal = db.prepare("SELECT value FROM settings WHERE key = 'require_cancel_password'").get()?.value;
+    assertEqual(settingVal, 'false', 'require_cancel_password stored as false');
+    assertEqual(isPasswordRequired(settingVal), false, 'Password check successfully bypassed when disabled');
+
+    // Re-enabling password check does not require password
+    db.prepare("INSERT OR REPLACE INTO settings (key, value, category) VALUES ('require_cancel_password', 'true', 'billing')").run();
+    const updatedVal = db.prepare("SELECT value FROM settings WHERE key = 'require_cancel_password'").get()?.value;
+    assertEqual(updatedVal, 'true');
+    assertEqual(isPasswordRequired(updatedVal), true, 'Password check re-enabled');
+  });
 });
 
 // -------------------------------------------------------------
@@ -1470,6 +1505,32 @@ suite('12. Multi-Tender Settlement & Order Locking (Fix 5.4)', () => {
       assert(err.message.includes('completed'));
     }
     assert(threw);
+  });
+
+  test('PAY-05 Cash tender calculator is disabled by default in settings and can be enabled', () => {
+    // Helper to evaluate if cash calculator is enabled (defaults to false)
+    const isCalculatorEnabled = (val) => String(val ?? 'false') === 'true';
+
+    // Unset / default setting must be false
+    assertEqual(isCalculatorEnabled(undefined), false, 'Default setting is OFF');
+    assertEqual(isCalculatorEnabled('false'), false, 'Explicitly false is OFF');
+
+    // When OFF, cash payment directly settles exact amount without requiring cash tender input
+    const billAmount = 21900;
+    const calcEnabled = isCalculatorEnabled(undefined);
+    const settledEntry = {
+      mode: 'cash',
+      amount: billAmount,
+      reference: calcEnabled ? 'Received: ₹219 | Change: ₹0' : undefined,
+    };
+    assertEqual(settledEntry.amount, 21900);
+    assertEqual(settledEntry.reference, undefined, 'Clean cash payment without calculator reference when OFF');
+
+    // When toggled ON from settings
+    db.prepare("INSERT OR REPLACE INTO settings (key, value, category) VALUES ('enable_cash_calculator', 'true', 'billing')").run();
+    const updatedVal = db.prepare("SELECT value FROM settings WHERE key = 'enable_cash_calculator'").get()?.value;
+    assertEqual(updatedVal, 'true');
+    assertEqual(isCalculatorEnabled(updatedVal), true, 'Calculator enabled via settings');
   });
 });
 

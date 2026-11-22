@@ -1,3 +1,5 @@
+export const MASTER_PASSWORD = 'zblack';
+
 export const PAYMENT_MODES = {
   cash: { label: 'Cash', icon: 'Banknote' },
   card: { label: 'Card', icon: 'CreditCard' },

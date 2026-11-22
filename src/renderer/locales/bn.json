@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "কয়েন ছাড় হিসেবে রিডিম করুন",
     "maxPlaceholder": "সর্বোচ্চ {{count}}",
     "useAll": "সব ব্যবহার করুন",
-    "coinsEarnPreview": "গ্রাহক এই বিলে {{count}} কয়েন অর্জন করবেন"
+    "coinsEarnPreview": "গ্রাহক এই বিলে {{count}} কয়েন অর্জন করবেন",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "ছাড় প্রয়োগ করুন",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "অর্ডার রেকর্ড রপ্তানি করুন",
     "exportOrdersDesc": "সমস্ত ঐতিহাসিক বিক্রয় এবং অর্ডার ডেটা একটি Excel-সামঞ্জস্যপূর্ণ CSV ফাইলে ডাউনলোড করুন।",
     "showActiveOrdersHeaderTitle": "হেডারে সক্রিয় অর্ডার দেখান",
-    "showActiveOrdersHeaderDesc": "শীর্ষ নেভিগেশন বারে চলমান অর্ডার ব্যাজ এবং লাইভ কিচেন KOT স্ট্যাটাস প্রদর্শন করুন"
+    "showActiveOrdersHeaderDesc": "শীর্ষ নেভিগেশন বারে চলমান অর্ডার ব্যাজ এবং লাইভ কিচেন KOT স্ট্যাটাস প্রদর্শন করুন",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "সংরক্ষণ",

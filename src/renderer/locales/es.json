@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "Canjear monedas como descuento",
     "maxPlaceholder": "Máx. {{count}}",
     "useAll": "Usar todo",
-    "coinsEarnPreview": "El cliente ganará {{count}} monedas con esta cuenta"
+    "coinsEarnPreview": "El cliente ganará {{count}} monedas con esta cuenta",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "Aplicar descuento",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "Exportar registros de pedidos",
     "exportOrdersDesc": "Descargue todos los datos históricos de ventas y pedidos en un archivo CSV compatible con Excel.",
     "showActiveOrdersHeaderTitle": "Mostrar pedidos activos en el encabezado",
-    "showActiveOrdersHeaderDesc": "Mostrar insignias de pedidos en curso y estados KOT de cocina en la barra de navegación superior"
+    "showActiveOrdersHeaderDesc": "Mostrar insignias de pedidos en curso y estados KOT de cocina en la barra de navegación superior",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "Guardar",

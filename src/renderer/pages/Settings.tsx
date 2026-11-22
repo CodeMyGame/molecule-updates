@@ -97,6 +97,7 @@ import { WHATSAPP_FEATURE_ENABLED } from '../../shared/featureFlags';
 import PrinterSettings from '../components/settings/PrinterSettings';
 import { useUIStore } from '../stores/ui.store';
 import { useDaySessionStore } from '../stores/daySession.store';
+import { MASTER_PASSWORD } from '../lib/constants';
 
 type SettingsSection = 'restaurant' | 'tax' | 'printer' | 'billing' | 'offers' | 'backup' | 'cloud' | 'day_session' | 'license' | 'refer_and_earn' | 'language' | 'appearance' | 'coins' | 'kitchen_network' | 'waiter_network' | 'qr_menu_settings' | 'system_update';
 
@@ -137,6 +138,8 @@ const SETTING_KEYS = [
   'enable_tips',
   'default_order_type',
   'round_off',
+  'enable_cash_calculator',
+  'require_cancel_password',
   'auto_print_bill',
   'bill_center_print',
   'printer_bill',
@@ -656,6 +659,46 @@ const Settings: React.FC = () => {
     const current = settings[key];
     const newVal = current === 'true' ? 'false' : 'true';
     await setSetting(key, newVal);
+    localStorage.setItem(key, newVal);
+  };
+
+  // Cancellation password disable modal state
+  const [showDisableCancelPasswordModal, setShowDisableCancelPasswordModal] = useState(false);
+  const [disableCancelPasswordInput, setDisableCancelPasswordInput] = useState('');
+  const [disableCancelPasswordError, setDisableCancelPasswordError] = useState('');
+
+  const handleToggleCancelPasswordSetting = () => {
+    const isCurrentlyRequired = (settings.require_cancel_password ?? 'true') !== 'false';
+    if (isCurrentlyRequired) {
+      // User is disabling password check -> prompt for master password ('zblack')
+      setDisableCancelPasswordInput('');
+      setDisableCancelPasswordError('');
+      setShowDisableCancelPasswordModal(true);
+    } else {
+      // User is enabling password check -> enable immediately
+      void setSetting('require_cancel_password', 'true');
+      localStorage.setItem('require_cancel_password', 'true');
+      toast.success(t('settingsPage.cancelPasswordEnabled', 'Cancellation password check enabled'));
+    }
+  };
+
+  const handleConfirmDisableCancelPassword = async () => {
+    if (disableCancelPasswordInput.trim() !== MASTER_PASSWORD) {
+      setDisableCancelPasswordError(t('reports.incorrectPassword', 'Incorrect password'));
+      setDisableCancelPasswordInput('');
+      return;
+    }
+
+    try {
+      await setSetting('require_cancel_password', 'false');
+      localStorage.setItem('require_cancel_password', 'false');
+      setShowDisableCancelPasswordModal(false);
+      setDisableCancelPasswordInput('');
+      setDisableCancelPasswordError('');
+      toast.success(t('settingsPage.cancelPasswordDisabled', 'Cancellation password check disabled'));
+    } catch (err: any) {
+      setDisableCancelPasswordError(err?.message ?? 'Failed to update setting');
+    }
   };
 
   const handleUpdateSetting = async (key: string, value: string) => {
@@ -1007,6 +1050,64 @@ const Settings: React.FC = () => {
           </div>
           <button onClick={() => handleToggleSetting('show_active_orders_header')}>
             {settings.show_active_orders_header === 'true' ? (
+              <ToggleRight size={32} className="text-blue-600" />
+            ) : (
+              <ToggleLeft size={32} className="text-gray-400" />
+            )}
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div>
+            <p className="text-sm font-medium text-gray-700">
+              {t('settingsPage.requireCancelPasswordTitle', 'Cancellation Password Check')}
+            </p>
+            <p className="text-xs text-gray-500">
+              {t(
+                'settingsPage.requireCancelPasswordDesc',
+                'Require master authorization password when cancelling active orders or items sent to the kitchen'
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleCancelPasswordSetting}
+            title={
+              (settings.require_cancel_password ?? 'true') !== 'false'
+                ? t('settingsPage.disablePasswordCheck', 'Disable Password Check')
+                : t('settingsPage.enablePasswordCheck', 'Enable Password Check')
+            }
+          >
+            {(settings.require_cancel_password ?? 'true') !== 'false' ? (
+              <ToggleRight size={32} className="text-blue-600" />
+            ) : (
+              <ToggleLeft size={32} className="text-gray-400" />
+            )}
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div>
+            <p className="text-sm font-medium text-gray-700">
+              {t('settingsPage.cashCalculatorTitle', 'Cash Tender Calculator')}
+            </p>
+            <p className="text-xs text-gray-500">
+              {t(
+                'settingsPage.cashCalculatorDesc',
+                'Show cash received input and change return calculator during checkout'
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => handleToggleSetting('enable_cash_calculator')}
+            title={
+              settings.enable_cash_calculator === 'true'
+                ? t('settingsPage.disableCashCalculator', 'Disable Cash Calculator')
+                : t('settingsPage.enableCashCalculator', 'Enable Cash Calculator')
+            }
+          >
+            {settings.enable_cash_calculator === 'true' ? (
               <ToggleRight size={32} className="text-blue-600" />
             ) : (
               <ToggleLeft size={32} className="text-gray-400" />
@@ -3474,6 +3575,99 @@ const Settings: React.FC = () => {
     );
   };
 
+  const renderDisableCancelPasswordModal = () => {
+    if (!showDisableCancelPasswordModal) return null;
+
+    return (
+      <Modal
+        isOpen
+        onClose={() => {
+          setShowDisableCancelPasswordModal(false);
+          setDisableCancelPasswordInput('');
+          setDisableCancelPasswordError('');
+        }}
+        title={t('settingsPage.disablePasswordModalTitle', 'Disable Cancellation Password Check')}
+        size="sm"
+        footer={
+          <div className="flex items-center justify-end gap-2 w-full">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setShowDisableCancelPasswordModal(false);
+                setDisableCancelPasswordInput('');
+                setDisableCancelPasswordError('');
+              }}
+            >
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              disabled={!disableCancelPasswordInput.trim()}
+              onClick={handleConfirmDisableCancelPassword}
+            >
+              {t('settingsPage.confirmDisablePassword', 'Disable Check')}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2.5">
+            <Lock size={18} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-900">
+              <p className="font-semibold">
+                {t('settingsPage.authRequiredTitle', 'Manager / Admin Authorization Required')}
+              </p>
+              <p className="text-[11px] text-amber-700 mt-0.5">
+                {t(
+                  'settingsPage.disablePasswordPrompt',
+                  'Enter master authorization password to disable the password check for cancellations.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+              {t('reports.password', 'Enter Password')}
+            </label>
+            <div className="relative">
+              <KeyRound size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="password"
+                value={disableCancelPasswordInput}
+                onChange={(e) => {
+                  setDisableCancelPasswordInput(e.target.value);
+                  setDisableCancelPasswordError('');
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && disableCancelPasswordInput.trim()) {
+                    e.preventDefault();
+                    handleConfirmDisableCancelPassword();
+                  }
+                }}
+                placeholder={t('reports.password', 'Enter Password')}
+                autoFocus
+                className={`w-full pl-9 pr-3 py-2 text-sm font-medium border rounded-lg focus:outline-none focus:ring-2 bg-white ${
+                  disableCancelPasswordError
+                    ? 'border-red-500 focus:ring-red-400 text-red-600'
+                    : 'border-gray-300 focus:ring-blue-400 focus:border-blue-500 text-gray-900'
+                }`}
+              />
+            </div>
+            {disableCancelPasswordError && (
+              <p className="text-xs text-red-600 font-medium mt-1.5 flex items-center gap-1">
+                <AlertCircle size={13} className="shrink-0" />
+                {disableCancelPasswordError}
+              </p>
+            )}
+          </div>
+        </div>
+      </Modal>
+    );
+  };
+
   const renderDayEndSummaryModal = () => {
     if (!dayEndSummary) return null;
     const s = dayEndSummary;
@@ -3714,6 +3908,9 @@ const Settings: React.FC = () => {
 
       {/* Day-end summary modal */}
       {renderDayEndSummaryModal()}
+
+      {/* Disable cancellation password check modal */}
+      {renderDisableCancelPasswordModal()}
     </div>
   );
 };

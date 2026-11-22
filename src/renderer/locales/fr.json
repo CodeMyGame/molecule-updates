@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "Échanger les jetons en remise",
     "maxPlaceholder": "Max {{count}}",
     "useAll": "Tout utiliser",
-    "coinsEarnPreview": "Le client gagnera {{count}} jetons sur cette addition"
+    "coinsEarnPreview": "Le client gagnera {{count}} jetons sur cette addition",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "Appliquer une remise",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "Exporter les enregistrements de commande",
     "exportOrdersDesc": "Téléchargez toutes les données historiques de ventes et de commandes dans un fichier CSV compatible Excel.",
     "showActiveOrdersHeaderTitle": "Afficher les commandes actives dans l'en-tête",
-    "showActiveOrdersHeaderDesc": "Afficher les badges de commandes en cours et le statut KOT de cuisine dans la barre de navigation supérieure"
+    "showActiveOrdersHeaderDesc": "Afficher les badges de commandes en cours et le statut KOT de cuisine dans la barre de navigation supérieure",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "Enregistrer",

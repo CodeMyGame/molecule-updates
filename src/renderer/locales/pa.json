@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "ਕੋਇਨ ਛੋਟ ਵਜੋਂ ਰਿਡੀਮ ਕਰੋ",
     "maxPlaceholder": "ਵੱਧੋ-ਵੱਧ {{count}}",
     "useAll": "ਸਾਰੇ ਵਰਤੋ",
-    "coinsEarnPreview": "ਗਾਹਕ ਇਸ ਬਿੱਲ ਉੱਤੇ {{count}} ਕੋਇਨ ਕਮਾਏਗਾ"
+    "coinsEarnPreview": "ਗਾਹਕ ਇਸ ਬਿੱਲ ਉੱਤੇ {{count}} ਕੋਇਨ ਕਮਾਏਗਾ",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "ਛੂਟ ਲਾਗੂ ਕਰੋ",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "ਆਰਡਰ ਰਿਕਾਰਡ ਨਿਰਯਾਤ ਕਰੋ",
     "exportOrdersDesc": "ਸਾਰੇ ਇਤਿਹਾਸਕ ਵਿਕਰੀ ਅਤੇ ਆਰਡਰ ਡੇਟਾ ਨੂੰ Excel-ਅਨੁਕੂਲ CSV ਫਾਈਲ ਵਿੱਚ ਡਾਊਨਲੋਡ ਕਰੋ।",
     "showActiveOrdersHeaderTitle": "ਹੈਡਰ ਵਿੱਚ ਸਰਗਰਮ ਆਰਡਰ ਦਿਖਾਓ",
-    "showActiveOrdersHeaderDesc": "ਸਿਖਰਲੀ ਨੇਵੀਗੇਸ਼ਨ ਪੱਟੀ ਵਿੱਚ ਚੱਲ ਰਹੇ ਆਰਡਰ ਬੈਜ ਅਤੇ ਲਾਈਵ ਰਸੋਈ KOT ਸਥਿਤੀਆਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"
+    "showActiveOrdersHeaderDesc": "ਸਿਖਰਲੀ ਨੇਵੀਗੇਸ਼ਨ ਪੱਟੀ ਵਿੱਚ ਚੱਲ ਰਹੇ ਆਰਡਰ ਬੈਜ ਅਤੇ ਲਾਈਵ ਰਸੋਈ KOT ਸਥਿਤੀਆਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "ਸੇਵ",

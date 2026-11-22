@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "ಕಾಯಿನ್‌ಗಳನ್ನು ರಿಯಾಯಿತಿಯಾಗಿ ರಿಡೀಮ್ ಮಾಡಿ",
     "maxPlaceholder": "ಗರಿಷ್ಠ {{count}}",
     "useAll": "ಎಲ್ಲವನ್ನೂ ಬಳಸಿ",
-    "coinsEarnPreview": "ಈ ಬಿಲ್‌ನಲ್ಲಿ ಗ್ರಾಹಕ {{count}} ಕಾಯಿನ್‌ಗಳನ್ನು ಗಳಿಸುತ್ತಾರೆ"
+    "coinsEarnPreview": "ಈ ಬಿಲ್‌ನಲ್ಲಿ ಗ್ರಾಹಕ {{count}} ಕಾಯಿನ್‌ಗಳನ್ನು ಗಳಿಸುತ್ತಾರೆ",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "ರಿಯಾಯಿತಿ ಅನ್ವಯಿಸಿ",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "ಆರ್ಡರ್ ದಾಖಲೆಗಳನ್ನು ರಫ್ತು ಮಾಡಿ",
     "exportOrdersDesc": "ಎಲ್ಲಾ ಐತಿಹಾಸಿಕ ಮಾರಾಟ ಮತ್ತು ಆರ್ಡರ್ ಡೇಟಾವನ್ನು Excel-ಹೊಂದಾಣಿಕೆಯ CSV ಫೈಲ್‌ಗೆ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
     "showActiveOrdersHeaderTitle": "ಹೆಡರ್‌ನಲ್ಲಿ ಸಕ್ರಿಯ ಆರ್ಡರ್‌ಗಳನ್ನು ತೋರಿಸಿ",
-    "showActiveOrdersHeaderDesc": "ಮೇಲಿನ ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್‌ನಲ್ಲಿ ನಡೆಯುತ್ತಿರುವ ಆರ್ಡರ್ ಬ್ಯಾಡ್ಜ್‌ಗಳು ಮತ್ತು ಲೈವ್ ಅಡುಗೆಮನೆ KOT ಸ್ಥಿತಿಯನ್ನು ಪ್ರದರ್ಶಿಸಿ"
+    "showActiveOrdersHeaderDesc": "ಮೇಲಿನ ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್‌ನಲ್ಲಿ ನಡೆಯುತ್ತಿರುವ ಆರ್ಡರ್ ಬ್ಯಾಡ್ಜ್‌ಗಳು ಮತ್ತು ಲೈವ್ ಅಡುಗೆಮನೆ KOT ಸ್ಥಿತಿಯನ್ನು ಪ್ರದರ್ಶಿಸಿ",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "ಉಳಿಸಿ",

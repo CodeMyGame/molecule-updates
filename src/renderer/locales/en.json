@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "Redeem coins as discount",
     "maxPlaceholder": "Max {{count}}",
     "useAll": "Use All",
-    "coinsEarnPreview": "Customer will earn {{count}} coins on this bill"
+    "coinsEarnPreview": "Customer will earn {{count}} coins on this bill",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "Apply Discount",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "Export Order Records",
     "exportOrdersDesc": "Download all historical sales and order data to an Excel-compatible CSV file.",
     "showActiveOrdersHeaderTitle": "Show Active Orders in Header",
-    "showActiveOrdersHeaderDesc": "Display running order badges and live kitchen KOT statuses in the top navigation bar"
+    "showActiveOrdersHeaderDesc": "Display running order badges and live kitchen KOT statuses in the top navigation bar",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "Save",

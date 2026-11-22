@@ -4,6 +4,8 @@ import { AlertTriangle, Trash2, Check, Lock, KeyRound } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import { useAuthStore } from '../../stores/auth.store';
+import { MASTER_PASSWORD } from '../../lib/constants';
+import { ipc } from '../../lib/ipc';
 
 interface VoidReasonModalProps {
   isOpen: boolean;
@@ -15,6 +17,7 @@ interface VoidReasonModalProps {
     quantity: number;
     amount?: number;
   };
+  requirePassword?: boolean;
 }
 
 export const VOID_REASONS = [
@@ -26,14 +29,13 @@ export const VOID_REASONS = [
   { id: 'duplicate', label: '📑 Duplicate / Billing Error', text: 'Duplicate / Billing Error' },
 ];
 
-const MASTER_PASSWORD = 'zblack';
-
 const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
   title,
   itemInfo,
+  requirePassword: propRequirePassword,
 }) => {
   const { t } = useTranslation();
   const currentUser = useAuthStore((s) => s.currentUser);
@@ -42,6 +44,11 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
   const [customReason, setCustomReason] = useState('');
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [requirePassword, setRequirePassword] = useState<boolean>(() => {
+    if (propRequirePassword !== undefined) return propRequirePassword;
+    const cached = localStorage.getItem('require_cancel_password');
+    return cached !== 'false';
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -49,8 +56,27 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
       setCustomReason('');
       setPassword('');
       setPasswordError('');
+
+      if (propRequirePassword !== undefined) {
+        setRequirePassword(propRequirePassword);
+      } else {
+        const cached = localStorage.getItem('require_cancel_password');
+        setRequirePassword(cached !== 'false');
+
+        if (window.electronAPI?.settings?.get) {
+          ipc<string | null>(window.electronAPI.settings.get('require_cancel_password'))
+            .then((val) => {
+              if (val !== null && val !== undefined) {
+                const req = val !== 'false';
+                setRequirePassword(req);
+                localStorage.setItem('require_cancel_password', req ? 'true' : 'false');
+              }
+            })
+            .catch(() => {});
+        }
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, propRequirePassword]);
 
   if (!isOpen) return null;
 
@@ -58,11 +84,13 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
     const reason = customReason.trim() ? customReason.trim() : selectedReason;
     if (!reason) return;
 
-    // Always verify master password 'zblack' (like in Reports)
-    if (password.trim() !== MASTER_PASSWORD) {
-      setPasswordError(t('reports.incorrectPassword', 'Incorrect password'));
-      setPassword('');
-      return;
+    // Verify master password 'zblack' if password is required
+    if (requirePassword) {
+      if (password.trim() !== MASTER_PASSWORD) {
+        setPasswordError(t('reports.incorrectPassword', 'Incorrect password'));
+        setPassword('');
+        return;
+      }
     }
 
     setPasswordError('');
@@ -71,7 +99,7 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
   };
 
   const hasReason = !!selectedReason || !!customReason.trim();
-  const canConfirm = hasReason && password.length > 0;
+  const canConfirm = requirePassword ? (hasReason && password.length > 0) : hasReason;
 
   return (
     <Modal
@@ -168,56 +196,58 @@ const VoidReasonModal: React.FC<VoidReasonModalProps> = ({
           />
         </div>
 
-        {/* Password Authorization (Always Required - 'zblack') */}
-        <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-semibold text-xs">
-              <Lock size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
-              <span>{t('voidModal.managerAuthRequired', 'Password Required')}</span>
+        {/* Password Authorization (Required when requirePassword is true) */}
+        {requirePassword && (
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-semibold text-xs">
+                <Lock size={15} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                <span>{t('voidModal.managerAuthRequired', 'Password Required')}</span>
+              </div>
+              {currentUser && (
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">
+                  {currentUser.name} ({currentUser.role})
+                </span>
+              )}
             </div>
-            {currentUser && (
-              <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                {currentUser.name} ({currentUser.role})
-              </span>
-            )}
-          </div>
-          <p className="text-[11px] text-amber-800 dark:text-amber-300">
-            {t('voidModal.managerAuthNotice', 'Items or orders sent to the kitchen require password authorization to cancel.')}
-          </p>
+            <p className="text-[11px] text-amber-800 dark:text-amber-300">
+              {t('voidModal.managerAuthNotice', 'Items or orders sent to the kitchen require password authorization to cancel.')}
+            </p>
 
-          <div>
-            <div className="relative">
-              <KeyRound size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPasswordError('');
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && canConfirm) {
-                    e.preventDefault();
-                    handleConfirm();
-                  }
-                }}
-                placeholder={t('reports.password', 'Enter Password')}
-                className={`w-full pl-9 pr-3 py-2 text-sm font-medium border rounded-lg focus:outline-none focus:ring-2 bg-white dark:bg-gray-800 ${
-                  passwordError
-                    ? 'border-red-500 focus:ring-red-400 text-red-600 dark:text-red-400'
-                    : 'border-amber-300 dark:border-amber-700 focus:ring-amber-400 focus:border-amber-500 text-gray-900 dark:text-white'
-                }`}
-                autoFocus
-              />
+            <div>
+              <div className="relative">
+                <KeyRound size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && canConfirm) {
+                      e.preventDefault();
+                      handleConfirm();
+                    }
+                  }}
+                  placeholder={t('reports.password', 'Enter Password')}
+                  className={`w-full pl-9 pr-3 py-2 text-sm font-medium border rounded-lg focus:outline-none focus:ring-2 bg-white dark:bg-gray-800 ${
+                    passwordError
+                      ? 'border-red-500 focus:ring-red-400 text-red-600 dark:text-red-400'
+                      : 'border-amber-300 dark:border-amber-700 focus:ring-amber-400 focus:border-amber-500 text-gray-900 dark:text-white'
+                  }`}
+                  autoFocus
+                />
+              </div>
+              {passwordError && (
+                <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1.5 flex items-center gap-1">
+                  <AlertTriangle size={13} className="shrink-0" />
+                  {passwordError}
+                </p>
+              )}
             </div>
-            {passwordError && (
-              <p className="text-xs text-red-600 dark:text-red-400 font-medium mt-1.5 flex items-center gap-1">
-                <AlertTriangle size={13} className="shrink-0" />
-                {passwordError}
-              </p>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </Modal>
   );

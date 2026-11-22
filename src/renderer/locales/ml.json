@@ -1029,7 +1029,9 @@
     "redeemAsDiscount": "കോയിനുകൾ ഡിസ്കൗണ്ടായി റിഡീം ചെയ്യുക",
     "maxPlaceholder": "പരമാവധി {{count}}",
     "useAll": "എല്ലാം ഉപയോഗിക്കുക",
-    "coinsEarnPreview": "ഈ ബില്ലിൽ ഉപഭോക്താവിന് {{count}} കോയിനുകൾ ലഭിക്കും"
+    "coinsEarnPreview": "ഈ ബില്ലിൽ ഉപഭോക്താവിന് {{count}} കോയിനുകൾ ലഭിക്കും",
+    "openCashCalculator": "Cash Calculator",
+    "cashExact": "Paying exact amount in cash"
   },
   "discountModal": {
     "title": "കിഴിവ് പ്രയോഗിക്കുക",
@@ -1452,7 +1454,21 @@
     "exportOrdersTitle": "ഓർഡർ റെക്കോർഡുകൾ കയറ്റുമതി ചെയ്യുക",
     "exportOrdersDesc": "എല്ലാ മുൻകാല വിൽപ്പനകളും ഓർഡർ ഡാറ്റയും Excel-അനുയോജ്യമായ CSV ഫയലിലേക്ക് ഡൗൺലോഡ് ചെയ്യുക.",
     "showActiveOrdersHeaderTitle": "തലക്കെട്ടിൽ സജീവ ഓർഡറുകൾ കാണിക്കുക",
-    "showActiveOrdersHeaderDesc": "മുകളിലെ നാവിഗേഷൻ ബാറിൽ നിലവിലുള്ള ഓർഡർ ബാഡ്ജുകളും തത്സമയ അടുക്കള KOT നിലയും കാണിക്കുക"
+    "showActiveOrdersHeaderDesc": "മുകളിലെ നാവിഗേഷൻ ബാറിൽ നിലവിലുള്ള ഓർഡർ ബാഡ്ജുകളും തത്സമയ അടുക്കള KOT നിലയും കാണിക്കുക",
+    "requireCancelPasswordTitle": "Cancellation Password Check",
+    "requireCancelPasswordDesc": "Require master authorization password when cancelling active orders or items sent to the kitchen",
+    "disablePasswordCheck": "Disable Password Check",
+    "enablePasswordCheck": "Enable Password Check",
+    "disablePasswordModalTitle": "Disable Cancellation Password Check",
+    "authRequiredTitle": "Manager / Admin Authorization Required",
+    "disablePasswordPrompt": "Enter master authorization password to disable the password check for cancellations.",
+    "confirmDisablePassword": "Disable Check",
+    "cancelPasswordEnabled": "Cancellation password check enabled",
+    "cancelPasswordDisabled": "Cancellation password check disabled",
+    "cashCalculatorTitle": "Cash Tender Calculator",
+    "cashCalculatorDesc": "Show cash received input and change return calculator during checkout",
+    "disableCashCalculator": "Disable Cash Calculator",
+    "enableCashCalculator": "Enable Cash Calculator"
   },
   "common": {
     "save": "സേവ്",
