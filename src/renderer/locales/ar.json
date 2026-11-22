@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "تصدير سجلات الطلبات",
-    "exportOrdersDesc": "تنزيل جميع بيانات المبيعات والطلبات السابقة في ملف CSV متوافق مع Excel."
+    "exportOrdersDesc": "تنزيل جميع بيانات المبيعات والطلبات السابقة في ملف CSV متوافق مع Excel.",
+    "showActiveOrdersHeaderTitle": "إظهار الطلبات النشطة في الشريط العلوي",
+    "showActiveOrdersHeaderDesc": "عرض شارات الطلبات الجارية وحالات مطبخ KOT المباشرة في شريط التنقل العلوي"
   },
   "common": {
     "save": "حفظ",

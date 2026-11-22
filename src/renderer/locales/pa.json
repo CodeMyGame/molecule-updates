@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "ਆਰਡਰ ਰਿਕਾਰਡ ਨਿਰਯਾਤ ਕਰੋ",
-    "exportOrdersDesc": "ਸਾਰੇ ਇਤਿਹਾਸਕ ਵਿਕਰੀ ਅਤੇ ਆਰਡਰ ਡੇਟਾ ਨੂੰ Excel-ਅਨੁਕੂਲ CSV ਫਾਈਲ ਵਿੱਚ ਡਾਊਨਲੋਡ ਕਰੋ।"
+    "exportOrdersDesc": "ਸਾਰੇ ਇਤਿਹਾਸਕ ਵਿਕਰੀ ਅਤੇ ਆਰਡਰ ਡੇਟਾ ਨੂੰ Excel-ਅਨੁਕੂਲ CSV ਫਾਈਲ ਵਿੱਚ ਡਾਊਨਲੋਡ ਕਰੋ।",
+    "showActiveOrdersHeaderTitle": "ਹੈਡਰ ਵਿੱਚ ਸਰਗਰਮ ਆਰਡਰ ਦਿਖਾਓ",
+    "showActiveOrdersHeaderDesc": "ਸਿਖਰਲੀ ਨੇਵੀਗੇਸ਼ਨ ਪੱਟੀ ਵਿੱਚ ਚੱਲ ਰਹੇ ਆਰਡਰ ਬੈਜ ਅਤੇ ਲਾਈਵ ਰਸੋਈ KOT ਸਥਿਤੀਆਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"
   },
   "common": {
     "save": "ਸੇਵ",

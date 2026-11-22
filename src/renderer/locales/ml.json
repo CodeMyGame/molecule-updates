@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "ഓർഡർ റെക്കോർഡുകൾ കയറ്റുമതി ചെയ്യുക",
-    "exportOrdersDesc": "എല്ലാ മുൻകാല വിൽപ്പനകളും ഓർഡർ ഡാറ്റയും Excel-അനുയോജ്യമായ CSV ഫയലിലേക്ക് ഡൗൺലോഡ് ചെയ്യുക."
+    "exportOrdersDesc": "എല്ലാ മുൻകാല വിൽപ്പനകളും ഓർഡർ ഡാറ്റയും Excel-അനുയോജ്യമായ CSV ഫയലിലേക്ക് ഡൗൺലോഡ് ചെയ്യുക.",
+    "showActiveOrdersHeaderTitle": "തലക്കെട്ടിൽ സജീവ ഓർഡറുകൾ കാണിക്കുക",
+    "showActiveOrdersHeaderDesc": "മുകളിലെ നാവിഗേഷൻ ബാറിൽ നിലവിലുള്ള ഓർഡർ ബാഡ്ജുകളും തത്സമയ അടുക്കള KOT നിലയും കാണിക്കുക"
   },
   "common": {
     "save": "സേവ്",

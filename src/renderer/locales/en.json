@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "Export Order Records",
-    "exportOrdersDesc": "Download all historical sales and order data to an Excel-compatible CSV file."
+    "exportOrdersDesc": "Download all historical sales and order data to an Excel-compatible CSV file.",
+    "showActiveOrdersHeaderTitle": "Show Active Orders in Header",
+    "showActiveOrdersHeaderDesc": "Display running order badges and live kitchen KOT statuses in the top navigation bar"
   },
   "common": {
     "save": "Save",

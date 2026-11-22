@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "导出订单记录",
-    "exportOrdersDesc": "将所有历史销售和订单数据下载为兼容 Excel 的 CSV 文件。"
+    "exportOrdersDesc": "将所有历史销售和订单数据下载为兼容 Excel 的 CSV 文件。",
+    "showActiveOrdersHeaderTitle": "在顶部栏显示进行中订单",
+    "showActiveOrdersHeaderDesc": "在顶部导航栏显示进行中订单标签和实时厨房KOT状态"
   },
   "common": {
     "save": "保存",

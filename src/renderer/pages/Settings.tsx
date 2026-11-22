@@ -160,6 +160,7 @@ const SETTING_KEYS = [
   'coins_enabled',
   'coin_slabs',
   'show_menu_prices',
+  'show_active_orders_header',
   'dynamic_qr_bill',
   'upi_id',
   'upi_payee_name',
@@ -992,6 +993,20 @@ const Settings: React.FC = () => {
           </div>
           <button onClick={() => handleToggleSetting('show_menu_prices')}>
             {(settings.show_menu_prices ?? 'true') === 'true' ? (
+              <ToggleRight size={32} className="text-blue-600" />
+            ) : (
+              <ToggleLeft size={32} className="text-gray-400" />
+            )}
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div>
+            <p className="text-sm font-medium text-gray-700">{t('settingsPage.showActiveOrdersHeaderTitle')}</p>
+            <p className="text-xs text-gray-500">{t('settingsPage.showActiveOrdersHeaderDesc')}</p>
+          </div>
+          <button onClick={() => handleToggleSetting('show_active_orders_header')}>
+            {settings.show_active_orders_header === 'true' ? (
               <ToggleRight size={32} className="text-blue-600" />
             ) : (
               <ToggleLeft size={32} className="text-gray-400" />

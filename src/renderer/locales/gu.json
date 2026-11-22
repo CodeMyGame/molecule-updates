@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "ઓર્ડર રેકોર્ડ નિકાસ કરો",
-    "exportOrdersDesc": "તમામ ઐતિહાસિક વેચાણ અને ઓર્ડર ડેટાને Excel-સુસંગત CSV ફાઇલમાં ડાઉનલોડ કરો."
+    "exportOrdersDesc": "તમામ ઐતિહાસિક વેચાણ અને ઓર્ડર ડેટાને Excel-સુસંગત CSV ફાઇલમાં ડાઉનલોડ કરો.",
+    "showActiveOrdersHeaderTitle": "હેડરમાં સક્રિય ઓર્ડર દર્શાવો",
+    "showActiveOrdersHeaderDesc": "ટોચની નેવિગેશન બારમાં ચાલુ ઓર્ડર બેજ અને લાઇવ રસોડું KOT સ્થિતિ દર્શાવો"
   },
   "common": {
     "save": "સાચવો",

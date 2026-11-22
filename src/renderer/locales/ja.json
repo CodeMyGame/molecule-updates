@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "注文記録のエクスポート",
-    "exportOrdersDesc": "過去のすべての売上および注文データを Excel 対応の CSV ファイルにダウンロードします。"
+    "exportOrdersDesc": "過去のすべての売上および注文データを Excel 対応の CSV ファイルにダウンロードします。",
+    "showActiveOrdersHeaderTitle": "ヘッダーにアクティブな注文を表示",
+    "showActiveOrdersHeaderDesc": "トップナビゲーションバーに進行中の注文バッジとキッチンのKOTステータスを表示"
   },
   "common": {
     "save": "保存",

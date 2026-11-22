@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "Exporter les enregistrements de commande",
-    "exportOrdersDesc": "Téléchargez toutes les données historiques de ventes et de commandes dans un fichier CSV compatible Excel."
+    "exportOrdersDesc": "Téléchargez toutes les données historiques de ventes et de commandes dans un fichier CSV compatible Excel.",
+    "showActiveOrdersHeaderTitle": "Afficher les commandes actives dans l'en-tête",
+    "showActiveOrdersHeaderDesc": "Afficher les badges de commandes en cours et le statut KOT de cuisine dans la barre de navigation supérieure"
   },
   "common": {
     "save": "Enregistrer",

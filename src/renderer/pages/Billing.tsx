@@ -178,7 +178,7 @@ const Billing: React.FC = () => {
   const taxTerms = useTaxTerminology();
 
   useEffect(() => {
-    void fetchSettings(['default_tax_rate', 'show_menu_prices']);
+    void fetchSettings(['default_tax_rate', 'show_menu_prices', 'show_active_orders_header']);
   }, [fetchSettings]);
 
   const orderType = useBillingStore((s) => s.orderType);
@@ -356,6 +356,12 @@ const Billing: React.FC = () => {
       };
     }
   }, []);
+
+  useEffect(() => {
+    if (headerSlot && settings.show_active_orders_header !== 'true') {
+      headerSlot.innerHTML = '';
+    }
+  }, [headerSlot, settings.show_active_orders_header]);
 
   // Tables
   const [tables, setTables] = useState<Table[]>([]);
@@ -1892,7 +1898,7 @@ const Billing: React.FC = () => {
       </div>
 
       {/* Active orders — portaled into header center slot */}
-      {headerSlot && (activeOrders.length > 0 || ordersLoading) && createPortal(
+      {settings.show_active_orders_header === 'true' && headerSlot && (activeOrders.length > 0 || ordersLoading) && createPortal(
         <>
           <span className="text-[11px] font-medium text-gray-400 flex-shrink-0 leading-none">
             {t('billing.ordersBarLabel')}

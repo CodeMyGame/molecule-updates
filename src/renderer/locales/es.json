@@ -1450,7 +1450,9 @@
       "classy": "Smooth Squircle"
     },
     "exportOrdersTitle": "Exportar registros de pedidos",
-    "exportOrdersDesc": "Descargue todos los datos históricos de ventas y pedidos en un archivo CSV compatible con Excel."
+    "exportOrdersDesc": "Descargue todos los datos históricos de ventas y pedidos en un archivo CSV compatible con Excel.",
+    "showActiveOrdersHeaderTitle": "Mostrar pedidos activos en el encabezado",
+    "showActiveOrdersHeaderDesc": "Mostrar insignias de pedidos en curso y estados KOT de cocina en la barra de navegación superior"
   },
   "common": {
     "save": "Guardar",
