@@ -306,7 +306,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         return;
       }
       if (splitRemainingPaise < 0) {
-        toast.error(t('paymentModal.splitOverAllocated', 'Total tender exceeds amount due'));
+        toast.error(t('paymentModal.splitOverAllocated', 'Total payment exceeds amount due'));
         return;
       }
 
@@ -329,7 +329,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
     // Cash mode validation
     if (activeMode === 'cash') {
       if (isCashUnderpaid) {
-        toast.error(t('paymentModal.underpaidError', 'Amount tendered is less than total due'));
+        toast.error(t('paymentModal.underpaidError', 'Cash received is less than total bill'));
         return;
       }
 
@@ -338,7 +338,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         amount: totalWithTip,
         reference:
           changePaise > 0
-            ? `Tendered: ${formatCurrency(cashTenderedPaise)} | Change: ${formatCurrency(changePaise)}`
+            ? `Received: ${formatCurrency(cashTenderedPaise)} | Change: ${formatCurrency(changePaise)}`
             : undefined,
       };
 
@@ -513,7 +513,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         {/* Payment Mode Segmented Selector */}
         <div>
           <label className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 mb-1.5 block">
-            {t('paymentModal.paymentMode', 'Payment Tender Mode')}
+            {t('paymentModal.paymentMode', 'Payment Mode')}
           </label>
           <div className="grid grid-cols-4 gap-2">
             {paymentModes.map(({ key, label, icon: Icon, color }) => {
@@ -544,14 +544,14 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         </div>
 
         {/* =========================================================================
-            CASH TENDER & CHANGE RETURN SUITE
+            CASH PAYMENT & CHANGE RETURN
         ========================================================================= */}
         {activeMode === 'cash' && (
           <div className="bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-800/80 rounded-xl p-3.5 space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
                 <Banknote size={15} className="text-emerald-600" />
-                <span>Cash Tendered from Customer</span>
+                <span>Cash Received from Customer</span>
               </label>
 
               {cashTenderedInput.trim() !== '' && (
@@ -642,7 +642,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                       Change to Return
                     </p>
                     <p className="text-xs text-white/90 font-medium">
-                      Collect {cs}{effectiveCashTenderedRupees} from guest
+                      Cash received: {cs}{effectiveCashTenderedRupees}
                     </p>
                   </div>
                 </div>
@@ -657,8 +657,8 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
                 <div className="flex items-center gap-2">
                   <AlertCircle size={18} className="text-amber-600 shrink-0" />
                   <div>
-                    <p className="text-xs font-bold">Amount Tendered is Short</p>
-                    <p className="text-[11px] text-amber-700 dark:text-amber-400">Cannot complete order with underpayment</p>
+                    <p className="text-xs font-bold">Cash Received is Not Enough</p>
+                    <p className="text-[11px] text-amber-700 dark:text-amber-400">Amount given is less than total bill</p>
                   </div>
                 </div>
                 <span className="text-base font-bold font-mono text-amber-700 dark:text-amber-300">
@@ -669,7 +669,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
               <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 flex items-center justify-between text-xs text-gray-600 dark:text-gray-300">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-emerald-500" />
-                  <span>Exact Cash Tendered</span>
+                  <span>Exact Cash Received</span>
                 </div>
                 <span className="font-mono font-bold">{formatCurrency(cashTenderedPaise)}</span>
               </div>
@@ -678,13 +678,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         )}
 
         {/* =========================================================================
-            SPLIT TENDER (MULTI-PAYMENT) SUITE
+            SPLIT PAYMENT (MULTI-PAYMENT)
         ========================================================================= */}
         {activeMode === 'split' && (
           <div className="bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-3.5 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h5 className="text-xs font-bold text-indigo-950 dark:text-indigo-200">Split Multi-Tender Breakdown</h5>
+                <h5 className="text-xs font-bold text-indigo-950 dark:text-indigo-200">Split Payment Breakdown</h5>
                 <p className="text-[11px] text-gray-500">Divide bill payment across Cash, Card, and UPI</p>
               </div>
 
