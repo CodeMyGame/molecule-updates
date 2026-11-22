@@ -1,5 +1,5 @@
 import './fetch-polyfill';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, session } from 'electron';
 import { join } from 'path';
 import fs from 'fs';
 import { is } from '@electron-toolkit/utils';
@@ -413,6 +413,18 @@ function setupAutoUpdater(): void {
 }
 
 app.whenReady().then(async () => {
+  // Enforce secure Content-Security-Policy across all renderer sessions
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws: wss: http: https:;"
+        ]
+      }
+    });
+  });
+
   // Initialize database before creating the window
   initializeDatabase();
 

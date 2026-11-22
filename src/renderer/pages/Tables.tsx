@@ -298,21 +298,26 @@ const Tables: React.FC = () => {
     }
   }, []);
 
+  // Consolidated poll for tables and active parcels so waiter tablet updates show in near real-time.
+  // Pauses when hidden to save battery and reduce SQLite IPC traffic.
   useEffect(() => {
     fetchActiveParcels();
-    const interval = setInterval(() => {
+    const poll = () => {
       if (typeof document !== 'undefined' && document.hidden) return;
+      refetch();
       fetchActiveParcels();
-    }, 5000);
+    };
+
+    const interval = setInterval(poll, 7000);
     const onVisibility = () => {
-      if (typeof document !== 'undefined' && !document.hidden) fetchActiveParcels();
+      if (typeof document !== 'undefined' && !document.hidden) poll();
     };
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [fetchActiveParcels]);
+  }, [fetchActiveParcels, refetch]);
 
   const handleOpenTransfer = (table: Table, orderId: number) => {
     setTableContextMenu(null);
@@ -410,22 +415,7 @@ const Tables: React.FC = () => {
     }
   };
 
-  // Poll the table list every 5s so orders placed from waiter tablets show up
-  // here in near real-time (occupations, KOT statuses). Pauses when hidden.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (typeof document !== 'undefined' && document.hidden) return;
-      refetch();
-    }, 5000);
-    const onVisibility = () => {
-      if (typeof document !== 'undefined' && !document.hidden) refetch();
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, [refetch]);
+
 
   // Order for selected occupied table (modal detail)
   const [tableOrder, setTableOrder] = useState<TableOrder | null>(null);

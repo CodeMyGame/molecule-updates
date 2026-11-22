@@ -845,10 +845,10 @@ const MenuManagement: React.FC = () => {
                           ? 'bg-rose-600 text-white border-rose-600 shadow-2xs'
                           : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border-rose-200/80 dark:border-rose-800/60 hover:bg-rose-100'
                       }`}
-                      title="Filter to 86'd items"
+                      title={t('menu.filterOutOfStock', 'Filter to Out of Stock items')}
                     >
                       <AlertCircle size={11} className={stockFilter === 'out_of_stock' ? 'text-white' : 'text-rose-500'} />
-                      <span>{catalogStats.outOfStock} {t('menu.outOfStockCount', "86'd")}</span>
+                      <span>{catalogStats.outOfStock} {t('menu.outOfStockCount', 'Out of Stock')}</span>
                     </button>
                   )}
                 </div>
@@ -1153,7 +1153,7 @@ const MenuManagement: React.FC = () => {
                     }`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                    <span>{t('menu.stock86', "86'd")}</span>
+                    <span>{t('menu.stock86', 'Out of Stock')}</span>
                     {catalogStats.outOfStock > 0 && (
                       <span className="ml-0.5 px-1.5 py-0.2 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 text-[10px] font-bold">
                         {catalogStats.outOfStock}
@@ -1299,7 +1299,7 @@ const MenuManagement: React.FC = () => {
                     className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-2xs transition-colors"
                   >
                     <AlertCircle size={13} />
-                    <span>{t('menuMgmt.disable', "Disable (86'd)")}</span>
+                    <span>{t('menuMgmt.disable', 'Disable (Out of Stock)')}</span>
                   </button>
                 </div>
               </div>
@@ -1431,10 +1431,10 @@ const MenuManagement: React.FC = () => {
                                 ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800/60 hover:bg-emerald-100'
                                 : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-800/60 hover:bg-rose-100 font-bold'
                             }`}
-                            title={isAvailable ? 'Click to 86 item' : 'Click to put back in stock'}
+                            title={isAvailable ? 'Click to mark Out of Stock' : 'Click to put back in stock'}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                            <span>{isAvailable ? t('menu.activeCount', 'In Stock') : t('menu.stock86', "86'd")}</span>
+                            <span>{isAvailable ? t('menu.activeCount', 'In Stock') : t('menu.stock86', 'Out of Stock')}</span>
                           </button>
                         </span>
 
@@ -1564,7 +1564,7 @@ const MenuManagement: React.FC = () => {
                             }`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                            <span>{isAvailable ? t('menu.activeCount', 'In Stock') : t('menu.stock86', "86'd")}</span>
+                            <span>{isAvailable ? t('menu.activeCount', 'In Stock') : t('menu.stock86', 'Out of Stock')}</span>
                           </button>
 
                           <div className="flex items-center gap-0.5">
@@ -2100,7 +2100,7 @@ const MenuManagement: React.FC = () => {
                   <ToggleLeft size={24} className="text-gray-400 dark:text-slate-600" />
                 )}
                 <span className="text-xs text-gray-800 dark:text-slate-200 font-bold">
-                  {itemForm.isAvailable ? t('menu.activeCount', 'In Stock') : t('menu.stock86', "86'd (Out of Stock)")}
+                  {itemForm.isAvailable ? t('menu.activeCount', 'In Stock') : t('menu.stock86', 'Out of Stock')}
                 </span>
               </button>
             </div>

@@ -19,14 +19,11 @@ import { useKOTStore } from '../stores/kot.store';
 import { KOTStatus } from '../../shared/enums';
 import KOTCard from '../components/kitchen/KOTCard';
 import StationFilter from '../components/kitchen/StationFilter';
+import { useSharedTicker } from '../hooks/useSharedTimer';
 
 const KitchenClock: React.FC = React.memo(() => {
-  const [time, setTime] = useState(() => new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const now = useSharedTicker();
+  const time = useMemo(() => new Date(now), [now]);
 
   const timeString = time.toLocaleTimeString('en-IN', {
     hour: '2-digit',

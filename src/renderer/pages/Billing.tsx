@@ -628,11 +628,12 @@ const Billing: React.FC = () => {
 
   useEffect(() => {
     fetchActiveOrders();
+    const pollInterval = settings.show_active_orders_header === 'true' ? 6000 : 10000;
     const interval = setInterval(() => {
       if (typeof document !== 'undefined' && document.hidden) return;
       if (isBrowsingOrEditingRef.current) return;
       fetchActiveOrders();
-    }, 5000);
+    }, pollInterval);
     const onVisibility = () => {
       if (typeof document !== 'undefined' && !document.hidden && !isBrowsingOrEditingRef.current) {
         fetchActiveOrders();

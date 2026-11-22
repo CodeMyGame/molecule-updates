@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 import { KOTStatus } from '../../../shared/enums';
 import type { KOT } from '../../stores/kot.store';
 import { ipc } from '../../lib/ipc';
+import { useSharedTicker } from '../../hooks/useSharedTimer';
 
 interface KOTCardProps {
   kot: KOT;
@@ -84,18 +85,10 @@ const STATION_I18N: Record<string, string> = {
 
 const KOTCard: React.FC<KOTCardProps> = ({ kot, onUpdateStatus }) => {
   const { t } = useTranslation();
-  const [elapsedSec, setElapsedSec] = useState(() => getElapsedSeconds(kot.createdAt));
+  const now = useSharedTicker();
+  const elapsedSec = useMemo(() => getElapsedSeconds(kot.createdAt), [kot.createdAt, now]);
   const [checkedItemIds, setCheckedItemIds] = useState<Set<number>>(new Set());
   const [reprinting, setReprinting] = useState(false);
-
-  // Live seconds ticker
-  useEffect(() => {
-    setElapsedSec(getElapsedSeconds(kot.createdAt));
-    const timer = setInterval(() => {
-      setElapsedSec(getElapsedSeconds(kot.createdAt));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [kot.createdAt]);
 
   const toggleItemCheck = (itemId: number) => {
     setCheckedItemIds((prev) => {

@@ -22,6 +22,10 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
   Clock,
   Smartphone,
   CheckCircle,
@@ -239,9 +243,10 @@ const Reports: React.FC = () => {
   const [orderHistoryHasMore, setOrderHistoryHasMore] = useState(false);
   const [orderHistoryLoadingMore, setOrderHistoryLoadingMore] = useState(false);
   const [orderHistoryAvailableTypes, setOrderHistoryAvailableTypes] = useState<string[]>([]);
-  const orderHistorySentinelRef = useRef<HTMLDivElement>(null);
   const [orderDateBasis, setOrderDateBasis] = useState<'updated_at' | 'created_at'>('updated_at');
   const ORDER_PAGE_SIZE = 100;
+  const [orderHistoryPage, setOrderHistoryPage] = useState(1);
+  const [orderHistoryPageSize, setOrderHistoryPageSize] = useState(25);
   const [deleteModal, setDeleteModal] = useState<{ orderIds: number[]; label: string } | null>(null);
   const [deletePassword, setDeletePassword] = useState('');
   const [selectedOrderIds, setSelectedOrderIds] = useState<Set<number>>(new Set());
@@ -255,8 +260,6 @@ const Reports: React.FC = () => {
   const [orderFilterType, setOrderFilterType] = useState('');
   const [orderSortKey, setOrderSortKey] = useState<string | null>(null);
   const [orderSortDir, setOrderSortDir] = useState<'asc' | 'desc'>('asc');
-  const [tableSortKey, setTableSortKey] = useState<string>('revenue');
-  const [tableSortDir, setTableSortDir] = useState<'asc' | 'desc'>('desc');
   const [itemFilterCategory, setItemFilterCategory] = useState('');
   const [busyHoursView, setBusyHoursView] = useState<'day' | 'week' | 'month' | 'year'>('day');
   const [voidFilterReason, setVoidFilterReason] = useState('');
@@ -394,28 +397,13 @@ const Reports: React.FC = () => {
   // Refetch order history when filters change while on order_history tab
   useEffect(() => {
     if (activeTab === 'order_history') {
+      setOrderHistoryPage(1);
       fetchOrderHistory(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderFilterStatus, orderFilterType, orderDateBasis]);
 
-  // IntersectionObserver for infinite scroll on order history
-  useEffect(() => {
-    if (activeTab !== 'order_history') return;
-    if (!orderHistorySentinelRef.current) return;
-    if (!orderHistoryHasMore) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !orderHistoryLoading && !orderHistoryLoadingMore && orderHistoryHasMore) {
-          fetchOrderHistory(true);
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(orderHistorySentinelRef.current);
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, orderHistoryHasMore, orderHistoryLoading, orderHistoryLoadingMore, orderHistory.length]);
+
 
   useEffect(() => {
     switch (activeTab) {
@@ -648,7 +636,7 @@ const Reports: React.FC = () => {
             { header: t('reports.percentOfTotal'), accessor: 'percentage', align: 'right', render: (item) => totalRevenue > 0 ? `${((item.totalRevenue / totalRevenue) * 100).toFixed(1)}%` : '0%' },
           ]}
           data={data}
-          keyExtractor={(item) => item.menuItemId}
+          keyExtractor={(item, idx) => item.menuItemId ? `${item.menuItemId}-${item.name}` : `item-${item.name || idx}-${idx}`}
           emptyMessage={t('reports.noItemSalesData')}
         />
 
@@ -708,7 +696,7 @@ const Reports: React.FC = () => {
             { header: t('reports.percentOfTotal'), accessor: 'share', align: 'right', render: (item) => totalRevenue > 0 ? `${((item.totalRevenue / totalRevenue) * 100).toFixed(1)}%` : '0%' },
           ]}
           data={data}
-          keyExtractor={(item) => item.categoryId}
+          keyExtractor={(item, idx) => item.categoryId ?? item.categoryName ?? idx}
           emptyMessage={t('reports.noCategorySalesData')}
         />
 
@@ -783,7 +771,7 @@ const Reports: React.FC = () => {
             { header: t('reports.tips'), accessor: 'tipAmount', align: 'right', render: (item) => formatCurrency(item.tipAmount) },
           ]}
           data={data}
-          keyExtractor={(item) => item.paymentMode}
+          keyExtractor={(item, idx) => item.paymentMode || idx}
           emptyMessage={t('reports.noPaymentData')}
         />
 
@@ -898,7 +886,7 @@ const Reports: React.FC = () => {
               { header: t('reports.totalTax'), accessor: 'totalTax', align: 'right', render: (item) => formatCurrency(item.totalTax) },
             ]}
             data={data}
-            keyExtractor={(item) => item.taxRate}
+            keyExtractor={(item, idx) => item.taxRate != null ? item.taxRate : idx}
             emptyMessage={t('reports.noGSTData')}
           />
         </div>
@@ -988,7 +976,7 @@ const Reports: React.FC = () => {
             { header: t('reports.avgOrderValue'), accessor: 'averageOrderValue', align: 'right', render: (item) => formatCurrency(item.averageOrderValue) },
           ]}
           data={data}
-          keyExtractor={(item) => item.staffId}
+          keyExtractor={(item, idx) => item.staffId ?? item.staffName ?? idx}
           emptyMessage={t('reports.noStaffData')}
         />
 
@@ -1046,7 +1034,7 @@ const Reports: React.FC = () => {
             { header: t('reports.cost'), accessor: 'totalCost', align: 'right', render: (item) => formatCurrency(item.totalCost) },
           ]}
           data={data}
-          keyExtractor={(item) => item.ingredientId}
+          keyExtractor={(item, idx) => item.ingredientId ?? item.ingredientName ?? idx}
           emptyMessage={t('reports.noInventoryData')}
         />
 
@@ -1111,7 +1099,7 @@ const Reports: React.FC = () => {
             { header: t('reports.orderCount'), accessor: 'orderCount', align: 'right' },
           ]}
           data={data}
-          keyExtractor={(item) => item.itemName}
+          keyExtractor={(item, idx) => item.itemName || idx}
           emptyMessage={t('reports.noKitchenData')}
         />
       </div>
@@ -1151,6 +1139,7 @@ const Reports: React.FC = () => {
         });
 
     const handleOrderSort = (key: string) => {
+      setOrderHistoryPage(1);
       if (orderSortKey === key) setOrderSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
       else { setOrderSortKey(key); setOrderSortDir('asc'); }
     };
@@ -1161,6 +1150,13 @@ const Reports: React.FC = () => {
         ? <ChevronUp size={13} className="inline ml-1 text-blue-600" />
         : <ChevronDown size={13} className="inline ml-1 text-blue-600" />;
     };
+
+    const totalLoaded = sorted.length;
+    const totalPages = Math.max(1, Math.ceil(totalLoaded / orderHistoryPageSize));
+    const safePage = Math.min(orderHistoryPage, totalPages);
+    const startIndex = (safePage - 1) * orderHistoryPageSize;
+    const endIndex = Math.min(startIndex + orderHistoryPageSize, totalLoaded);
+    const paginatedOrders = sorted.slice(startIndex, endIndex);
 
     const orderTypes = orderHistoryAvailableTypes.length > 0
       ? orderHistoryAvailableTypes
@@ -1277,11 +1273,13 @@ const Reports: React.FC = () => {
                 <th className="px-3 py-3 w-8" onClick={(e) => e.stopPropagation()}>
                   <input
                     type="checkbox"
-                    className="rounded"
-                    checked={sorted.length > 0 && sorted.every((o) => selectedOrderIds.has(o.id))}
+                    className="rounded cursor-pointer"
+                    checked={paginatedOrders.length > 0 && paginatedOrders.every((o) => selectedOrderIds.has(o.id))}
                     onChange={(e) => {
-                      if (e.target.checked) setSelectedOrderIds(new Set(sorted.map((o) => o.id)));
-                      else setSelectedOrderIds(new Set());
+                      const next = new Set(selectedOrderIds);
+                      if (e.target.checked) paginatedOrders.forEach((o) => next.add(o.id));
+                      else paginatedOrders.forEach((o) => next.delete(o.id));
+                      setSelectedOrderIds(next);
                     }}
                   />
                 </th>
@@ -1329,7 +1327,7 @@ const Reports: React.FC = () => {
                   </tr>
                 ))
               ) : (
-                sorted.map((order) => (
+                paginatedOrders.map((order) => (
                 <React.Fragment key={order.id}>
                 <tr
                   className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${expandedOrderId === order.id ? 'bg-blue-50' : ''} ${selectedOrderIds.has(order.id) ? 'bg-red-50' : ''}`}
@@ -1611,28 +1609,118 @@ const Reports: React.FC = () => {
           </table>
         </div>
 
+        {/* Pagination Bar */}
+        {totalLoaded > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-t-0 border-gray-200 rounded-b-xl text-xs text-gray-600">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span>
+                {t('reports.showing', 'Showing')}{' '}
+                <strong className="text-gray-900 font-semibold">{startIndex + 1}–{endIndex}</strong>{' '}
+                {t('reports.of', 'of')}{' '}
+                <strong className="text-gray-900 font-semibold">{totalLoaded}</strong>{' '}
+                {t('reports.loaded', 'orders')}
+                {orderHistoryHasMore && (
+                  <span className="text-blue-600 font-medium"> ({t('reports.moreInDb', 'more in database')})</span>
+                )}
+              </span>
+              <span className="text-gray-300">|</span>
+              <label className="flex items-center gap-1.5 text-gray-500">
+                <span>{t('reports.rowsPerPage', 'Rows per page')}:</span>
+                <select
+                  value={orderHistoryPageSize}
+                  onChange={(e) => {
+                    setOrderHistoryPageSize(Number(e.target.value));
+                    setOrderHistoryPage(1);
+                  }}
+                  className="border border-gray-200 rounded px-1.5 py-0.5 bg-gray-50 text-gray-700 font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {orderHistoryHasMore && (
+                <button
+                  type="button"
+                  disabled={orderHistoryLoadingMore}
+                  onClick={() => fetchOrderHistory(true)}
+                  className="mr-2 inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {orderHistoryLoadingMore ? (
+                    <>
+                      <Loader2 size={12} className="animate-spin" /> {t('reports.loadingMoreOrders', 'Loading...')}
+                    </>
+                  ) : (
+                    <>
+                      <Download size={12} /> {t('reports.loadMoreDb', 'Load Next +100 from DB')}
+                    </>
+                  )}
+                </button>
+              )}
+
+              <button
+                type="button"
+                disabled={safePage <= 1}
+                onClick={() => setOrderHistoryPage(1)}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed text-gray-600"
+                title={t('common.firstPage', 'First Page')}
+              >
+                <ChevronsLeft size={16} />
+              </button>
+
+              <button
+                type="button"
+                disabled={safePage <= 1}
+                onClick={() => setOrderHistoryPage((p) => Math.max(1, p - 1))}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed text-gray-600"
+                title={t('common.prevPage', 'Previous Page')}
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <span className="px-2 font-medium text-gray-700">
+                {t('common.pageOf', { current: safePage, total: totalPages, defaultValue: `Page ${safePage} of ${totalPages}` })}
+              </span>
+
+              <button
+                type="button"
+                disabled={safePage >= totalPages && !orderHistoryHasMore}
+                onClick={async () => {
+                  if (safePage < totalPages) {
+                    setOrderHistoryPage((p) => p + 1);
+                  } else if (orderHistoryHasMore && !orderHistoryLoadingMore) {
+                    await fetchOrderHistory(true);
+                    setOrderHistoryPage((p) => p + 1);
+                  }
+                }}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed text-gray-600"
+                title={t('common.nextPage', 'Next Page')}
+              >
+                <ChevronRight size={16} />
+              </button>
+
+              <button
+                type="button"
+                disabled={safePage >= totalPages}
+                onClick={() => setOrderHistoryPage(totalPages)}
+                className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:hover:bg-transparent cursor-pointer disabled:cursor-not-allowed text-gray-600"
+                title={t('common.lastPage', 'Last Page')}
+              >
+                <ChevronsRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Empty state when filters yield nothing */}
         {orderHistory.length === 0 && !orderHistoryLoading && (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <ClipboardList size={36} strokeWidth={1.5} />
             <p className="mt-2 text-sm">{t('reports.noOrdersMatch')}</p>
           </div>
-        )}
-
-        {/* Infinite scroll sentinel + loading-more indicator */}
-        {orderHistoryHasMore && (
-          <div ref={orderHistorySentinelRef} className="flex items-center justify-center py-6">
-            {orderHistoryLoadingMore ? (
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <Loader2 size={16} className="animate-spin" /> {t('reports.loadingMoreOrders')}
-              </div>
-            ) : (
-              <span className="text-xs text-gray-300">{t('reports.scrollForMore')}</span>
-            )}
-          </div>
-        )}
-        {!orderHistoryHasMore && orderHistory.length > 0 && (
-          <div className="text-center py-4 text-xs text-gray-300">{t('reports.endOfResults')}</div>
         )}
       </div>
     );
@@ -1669,23 +1757,6 @@ const Reports: React.FC = () => {
         </div>
       );
     }
-
-    const tableSorted = [...tableWiseData].sort((a, b) => {
-      const av = a[tableSortKey] ?? 0;
-      const bv = b[tableSortKey] ?? 0;
-      const cmp = typeof av === 'string' ? av.localeCompare(bv) : av < bv ? -1 : av > bv ? 1 : 0;
-      return tableSortDir === 'asc' ? cmp : -cmp;
-    });
-    const handleTableSort = (key: string) => {
-      if (tableSortKey === key) setTableSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-      else { setTableSortKey(key); setTableSortDir('asc'); }
-    };
-    const TableSortIcon = ({ col }: { col: string }) => {
-      if (tableSortKey !== col) return <ChevronsUpDown size={13} className="inline ml-1 text-gray-400" />;
-      return tableSortDir === 'asc'
-        ? <ChevronUp size={13} className="inline ml-1 text-blue-600" />
-        : <ChevronDown size={13} className="inline ml-1 text-blue-600" />;
-    };
 
     const totalRevenue = tableWiseData.reduce((s, d) => s + d.revenue, 0);
     const totalOrders = tableWiseData.reduce((s, d) => s + d.totalOrders, 0);
@@ -1734,44 +1805,20 @@ const Reports: React.FC = () => {
           </Button>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                {([
-                  { label: t('reports.table'), key: 'tableName', align: 'left' },
-                  { label: t('reports.totalOrders'), key: 'totalOrders', align: 'right' },
-                  { label: t('reports.statusCompleted'), key: 'completedOrders', align: 'right' },
-                  { label: t('reports.statusCancelled'), key: 'cancelledOrders', align: 'right' },
-                  { label: t('reports.revenue'), key: 'revenue', align: 'right' },
-                  { label: t('reports.discount'), key: 'discount', align: 'right' },
-                  { label: taxTerms.scheme, key: 'tax', align: 'right' },
-                ] as { label: string; key: string; align: string }[]).map(({ label, key, align }) => (
-                  <th
-                    key={key}
-                    onClick={() => handleTableSort(key)}
-                    className={`px-4 py-3 font-medium text-gray-600 cursor-pointer select-none hover:bg-gray-100 text-${align}`}
-                  >
-                    {label}<TableSortIcon col={key} />
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {tableSorted.map((row, i) => (
-                <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-medium text-gray-900">{row.tableName}</td>
-                  <td className="px-4 py-2.5 text-right">{row.totalOrders}</td>
-                  <td className="px-4 py-2.5 text-right text-green-600">{row.completedOrders}</td>
-                  <td className="px-4 py-2.5 text-right text-red-600">{row.cancelledOrders}</td>
-                  <td className="px-4 py-2.5 text-right font-semibold">{formatCurrency(row.revenue)}</td>
-                  <td className="px-4 py-2.5 text-right text-red-600">{row.discount ? `-${formatCurrency(row.discount)}` : '-'}</td>
-                  <td className="px-4 py-2.5 text-right">{formatCurrency(row.tax)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={[
+            { header: t('reports.table'), accessor: 'tableName' },
+            { header: t('reports.totalOrders'), accessor: 'totalOrders', align: 'right' },
+            { header: t('reports.statusCompleted'), accessor: 'completedOrders', align: 'right', render: (item) => <span className="text-green-600 font-medium">{item.completedOrders}</span> },
+            { header: t('reports.statusCancelled'), accessor: 'cancelledOrders', align: 'right', render: (item) => <span className="text-red-600">{item.cancelledOrders}</span> },
+            { header: t('reports.revenue'), accessor: 'revenue', align: 'right', render: (item) => <span className="font-semibold">{formatCurrency(item.revenue)}</span> },
+            { header: t('reports.discount'), accessor: 'discount', align: 'right', render: (item) => item.discount ? <span className="text-red-600">-{formatCurrency(item.discount)}</span> : '-' },
+            { header: taxTerms.scheme, accessor: 'tax', align: 'right', render: (item) => formatCurrency(item.tax) },
+          ]}
+          data={tableWiseData}
+          keyExtractor={(item, idx) => item.tableId ?? item.tableName ?? idx}
+          emptyMessage={t('reports.noDataForPeriod', 'No table sales data available for this period')}
+        />
       </div>
     );
   };
@@ -2174,6 +2221,7 @@ const Reports: React.FC = () => {
         <DataTable
           columns={columns}
           data={filteredItems}
+          keyExtractor={(item, idx) => item.id ?? idx}
           emptyMessage={t('reports.noVoidRecords', 'No voided or cancelled items recorded for this period.')}
         />
       </div>

@@ -825,7 +825,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
                       </span>
                       {!isAvailable && (
                         <span className="px-1.5 py-0.2 rounded bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 text-[9px] font-bold">
-                          86'd
+                          {t('menu.stock86', 'Out of Stock')}
                         </span>
                       )}
                       {showPrices && (
@@ -921,7 +921,7 @@ const MenuGrid: React.FC<MenuGridProps> = ({
 
                 {!isAvailable && (
                   <span className="absolute inset-x-1.5 bottom-1 text-center py-0.5 rounded bg-rose-600/90 text-white font-bold text-[9px] uppercase tracking-wider shadow-2xs z-10">
-                    86'd
+                    {t('menu.stock86', 'Out of Stock')}
                   </span>
                 )}
               </button>

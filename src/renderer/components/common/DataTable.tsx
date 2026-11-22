@@ -179,31 +179,49 @@ function DataTable<T extends Record<string, any>>({
                 </div>
               </td>
             </tr>
-          ) : (
-            visibleItems.map((item, index) => (
-              <tr
-                key={keyExtractor ? keyExtractor(item, index) : index}
-                onClick={() => onRowClick?.(item, index)}
-                className={`border-b border-gray-100 dark:border-slate-800/60 last:border-b-0 transition-colors ${
-                  index % 2 === 1 ? 'bg-gray-50/50 dark:bg-slate-800/30' : 'bg-white dark:bg-slate-900'
-                } ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20' : 'hover:bg-gray-50/70 dark:hover:bg-slate-800/40'}`}
-              >
-                {columns.map((col) => {
-                  const accessor = String(col.accessor);
-                  return (
-                    <td
-                      key={accessor}
-                      className={`px-4 py-3 text-gray-800 dark:text-slate-200 ${alignClass(col.align)}`}
-                    >
-                      {col.render
-                        ? col.render(item, index)
-                        : getNestedValue(item, accessor) ?? '-'}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))
-          )}
+          ) : (() => {
+            const seenKeys = new Set<string>();
+            return visibleItems.map((item, index) => {
+              let rowKey: string;
+              if (keyExtractor) {
+                const raw = keyExtractor(item, index);
+                rowKey = raw != null && raw !== '' ? String(raw) : `row-${index}`;
+              } else if (item?.id != null && item.id !== '') {
+                rowKey = String(item.id);
+              } else {
+                rowKey = `row-${index}`;
+              }
+
+              if (seenKeys.has(rowKey)) {
+                rowKey = `${rowKey}-${index}`;
+              }
+              seenKeys.add(rowKey);
+
+              return (
+                <tr
+                  key={rowKey}
+                  onClick={() => onRowClick?.(item, index)}
+                  className={`border-b border-gray-100 dark:border-slate-800/60 last:border-b-0 transition-colors ${
+                    index % 2 === 1 ? 'bg-gray-50/50 dark:bg-slate-800/30' : 'bg-white dark:bg-slate-900'
+                  } ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20' : 'hover:bg-gray-50/70 dark:hover:bg-slate-800/40'}`}
+                >
+                  {columns.map((col) => {
+                    const accessor = String(col.accessor);
+                    return (
+                      <td
+                        key={accessor}
+                        className={`px-4 py-3 text-gray-800 dark:text-slate-200 ${alignClass(col.align)}`}
+                      >
+                        {col.render
+                          ? col.render(item, index)
+                          : getNestedValue(item, accessor) ?? '-'}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            });
+          })()}
           {isInfiniteScrollActive && hasMore && (
             <tr>
               <td colSpan={columns.length} className="p-0 border-none">

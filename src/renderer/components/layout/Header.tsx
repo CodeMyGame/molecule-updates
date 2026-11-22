@@ -28,6 +28,7 @@ import { useUIStore } from '../../stores/ui.store';
 import toast from 'react-hot-toast';
 import { useBillingStore } from '../../stores/billing.store';
 import { useDaySessionStore } from '../../stores/daySession.store';
+import { useSharedTicker } from '../../hooks/useSharedTimer';
 import { useSettings } from '../../hooks/useSettings';
 import { useTourStore } from '../../stores/tour.store';
 import { useWhatsNewStore } from '../../stores/whatsNew.store';
@@ -64,7 +65,8 @@ const Header: React.FC = () => {
   };
   useEffect(() => { void fetchRestaurant(); }, [fetchRestaurant]);
   const restaurantName = restaurant?.name?.trim() || t('header.appName');
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const now = useSharedTicker();
+  const currentTime = useMemo(() => new Date(now), [now]);
   const [shiftReport, setShiftReport] = useState<any>(null);
   const [showShiftReport, setShowShiftReport] = useState(false);
 
@@ -193,10 +195,7 @@ const Header: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+
 
   const pageTitle = useMemo(() => {
     const routes: Record<string, string> = {
