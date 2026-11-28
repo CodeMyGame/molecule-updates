@@ -82,6 +82,14 @@ export function update(id: number, data: Partial<CreateStaffDTO>): Staff | undef
 export function deleteStaff(id: number): void {
   clearPinCache();
   const db = getDb();
+  // Prevent deleting the last active admin staff member
+  const staffToDelete = db.prepare('SELECT role_id FROM staff WHERE id = ?').get(id) as any;
+  if (staffToDelete?.role_id === 1) {
+    const remainingAdmins = db.prepare('SELECT COUNT(*) as count FROM staff WHERE role_id = 1 AND is_active = 1 AND id != ?').get(id) as { count: number };
+    if (remainingAdmins.count === 0) {
+      throw new Error('Cannot delete the last active administrator.');
+    }
+  }
   db.prepare("UPDATE staff SET is_active = 0, updated_at = datetime('now') WHERE id = ?").run(id);
 }
 

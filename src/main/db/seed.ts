@@ -232,6 +232,26 @@ const ADDON_GROUPS: SeedAddonGroup[] = [
 export function seedDatabase(db: Database.Database): void {
   const existing = db.prepare('SELECT COUNT(*) as count FROM restaurant').get() as { count: number };
   if (existing.count > 0) {
+    // Auto-heal guard: Ensure at least one active admin staff member exists with a valid 60-char bcrypt PIN hash
+    try {
+      const activeStaff = db.prepare('SELECT COUNT(*) as count FROM staff WHERE is_active = 1').get() as { count: number };
+      if (activeStaff.count === 0) {
+        const adminStaff = db.prepare('SELECT id, pin_hash FROM staff WHERE role_id = 1 ORDER BY id ASC LIMIT 1').get() as any;
+        if (adminStaff) {
+          const pinHash = adminStaff.pin_hash && adminStaff.pin_hash.length === 60
+            ? adminStaff.pin_hash
+            : bcrypt.hashSync('1234', 10);
+          db.prepare("UPDATE staff SET is_active = 1, pin_hash = ?, updated_at = datetime('now') WHERE id = ?").run(pinHash, adminStaff.id);
+          console.log(`[Auto-heal] Restored inactive admin staff id=${adminStaff.id}`);
+        } else {
+          const pinHash = bcrypt.hashSync('1234', 10);
+          db.prepare("INSERT INTO staff (name, phone, pin_hash, role_id, is_active) VALUES ('Admin', '+91-0000000000', ?, 1, 1)").run(pinHash);
+          console.log('[Auto-heal] Re-created missing default admin staff');
+        }
+      }
+    } catch (e: any) {
+      console.error('[Auto-heal] Failed to verify/restore active staff:', e?.message);
+    }
     return;
   }
 

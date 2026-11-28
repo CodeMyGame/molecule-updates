@@ -380,28 +380,35 @@ const StaffPage: React.FC = () => {
             accessor: 'actions',
             sortable: false,
             align: 'right',
-            render: (item) => (
-              <div className="flex items-center justify-end gap-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenEdit(item);
-                  }}
-                  className="p-1 hover:bg-gray-100 rounded transition-colors text-gray-500 hover:text-blue-600"
-                >
-                  <Edit2 size={13} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirm(item.id);
-                  }}
-                  className="p-1 hover:bg-red-50 rounded transition-colors text-gray-500 hover:text-red-600"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            ),
+            render: (item) => {
+              const activeAdmins = staff.filter((s) => s.roleId === 1 && s.isActive);
+              const isOnlyAdmin = item.roleId === 1 && activeAdmins.length <= 1;
+
+              return (
+                <div className="flex items-center justify-end gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenEdit(item);
+                    }}
+                    className="p-1 hover:bg-gray-100 rounded transition-colors text-gray-500 hover:text-blue-600"
+                  >
+                    <Edit2 size={13} />
+                  </button>
+                  {!isOnlyAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirm(item.id);
+                      }}
+                      className="p-1 hover:bg-red-50 rounded transition-colors text-gray-500 hover:text-red-600"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+              );
+            },
           },
         ]}
         data={staff}
